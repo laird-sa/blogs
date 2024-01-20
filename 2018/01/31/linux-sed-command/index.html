@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>SED 命令简明教程 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="awk于 1977 年出生，今年 36 岁本命年，sed比awk大 2-3 岁，awk就像林妹妹，sed 就是宝玉哥哥了。所以 林妹妹跳了个Topless，他的哥哥sed坐不住了，也一定要出来抖一抖。 sed全名叫stream editor，流编辑器，用程序的方式来编辑文本，相当的hacker啊。sed基本上就是玩正则模式匹配，所以，玩sed的人，正则表达式一般都比较强。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SED 命令简明教程">
+<meta property="og:url" content="http://example.com/2018/01/31/linux-sed-command/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="awk于 1977 年出生，今年 36 岁本命年，sed比awk大 2-3 岁，awk就像林妹妹，sed 就是宝玉哥哥了。所以 林妹妹跳了个Topless，他的哥哥sed坐不住了，也一定要出来抖一抖。 sed全名叫stream editor，流编辑器，用程序的方式来编辑文本，相当的hacker啊。sed基本上就是玩正则模式匹配，所以，玩sed的人，正则表达式一般都比较强。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.ihoey.com/blog/sed_demo_00.jpg?imageView2/0/format/jpg/q/75%7Cimageslim">
+<meta property="og:image" content="https://cdn.ihoey.com/blog/sed_demo.jpg?imageView2/0/format/jpg/q/75%7Cimageslim">
+<meta property="article:published_time" content="2018-01-31T11:03:52.000Z">
+<meta property="article:modified_time" content="2024-01-20T12:06:05.095Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="shell">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.ihoey.com/blog/sed_demo_00.jpg?imageView2/0/format/jpg/q/75%7Cimageslim">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-linux-sed-command" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2018/01/31/linux-sed-command/" class="article-date">
+  <time class="dt-published" datetime="2018-01-31T11:03:52.000Z" itemprop="datePublished">2018-01-31</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Linux/">Linux</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      SED 命令简明教程
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p><code>awk</code>于 1977 年出生，今年 36 岁本命年，<code>sed</code>比<code>awk</code>大 2-3 岁，<code>awk</code>就像林妹妹，sed 就是宝玉哥哥了。所以 林妹妹跳了个<code>Topless</code>，他的哥哥<code>sed</code>坐不住了，也一定要出来抖一抖。</p>
+<p><code>sed</code>全名叫<code>stream editor</code>，流编辑器，用程序的方式来编辑文本，相当的<code>hacker</code>啊。<code>sed</code>基本上就是玩正则模式匹配，所以，玩<code>sed</code>的人，正则表达式一般都比较强。</p>
+<span id="more"></span>
+
+<p>同样，本篇文章不会说<code>sed</code>的全部东西，你可以参看 <a target="_blank" rel="noopener" href="http://www.gnu.org/software/sed/manual/sed.html"><code>sed</code>的手册</a> ，我这里主要还是想和大家竞争一下那些从手机指缝间或马桶里流走的时间，用这些时间来学习一些东西。当然，接下来的还是要靠大家自己双手。</p>
+<h2 id="用-s-命令替换"><a href="#用-s-命令替换" class="headerlink" title="用 s 命令替换"></a>用 s 命令替换</h2><p>我使用下面的这段文本做演示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cat pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">This is my dog</span><br><span class="line">  my dog&#x27;s name is frank</span><br><span class="line">This is my fish</span><br><span class="line">  my fish&#x27;s name is george</span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>把其中的<code>my</code>字符串替换成<code>Hao Chen’s</code>，下面的语句应该很好理解（<code>s</code>表示替换命令，<code>/my/</code>表示匹配<code>my</code>，<code>/Hao Chen’s/</code>表示把匹配替换成<code>Hao Chen’s</code>，<code>/g</code> 表示一行上的替换所有的匹配）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &quot;s/my/Hao Chen&#x27;s/g&quot; pets.txt</span><br><span class="line">&quot;This is Hao Chen&#x27;s cat</span><br><span class="line">  Hao Chen&#x27;s cat&#x27;s name is betty</span><br><span class="line">This is Hao Chen&#x27;s dog</span><br><span class="line">  Hao Chen&#x27;s dog&#x27;s name is frank</span><br><span class="line">This is Hao Chen&#x27;s fish</span><br><span class="line">  Hao Chen&#x27;s fish&#x27;s name is george</span><br><span class="line">This is Hao Chen&#x27;s goat</span><br><span class="line">  Hao Chen&#x27;s goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>注意：如果你要使用单引号，那么你没办法通过<code>\&#39;</code>这样来转义，就有双引号就可以了，在双引号内可以用<code>\&quot;</code>来转义。</p>
+<p>再注意：上面的<code>sed</code>并没有对文件的内容改变，只是把处理过后的内容输出，如果你要写回文件，你可以使用重定向，如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed &quot;s/my/Hao Chen&#x27;s/g&quot; pets.txt &gt; hao_pets.txt</span><br></pre></td></tr></table></figure>
+
+<p>或使用 <code>-i</code> 参数直接修改文件内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i &quot;s/my/Hao Chen&#x27;s/g&quot; pets.txt</span><br></pre></td></tr></table></figure>
+
+<p>在每一行最前面加点东西：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/^/#/g&#x27; pets.txt</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">This is my <span class="built_in">cat</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"> my <span class="built_in">cat</span><span class="string">&#x27;s name is betty</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string">This is my dog</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string"> my dog&#x27;</span>s name is frank</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">This is my fish</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"> my fish<span class="string">&#x27;s name is george</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="string">This is my goat</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string"> my goat&#x27;</span>s name is adam</span></span><br></pre></td></tr></table></figure>
+
+<p>在每一行最后面加点东西：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/$/ --- /g&#x27; pets.txt</span><br><span class="line">&quot;This is my cat ---</span><br><span class="line">  my cat&#x27;s name is betty ---</span><br><span class="line">This is my dog ---</span><br><span class="line">  my dog&#x27;s name is frank ---</span><br><span class="line">This is my fish ---</span><br><span class="line">  my fish&#x27;s name is george ---</span><br><span class="line">This is my goat ---</span><br><span class="line">  my goat&#x27;s name is adam ---&quot;</span><br></pre></td></tr></table></figure>
+
+<p>顺手介绍一下正则表达式的一些最基本的东西：</p>
+<ul>
+<li><code>^</code> 表示一行的开头。如：<code>/^#/</code> 以<code>#</code>开头的匹配。</li>
+<li><code>$</code> 表示一行的结尾。如：<code>/&#125;$/</code> 以<code>&#125;</code>结尾的匹配。</li>
+<li><code>\&lt;</code> 表示词首。 如：<code>\&lt;abc</code> 表示以 <code>abc</code> 为首的詞。</li>
+<li><code>\&gt;</code> 表示词尾。 如：<code>abc\&gt;</code> 表示以 <code>abc</code> 結尾的詞。</li>
+<li><code>.</code> 表示任何单个字符。</li>
+<li><code>*</code> 表示某个字符出现了 0 次或多次。</li>
+<li><code>[ ]</code> 字符集合。 如：<code>[abc]</code> 表示匹配 a 或 b 或 c，还有 <code>[a-zA-Z]</code> 表示匹配所有的<code>26</code>个字符。如果其中有<code>^</code>表示反，如 <code>[^a]</code> 表示非 a 的字符</li>
+</ul>
+<p>正规则表达式是一些很牛的事，比如我们要去掉某<code>html</code>中的<code>tags</code>：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">b</span>&gt;</span>This<span class="tag">&lt;/<span class="name">b</span>&gt;</span> is what <span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;text-decoration: underline;&quot;</span>&gt;</span>I<span class="tag">&lt;/<span class="name">span</span>&gt;</span> meant.</span><br><span class="line">Understand?</span><br></pre></td></tr></table></figure>
+
+<p>看看我们的<code>sed</code>命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果你这样搞的话，就会有问题</span></span><br><span class="line">sed &#x27;s/&lt;.*&gt;//g&#x27; html.txt</span><br><span class="line">&quot; Understand?&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">要解决上面的那个问题，就得像下面这样。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其中的<span class="string">&#x27;[^&gt;]&#x27;</span> 指定了除了&gt;的字符重复0次或多次。</span></span><br><span class="line">sed &#x27;s/&lt;[^&gt;]*&gt;//g&#x27; html.txt</span><br><span class="line">&quot;This is what I meant. Understand?&quot;</span><br></pre></td></tr></table></figure>
+
+<p>我们再来看看指定需要替换的内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &quot;3s/my/your/g&quot; pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">This is your dog</span><br><span class="line">  my dog&#x27;s name is frank</span><br><span class="line">This is my fish</span><br><span class="line">  my fish&#x27;s name is george</span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>下面的命令只替换第<code>3</code>到第<code>6</code>行的文本。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &quot;3,6s/my/your/g&quot; pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">This is your dog</span><br><span class="line">  your dog&#x27;s name is frank</span><br><span class="line">This is your fish</span><br><span class="line">  your fish&#x27;s name is george</span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>只替换每一行的第一个 s：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/s/S/1&#x27; my.txt</span><br><span class="line">&quot;ThiS is my cat, my cat&#x27;s name is betty</span><br><span class="line">ThiS is my dog, my dog&#x27;s name is frank</span><br><span class="line">ThiS is my fish, my fish&#x27;s name is george</span><br><span class="line">ThiS is my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>只替换每一行的第二个<code>s</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/s/S/2&#x27; my.txt</span><br><span class="line">&quot;This iS my cat, my cat&#x27;s name is betty</span><br><span class="line">This iS my dog, my dog&#x27;s name is frank</span><br><span class="line">This iS my fish, my fish&#x27;s name is george</span><br><span class="line">This iS my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>只替换第一行的第<code>3</code>个以后的<code>s</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/s/S/3g&#x27; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;S name iS betty</span><br><span class="line">This is my dog, my dog&#x27;S name iS frank</span><br><span class="line">This is my fiSh, my fiSh&#x27;S name iS george</span><br><span class="line">This is my goat, my goat&#x27;S name iS adam&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="多个匹配"><a href="#多个匹配" class="headerlink" title="多个匹配"></a>多个匹配</h2><p>如果我们需要一次替换多个模式，可参看下面的示例：（第一个模式把第一行到第三行的<code>my</code>替换成<code>your</code>，第二个则把第<code>3</code>行以后的<code>This</code>替换成了<code>That</code>）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;1,3s/my/your/g; 3,$s/This/That/g&#x27; my.txt</span><br><span class="line">&quot;This is your cat, your cat&#x27;s name is betty</span><br><span class="line">This is your dog, your dog&#x27;s name is frank</span><br><span class="line">That is your fish, your fish&#x27;s name is george</span><br><span class="line">That is my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>上面的命令等价于：（注：下面使用的是<code>sed</code>的<code>-e</code>命令行参数）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -e &#x27;1,3s/my/your/g&#x27; -e &#x27;3,$s/This/That/g&#x27; my.txt</span><br></pre></td></tr></table></figure>
+
+<p>我们可以使用&amp;来当做被匹配的变量，然后可以在基本左右加点东西。如下所示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/my/[&amp;]/g&#x27; my.txt</span><br><span class="line">&quot;This is [my] cat, [my] cat&#x27;s name is betty</span><br><span class="line">This is [my] dog, [my] dog&#x27;s name is frank</span><br><span class="line">This is [my] fish, [my] fish&#x27;s name is george</span><br><span class="line">This is [my] goat, [my] goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="圆括号匹配"><a href="#圆括号匹配" class="headerlink" title="圆括号匹配"></a>圆括号匹配</h2><p>使用圆括号匹配的示例：（圆括号括起来的正则表达式所匹配的字符串会可以当成变量来使用，<code>sed</code>中使用的是<code>\1,\2…</code>）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;s/This is my \([^,&amp;]*\),.*is \(.*\)/\1:\2/g&#x27; my.txt</span><br><span class="line">&quot;cat:betty</span><br><span class="line">dog:frank</span><br><span class="line">fish:george</span><br><span class="line">goat:adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>上面这个例子中的正则表达式有点复杂，解开如下（去掉转义字符）：</p>
+<ul>
+<li>正则为：<code>This is my ([^,]*),.*is (.*)</code></li>
+<li>匹配为：<code>This is my (cat),……….is (betty)</code></li>
+</ul>
+<p>然后：<code>\1</code>就是<code>cat</code>，<code>\2</code>就是<code>betty</code></p>
+<h2 id="sed-的命令"><a href="#sed-的命令" class="headerlink" title="sed 的命令"></a>sed 的命令</h2><p>让我们回到最一开始的例子<code>pets.txt</code>，让我们来看几个命令：</p>
+<h3 id="N-命令"><a href="#N-命令" class="headerlink" title="N 命令"></a>N 命令</h3><p>先来看<code>N</code>命令 —— 把下一行的内容纳入当成缓冲区做匹配。</p>
+<p>下面的的示例会把原文本中的偶数行纳入奇数行匹配，而<code>s</code>只匹配并替换一次，所以，就成了下面的结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;N;s/my/your/&#x27; pets.txt</span><br><span class="line">&quot;This is your cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">This is your dog</span><br><span class="line">  my dog&#x27;s name is frank</span><br><span class="line">This is your fish</span><br><span class="line">  my fish&#x27;s name is george</span><br><span class="line">This is your goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，原来的文件成了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">This is my cat\n  my cat&#x27;s name is betty</span><br><span class="line">This is my dog\n  my dog&#x27;s name is frank</span><br><span class="line">This is my fish\n  my fish&#x27;s name is george</span><br><span class="line">This is my goat\n  my goat&#x27;s name is adam</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，下面的例子你就明白了，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;N;s/\n/,/&#x27; pets.txt</span><br><span class="line">This is my cat,  my cat&#x27;s name is betty</span><br><span class="line">This is my dog,  my dog&#x27;s name is frank</span><br><span class="line">This is my fish,  my fish&#x27;s name is george</span><br><span class="line">This is my goat,  my goat&#x27;s name is adam</span><br></pre></td></tr></table></figure>
+
+<h3 id="a-命令和-i-命令"><a href="#a-命令和-i-命令" class="headerlink" title="a 命令和 i 命令"></a>a 命令和 i 命令</h3><p><code>a</code>命令就是<code>append</code>， <code>i</code>命令就是<code>insert</code>，它们是用来添加行的。如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其中的1i表明，其要在第1行前插入一行（insert）</span></span><br><span class="line">sed &quot;1 i This is my monkey, my monkey&#x27;s name is wukong&quot; my.txt</span><br><span class="line">&quot;This is my monkey, my monkey&#x27;s name is wukong</span><br><span class="line">This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其中的1a表明，其要在最后一行后追加一行（append）</span></span><br><span class="line">sed &quot;1 a This is my monkey, my monkey&#x27;s name is wukong&quot; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my monkey, my monkey&#x27;s name is wukong</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以运用匹配来添加文本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">注意其中的/fish/a，这意思是匹配到/fish/后就追加一行</span></span><br><span class="line">sed &quot;/fish/a This is my monkey, my monkey&#x27;s name is wukong&quot; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my monkey, my monkey&#x27;s name is wukong</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<p>下面这个例子是对每一行都挺插入：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &quot;/my/a ----&quot; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">----</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">----</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">----</span><br><span class="line">This is my goat, my goat&#x27;s name is adam</span><br><span class="line">----&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="c-命令"><a href="#c-命令" class="headerlink" title="c 命令"></a>c 命令</h3><p><code>c</code> 命令是替换匹配行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sed &quot;2 c This is my monkey, my monkey&#x27;s name is wukong&quot; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my monkey, my monkey&#x27;s name is wukong</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br><span class="line"></span><br><span class="line">sed &quot;/fish/c This is my monkey, my monkey&#x27;s name is wukong&quot; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my monkey, my monkey&#x27;s name is wukong</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="d-命令"><a href="#d-命令" class="headerlink" title="d 命令"></a>d 命令</h3><p>删除匹配行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;/fish/d&#x27; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br><span class="line"></span><br><span class="line">sed &#x27;2d&#x27; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br><span class="line"></span><br><span class="line">sed &#x27;2,$d&#x27; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="p-命令"><a href="#p-命令" class="headerlink" title="p 命令"></a>p 命令</h3><p>打印命令</p>
+<p>你可以把这个命令当成<code>grep</code>式的命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">匹配fish并输出，可以看到fish的那一行被打了两遍，</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">这是因为sed处理时会把处理的信息输出</span></span><br><span class="line">sed &#x27;/fish/p&#x27; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my fish, my fish&#x27;s name is george</span><br><span class="line">This is my goat, my goat&#x27;s name is adam&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用n参数就好了</span></span><br><span class="line">sed -n &#x27;/fish/p&#x27; my.txt</span><br><span class="line">&quot;This is my fish, my fish&#x27;s name is george&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从一个模式到另一个模式</span></span><br><span class="line">sed -n &#x27;/dog/,/fish/p&#x27; my.txt</span><br><span class="line">&quot;This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">从第一行打印到匹配fish成功的那一行</span></span><br><span class="line">sed -n &#x27;1,/fish/p&#x27; my.txt</span><br><span class="line">&quot;This is my cat, my cat&#x27;s name is betty</span><br><span class="line">This is my dog, my dog&#x27;s name is frank</span><br><span class="line">This is my fish, my fish&#x27;s name is george&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="几个知识点"><a href="#几个知识点" class="headerlink" title="几个知识点"></a>几个知识点</h2><p>好了，下面我们要介绍四个<code>sed</code>的基本知识点：</p>
+<h3 id="Pattern-Space"><a href="#Pattern-Space" class="headerlink" title="Pattern Space"></a>Pattern Space</h3><p>第零个是关于<code>-n</code>参数的，大家也许没看懂，没关系，我们来看一下<code>sed</code>处理文本的伪代码，并了解一下<code>Pattern Space</code>的概念：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">foreach line in file &#123;</span><br><span class="line">    //放入把行Pattern_Space</span><br><span class="line">    Pattern_Space &lt;= line;</span><br><span class="line"></span><br><span class="line">    // 对每个pattern space执行sed命令</span><br><span class="line">    Pattern_Space &lt;= EXEC(sed_cmd, Pattern_Space);</span><br><span class="line"></span><br><span class="line">    // 如果没有指定 -n 则输出处理后的Pattern_Space</span><br><span class="line">    if (sed option hasn\&#x27;t &quot;-n&quot;)  &#123;</span><br><span class="line">       print Pattern_Space</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Address"><a href="#Address" class="headerlink" title="Address"></a>Address</h3><p>第一个是关于<code>address</code>，几乎上述所有的命令都是这样的（注：其中的<code>!</code>表示匹配成功后是否执行命令）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[address[,address]][!]&#123;cmd&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>address</code>可以是一个数字，也可以是一个模式，你可以通过逗号要分隔两个<code>address</code> 表示两个<code>address</code>的区间，参执行命令<code>cmd</code>，伪代码如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">bool bexec = false</span><br><span class="line">foreach line in file &#123;</span><br><span class="line">    if ( match(address1) )&#123;</span><br><span class="line">        bexec = true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if ( bexec == true) &#123;</span><br><span class="line">        EXEC(sed_cmd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if ( match (address2) ) &#123;</span><br><span class="line">        bexec = false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关于<code>address</code>可以使用相对位置，如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其中的+3表示后面连续3行</span></span><br><span class="line">sed &#x27;/dog/,+3s/^/# /g&#x27; pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">This is my dog</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">  my dog<span class="string">&#x27;s name is frank</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">This is my fish</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">  my fish&#x27;</span>s name is george</span></span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="命令打包"><a href="#命令打包" class="headerlink" title="命令打包"></a>命令打包</h3><p>第二个是<code>cmd</code>可以是多个，它们可以用分号分开，可以用大括号括起来作为嵌套命令。下面是几个例子：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">cat pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">This is my dog</span><br><span class="line">  my dog&#x27;s name is frank</span><br><span class="line">This is my fish</span><br><span class="line">  my fish&#x27;s name is george</span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对3行到第6行，执行命令/This/d</span></span><br><span class="line">sed &#x27;3,6 &#123;/This/d&#125;&#x27; pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">  my dog&#x27;s name is frank</span><br><span class="line">  my fish&#x27;s name is george</span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对3行到第6行，匹配/This/成功后，再匹配/fish/，成功后执行d命令</span></span><br><span class="line">sed &#x27;3,6 &#123;/This/&#123;/fish/d&#125;&#125;&#x27; pets.txt</span><br><span class="line">&quot;This is my cat</span><br><span class="line">  my cat&#x27;s name is betty</span><br><span class="line">This is my dog</span><br><span class="line">  my dog&#x27;s name is frank</span><br><span class="line">  my fish&#x27;s name is george</span><br><span class="line">This is my goat</span><br><span class="line">  my goat&#x27;s name is adam&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从第一行到最后一行，如果匹配到This，则删除之；如果前面有空格，则去除空格</span></span><br><span class="line">sed &#x27;1,$&#123;/This/d;s/^ *//g&#125;&#x27; pets.txt</span><br><span class="line">&quot;my cat&#x27;s name is betty</span><br><span class="line">my dog&#x27;s name is frank</span><br><span class="line">my fish&#x27;s name is george</span><br><span class="line">my goat&#x27;s name is adam&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Hold-Space"><a href="#Hold-Space" class="headerlink" title="Hold Space"></a>Hold Space</h3><p>第三个我们再来看一下 <code>Hold Space</code></p>
+<p>接下来，我们需要了解一下<code>Hold Space</code>的概念，我们先来看几个命令：</p>
+<ul>
+<li><code>g</code>： 将<code>hold space</code>中的内容拷贝到<code>pattern space</code>中，原来<code>pattern space</code>里的内容清除</li>
+<li><code>G</code>： 将<code>hold space</code>中的内容<code>append</code>到<code>pattern space\n</code>后</li>
+<li><code>h</code>： 将<code>pattern space</code>中的内容拷贝到<code>hold space</code>中，原来的<code>hold space</code>里的内容被清除</li>
+<li><code>H</code>： 将<code>pattern space</code>中的内容<code>append</code>到<code>hold space\n</code>后</li>
+<li><code>x</code>： 交换<code>pattern space</code>和<code>hold space</code>的内容</li>
+</ul>
+<p>这些命令有什么用？我们来看两个示例吧，用到的示例文件是：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cat t.txt</span><br><span class="line">one</span><br><span class="line">two</span><br><span class="line">three</span><br></pre></td></tr></table></figure>
+
+<p>第一个示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;H;g&#x27; t.txt</span><br><span class="line">one</span><br><span class="line"></span><br><span class="line">one</span><br><span class="line">two</span><br><span class="line"></span><br><span class="line">one</span><br><span class="line">two</span><br><span class="line">three</span><br></pre></td></tr></table></figure>
+
+<p>是不是有点没看懂，我作个图你就看懂了。</p>
+<p><img src="https://cdn.ihoey.com/blog/sed_demo_00.jpg?imageView2/0/format/jpg/q/75%7Cimageslim"></p>
+<p>第二个示例，反序了一个文件的行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sed &#x27;1!G;h;$!d&#x27; t.txt</span><br><span class="line">three</span><br><span class="line">two</span><br><span class="line">one</span><br></pre></td></tr></table></figure>
+
+<p>其中的 <code>&#39;1!G;h;$!d&#39;</code> 可拆解为三个命令</p>
+<ul>
+<li><code>1!G</code> —— 只有第一行不执行<code>G</code>命令，将<code>hold space</code>中的内容<code>append</code>回到<code>pattern space</code></li>
+<li><code>h</code> —— 第一行都执行<code>h</code>命令，将<code>pattern space</code>中的内容拷贝到<code>hold space</code>中</li>
+<li><code>$!d</code> —— 除了最后一行不执行<code>d</code>命令，其它行都执行<code>d</code>命令，删除当前行</li>
+</ul>
+<p>这个执行序列很难理解，做个图如下大家就明白了：</p>
+<p><img src="https://cdn.ihoey.com/blog/sed_demo.jpg?imageView2/0/format/jpg/q/75%7Cimageslim"></p>
+<p>就先说这么多吧，希望对大家有用。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2018/01/31/linux-sed-command/" data-id="clrm0xvum003mlqn94c10c474" data-title="SED 命令简明教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/" rel="tag">shell</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/02/13/crontab-part1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          crontab 踩坑之绝对路径
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/01/30/Hexo-NexT-Wildfire/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">在Hexo博客 NexT主题中部署Wildfire评论系统</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CSS3/">CSS3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Canvas/">Canvas</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Cron/">Cron</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ElasticStack/">ElasticStack</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Git/">Git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo/">Hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo%E5%8D%9A%E5%AE%A2/">Hexo博客</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Interview/">Interview</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java%E6%95%99%E7%A8%8B/">Java教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Mac/">Mac</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Markdown/">Markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Node/">Node</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SpringCloud/">SpringCloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SpringReactive/">SpringReactive</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/WebRTC/">WebRTC</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/PWA/">PWA</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/rust/">rust</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsocks/">shadowsocks</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/">安全认证</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">环境配置</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/">网络协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android/" rel="tag">Android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BlueLake/" rel="tag">BlueLake</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Canvas/" rel="tag">Canvas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CentOS/" rel="tag">CentOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Config/" rel="tag">Config</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Cron/" rel="tag">Cron</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ElasticSearch/" rel="tag">ElasticSearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ElasticStack/" rel="tag">ElasticStack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eureka/" rel="tag">Eureka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastDFS/" rel="tag">FastDFS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/" rel="tag">Function</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gateway/" rel="tag">Gateway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/" rel="tag">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gogs/" rel="tag">Gogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTML5/" rel="tag">HTML5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JQuery/" rel="tag">JQuery</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JWT/" rel="tag">JWT</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Javascript/" rel="tag">Javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Js%E6%A1%86%E6%9E%B6/" rel="tag">Js框架</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LogStash/" rel="tag">LogStash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac/" rel="tag">Mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown%E8%AF%AD%E6%B3%95%E8%A7%84%E8%8C%83/" rel="tag">Markdown语法规范</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Maven/" rel="tag">Maven</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MongoDB/" rel="tag">MongoDB</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NFS/" rel="tag">NFS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NoSQL/" rel="tag">NoSQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Node/" rel="tag">Node</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NodeJs/" rel="tag">NodeJs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenFeign/" rel="tag">OpenFeign</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PWA/" rel="tag">PWA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Permissions/" rel="tag">Permissions</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RBAC/" rel="tag">RBAC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/" rel="tag">Reactor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SSE/" rel="tag">SSE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SVN/" rel="tag">SVN</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sentinel/" rel="tag">Sentinel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/" rel="tag">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringBoot/" rel="tag">SpringBoot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringReactive/" rel="tag">SpringReactive</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringSecurity/" rel="tag">SpringSecurity</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Thymeleaf/" rel="tag">Thymeleaf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Token/" rel="tag">Token</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tomcat9/" rel="tag">Tomcat9</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vue/" rel="tag">Vue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/WebClient/" rel="tag">WebClient</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/WebFlux/" rel="tag">WebFlux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/WebRTC/" rel="tag">WebRTC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/YApi/" rel="tag">YApi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/" rel="tag">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb%E5%91%BD%E4%BB%A4/" rel="tag">adb命令</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bower/" rel="tag">bower</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/comment/" rel="tag">comment</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/houyi1121/" rel="tag">houyi1121</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/" rel="tag">js构造函数</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/js%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" rel="tag">js面向对象</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rust/" rel="tag">rust</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsocks/" rel="tag">shadowsocks</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/yarn/" rel="tag">yarn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%AA%E5%85%83%E7%B4%A0/" rel="tag">伪元素</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%AA%E7%B1%BB/" rel="tag">伪类</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8E%9F%E5%9E%8B/" rel="tag">原型</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8E%9F%E5%9E%8B%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" rel="tag">原型的基本概念</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" rel="tag">原型链</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8E%9F%E7%94%9FJs/" rel="tag">原生Js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">后端开发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" rel="tag">安全认证</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%82%E7%AD%89/" rel="tag">幂等</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%A5%E5%B8%B8%E6%B0%B4%E6%96%87/" rel="tag">日常水文</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A2%A6%E9%AD%87/" rel="tag">梦魇</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A2%A6%E9%AD%87%E5%B0%8F%E6%A0%88/" rel="tag">梦魇小栈</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag">环境配置</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%94%BB%E5%B8%83/" rel="tag">画布</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/" rel="tag">科学上网</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%A7%E6%89%BF/" rel="tag">继承</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BB%A7%E6%89%BF%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/" rel="tag">继承的实现方式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" rel="tag">网络协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Android/" style="font-size: 10.59px;">Android</a> <a href="/tags/BlueLake/" style="font-size: 10.59px;">BlueLake</a> <a href="/tags/Canvas/" style="font-size: 11.18px;">Canvas</a> <a href="/tags/CentOS/" style="font-size: 15.29px;">CentOS</a> <a href="/tags/Config/" style="font-size: 10px;">Config</a> <a href="/tags/Cron/" style="font-size: 10.59px;">Cron</a> <a href="/tags/Docker/" style="font-size: 10.59px;">Docker</a> <a href="/tags/ElasticSearch/" style="font-size: 11.76px;">ElasticSearch</a> <a href="/tags/ElasticStack/" style="font-size: 11.76px;">ElasticStack</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/FastDFS/" style="font-size: 11.18px;">FastDFS</a> <a href="/tags/Function/" style="font-size: 10.59px;">Function</a> <a href="/tags/Gateway/" style="font-size: 10px;">Gateway</a> <a href="/tags/Git/" style="font-size: 10.59px;">Git</a> <a href="/tags/Gogs/" style="font-size: 10px;">Gogs</a> <a href="/tags/HTML5/" style="font-size: 11.18px;">HTML5</a> <a href="/tags/JQuery/" style="font-size: 13.53px;">JQuery</a> <a href="/tags/JVM/" style="font-size: 11.18px;">JVM</a> <a href="/tags/JWT/" style="font-size: 10px;">JWT</a> <a href="/tags/Java/" style="font-size: 15.88px;">Java</a> <a href="/tags/Javascript/" style="font-size: 10px;">Javascript</a> <a href="/tags/Jenkins/" style="font-size: 11.76px;">Jenkins</a> <a href="/tags/Js%E6%A1%86%E6%9E%B6/" style="font-size: 13.53px;">Js框架</a> <a href="/tags/Kibana/" style="font-size: 11.76px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 17.65px;">Linux</a> <a href="/tags/LogStash/" style="font-size: 11.76px;">LogStash</a> <a href="/tags/Mac/" style="font-size: 10px;">Mac</a> <a href="/tags/Mac-OS/" style="font-size: 10px;">Mac OS</a> <a href="/tags/Markdown%E8%AF%AD%E6%B3%95%E8%A7%84%E8%8C%83/" style="font-size: 10px;">Markdown语法规范</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10.59px;">MongoDB</a> <a href="/tags/MySQL/" style="font-size: 13.53px;">MySQL</a> <a href="/tags/NFS/" style="font-size: 10px;">NFS</a> <a href="/tags/Nexus/" style="font-size: 10px;">Nexus</a> <a href="/tags/Nginx/" style="font-size: 10.59px;">Nginx</a> <a href="/tags/NoSQL/" style="font-size: 11.18px;">NoSQL</a> <a href="/tags/Node/" style="font-size: 12.94px;">Node</a> <a href="/tags/NodeJs/" style="font-size: 11.76px;">NodeJs</a> <a href="/tags/OpenFeign/" style="font-size: 10px;">OpenFeign</a> <a href="/tags/PWA/" style="font-size: 10px;">PWA</a> <a href="/tags/Permissions/" style="font-size: 10px;">Permissions</a> <a href="/tags/RBAC/" style="font-size: 10px;">RBAC</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 13.53px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 10.59px;">RocketMQ</a> <a href="/tags/SSE/" style="font-size: 10px;">SSE</a> <a href="/tags/SVN/" style="font-size: 10px;">SVN</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Shell/" style="font-size: 12.35px;">Shell</a> <a href="/tags/Spring/" style="font-size: 18.82px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 13.53px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.35px;">SpringCloud</a> <a href="/tags/SpringReactive/" style="font-size: 12.94px;">SpringReactive</a> <a href="/tags/SpringSecurity/" style="font-size: 13.53px;">SpringSecurity</a> <a href="/tags/Thymeleaf/" style="font-size: 10px;">Thymeleaf</a> <a href="/tags/Token/" style="font-size: 10px;">Token</a> <a href="/tags/Tomcat9/" style="font-size: 10px;">Tomcat9</a> <a href="/tags/Ubuntu/" style="font-size: 12.35px;">Ubuntu</a> <a href="/tags/Vue/" style="font-size: 10px;">Vue</a> <a href="/tags/WebClient/" style="font-size: 10px;">WebClient</a> <a href="/tags/WebFlux/" style="font-size: 10px;">WebFlux</a> <a href="/tags/WebRTC/" style="font-size: 10px;">WebRTC</a> <a href="/tags/YApi/" style="font-size: 10px;">YApi</a> <a href="/tags/adb/" style="font-size: 10.59px;">adb</a> <a href="/tags/adb%E5%91%BD%E4%BB%A4/" style="font-size: 10.59px;">adb命令</a> <a href="/tags/bower/" style="font-size: 10px;">bower</a> <a href="/tags/comment/" style="font-size: 11.18px;">comment</a> <a href="/tags/hexo/" style="font-size: 12.35px;">hexo</a> <a href="/tags/houyi1121/" style="font-size: 10px;">houyi1121</a> <a href="/tags/java/" style="font-size: 14.71px;">java</a> <a href="/tags/javascript/" style="font-size: 17.06px;">javascript</a> <a href="/tags/js%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/" style="font-size: 10px;">js构造函数</a> <a href="/tags/js%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">js面向对象</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/npm/" style="font-size: 11.18px;">npm</a> <a href="/tags/pm2/" style="font-size: 10px;">pm2</a> <a href="/tags/rust/" style="font-size: 10px;">rust</a> <a href="/tags/shadowsocks/" style="font-size: 10px;">shadowsocks</a> <a href="/tags/shell/" style="font-size: 12.94px;">shell</a> <a href="/tags/tools/" style="font-size: 10.59px;">tools</a> <a href="/tags/yarn/" style="font-size: 10px;">yarn</a> <a href="/tags/%E4%BC%AA%E5%85%83%E7%B4%A0/" style="font-size: 10px;">伪元素</a> <a href="/tags/%E4%BC%AA%E7%B1%BB/" style="font-size: 10px;">伪类</a> <a href="/tags/%E5%8E%9F%E5%9E%8B/" style="font-size: 10px;">原型</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" style="font-size: 10px;">原型的基本概念</a> <a href="/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE/" style="font-size: 10px;">原型链</a> <a href="/tags/%E5%8E%9F%E7%94%9FJs/" style="font-size: 14.12px;">原生Js</a> <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" style="font-size: 20px;">后端开发</a> <a href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" style="font-size: 16.47px;">安全认证</a> <a href="/tags/%E5%B9%82%E7%AD%89/" style="font-size: 10px;">幂等</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 11.76px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 14.12px;">数据库</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 18.24px;">数据结构</a> <a href="/tags/%E6%97%A5%E5%B8%B8%E6%B0%B4%E6%96%87/" style="font-size: 10px;">日常水文</a> <a href="/tags/%E6%A2%A6%E9%AD%87/" style="font-size: 10px;">梦魇</a> <a href="/tags/%E6%A2%A6%E9%AD%87%E5%B0%8F%E6%A0%88/" style="font-size: 10px;">梦魇小栈</a> <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" style="font-size: 19.41px;">环境配置</a> <a href="/tags/%E7%94%BB%E5%B8%83/" style="font-size: 11.18px;">画布</a> <a href="/tags/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/" style="font-size: 10px;">科学上网</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 17.65px;">算法</a> <a href="/tags/%E7%BB%A7%E6%89%BF/" style="font-size: 10px;">继承</a> <a href="/tags/%E7%BB%A7%E6%89%BF%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/" style="font-size: 10px;">继承的实现方式</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" style="font-size: 10px;">网络协议</a> <a href="/tags/%E9%9D%A2%E8%AF%95/" style="font-size: 10px;">面试</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">September 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">June 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">May 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">February 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">June 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">July 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/09/17/rust-wechat-game-ylgy/">《羊了个羊》程序员过关攻略</a>
+          </li>
+        
+          <li>
+            <a href="/2022/08/15/data-structure-b-tree/">「数据结构与算法」B 树 与 B+ 树</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/25/data-structure-algorithm-method/">「数据结构与算法」常见算法思想</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/06/data-structure-trie-ac/">「数据结构与算法」Trie 树 与 AC 自动机</a>
+          </li>
+        
+          <li>
+            <a href="/2022/06/25/data-structure-text-pattern-algorithm/">「数据结构与算法」单模式字符串匹配算法（BF、RK、KMP、BM）</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
