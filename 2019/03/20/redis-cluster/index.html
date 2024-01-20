@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>「Redis」深入学习Redis及集群 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Redis本质上是一个Key-Value类型的内存数据库，整个数据库统统加载在内存当中进行操作，定期通过异步操作把数据库数据flush到硬盘上进行保存。因为是纯内存操作，Redis的性能非常出色，每秒可以处理超过10万次读写操作，是已知性能最快的Key-Value DB。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Redis」深入学习Redis及集群">
+<meta property="og:url" content="http://example.com/2019/03/20/redis-cluster/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Redis本质上是一个Key-Value类型的内存数据库，整个数据库统统加载在内存当中进行操作，定期通过异步操作把数据库数据flush到硬盘上进行保存。因为是纯内存操作，Redis的性能非常出色，每秒可以处理超过10万次读写操作，是已知性能最快的Key-Value DB。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-03-20T08:19:26.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.568Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-redis-cluster" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/03/20/redis-cluster/" class="article-date">
+  <time class="dt-published" datetime="2019-03-20T08:19:26.000Z" itemprop="datePublished">2019-03-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Redis/">Redis</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      「Redis」深入学习Redis及集群
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Redis本质上是一个Key-Value类型的<strong>内存数据库</strong>，整个数据库统统加载在内存当中进行操作，定期通过异步操作把数据库数据flush到硬盘上进行保存。因为是纯内存操作，Redis的性能非常出色，每秒可以处理超过10万次读写操作，是已知性能最快的Key-Value DB。</p>
+<span id="more"></span>
+<p>Redis的出色之处不仅仅是性能，Redis最大的魅力是支持保存多种数据结构，此外单个value的最大限制是1GB。另外Redis也可以对存入的Key-Value设置expire时间。 Redis的主要缺点是数据库容量受到物理内存的限制，不能用作海量数据的高性能读写，因此Redis适合的场景主要局限在较小数据量的高性能操作和运算上。</p>
+<h3 id="1-Redis数据结构及命令操作"><a href="#1-Redis数据结构及命令操作" class="headerlink" title="1. Redis数据结构及命令操作"></a>1. Redis数据结构及命令操作</h3><h4 id="1-1-基本概念及操作"><a href="#1-1-基本概念及操作" class="headerlink" title="1.1 基本概念及操作"></a>1.1 基本概念及操作</h4><ul>
+<li>默认16个数据库，类似数组下表从零开始，初始默认使用零号库；</li>
+<li>统一密码管理，16个库都是同样密码，要么都OK要么一个也连接不上，redis默认端口是6379；</li>
+<li>select命令切换数据库：select 0-15；</li>
+<li>dbsize：查看当前数据库的key的数量；</li>
+<li>flushdb：清空当前库；</li>
+<li>flushall；通杀全部库；</li>
+</ul>
+<h4 id="1-2-Redis数据结构"><a href="#1-2-Redis数据结构" class="headerlink" title="1.2 Redis数据结构"></a>1.2 Redis数据结构</h4><p>redis存储的是：key-value格式的数据，其中key都是字符串，value有5种不同的数据结构:String、Hash、List、Set、Zset(Sorted Set)</p>
+<ol>
+<li>String：set, get, del, append, strlen</li>
+<li>Hash：hset, hget, hdel, hmset(批量设值), hmget, hgetall</li>
+<li>List：lpush, rpush, lrange, lpop(删除), rpop, lindex</li>
+<li>Set：sadd, smembers, srem(根据可以移除member), sismember(判断是否为key的成员)</li>
+<li>ZSet：zadd, zrange, zrem</li>
+</ol>
+<h4 id="1-3-Redis键-key-–常用命令介绍"><a href="#1-3-Redis键-key-–常用命令介绍" class="headerlink" title="1.3 Redis键(key)–常用命令介绍"></a>1.3 Redis键(key)–常用命令介绍</h4><ul>
+<li>keys *：查看所有 key ；</li>
+<li>exists key的名字：判断某个 key 是否存在；</li>
+<li>move key dbID（0-15）： 当前库就没有了，被移除了；</li>
+<li>expire key 秒钟： 为给定的 key 设置过期时间；</li>
+<li>ttl key： 查看还有多少秒过期，-1表示永不过期，-2表示已过期；</li>
+<li>type key： 查看你的 key 是什么类型；</li>
+</ul>
+<h3 id="2-Redis持久化"><a href="#2-Redis持久化" class="headerlink" title="2. Redis持久化"></a>2. Redis持久化</h3><p>Redis作为一个键值对内存数据库(NoSQL)，数据都存储在内存当中，在处理客户端请求时，所有操作都在内存当中进行，为了避免内存中数据丢失，Redis提供了RDB和AOF两种不同的数据持久化方式。</p>
+<h4 id="2-1-RDB（Redis-DataBase）"><a href="#2-1-RDB（Redis-DataBase）" class="headerlink" title="2.1 RDB（Redis DataBase）"></a>2.1 RDB（Redis DataBase）</h4><p>RDB是一种快照存储持久化方式，具体就是将Redis某一时刻的内存数据保存到硬盘的文件当中，默认保存的文件名为dump.rdb，而在Redis服务器启动时，会重新加载dump.rdb文件的数据到内存当中恢复数据。</p>
+<ul>
+<li>开启RDB持久化方式一：save命令，或bgsave(异步)</li>
+<li>开启方式二：在Redis配置文件redis.conf配置，配置完后启动时加载：<code>redis-server redis.conf</code></li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">save <span class="number">900</span> <span class="number">1</span>     # <span class="number">900</span>s内至少达到一条写命令</span><br><span class="line">save <span class="number">300</span> <span class="number">10</span>    # <span class="number">300</span>s内至少达至<span class="number">10</span>条写命令</span><br><span class="line">save <span class="number">60</span> <span class="number">10000</span>  # <span class="number">60</span>s内至少达到<span class="number">10000</span>条写命令</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>RDB的几个优点</p>
+<ul>
+<li>与AOF方式相比，通过rdb文件恢复数据比较快。</li>
+<li>rdb文件非常紧凑，适合于数据备份。</li>
+<li>通过RDB进行数据备，由于使用子进程生成，所以对Redis服务器性能影响较小。</li>
+</ul>
+</li>
+<li><p>RDB的几个缺点</p>
+<ul>
+<li>如果服务器宕机的话，采用RDB的方式会造成某个时段内数据的丢失，比如我们设置10分钟同步一次或5分钟达到1000次写入就同步一次，那么如果还没达到触发条件服务器就死机了，那么这个时间段的数据会丢失。</li>
+<li>使用save命令会造成服务器阻塞，直接数据同步完成才能接收后续请求。</li>
+<li>使用bgsave命令在forks子进程时，如果数据量太大，forks的过程也会发生阻塞，另外，forks子进程会耗费内存。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-2-AOF-Append-only-file"><a href="#2-2-AOF-Append-only-file" class="headerlink" title="2.2 AOF(Append-only file)"></a>2.2 AOF(Append-only file)</h4><p>与RDB存储某个时刻的快照不同，AOF持久化方式会记录客户端对服务器的每一次写操作命令（以日志的形式），并将这些写操作以Redis协议追加保存到以后缀为aof文件末尾，在Redis服务器重启时，会加载并运行aof文件的命令，以达到恢复数据的目的。</p>
+<ul>
+<li>开启方式：在Redis配置文件redis.conf配置</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">appendonly yes                  # 开启aof机制</span><br><span class="line">appendfilename <span class="string">&quot;appendonly.aof&quot;</span> # aof文件名</span><br><span class="line"># 写入策略<span class="punctuation">,</span>always表示每个写操作都保存到aof文件中<span class="punctuation">,</span>也可以是everysec(每秒写入一次)或no(操作系统处理)</span><br><span class="line">appendfsync always</span><br><span class="line">no-appendfsync-on-rewrite no    # 默认不重写aof文件</span><br><span class="line">dir ~/redis/                    # 保存目录</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>aof文件太大，加载aof文件恢复数据时，就会非常慢，为了解决，Redis通过重写aof，可以生成一个恢复当前数据的最少命令集，两种方式：配置no-appendfsync-on-rewrite(默认no)，或者客户端向服务器发送bgrewriteaof命令</li>
+</ul>
+<ul>
+<li>AOF的优点：AOF只是追加日志文件，因此对服务器性能影响较小，速度比RDB要快，消耗的内存较少。</li>
+<li>AOF的缺点：AOF方式生成的日志文件太大，即使通过AFO重写，文件体积仍然很大。恢复数据的速度比RDB慢。</li>
+<li>当RDB与AOF两种方式都开启时，Redis会优先使用AOF日志来恢复数据，因为AOF保存的文件比RDB文件更完整。</li>
+</ul>
+<h5 id="2-2-1-AOF文件修复"><a href="#2-2-1-AOF文件修复" class="headerlink" title="2.2.1 AOF文件修复"></a>2.2.1 AOF文件修复</h5><ol>
+<li>备份被写坏的AOF文件</li>
+<li>运行redis-check-aof –fix进行修复</li>
+<li>用diff -u来看下两个文件的差异，确认问题点</li>
+<li>重启redis，加载修复后的AOF文件</li>
+</ol>
+<h3 id="3-Redis的高并发和快速原因"><a href="#3-Redis的高并发和快速原因" class="headerlink" title="3. Redis的高并发和快速原因"></a>3. Redis的高并发和快速原因</h3><ol>
+<li>redis是基于内存的，内存的读写速度非常快；</li>
+<li>redis是单线程的，省去了很多上下文切换线程的时间；</li>
+<li>redis使用多路复用技术，可以处理并发的连接。非阻塞IO 内部实现采用epoll，采用了epoll+自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间。</li>
+<li>另外，数据结构也帮了不少忙，Redis全程使用hash结构，读取速度快，还有一些特殊的数据结构，对数据存储进行了优化，如压缩表，对短数据进行压缩存储，再如，跳表，使用有序的数据结构加快读取的速度。</li>
+<li>还有一点，Redis采用自己实现的事件分离器，效率比较高，内部采用非阻塞的执行方式，吞吐能力比较大。</li>
+</ol>
+<h3 id="4-Redis利用哨兵-Sentinel-，复制-Replication-这两个功能来保证高可用"><a href="#4-Redis利用哨兵-Sentinel-，复制-Replication-这两个功能来保证高可用" class="headerlink" title="4. Redis利用哨兵(Sentinel)，复制(Replication)这两个功能来保证高可用"></a>4. Redis利用哨兵(Sentinel)，复制(Replication)这两个功能来保证高可用</h3><ol>
+<li>哨兵(Sentinel)：可以管理多个Redis服务器，它提供了监控，提醒以及自动的故障转移的功能。<ol>
+<li>集群监控：负责监控Redis master和slave进程是否正常工作</li>
+<li>消息通知：如果某个Redis实例有故障，那么哨兵负责发送消息作为报警通知给管理员</li>
+<li>故障转移：如果master node挂掉了，会自动转移到slave node上</li>
+<li>配置中心：如果故障转移发生了，通知client客户端新的master地址</li>
+</ol>
+</li>
+<li>复制(Replication)：则是负责让一个Redis服务器可以配备多个备份的服务器。<ol>
+<li>从数据库向主数据库发送sync(数据同步)命令。</li>
+<li>主数据库接收同步命令后，会保存快照，创建一个RDB文件。</li>
+<li>当主数据库执行完保持快照后，会向从数据库发送RDB文件，而从数据库会接收并载入该文件。</li>
+<li>主数据库将缓冲区的所有写命令发给从服务器执行。</li>
+<li>以上处理完之后，之后主数据库每执行一个写命令，都会将被执行的写命令发送给从数据库。</li>
+</ol>
+</li>
+</ol>
+<h3 id="5-Redis-主从复制、哨兵和集群这三个有什么区别"><a href="#5-Redis-主从复制、哨兵和集群这三个有什么区别" class="headerlink" title="5. Redis 主从复制、哨兵和集群这三个有什么区别"></a>5. Redis 主从复制、哨兵和集群这三个有什么区别</h3><p>主从复制是为了数据备份，哨兵是为了高可用，Redis主服务器挂了哨兵可以切换，集群则是因为单实例能力有限，搞多个分散压力。</p>
+<ol>
+<li>主从模式：读写分离，备份，一个Master可以有多个Slaves。</li>
+<li>哨兵entinel：监控，自动转移，哨兵发现主服务器挂了后，就会从slave中重新选举一个主服务器。</li>
+<li>集群Cluster：为了解决单机Redis容量有限的问题，将数据按一定的规则分配到多台机器，内存&#x2F;QPS不受限于单机，可受益于分布式集群高扩展性。</li>
+</ol>
+<h3 id="6-Redis-Cluster集群"><a href="#6-Redis-Cluster集群" class="headerlink" title="6. Redis Cluster集群"></a>6. Redis Cluster集群</h3><p>Redis Cluster，是Redis 3.0开始引入的分布式存储方案。<br>集群由多个节点(Node)组成，Redis的数据分布在这些节点中。集群中的节点分为主节点和从节点：只有主节点负责读写请求和集群信息的维护；从节点只进行主节点数据和状态信息的复制。</p>
+<ul>
+<li>集群的作用：<ol>
+<li>数据分区：数据分区(或称数据分片)是集群最核心的功能。</li>
+<li>高可用：集群支持主从复制和主节点的自动故障转移（与哨兵类似）；当任一节点发生故障时，集群仍然可以对外提供服务。</li>
+</ol>
+</li>
+</ul>
+<h4 id="6-1-Redis-Cluster集群的搭建可以分为四步："><a href="#6-1-Redis-Cluster集群的搭建可以分为四步：" class="headerlink" title="6.1 Redis Cluster集群的搭建可以分为四步："></a>6.1 Redis Cluster集群的搭建可以分为四步：</h4><ol>
+<li><strong>启动节点</strong>：将节点以集群模式启动，此时节点是独立的，并没有建立联系；</li>
+<li><strong>节点握手</strong>：让独立的节点连成一个网络；</li>
+<li><strong>分配槽</strong>：将16384个槽分配给主节点；</li>
+<li><strong>指定主从关系</strong>：为从节点指定主节点。</li>
+</ol>
+<h4 id="6-2-Redis-Cluster工作原理"><a href="#6-2-Redis-Cluster工作原理" class="headerlink" title="6.2 Redis Cluster工作原理"></a>6.2 Redis Cluster工作原理</h4><ul>
+<li>客户端与Redis节点直连,不需要中间Proxy层，直接连接任意一个Master节点</li>
+<li>根据公式<code>HASH_SLOT=CRC16(key) mod 16384</code>，计算出映射到哪个分片上，然后Redis会去相应的节点进行操作</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">         CRC16(key)    |  0~5460   | &lt;--Slot--|Redis(M)|&lt;---|Redis(S可多个从)</span><br><span class="line">         mode 16384    |</span><br><span class="line">Client --------------&gt; | 5461~10922| &lt;--Slot--|Redis(M)|&lt;---|Redis(S可多个从)</span><br><span class="line">                       |</span><br><span class="line">                       |10923~10383| &lt;--Slot--|Redis(M)|&lt;---|Redis(S可多个从)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="6-3-Redis-Cluster优点"><a href="#6-3-Redis-Cluster优点" class="headerlink" title="6.3 Redis Cluster优点:"></a>6.3 Redis Cluster优点:</h4><ol>
+<li>无需Sentinel哨兵监控，如果Master挂了，Redis Cluster内部自动将Slave切换Master</li>
+<li>可以进行水平扩容</li>
+<li>支持自动化迁移，当出现某个Slave宕机了，那么就只有Master了，这时候的高可用性就无法很好的保证了，万一master也宕机了，咋办呢？ 针对这种情况，如果说其他Master有多余的Slave ，集群自动把多余的Slave迁移到没有Slave的Master 中。</li>
+</ol>
+<h4 id="6-4-Redis-Cluster缺点"><a href="#6-4-Redis-Cluster缺点" class="headerlink" title="6.4 Redis Cluster缺点:"></a>6.4 Redis Cluster缺点:</h4><ol>
+<li>批量操作是个坑（不同的key会划分到不同的slot中，因此直接使用mset或者mget等操作是行不通）</li>
+<li>资源隔离性较差，容易出现相互影响的情况。</li>
+</ol>
+<h4 id="6-5-Redis-Cluster总结："><a href="#6-5-Redis-Cluster总结：" class="headerlink" title="6.5 Redis Cluster总结："></a>6.5 Redis Cluster总结：</h4><ol>
+<li>Redis Cluster集群架构，不同的key是有可能分配在不同的Redis节点上的，在这种情况下Redis的事务机制是不生效。</li>
+<li>单机下的redis可以支持16个数据库（db0 ~ db15），在Redis Cluster集群架构下只有一个数据库空间，即db0。</li>
+<li>不同的key会划分到不同的slot中，因此直接使用mset或者mget等操作是行不通。</li>
+<li>如果Hash对象非常大，是不支持映射到不同节点的！只能映射到集群中的一个节点上。</li>
+<li>Redis集群模式下进行批量操作：如果执行的key数量比较少，就用串行get操作； 如果需要执行的key很多，就使用Hashtag保证这些key映射到同一台redis节点上。</li>
+<li>Redis Cluster的架构，是属于分片集群的架构，不做读写分离，因为redis本身在内存上操作，不会涉及IO吞吐，即使读写分离也不会提升太多性能，Redis在生产上的主要问题是考虑容量，单机最多10-20G，key太多降低redis性能.因此采用分片集群结构，已经能保证了我们的性能。其次，用上了读写分离后，还要考虑主从一致性，主从延迟等问题，徒增业务复杂度。</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/03/20/redis-cluster/" data-id="clrm0oz70007mebn9212x4rt6" data-title="「Redis」深入学习Redis及集群" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">后端开发</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/03/27/redis-consistency/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          「Redis」Redis穿透、击穿、雪崩和数据一致性
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/02/15/mysql-slow-log/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">「MySQL」MySQL慢日志查询分析</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ElasticStack/">ElasticStack</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo%E5%8D%9A%E5%AE%A2/">Hexo博客</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java%E6%95%99%E7%A8%8B/">Java教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SpringCloud/">SpringCloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SpringReactive/">SpringReactive</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/">安全认证</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">环境配置</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/">网络协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BlueLake/" rel="tag">BlueLake</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CentOS/" rel="tag">CentOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Config/" rel="tag">Config</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ElasticSearch/" rel="tag">ElasticSearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ElasticStack/" rel="tag">ElasticStack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eureka/" rel="tag">Eureka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastDFS/" rel="tag">FastDFS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gateway/" rel="tag">Gateway</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Git/" rel="tag">Git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gogs/" rel="tag">Gogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JWT/" rel="tag">JWT</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Javascript/" rel="tag">Javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Kibana/" rel="tag">Kibana</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LogStash/" rel="tag">LogStash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Maven/" rel="tag">Maven</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NFS/" rel="tag">NFS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenFeign/" rel="tag">OpenFeign</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Permissions/" rel="tag">Permissions</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RBAC/" rel="tag">RBAC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/" rel="tag">Reactor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SSE/" rel="tag">SSE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SVN/" rel="tag">SVN</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sentinel/" rel="tag">Sentinel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shell/" rel="tag">Shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringBoot/" rel="tag">SpringBoot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringCloud/" rel="tag">SpringCloud</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringReactive/" rel="tag">SpringReactive</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SpringSecurity/" rel="tag">SpringSecurity</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Thymeleaf/" rel="tag">Thymeleaf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Token/" rel="tag">Token</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tomcat9/" rel="tag">Tomcat9</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vue/" rel="tag">Vue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/WebClient/" rel="tag">WebClient</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/WebFlux/" rel="tag">WebFlux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/YApi/" rel="tag">YApi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bower/" rel="tag">bower</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/" rel="tag">mongodb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">后端开发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" rel="tag">安全认证</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%82%E7%AD%89/" rel="tag">幂等</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag">环境配置</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" rel="tag">网络协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/BlueLake/" style="font-size: 10.63px;">BlueLake</a> <a href="/tags/CentOS/" style="font-size: 15.63px;">CentOS</a> <a href="/tags/Config/" style="font-size: 10px;">Config</a> <a href="/tags/Docker/" style="font-size: 10.63px;">Docker</a> <a href="/tags/ElasticSearch/" style="font-size: 11.88px;">ElasticSearch</a> <a href="/tags/ElasticStack/" style="font-size: 11.88px;">ElasticStack</a> <a href="/tags/Eureka/" style="font-size: 10px;">Eureka</a> <a href="/tags/FastDFS/" style="font-size: 11.25px;">FastDFS</a> <a href="/tags/Gateway/" style="font-size: 10px;">Gateway</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Gogs/" style="font-size: 10px;">Gogs</a> <a href="/tags/JVM/" style="font-size: 11.25px;">JVM</a> <a href="/tags/JWT/" style="font-size: 10px;">JWT</a> <a href="/tags/Java/" style="font-size: 16.25px;">Java</a> <a href="/tags/Javascript/" style="font-size: 10px;">Javascript</a> <a href="/tags/Jenkins/" style="font-size: 11.88px;">Jenkins</a> <a href="/tags/Kibana/" style="font-size: 11.88px;">Kibana</a> <a href="/tags/Linux/" style="font-size: 16.25px;">Linux</a> <a href="/tags/LogStash/" style="font-size: 11.88px;">LogStash</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MySQL/" style="font-size: 13.13px;">MySQL</a> <a href="/tags/NFS/" style="font-size: 10px;">NFS</a> <a href="/tags/Nexus/" style="font-size: 10px;">Nexus</a> <a href="/tags/Nginx/" style="font-size: 10.63px;">Nginx</a> <a href="/tags/OpenFeign/" style="font-size: 10px;">OpenFeign</a> <a href="/tags/Permissions/" style="font-size: 10px;">Permissions</a> <a href="/tags/RBAC/" style="font-size: 10px;">RBAC</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 13.75px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 10.63px;">RocketMQ</a> <a href="/tags/SSE/" style="font-size: 10px;">SSE</a> <a href="/tags/SVN/" style="font-size: 10px;">SVN</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Shell/" style="font-size: 12.5px;">Shell</a> <a href="/tags/Spring/" style="font-size: 18.75px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 13.75px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.5px;">SpringCloud</a> <a href="/tags/SpringReactive/" style="font-size: 13.13px;">SpringReactive</a> <a href="/tags/SpringSecurity/" style="font-size: 13.75px;">SpringSecurity</a> <a href="/tags/Thymeleaf/" style="font-size: 10px;">Thymeleaf</a> <a href="/tags/Token/" style="font-size: 10px;">Token</a> <a href="/tags/Tomcat9/" style="font-size: 10px;">Tomcat9</a> <a href="/tags/Vue/" style="font-size: 10px;">Vue</a> <a href="/tags/WebClient/" style="font-size: 10px;">WebClient</a> <a href="/tags/WebFlux/" style="font-size: 10px;">WebFlux</a> <a href="/tags/YApi/" style="font-size: 10px;">YApi</a> <a href="/tags/bower/" style="font-size: 10px;">bower</a> <a href="/tags/hexo/" style="font-size: 11.25px;">hexo</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" style="font-size: 20px;">后端开发</a> <a href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" style="font-size: 16.88px;">安全认证</a> <a href="/tags/%E5%B9%82%E7%AD%89/" style="font-size: 10px;">幂等</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 11.88px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 14.38px;">数据库</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 18.13px;">数据结构</a> <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" style="font-size: 19.38px;">环境配置</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 17.5px;">算法</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" style="font-size: 10px;">网络协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">August 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">June 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">May 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">February 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">June 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">July 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/08/15/data-structure-b-tree/">「数据结构与算法」B 树 与 B+ 树</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/25/data-structure-algorithm-method/">「数据结构与算法」常见算法思想</a>
+          </li>
+        
+          <li>
+            <a href="/2022/07/06/data-structure-trie-ac/">「数据结构与算法」Trie 树 与 AC 自动机</a>
+          </li>
+        
+          <li>
+            <a href="/2022/06/25/data-structure-text-pattern-algorithm/">「数据结构与算法」单模式字符串匹配算法（BF、RK、KMP、BM）</a>
+          </li>
+        
+          <li>
+            <a href="/2022/06/02/data-structure-binary-search/">「数据结构与算法」二分查找</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
