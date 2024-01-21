@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="环境配置,CentOS,FastDFS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="事件经过：由于前端同学不小心把上传图片服务器地址写死了测试域名（指向测试服务器），然后项目上到正式环境，一段时间后，发现用户发布商品时的商品详情富文本中的图片全部指向测试图片服务器域名，然后图片又太多了，手动逐条修复数据不太现实。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「环境配置」记一次生产事故引发的FastDFS图片迁移">
+<meta property="og:url" content="https://www.resonanat.com/2021/05/28/env-centos8-fastdfs-rsync/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="事件经过：由于前端同学不小心把上传图片服务器地址写死了测试域名（指向测试服务器），然后项目上到正式环境，一段时间后，发现用户发布商品时的商品详情富文本中的图片全部指向测试图片服务器域名，然后图片又太多了，手动逐条修复数据不太现实。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-05-28T14:11:23.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.536Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="环境配置">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="FastDFS">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2021/05/28/env-centos8-fastdfs-rsync/"/>
+
+
+
+
+
+  <title>「环境配置」记一次生产事故引发的FastDFS图片迁移 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2021/05/28/env-centos8-fastdfs-rsync/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「环境配置」记一次生产事故引发的FastDFS图片迁移</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-05-28T22:11:23+08:00">
+                2021-05-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ul>
+<li><p><strong>事件经过</strong>：由于前端同学不小心把上传图片服务器地址写死了测试域名（指向测试服务器），然后项目上到正式环境，一段时间后，发现用户发布商品时的商品详情富文本中的图片全部指向测试图片服务器域名，然后图片又太多了，手动逐条修复数据不太现实。<span id="more"></span></p>
+</li>
+<li><p><strong>解决思路</strong>：</p>
+<ul>
+<li>从数据库中查询商品详情富文本，分析出所有测试域名图片的<code>Url</code>地址；</li>
+<li>通过<code>Url</code>下载图片到本地服务器并保持图片存放路径与图片文件名和原本一致；</li>
+<li>通过<code>rsync</code>远程同步命令同步到正式服务器；</li>
+<li>修改数据库中商品图片<code>Url</code>地址指向正式服务器域名(因为路径和文件名与测试服务器一致，只需替换域名即可)。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>引入<code>pom.xml</code>依赖</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.jsoup<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jsoup<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.11.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>提供出临时接口以备调用同步图片</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 提供出临时接口以备调用修复</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@PostMapping(&quot;/product/img/repair&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">repairProductImg</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 获取带有测试域名图片的富文本列表</span></span><br><span class="line">    List&lt;String&gt; infoList = productDao.getProductInfo();</span><br><span class="line">    <span class="comment">// 下载图片到本地服务器</span></span><br><span class="line">    infoList.forEach(RepairImgUtil::saveProductImg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">&lt;</span><span class="operator">!</span><span class="comment">-- 这里测试图片服务器域名为：img-test.abc.com --&gt;</span></span><br><span class="line"><span class="operator">&lt;</span><span class="keyword">select</span> id<span class="operator">=</span>&quot;getProductInfo&quot; resultType<span class="operator">=</span>&quot;java.lang.String&quot;<span class="operator">&gt;</span></span><br><span class="line">      <span class="keyword">select</span> detail <span class="keyword">from</span> productInfo <span class="keyword">where</span> detail <span class="keyword">like</span> <span class="string">&#x27;%img-test.abc.com%&#x27;</span></span><br><span class="line"><span class="operator">&lt;</span><span class="operator">/</span><span class="keyword">select</span><span class="operator">&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RepairImgUtil</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 保存图片到本地服务器</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> textBody 富文本</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">saveProductImg</span><span class="params">(String textBody)</span> &#123;</span><br><span class="line">        <span class="comment">// 解析富文本</span></span><br><span class="line">        <span class="type">Element</span> <span class="variable">doc</span> <span class="operator">=</span> Jsoup.parseBodyFragment(textBody).body();</span><br><span class="line">        <span class="type">Elements</span> <span class="variable">images</span> <span class="operator">=</span> doc.select(<span class="string">&quot;img[src]&quot;</span>);</span><br><span class="line">        List&lt;String&gt; srcList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (Element element : images) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">imgUrl</span> <span class="operator">=</span> element.attr(<span class="string">&quot;src&quot;</span>);</span><br><span class="line">            <span class="comment">// 筛选测试服务器的图片路径</span></span><br><span class="line">            <span class="keyword">if</span> (imgUrl.indexOf(<span class="string">&quot;img-test.abc.com&quot;</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                srcList.add(imgUrl);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 本地存放路径</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">basePath</span> <span class="operator">=</span> <span class="string">&quot;/apps/fdfs/storage/data/&quot;</span>;</span><br><span class="line">        srcList.forEach(img -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 下载图片，并根据路径规律保持原有路径</span></span><br><span class="line">                RepairImgUtil.downloadImage(img, img.substring(<span class="number">45</span>), basePath+img.substring(<span class="number">39</span>, <span class="number">45</span>));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.error(<span class="string">&quot;try-catch:&quot;</span>,e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 下载图片</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> urlString 图片链接</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> filename  图片名称</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> savePath  保存路径</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">downloadImage</span><span class="params">(String urlString, String filename, String savePath)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 构造URL打开连接，并设置输入流与缓冲</span></span><br><span class="line">        <span class="type">URL</span> <span class="variable">url</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(urlString);</span><br><span class="line">        <span class="type">URLConnection</span> <span class="variable">con</span> <span class="operator">=</span> url.openConnection();</span><br><span class="line">        con.setConnectTimeout(<span class="number">5</span>*<span class="number">1000</span>);</span><br><span class="line">        <span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> con.getInputStream();</span><br><span class="line">        <span class="type">byte</span>[] bs = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">        <span class="comment">// 读取到的数据长度</span></span><br><span class="line">        <span class="type">int</span> len;</span><br><span class="line">        <span class="comment">// 输出的文件流</span></span><br><span class="line">        File sf=<span class="keyword">new</span> <span class="title class_">File</span>(savePath);</span><br><span class="line">        <span class="keyword">if</span>(!sf.exists())&#123;</span><br><span class="line">           sf.mkdirs();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">OutputStream</span> <span class="variable">os</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(sf.getPath()+<span class="string">&quot;/&quot;</span>+filename);</span><br><span class="line">        <span class="comment">// 开始读取</span></span><br><span class="line">        <span class="keyword">while</span> ((len = is.read(bs)) != -<span class="number">1</span>) &#123;</span><br><span class="line">            os.write(bs, <span class="number">0</span>, len);</span><br><span class="line">        &#125;</span><br><span class="line">        os.close();</span><br><span class="line">        is.close();</span><br><span class="line">        <span class="comment">// 打印图片链接</span></span><br><span class="line">        log.info(urlString);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>调用接口后，图片会先备份到本地服务器，通过rsync远程同步命令同步到正式服务器</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 登录远程服务器，进入图片服务器目录</span></span><br><span class="line"><span class="built_in">cd</span> /apps/fdfs</span><br><span class="line"><span class="comment"># 远程登陆下载图片的服务器并同步数据</span></span><br><span class="line">rsync -avz myuser@119.29.36.15:/apps/fdfs/storage  ./</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据提示，确认连接输入 yes，输入本地服务器（下载图片的服务器）用户密码后开始同步</span></span><br><span class="line"></span><br><span class="line">The authenticity of host <span class="string">&#x27;119.29.36.15 (119.29.36.15)&#x27;</span> can<span class="string">&#x27;t be established.</span></span><br><span class="line"><span class="string">ECDSA key fingerprint is SHA256:5m4KgPF0QgBO1xE7Tz1RT7U/tfCue+QBE/t4zEDEDJQ.</span></span><br><span class="line"><span class="string">Are you sure you want to continue connecting (yes/no/[fingerprint])? yes</span></span><br><span class="line"><span class="string">Warning: Permanently added &#x27;</span>119.29.36.15<span class="string">&#x27; (ECDSA) to the list of known hosts.</span></span><br><span class="line"><span class="string">myuser@119.29.36.15&#x27;</span>s password: </span><br><span class="line">receiving incremental file list</span><br><span class="line">storage/</span><br><span class="line">storage/data/</span><br><span class="line">storage/data/03/</span><br><span class="line">storage/data/03/08/</span><br><span class="line">storage/data/03/08/Cmgy61-BU3GANDoCAAGOnj-x-ws715.jpg</span><br><span class="line">storage/data/03/08/Cmgy61-BU8SAeTvqAAGOnj-x-ws868.jpg</span><br><span class="line">storage/data/03/08/Cmgy61-BVn-AdXoKAA2Msh3VVsk076.jpg</span><br><span class="line">...</span><br><span class="line">storage/data/03/3C/Cmgy62CwSTOARHdWABLV4kLKua4925.png</span><br><span class="line"></span><br><span class="line">sent 15,786 bytes  received 422,224,711 bytes  10,425,691.28 bytes/sec</span><br><span class="line">total size is 448,804,964  speedup is 1.06</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>把测试域名换成正式域名访问图片成功！最后修改数据库商品详情：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> productInfo <span class="keyword">set</span> detail <span class="operator">=</span> REPLACE(detail, <span class="string">&#x27;img-test.abc.com%&#x27;&#x27;, &#x27;</span>img.abc.com<span class="operator">%</span><span class="string">&#x27;&#x27;</span>) <span class="keyword">where</span> detail <span class="keyword">like</span> <span class="keyword">like</span> <span class="string">&#x27;%img-test.abc.com%&#x27;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag"># 环境配置</a>
+          
+            <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+          
+            <a href="/tags/FastDFS/" rel="tag"># FastDFS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/11/spring-boot-html/" rel="next" title="「Spring」SpringBoot Thymeleaf页面静态化实现">
+                <i class="fa fa-chevron-left"></i> 「Spring」SpringBoot Thymeleaf页面静态化实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/10/env-mq-rocketmq/" rel="prev" title="「环境配置」RocketMQ安装并整合SpringBoot">
+                「环境配置」RocketMQ安装并整合SpringBoot <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

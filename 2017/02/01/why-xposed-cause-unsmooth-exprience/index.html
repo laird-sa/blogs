@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,Xposed,卡顿," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="经常有人说 Xposed 会带来卡顿的操作体验，甚至会引起掉帧等糟糕的后果。所以我再一次阅读完 Xposed  的文档以后，希望能用通俗的方式做一个回答。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为什么安装 Xposed 以后会导致卡顿">
+<meta property="og:url" content="https://www.resonanat.com/2017/02/01/why-xposed-cause-unsmooth-exprience/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="经常有人说 Xposed 会带来卡顿的操作体验，甚至会引起掉帧等糟糕的后果。所以我再一次阅读完 Xposed  的文档以后，希望能用通俗的方式做一个回答。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-02-01T15:55:12.000Z">
+<meta property="article:modified_time" content="2017-02-01T15:55:12.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Xposed">
+<meta property="article:tag" content="卡顿">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/02/01/why-xposed-cause-unsmooth-exprience/"/>
+
+
+
+
+
+  <title>为什么安装 Xposed 以后会导致卡顿 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/02/01/why-xposed-cause-unsmooth-exprience/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">为什么安装 Xposed 以后会导致卡顿</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-02-01T23:55:12+08:00">
+                2017-02-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>经常有人说 Xposed 会带来卡顿的操作体验，甚至会引起掉帧等糟糕的后果。所以我再一次阅读完 Xposed  的文档以后，希望能用<strong>通俗的方式</strong>做一个回答。</p>
+<span id="more"></span>
+
+<p>Xposed 的工作原理我在<a target="_blank" rel="noopener" href="https://blog.neofelhz.space/archives/forcestopgb-lieying-brevent.html">《阻止运行、猎鹰网络、黑域 始末》</a>一文中介绍 Xposed Moudule 的权限时做了简单介绍。这里我再详细地说一遍：</p>
+<blockquote>
+<p>Xposed 的工作原理是通过替换或劫持 <code>/system/bin/app_process</code> 控制 <code>zygote</code>（而 <code>zygote</code> 孵化了所有应用的进程，可以形象地称之为“进程之母”），使 <code>app_process</code> 在启动过程中加载 Xposed 的重要部分 <code>XposedBridge.jar</code>，这一段 Java 包含了所有的劫持方法，从而完成对 <code>Zygote</code> 进程及其创建的 <code>Dalvik 虚拟机</code> 的劫持，Xposed 在开机的时候利用 <code>XposedBridge.jar</code> 完成在原 Function 执行的前后加上自定义代码的操作，从而完成所有的 Hook Functions。</p>
+</blockquote>
+<p>在 Android L 时，Xposed 是通过劫持 <code>app_process</code> 来达到 hook 的目的。到了 Android M，谷歌再一次加强了系统安全性，加强了对系统底层（主要是框架 framework）的封装。所以为了实现 hook，就不得不修改 ART（Android Run Time，Android 虚拟机执行进程的方式），从而对 app_process 提供接口。这就是为什么当时 Android L 和 M 的 Xposed 憋了老久才放出来的原因。当然这一次 Android N 的 Xposed 迟迟不出来原因主要是系统安全性的增强和由于系统分区加固而可能需要另辟蹊径 Systemless 的缘故。</p>
+<p>说了这么多，还没有说 <code>hook</code> 是什么东西。<code>hook</code>，钩子的意思。那么这个钩子拿来钩什么东西？（反正不是鱼）实际上，钩子钩的是资源，进程调用的资源。让系统本来从 APP 中读取的资源重定向到第三方的模块，这样就实现了在不修改 APP 的情况下实现了对系统资源、APP 资源的替换！从 Zygote 产生出进程开始就已经完成了劫持。这里就和模块有关了。Xposed 提供了一系列钩子，这些钩子就是接口。开发 Xposed 模块的开发者只需要找到需要替换的资源、框架，用 Xposed 的钩子实现替换即可。</p>
+<blockquote>
+<p>为什么钩子可以实现这个？因为 APK 在运行时会进入虚拟机（Dalvik 或者 ART），然而你在虚拟机里面劫持了原本的 Java API，制作了一个新的可供操作的 API，当然可以实现资源替换、字节码替换了。</p>
+</blockquote>
+<p>那么 Xposed 到底消耗不消耗系统的性能？</p>
+<p>Android L 以后，Xposed 会在标准的运行 <code>zygote</code> 进程的基础上制作一个新的 带有 Xpsed API 的 运行环境。所以在没有用到 Xposed 的地方，原来怎么运行的程序依然按原来的方式运行。Xposed 只有在应用启动时会根据钩子执行一些替换工作。这部分执行得是非常快的，所以你是不会意识到应用启动速度的差别的，而且这部分占用的内存是很少的。这就是为什么一些改动需要重启才能生效的原因了。所以说，单纯刷入 Xposed，是并不会引起系统卡顿的。</p>
+<p>那么为什么 Xposed 会使用户觉得卡顿了呢？当 hook 没有启用时，系统是几乎无影响的。但是你一旦安装了模块以后，hook 开始发挥作用，然后开始替换系统资源为模块自己的代码（排除流氓终结者、核心破解、XPrivacy 这类仅仅篡改了返回值的模块），比如重力工具箱要 hook 系统 Framework 和 SystemUI 的资源。而且，重力工具箱要修改的地方要更底层一些，这样才能实现不重启实时完成切换切换并生效（XnubiaUI 模块，相当于 nubiaUI 上的重力工具箱，也是对 nubiaUI 的功能、界面进行调整的 Xposed 模块，它就没有做实时生效）。在这样的设计中，相当于一次要启用大量钩子随时调用，那么在 UI 层面就有大量改动需要用到钩子。于是在这些调用中，执行速度受到了一些影响。</p>
+<hr>
+<p>总结：单单安装 Xposed 是不会引起卡顿的，影响运行速度的并不是完全在于模块多少。是否影响卡顿取决于模块的功能本身，越需要经常 hook 替换资源的模块、需要替换大量资源的模块、hook 越接近系统底层的模块，最容易拖慢运行速度。此外，模块的功能实现设计、代码写得是否优雅等，都会影响到运行速度。此外，在目前富余的性能配置面前，Xposed 带来的系统卡顿固然不可忽略，但是一般人感觉是不会太明显的。更何况，在国内 BAT 毒瘤滥用广播接收器、毒瘤后台服务面前，我们还是使用 Xposed 模块来镇压毒瘤显得更为合适——不然造成的卡顿不是 Xposed Hook 所能够比拟的。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Xposed/" rel="tag"># Xposed</a>
+          
+            <a href="/tags/%E5%8D%A1%E9%A1%BF/" rel="tag"># 卡顿</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/31/open-source-in-china/" rel="next" title="从应用“妮乎”不遵守开源协议谈谈我国开源的现状">
+                <i class="fa fa-chevron-left"></i> 从应用“妮乎”不遵守开源协议谈谈我国开源的现状
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/11/coolapk-in-my-mind/" rel="prev" title="是时候离开了——我眼中的酷安">
+                是时候离开了——我眼中的酷安 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

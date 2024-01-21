@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端开发,安全认证,SpringSecurity,Permissions," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="实现按钮级别的权限控制，基于上一篇Spring Secuirty（六）前后端分离菜单权限控制-前端动态路由的扩展。前端部分还是基于vue-element-admin模板来演示。 这里实现按钮级别的权限判断的逻辑：每个按钮对应一个权限标识，后台根据用户角色计算出当前用户可访问的权限标识列表，前端登录后得到权限标识列表存入全局，通过单个按钮的权限标识去匹配列表里的。来实现按钮级别的权限判断。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Spring Security」前后端分离权限控制-指令级权限">
+<meta property="og:url" content="https://www.resonanat.com/2021/12/30/spring-security-permission/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="实现按钮级别的权限控制，基于上一篇Spring Secuirty（六）前后端分离菜单权限控制-前端动态路由的扩展。前端部分还是基于vue-element-admin模板来演示。 这里实现按钮级别的权限判断的逻辑：每个按钮对应一个权限标识，后台根据用户角色计算出当前用户可访问的权限标识列表，前端登录后得到权限标识列表存入全局，通过单个按钮的权限标识去匹配列表里的。来实现按钮级别的权限判断。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/up-584b8affd5e003dbb50e53f100779ae49c9.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-3304cdd327e2f4f01862531203ae17bfa62.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-dde01457a309a26fc04f512830e18e71485.webp">
+<meta property="article:published_time" content="2021-12-30T04:28:00.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.591Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="安全认证">
+<meta property="article:tag" content="SpringSecurity">
+<meta property="article:tag" content="Permissions">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/up-584b8affd5e003dbb50e53f100779ae49c9.webp">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2021/12/30/spring-security-permission/"/>
+
+
+
+
+
+  <title>「Spring Security」前后端分离权限控制-指令级权限 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2021/12/30/spring-security-permission/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Spring Security」前后端分离权限控制-指令级权限</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-12-30T12:28:00+08:00">
+                2021-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" itemprop="url" rel="index">
+                    <span itemprop="name">安全认证</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>实现按钮级别的权限控制，基于上一篇<a target="_blank" rel="noopener" href="https://my.oschina.net/chaoo/blog/5380267">Spring Secuirty（六）前后端分离菜单权限控制-前端动态路由</a>的扩展。<br>前端部分还是基于<a target="_blank" rel="noopener" href="https://panjiachen.github.io/vue-element-admin-site/zh/">vue-element-admin</a>模板来演示。</p>
+<p>这里实现按钮级别的权限判断的逻辑：每个按钮对应一个<code>权限标识</code>，后台根据用户角色计算出当前用户可访问的<code>权限标识</code>列表，前端登录后得到<code>权限标识</code>列表存入全局，通过单个按钮的<code>权限标识</code>去匹配列表里的。来实现按钮级别的权限判断。<span id="more"></span></p>
+<h3 id="1-数据库添加权限表"><a href="#1-数据库添加权限表" class="headerlink" title="1. 数据库添加权限表"></a>1. 数据库添加权限表</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 系统权限表</span></span><br><span class="line"> <span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `system_permission`;</span><br><span class="line"> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `system_permission` (</span><br><span class="line">  `id` <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;ID&#x27;</span>,</span><br><span class="line">  `menu_id` <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;菜单ID&#x27;</span>,</span><br><span class="line">  `name` <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限标识&#x27;</span>,</span><br><span class="line">  `title` <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限名称&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line"> ) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>UTF8MB4 COMMENT<span class="operator">=</span><span class="string">&#x27;系统权限表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> <span class="comment">-- 权限&amp;角色 关联表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `system_role_permission`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `system_role_permission` (</span><br><span class="line">  `id` <span class="type">BIGINT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `role_id` <span class="type">BIGINT</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;角色ID&#x27;</span>,</span><br><span class="line">  `permission_id` <span class="type">BIGINT</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限ID&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>UTF8MB4 COMMENT<span class="operator">=</span><span class="string">&#x27;系统角色权限关联表&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-前端代码改造"><a href="#2-前端代码改造" class="headerlink" title="2. 前端代码改造"></a>2. 前端代码改造</h3><p>登录后通过接口直接返回用户可访问指令级权限列表：<br><img src="/up-584b8affd5e003dbb50e53f100779ae49c9.webp"></p>
+<p><a target="_blank" rel="noopener" href="https://panjiachen.github.io/vue-element-admin-site/zh/">vue-element-admin</a>模板已经封装了一个通过角色来判断的指令权限：<a target="_blank" rel="noopener" href="https://github.com/PanJiaChen/vue-element-admin/tree/master/src/directive/permission">v-permission</a>。</p>
+<p>这里需要修改其逻辑：</p>
+<h4 id="2-1-全局state中添加permissions列表"><a href="#2-1-全局state中添加permissions列表" class="headerlink" title="2.1 全局state中添加permissions列表"></a>2.1 全局<code>state</code>中添加<code>permissions</code>列表</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ---------------- state 中添加 permissions</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * src\store\modules\user.js</span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line"><span class="comment">// ... other code</span></span><br><span class="line"><span class="keyword">const</span> state = &#123;</span><br><span class="line">    <span class="attr">token</span>: <span class="title function_">getToken</span>(),</span><br><span class="line">    <span class="attr">username</span>: <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">    <span class="attr">roles</span>: [],</span><br><span class="line">    <span class="attr">menus</span>: [],</span><br><span class="line">    <span class="attr">permissions</span>: [],</span><br><span class="line">    <span class="comment">// ... other code</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> mutations = &#123;</span><br><span class="line">    <span class="attr">SET_TOKEN</span>: <span class="function">(<span class="params">state, token</span>) =&gt;</span> &#123;</span><br><span class="line">    state.<span class="property">token</span> = token</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">SET_PERMISSIONS</span>: <span class="function">(<span class="params">state, permissions</span>) =&gt;</span> &#123;</span><br><span class="line">      state.<span class="property">permissions</span> = permissions</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">// ... other code</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> actions = &#123;</span><br><span class="line">  <span class="comment">// user login</span></span><br><span class="line">  <span class="title function_">login</span>(<span class="params">&#123; commit &#125;, userInfo</span>) &#123;</span><br><span class="line">    <span class="comment">// ... other code</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// get user info</span></span><br><span class="line">  <span class="title function_">getInfo</span>(<span class="params">&#123; commit, state &#125;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="title function_">getInfo</span>()</span><br><span class="line">        .<span class="title function_">then</span>(<span class="function"><span class="params">response</span> =&gt;</span> &#123;</span><br><span class="line">          <span class="keyword">const</span> &#123; data &#125; = response</span><br><span class="line">          <span class="keyword">if</span> (!data) &#123;</span><br><span class="line">            <span class="title function_">reject</span>(<span class="string">&#x27;Verification failed, please Login again.&#x27;</span>)</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">const</span> &#123; roles, menus, permissions, id, username, avatar, roleDesc, fullName, phone &#125; = data</span><br><span class="line">          <span class="comment">// roles must be a non-empty array</span></span><br><span class="line">          <span class="keyword">if</span> (!roles || roles.<span class="property">length</span> &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="title function_">reject</span>(<span class="string">&#x27;getInfo: roles must be a non-null array!&#x27;</span>)</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_ROLES&#x27;</span>, roles)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_MENUS&#x27;</span>, menus)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_PERMISSIONS&#x27;</span>, permissions)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_USERID&#x27;</span>, id)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_USERNAME&#x27;</span>, username)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_AVATAR&#x27;</span>, avatar)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_ROLEDESC&#x27;</span>, roleDesc)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_FULLNAME&#x27;</span>, fullName)</span><br><span class="line">          <span class="title function_">commit</span>(<span class="string">&#x27;SET_PHONE&#x27;</span>, phone)</span><br><span class="line">          <span class="title function_">resolve</span>(data)</span><br><span class="line">        &#125;)</span><br><span class="line">        .<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">          <span class="title function_">reject</span>(error)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">// user logout</span></span><br><span class="line">  <span class="title function_">logout</span>(<span class="params">&#123; commit, state, dispatch &#125;</span>) &#123;</span><br><span class="line">    <span class="comment">// ... other code</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// ... other code</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">namespaced</span>: <span class="literal">true</span>,</span><br><span class="line">  state,</span><br><span class="line">  mutations,</span><br><span class="line">  actions</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ---------------- getters 中添加 permissions</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * src\store\getters.js</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> getters = &#123;</span><br><span class="line">  <span class="comment">// ... other code</span></span><br><span class="line">  <span class="attr">permissions</span>: <span class="function"><span class="params">state</span> =&gt;</span> state.<span class="property">user</span>.<span class="property">permissions</span>,</span><br><span class="line">  <span class="comment">// ... other code</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> getters</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-重写全局v-permission指令逻辑"><a href="#2-2-重写全局v-permission指令逻辑" class="headerlink" title="2.2 重写全局v-permission指令逻辑"></a>2.2 重写全局<code>v-permission</code>指令逻辑</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * src\directive\permission\permission.js</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&#x27;@/store&#x27;</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">checkPermission</span>(<span class="params">el, binding</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; value &#125; = binding</span><br><span class="line">  <span class="keyword">if</span> (value &amp;&amp; value.<span class="property">length</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> permissions = store.<span class="property">getters</span> &amp;&amp; store.<span class="property">getters</span>.<span class="property">permissions</span></span><br><span class="line">    <span class="keyword">const</span> permissionButton = value</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> hasPermission = permissions.<span class="property">length</span> &gt; <span class="number">0</span> &amp;&amp; permissions.<span class="title function_">some</span>(<span class="function"><span class="params">permission</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> permission === permissionButton</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">if</span> (!hasPermission) &#123;</span><br><span class="line">      el.<span class="property">parentNode</span> &amp;&amp; el.<span class="property">parentNode</span>.<span class="title function_">removeChild</span>(el)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">`need permissions! Like v-permission=&quot;sys:menu:edit&quot;`</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="title function_">inserted</span>(<span class="params">el, binding</span>) &#123;</span><br><span class="line">    <span class="title function_">checkPermission</span>(el, binding)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="title function_">update</span>(<span class="params">el, binding</span>) &#123;</span><br><span class="line">    <span class="title function_">checkPermission</span>(el, binding)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-重新checkPermission权限判断函数逻辑"><a href="#2-3-重新checkPermission权限判断函数逻辑" class="headerlink" title="2.3 重新checkPermission权限判断函数逻辑"></a>2.3 重新<code>checkPermission</code>权限判断函数逻辑</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * src\utils\permission.js</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&#x27;@/store&#x27;</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> &#123;<span class="type">String</span>&#125; <span class="variable">value</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span> &#123;<span class="type">Boolean</span>&#125;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@example</span> see @/views/permission/directive.vue</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="title function_">checkPermission</span>(<span class="params">value</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (value &amp;&amp; value.<span class="property">length</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> permissions = store.<span class="property">getters</span> &amp;&amp; store.<span class="property">getters</span>.<span class="property">permissions</span></span><br><span class="line">    <span class="keyword">const</span> permissionButton = value</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> hasPermission = permissions.<span class="property">length</span> &gt; <span class="number">0</span> &amp;&amp; permissions.<span class="title function_">some</span>(<span class="function"><span class="params">permission</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> permission === permissionButton</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> hasPermission</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">`need permissions! Like v-permission=&quot;sys:menu:edit&quot;`</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="3-使用指令级权限"><a href="#3-使用指令级权限" class="headerlink" title="3. 使用指令级权限"></a>3. 使用指令级权限</h3><p>使用<code>v-permission</code>指令</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- menu delete permission can see this --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">el-tag</span> <span class="attr">v-permission</span>=<span class="string">&quot;&#x27;sys:menu:del&#x27;&quot;</span>&gt;</span>delete<span class="tag">&lt;/<span class="name">el-tag</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- menu edit permission can see this --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">el-tag</span> <span class="attr">v-permission</span>=<span class="string">&quot;&#x27;sys:menu:edit&#x27;&quot;</span>&gt;</span>edit<span class="tag">&lt;/<span class="name">el-tag</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"><span class="keyword">import</span> permission <span class="keyword">from</span> <span class="string">&#x27;@/directive/permission/index.js&#x27;</span></span></span><br><span class="line"><span class="language-javascript"><span class="keyword">export</span> <span class="keyword">default</span>&#123;</span></span><br><span class="line"><span class="language-javascript">  <span class="attr">directives</span>: &#123; permission &#125;</span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用<code>checkPermission</code>函数</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- menu delete permission can see this --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">el-tag</span> <span class="attr">v-if</span>=<span class="string">&quot;checkPermission(&#x27;sys:menu:del&#x27;)&quot;</span>&gt;</span>delete<span class="tag">&lt;/<span class="name">el-tag</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- menu edit permission can see this --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">el-tag</span> <span class="attr">v-if</span>=<span class="string">&quot;checkPermission(&#x27;sys:menu:edit&#x27;)&quot;</span>&gt;</span>edit<span class="tag">&lt;/<span class="name">el-tag</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"><span class="keyword">import</span> checkPermission <span class="keyword">from</span> <span class="string">&#x27;@/utils/permission&#x27;</span></span></span><br><span class="line"><span class="language-javascript"><span class="keyword">export</span> <span class="keyword">default</span>&#123;</span></span><br><span class="line"><span class="language-javascript">   <span class="attr">methods</span>: &#123;</span></span><br><span class="line"><span class="language-javascript">    checkPermission</span></span><br><span class="line"><span class="language-javascript">   &#125;</span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="4-添加按钮权限，与菜单-按钮对角色授权演示"><a href="#4-添加按钮权限，与菜单-按钮对角色授权演示" class="headerlink" title="4. 添加按钮权限，与菜单&#x2F;按钮对角色授权演示"></a>4. 添加按钮权限，与菜单&#x2F;按钮对角色授权演示</h3><p>菜单中添加按钮的权限演示<br><img src="/up-3304cdd327e2f4f01862531203ae17bfa62.webp"></p>
+<p>菜单&#x2F;按钮对角色授权演示<br><img src="/up-dde01457a309a26fc04f512830e18e71485.webp"></p>
+<p>完整代码请查看源码：</p>
+<blockquote>
+<p>源码地址：<a target="_blank" rel="noopener" href="https://github.com/chaooo/spring-security-jwt.git">https://github.com/chaooo/spring-security-jwt.git</a>,<br>这里我将本文的前后端分离后台菜单权限控制放在github源码tag的V5.0中，防止后续修改后代码对不上。</p>
+</blockquote>
+<h3 id="附：当前实例完整SQL"><a href="#附：当前实例完整SQL" class="headerlink" title="附：当前实例完整SQL"></a>附：当前实例完整SQL</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 系统用户表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_user`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_user` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;用户ID&#x27;</span>,</span><br><span class="line">  `username` <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;用户名&#x27;</span>,</span><br><span class="line">  `password` <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;密码&#x27;</span>,</span><br><span class="line">  `avatar` <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">DEFAULT</span> <span class="string">&#x27;https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif&#x27;</span> COMMENT <span class="string">&#x27;头像&#x27;</span>,</span><br><span class="line">  `fullName` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;姓名&#x27;</span>,</span><br><span class="line">  `phone` <span class="type">varchar</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;电话&#x27;</span>,</span><br><span class="line">  `login_flag` <span class="type">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;是否阻止登录：0否，其他是&#x27;</span>,</span><br><span class="line">  `create_time` datetime <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">  `update_time` datetime <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;更新时间&#x27;</span>,</span><br><span class="line">  `del_flag` <span class="type">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;删除标记：0未删，其他删除&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`),</span><br><span class="line">  <span class="keyword">UNIQUE</span> KEY `username` (`username`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8 COMMENT<span class="operator">=</span><span class="string">&#x27;系统用户表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 系统角色表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_role`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_role` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;角色ID&#x27;</span>,</span><br><span class="line">  `role_name` <span class="type">varchar</span>(<span class="number">50</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;角色名称&#x27;</span>,</span><br><span class="line">  `role_desc` <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;描述&#x27;</span>,</span><br><span class="line">  `create_time` datetime <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">  `update_time` datetime <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;更新时间&#x27;</span>,</span><br><span class="line">  `del_flag` <span class="type">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;删除标记：0未删，其他删除&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`),</span><br><span class="line">  <span class="keyword">UNIQUE</span> KEY `role_name` (`role_name`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8 COMMENT<span class="operator">=</span><span class="string">&#x27;系统角色表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 系统菜单表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_menu`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_menu` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;菜单ID&#x27;</span>,</span><br><span class="line">  `title` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;菜单名称&#x27;</span>,</span><br><span class="line">  `name` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;路由名称(前端匹配路由用)&#x27;</span>,</span><br><span class="line">  `icon` <span class="type">varchar</span>(<span class="number">50</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;图标&#x27;</span>,</span><br><span class="line">  `parent_id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;父级菜单Id&#x27;</span>,</span><br><span class="line">  `hidden` <span class="type">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;隐藏状态：0显示，1隐藏&#x27;</span>,</span><br><span class="line">  `status` <span class="type">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;状态：0启用，1停用&#x27;</span>,</span><br><span class="line">  `sort` <span class="type">int</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;排序&#x27;</span>,</span><br><span class="line">  `create_time` datetime <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">  `update_time` datetime <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;更新时间&#x27;</span>,</span><br><span class="line">  `del_flag` <span class="type">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span> COMMENT <span class="string">&#x27;删除标记：0未删，其他删除&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`),</span><br><span class="line">  <span class="keyword">UNIQUE</span> KEY `name` (`name`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8 COMMENT<span class="operator">=</span><span class="string">&#x27;系统菜单表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 系统权限表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_permission`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_permission` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="string">&#x27;ID&#x27;</span>,</span><br><span class="line">  `menu_id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;菜单ID&#x27;</span>,</span><br><span class="line">  `name` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限标识&#x27;</span>,</span><br><span class="line">  `title` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限名称&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4 <span class="keyword">COLLATE</span><span class="operator">=</span>utf8mb4_0900_ai_ci COMMENT<span class="operator">=</span><span class="string">&#x27;系统权限表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"> <span class="comment">-- 权限&amp;角色 关联表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_role_permission`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_role_permission` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `role_id` <span class="type">bigint</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;角色ID&#x27;</span>,</span><br><span class="line">  `permission_id` <span class="type">bigint</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限ID&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>UTF8MB4 COMMENT<span class="operator">=</span><span class="string">&#x27;系统角色权限关联表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 用户&amp;角色 关联表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_role_user`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_role_user` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `role_id` <span class="type">bigint</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;角色ID&#x27;</span>,</span><br><span class="line">  `user_id` <span class="type">bigint</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;用户ID&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>UTF8MB4 COMMENT<span class="operator">=</span><span class="string">&#x27;系统用户角色关联表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 菜单&amp;角色 关联表</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> IF <span class="keyword">EXISTS</span> `sys_role_menu`;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `sys_role_menu` (</span><br><span class="line">  `id` <span class="type">bigint</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `role_id` <span class="type">bigint</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;角色ID&#x27;</span>,</span><br><span class="line">  `menu_id` <span class="type">bigint</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;菜单ID&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>UTF8MB4 COMMENT<span class="operator">=</span><span class="string">&#x27;系统角色菜单关联表&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 初始数据</span></span><br><span class="line"><span class="keyword">INSERT</span>  <span class="keyword">INTO</span> `sys_user`(`id`,`username`,`password`,`create_time`) <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">&#x27;sysadmin&#x27;</span>,<span class="string">&#x27;$2a$10$Ml/uEJ5BnUSdKspYM4vkneUHM0piXyAVU0aueWya/v7FBauz6XWE6&#x27;</span>,NOW());</span><br><span class="line"><span class="keyword">INSERT</span>  <span class="keyword">INTO</span> `sys_role`(`id`,`role_name`,`role_desc`,`create_time`) <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">&#x27;admin&#x27;</span>,<span class="string">&#x27;管理员&#x27;</span>,NOW());</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `sys_menu` (`id`, `title`, `name`, `icon`, `parent_id`, `hidden`, `create_time`)</span><br><span class="line"><span class="keyword">VALUES</span>  (<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;系统设置&#x27;</span>,<span class="string">&#x27;SysSetting&#x27;</span>,<span class="string">&#x27;el-icon-s-tools&#x27;</span>,<span class="string">&#x27;0&#x27;</span>,<span class="string">&#x27;0&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;菜单管理&#x27;</span>,<span class="string">&#x27;SysMenus&#x27;</span>,<span class="string">&#x27;el-icon-menu&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;0&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;角色管理&#x27;</span>,<span class="string">&#x27;SysRoles&#x27;</span>,<span class="string">&#x27;peoples&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;0&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;用户管理&#x27;</span>,<span class="string">&#x27;SysUsers&#x27;</span>,<span class="string">&#x27;user&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;0&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;5&#x27;</span>,<span class="string">&#x27;系统图标&#x27;</span>,<span class="string">&#x27;SysIcons&#x27;</span>,<span class="string">&#x27;el-icon-picture&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,<span class="string">&#x27;0&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;6&#x27;</span>,<span class="string">&#x27;菜单列表&#x27;</span>,<span class="string">&#x27;SysMenuList&#x27;</span>,<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;7&#x27;</span>,<span class="string">&#x27;菜单编辑&#x27;</span>,<span class="string">&#x27;SysMenuEdit&#x27;</span>,<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;2&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;8&#x27;</span>,<span class="string">&#x27;角色列表&#x27;</span>,<span class="string">&#x27;SysRoleList&#x27;</span>,<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;9&#x27;</span>,<span class="string">&#x27;角色编辑&#x27;</span>,<span class="string">&#x27;SysRoleEdit&#x27;</span>,<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;3&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;10&#x27;</span>,<span class="string">&#x27;用户列表&#x27;</span>,<span class="string">&#x27;SysUserList&#x27;</span>,<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;11&#x27;</span>,<span class="string">&#x27;用户编辑&#x27;</span>,<span class="string">&#x27;SysUserEdit&#x27;</span>,<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;4&#x27;</span>,<span class="string">&#x27;1&#x27;</span>,NOW()),</span><br><span class="line">        (<span class="string">&#x27;12&#x27;</span>,<span class="string">&#x27;其他菜单&#x27;</span>,<span class="string">&#x27;Other&#x27;</span>,<span class="string">&#x27;bug&#x27;</span>,<span class="number">0</span>,<span class="string">&#x27;0&#x27;</span>,NOW());</span><br><span class="line"><span class="keyword">INSERT</span>  <span class="keyword">INTO</span> `sys_permission`(`id`,`menu_id`,`name`,`title`) <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="number">6</span>,<span class="string">&#x27;sys:menu:edit&#x27;</span>,<span class="string">&#x27;编辑&#x27;</span>),(<span class="number">2</span>,<span class="number">6</span>,<span class="string">&#x27;sys:menu:del&#x27;</span>,<span class="string">&#x27;删除&#x27;</span>),(<span class="number">3</span>,<span class="number">8</span>,<span class="string">&#x27;sys:role:edit&#x27;</span>,<span class="string">&#x27;编辑&#x27;</span>),(<span class="number">4</span>,<span class="number">8</span>,<span class="string">&#x27;sys:role:del&#x27;</span>,<span class="string">&#x27;删除&#x27;</span>),(<span class="number">5</span>,<span class="number">10</span>,<span class="string">&#x27;sys:user:edit&#x27;</span>,<span class="string">&#x27;编辑&#x27;</span>),(<span class="number">6</span>,<span class="number">10</span>,<span class="string">&#x27;sys:user:del&#x27;</span>,<span class="string">&#x27;删除&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `sys_role_user`(`user_id`, `role_id`) <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `sys_role_menu`(`role_id`, `menu_id`) <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="number">1</span>),(<span class="number">1</span>, <span class="number">2</span>),(<span class="number">1</span>, <span class="number">3</span>),(<span class="number">1</span>, <span class="number">4</span>),(<span class="number">1</span>, <span class="number">5</span>),(<span class="number">1</span>, <span class="number">6</span>),(<span class="number">1</span>, <span class="number">7</span>),(<span class="number">1</span>, <span class="number">8</span>),(<span class="number">1</span>, <span class="number">9</span>),(<span class="number">1</span>, <span class="number">10</span>),(<span class="number">1</span>, <span class="number">11</span>),(<span class="number">1</span>, <span class="number">12</span>);</span><br><span class="line"><span class="keyword">INSERT</span>  <span class="keyword">INTO</span> `sys_role_permission`(`id`,`role_id`,`permission_id`) <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>),(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>),(<span class="number">3</span>,<span class="number">1</span>,<span class="number">3</span>),(<span class="number">4</span>,<span class="number">1</span>,<span class="number">4</span>),(<span class="number">5</span>,<span class="number">1</span>,<span class="number">5</span>),(<span class="number">6</span>,<span class="number">1</span>,<span class="number">6</span>);</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag"># 后端开发</a>
+          
+            <a href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" rel="tag"># 安全认证</a>
+          
+            <a href="/tags/SpringSecurity/" rel="tag"># SpringSecurity</a>
+          
+            <a href="/tags/Permissions/" rel="tag"># Permissions</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/12/27/spring-security-vue/" rel="next" title="「Spring Security」前后端分离菜单权限控制-前端动态路由">
+                <i class="fa fa-chevron-left"></i> 「Spring Security」前后端分离菜单权限控制-前端动态路由
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/02/26/data-structure-complexity/" rel="prev" title="「数据结构与算法」复杂度分析">
+                「数据结构与算法」复杂度分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%B7%BB%E5%8A%A0%E6%9D%83%E9%99%90%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">1. 数据库添加权限表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%89%8D%E7%AB%AF%E4%BB%A3%E7%A0%81%E6%94%B9%E9%80%A0"><span class="nav-number">2.</span> <span class="nav-text">2. 前端代码改造</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E5%85%A8%E5%B1%80state%E4%B8%AD%E6%B7%BB%E5%8A%A0permissions%E5%88%97%E8%A1%A8"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 全局state中添加permissions列表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E9%87%8D%E5%86%99%E5%85%A8%E5%B1%80v-permission%E6%8C%87%E4%BB%A4%E9%80%BB%E8%BE%91"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 重写全局v-permission指令逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E9%87%8D%E6%96%B0checkPermission%E6%9D%83%E9%99%90%E5%88%A4%E6%96%AD%E5%87%BD%E6%95%B0%E9%80%BB%E8%BE%91"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 重新checkPermission权限判断函数逻辑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BD%BF%E7%94%A8%E6%8C%87%E4%BB%A4%E7%BA%A7%E6%9D%83%E9%99%90"><span class="nav-number">3.</span> <span class="nav-text">3. 使用指令级权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%B7%BB%E5%8A%A0%E6%8C%89%E9%92%AE%E6%9D%83%E9%99%90%EF%BC%8C%E4%B8%8E%E8%8F%9C%E5%8D%95-%E6%8C%89%E9%92%AE%E5%AF%B9%E8%A7%92%E8%89%B2%E6%8E%88%E6%9D%83%E6%BC%94%E7%A4%BA"><span class="nav-number">4.</span> <span class="nav-text">4. 添加按钮权限，与菜单&#x2F;按钮对角色授权演示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%84%EF%BC%9A%E5%BD%93%E5%89%8D%E5%AE%9E%E4%BE%8B%E5%AE%8C%E6%95%B4SQL"><span class="nav-number">5.</span> <span class="nav-text">附：当前实例完整SQL</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

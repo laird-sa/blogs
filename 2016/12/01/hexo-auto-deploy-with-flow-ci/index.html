@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo,持续集成,CI,Flow.CI," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Flow.CI 是一个由著名移动应用公测平台 Fir.im 推出的持续集成（CI）的 saas 服务平台，感觉就是中国的 Travis.CI，作用是把你 Github 或者 Coding 上的代码拉过来，通过容器技术自动化完成代码的构建、测试、交付和部署。整个对 Flow.CI 使用下来的感受就是简洁和美观，配置方便，速度很快。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 Flow.CI 让 Hexo 持续集成">
+<meta property="og:url" content="https://www.resonanat.com/2016/12/01/hexo-auto-deploy-with-flow-ci/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="Flow.CI 是一个由著名移动应用公测平台 Fir.im 推出的持续集成（CI）的 saas 服务平台，感觉就是中国的 Travis.CI，作用是把你 Github 或者 Coding 上的代码拉过来，通过容器技术自动化完成代码的构建、测试、交付和部署。整个对 Flow.CI 使用下来的感受就是简洁和美观，配置方便，速度很快。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000035.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000036.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000037.png">
+<meta property="article:published_time" content="2016-12-01T05:40:16.000Z">
+<meta property="article:modified_time" content="2016-12-01T05:40:16.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="持续集成">
+<meta property="article:tag" content="CI">
+<meta property="article:tag" content="Flow.CI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000035.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/12/01/hexo-auto-deploy-with-flow-ci/"/>
+
+
+
+
+
+  <title>用 Flow.CI 让 Hexo 持续集成 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/01/hexo-auto-deploy-with-flow-ci/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">用 Flow.CI 让 Hexo 持续集成</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-01T13:40:16+08:00">
+                2016-12-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a target="_blank" rel="noopener" href="https://flow.ci/">Flow.CI</a> 是一个由著名移动应用公测平台 <a target="_blank" rel="noopener" href="https://fir.im/">Fir.im</a> 推出的持续集成（CI）的 saas 服务平台，感觉就是中国的 Travis.CI，作用是把你 Github 或者 Coding 上的代码拉过来，通过容器技术自动化完成代码的构建、测试、交付和部署。整个对 Flow.CI 使用下来的感受就是简洁和美观，配置方便，速度很快。</p>
+<span id="more"></span>
+
+<p>虽然内测阶段我没有拿到邀请码，但是我至少参加了公测。<del>目前 Flow.CI 依然在公测，所以依旧免费</del>公测早就结束了，现在要付费了。<br>跟 Daocloud 的代码构建相比，Flow.CI 是更纯粹的持续集成&#x2F;部署平台。</p>
+<h1 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h1><ul>
+<li>关闭 Daocloud 持续集成功能</li>
+<li>配置 Flow.CI 持续集成</li>
+<li>增加触发器</li>
+<li>在本地提交 Hexo 主项目修改的<code>git commit</code>进行测试。</li>
+</ul>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>如果之前用的是 Daocloud 的持续集成服务，首先是禁用 Daocloud 的持续集成，在 Daocloud 的控制台关掉持续集成。<br>如果以后再也不用 Daocloud 了，那么建议你把<code>daocloud.yml</code>和<code>dockerfile</code>两个文件删除。虽然不删除也不影响部署，但是这两个配置文件并没有起任何作用。</p>
+<h1 id="创建持续集成项目"><a href="#创建持续集成项目" class="headerlink" title="创建持续集成项目"></a>创建持续集成项目</h1><p>这一步很简单，按照 Flow.CI 控制台里面的按钮顺着点“创建项目”-&gt;选择 CODING 代码托管库-&gt;选择你的用户-&gt;选择你的项目。完成！</p>
+<p>这时 CODING 里面的项目会有两处变化：</p>
+<ul>
+<li>新增了 Flow.CI 的 webhook</li>
+<li>新增了项目下的部署公钥（只读）</li>
+</ul>
+<h1 id="创建并设置工作流"><a href="#创建并设置工作流" class="headerlink" title="创建并设置工作流"></a>创建并设置工作流</h1><p><img src="https://bbs-static.nfz.yecdn.com/i/0000035.png" alt="0000035.png"><br>接下来点击“创建你的第一个工作流”，开始设置部署流程。<br>由于Hexo的所需环境是Node.js，所以选择Node.js，版本选择最新的6.6.0。</p>
+<p>接下来就会进入到工作流定义界面。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000036.png" alt="0000036.png"></p>
+<h2 id="触发器"><a href="#触发器" class="headerlink" title="触发器"></a>触发器</h2><p>触发器自然是选择对所有分支的Push、对所有的Tag进行匹配。当然你也可以设置每天定时运行。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>保持默认即可，初始环境变量（Flow.CI提供）和Node.js的组件版本等信息。</p>
+<h2 id="Git-仓库克隆"><a href="#Git-仓库克隆" class="headerlink" title="Git 仓库克隆"></a>Git 仓库克隆</h2><p>保持默认即可，拉取你的仓库。</p>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>保持默认即可，使用缓存可以大大加快下一次部署的速度。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>保持默认即可。使用 <code>npm install</code> 指令安装依赖项，而安装的依赖项基于你仓库中的 <code>package.json</code></p>
+<h2 id="自定义脚本"><a href="#自定义脚本" class="headerlink" title="自定义脚本"></a>自定义脚本</h2><p>在左侧的工作流定义的“安装”与“测试”之间的 + 号，添加一个节点“自定义脚本”</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000037.png" alt="0000037.png"></p>
+<p>我们的脚本要执行的有：</p>
+<ul>
+<li>Hexo 命令行的安装</li>
+<li>Hexo 静态站点的生成和部署</li>
+</ul>
+<p>在这个节点输入以下脚本：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 Hexo 命令行工具</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;npm install hexo-cli -g&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="comment"># 准备并安装私钥</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;cp .daocloud/id_rsa .&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;chmod 600 ./id_rsa&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;eval $(ssh-agent)&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;ssh-add ./id_rsa&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="comment"># 执行 Hexo 生成和发布</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;hexo clean&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;hexo g&quot;</span> <span class="string">--echo</span></span><br><span class="line"><span class="string">flow_cmd</span> <span class="string">&quot;hexo d&quot;</span> <span class="string">--echo</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>在右上角把这个节点删除。我们不需要执行 <code>npm test</code>。</p>
+<h2 id="完成后"><a href="#完成后" class="headerlink" title="完成后"></a>完成后</h2><p>如果你打算让Flow.CI每次部署成功后都给你发邮件，可以在这里设置。默认会给你的注册时用的邮箱发邮件。</p>
+<h1 id="手动测试"><a href="#手动测试" class="headerlink" title="手动测试"></a>手动测试</h1><p>回到构建列表，点击手动构建，选择你的分支开始构建，之后会看到整个工作流的执行过程和日志信息（绿色为成功，蓝色为正在执行，灰色为等待，红色为停止或失败）。<br>然后写一篇博客（庆祝一下你配置了 Flow.CI 嘛），然后用 <code>git commit</code> 和 <code>git push</code> 推送到你的仓库，看一下你的Flow.CI是否开始了自动运行。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>本文介绍了从 Daocloud 进行持续集成&#x2F;部署改造为 Flow.CI 进行集成&#x2F;部署的过程，今后的使用和之前的方式一样，向仓库提交 push 就可以触发自动部署。<br>和 Daocloud 的代码构建相比，Flow.CI 的优点如下：</p>
+<ul>
+<li>更简单、直观的方式，更容易理解（但是并不像配置一个 yml 那样 Geek，对吧？）</li>
+<li><del>更加丰富的触发方式（比如支持正则表达式匹配 commit 信息）</del>其实这个优势并不明显</li>
+<li>方便地配置环境（而不需要像 Daocloud 一样，需要先生成一个带着 node.js 和 hexo 的 image，用来搭建一个 docker 作为运行环境）</li>
+<li>控制台界面比 Daocloud 要漂亮得多（美，才是驱动开发的第一生产力！）</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          
+            <a href="/tags/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/" rel="tag"># 持续集成</a>
+          
+            <a href="/tags/CI/" rel="tag"># CI</a>
+          
+            <a href="/tags/Flow-CI/" rel="tag"># Flow.CI</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/29/hexo-auto-deploy-with-daocloud/" rel="next" title="使用 DaoCloud 让 Hexo 持续集成">
+                <i class="fa fa-chevron-left"></i> 使用 DaoCloud 让 Hexo 持续集成
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/10/Node-part1/" rel="prev" title="Node第一部分-初体验">
+                Node第一部分-初体验 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%80%9D%E8%B7%AF"><span class="nav-number">1.</span> <span class="nav-text">基本思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E9%A1%B9%E7%9B%AE"><span class="nav-number">3.</span> <span class="nav-text">创建持续集成项目</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B9%B6%E8%AE%BE%E7%BD%AE%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="nav-number">4.</span> <span class="nav-text">创建并设置工作流</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91%E5%99%A8"><span class="nav-number">4.1.</span> <span class="nav-text">触发器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Git-%E4%BB%93%E5%BA%93%E5%85%8B%E9%9A%86"><span class="nav-number">4.3.</span> <span class="nav-text">Git 仓库克隆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98"><span class="nav-number">4.4.</span> <span class="nav-text">缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">4.5.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%84%9A%E6%9C%AC"><span class="nav-number">4.6.</span> <span class="nav-text">自定义脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">4.7.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%88%90%E5%90%8E"><span class="nav-number">4.8.</span> <span class="nav-text">完成后</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">手动测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

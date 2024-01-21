@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="javascript," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="步骤使用 JavaScript 实现拖拽的步骤：  让元素捕获事件（mousedown, mousemove &amp; mouseup） 单击并不释放，触发 mousedown，标记开始拖拽，并获取元素和鼠标的位置 拖动鼠标，触发 mousemove，不断的获取鼠标的位置，并通过计算重新确定元素的位置 释放师表，触发 mouseup，结束拖拽，确定元素位置并更新">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 JavaScript 实现简单的拖拽">
+<meta property="og:url" content="https://www.resonanat.com/2018/01/29/use-javascript-to-achieve-simple-drag-and-drop/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="步骤使用 JavaScript 实现拖拽的步骤：  让元素捕获事件（mousedown, mousemove &amp; mouseup） 单击并不释放，触发 mousedown，标记开始拖拽，并获取元素和鼠标的位置 拖动鼠标，触发 mousemove，不断的获取鼠标的位置，并通过计算重新确定元素的位置 释放师表，触发 mouseup，结束拖拽，确定元素位置并更新">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-01-29T09:12:55.000Z">
+<meta property="article:modified_time" content="2024-01-20T12:06:05.099Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="javascript">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2018/01/29/use-javascript-to-achieve-simple-drag-and-drop/"/>
+
+
+
+
+
+  <title>使用 JavaScript 实现简单的拖拽 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/01/29/use-javascript-to-achieve-simple-drag-and-drop/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">使用 JavaScript 实现简单的拖拽</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T17:12:55+08:00">
+                2018-01-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/" itemprop="url" rel="index">
+                    <span itemprop="name">javascript</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>使用 <code>JavaScript</code> 实现拖拽的步骤：</p>
+<ul>
+<li>让元素捕获事件（<code>mousedown</code>, <code>mousemove</code> &amp; <code>mouseup</code>）</li>
+<li>单击并不释放，触发 <code>mousedown</code>，标记开始拖拽，并获取元素和鼠标的位置</li>
+<li>拖动鼠标，触发 <code>mousemove</code>，不断的获取鼠标的位置，并通过计算重新确定元素的位置</li>
+<li>释放师表，触发 <code>mouseup</code>，结束拖拽，确定元素位置并更新</li>
+</ul>
+<span id="more"></span>
+
+<p><strong>被拖拽的元素必须是相对父元素定位，或者是绝对定位</strong></p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>绑定事件</p>
+<p>首先，对拖拽的元素绑定 <code>mousedown</code> 时间，使其触发对应的函数，获取元素与鼠标的位置。在 <code>document</code> 对象上绑定 <code>mousemove</code> 和 <code>mouseup</code> 事件，不在拖拽的元素上绑定是因为当鼠标移动太快而超出元素的范围时会停止拖拽，而绑定在 <code>document</code> 上则可以避免这样的事情发生。拖拽再快都不会超出 <code>document</code> 的范围。</p>
+<p><strong>绑定事件：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> box = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;box&#x27;</span>);</span><br><span class="line"></span><br><span class="line">box.<span class="property">onmousedown</span> = down;</span><br><span class="line"><span class="variable language_">document</span>.<span class="property">onmousemove</span> = move;</span><br><span class="line"><span class="variable language_">document</span>.<span class="property">onmouseup</span> = up;</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取鼠标位置"><a href="#获取鼠标位置" class="headerlink" title="获取鼠标位置"></a>获取鼠标位置</h2><p>鼠标位置可以在 <code>event</code> 对象中获得，常用的属性有：</p>
+<ul>
+<li><code>clientX / clientY</code> : 相对浏览器窗口坐标</li>
+<li><code>offsetX / offsetY</code> : 相对事件目标对象坐标</li>
+<li><code>pageX / pageY</code> : 相对 <code>document</code> 对象坐标</li>
+</ul>
+<p>一般鼠标的位置使用 <code>pageX / pageY</code> 获取，但是 IE 不支持这两个属性。所以在 IE 中使用 <code>event.clientX + document.body.scrollLeft - document.body.clientLeft; </code>获取鼠标的位置。</p>
+<p><strong>获取鼠标位置的函数：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">getMouseXY</span>(<span class="params">e</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> x = <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line">  e = e || <span class="variable language_">window</span>.<span class="property">event</span>;</span><br><span class="line">  <span class="keyword">if</span> (e.<span class="property">pageX</span>) &#123;</span><br><span class="line">    x = e.<span class="property">pageX</span>;</span><br><span class="line">    y = e.<span class="property">pageY</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    x = e.<span class="property">clientX</span> + <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">scrollLeft</span> - <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">clientLeft</span>;</span><br><span class="line">    y = e.<span class="property">clientY</span> + <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">scrollTop</span> - <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">clientTop</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">x</span>: x,</span><br><span class="line">    <span class="attr">y</span>: y</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="事件触发函数"><a href="#事件触发函数" class="headerlink" title="事件触发函数"></a>事件触发函数</h2><p><code>mousedown</code><br>当鼠标移动到元素内并点击元素不放时，触发 <code>mousedown</code> 事件。按照上面的步骤，这一步是获取元素与鼠标的位置，用于触发 <code>mousemove</code> 时计算元素的位置。</p>
+<p><strong><code>mousedown</code> 触发的函数：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">down</span>(<span class="params">e</span>) &#123;</span><br><span class="line">  dragging = <span class="literal">true</span>;</span><br><span class="line">  boxX = box.<span class="property">offsetLeft</span>;</span><br><span class="line">  boxY = box.<span class="property">offsetTop</span>;</span><br><span class="line">  mouseX = <span class="built_in">parseInt</span>(<span class="title function_">getMouseXY</span>(e).<span class="property">x</span>);</span><br><span class="line">  mouseY = <span class="built_in">parseInt</span>(<span class="title function_">getMouseXY</span>(e).<span class="property">y</span>);</span><br><span class="line">  offsetX = mouseX - boxX;</span><br><span class="line">  offsetY = mouseY - boxY;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>boxX / boxY</code> 为元素左上角相对于已定位的父元素（相对或者绝对定位的父元素）的偏移的像素值，即元素左上角的坐标。<br><code>mouseX / mouseY</code> 是通过 <code>getMouseXY</code> 函数获得的鼠标的坐标。<br><code>offsetX/ offsetY</code> 是鼠标相对于元素坐标（左上角坐标）的坐标。<br><code>mousemove</code><br>当鼠标移动时，不断的获取鼠标的位置，并计算元素的新坐标修改元素的位置样式。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">move</span>(<span class="params">e</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (dragging) &#123;</span><br><span class="line">    <span class="keyword">var</span> x = <span class="title function_">getMouseXY</span>(e).<span class="property">x</span> - offsetX;</span><br><span class="line">    <span class="keyword">var</span> y = <span class="title function_">getMouseXY</span>(e).<span class="property">y</span> - offsetY;</span><br><span class="line">    <span class="keyword">var</span> width = <span class="variable language_">document</span>.<span class="property">documentElement</span>.<span class="property">clientWidth</span> - box.<span class="property">offsetWidth</span>;</span><br><span class="line">    <span class="keyword">var</span> height = <span class="variable language_">document</span>.<span class="property">documentElement</span>.<span class="property">clientHeight</span> - box.<span class="property">offsetHeight</span>;</span><br><span class="line"></span><br><span class="line">    x = <span class="title class_">Math</span>.<span class="title function_">min</span>(<span class="title class_">Math</span>.<span class="title function_">max</span>(<span class="number">0</span>, x), width);</span><br><span class="line">    y = <span class="title class_">Math</span>.<span class="title function_">min</span>(<span class="title class_">Math</span>.<span class="title function_">max</span>(<span class="number">0</span>, y), height);</span><br><span class="line"></span><br><span class="line">    box.<span class="property">style</span>.<span class="property">left</span> = x + <span class="string">&#x27;px&#x27;</span>;</span><br><span class="line">    box.<span class="property">style</span>.<span class="property">top</span> = y + <span class="string">&#x27;px&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>变量 <code>width / height</code> 表示可移动的位置的大小，这里是 <code>document</code> 减去元素的大小（元素不会超出可移动的范围）。<br><code>Math.min</code> 使得元素不会超出可移动访问的右边界（元素 <code>x</code> 坐标不会超过 <code>width</code>），<code>Math.max</code> 使得元素不会超出可移动范围的左边界（元素的 x 坐标不小于 0）。<br>最后将改变后的元素 <code>left</code> 与 <code>top</code> 值应用当元素上，即修改元素的样式。<br><code>mouseup</code><br>拖拽结束，取消拖拽的标记。使其触发 <code>mousemove</code> 事件，但不做任何处理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">up</span>(<span class="params">e</span>) &#123;</span><br><span class="line">  dragging = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="在线演示"><a href="#在线演示" class="headerlink" title="在线演示"></a>在线演示</h2><iframe src="//fiddle.jshell.net/Lr73mn89/show/light/" frameborder="0" sandbox="allow-forms allow-scripts allow-same-origin allow-modals allow-popups" allow="midi; geolocation; microphone; camera" width="100%" height="200px"></iframe>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上面使用的简单的 <code>JavaScript</code> 代码实现了元素的拖拽，但并没有对兼容性问题全面考虑，也没有对性能优化，有不必要的事件触发。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/javascript/" rel="tag"># javascript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/02/good-bye-2017/" rel="next" title="Goodbye 2017">
+                <i class="fa fa-chevron-left"></i> Goodbye 2017
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/30/Hexo-NexT-Wildfire/" rel="prev" title="在Hexo博客 NexT主题中部署Wildfire评论系统">
+                在Hexo博客 NexT主题中部署Wildfire评论系统 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.</span> <span class="nav-text">步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E9%BC%A0%E6%A0%87%E4%BD%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">获取鼠标位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E8%A7%A6%E5%8F%91%E5%87%BD%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">事件触发函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA"><span class="nav-number">5.</span> <span class="nav-text">在线演示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

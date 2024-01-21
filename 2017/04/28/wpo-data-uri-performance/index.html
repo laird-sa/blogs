@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="前端优化,Web,base64,data URI," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="业内常会有 Data URI 的利与弊、用与不用的讨论，即使在最有经验的前端开发者眼中，也会形成对 data URI 截然不同的看法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web 性能优化（3）——探讨 data URI 的性能">
+<meta property="og:url" content="https://www.resonanat.com/2017/04/28/wpo-data-uri-performance/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="业内常会有 Data URI 的利与弊、用与不用的讨论，即使在最有经验的前端开发者眼中，也会形成对 data URI 截然不同的看法。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000089.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000090.png">
+<meta property="article:published_time" content="2017-04-28T13:16:18.000Z">
+<meta property="article:modified_time" content="2017-04-28T13:16:18.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="前端优化">
+<meta property="article:tag" content="Web">
+<meta property="article:tag" content="base64">
+<meta property="article:tag" content="data URI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000089.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/04/28/wpo-data-uri-performance/"/>
+
+
+
+
+
+  <title>Web 性能优化（3）——探讨 data URI 的性能 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/28/wpo-data-uri-performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Web 性能优化（3）——探讨 data URI 的性能</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-28T21:16:18+08:00">
+                2017-04-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>业内常会有 Data URI 的利与弊、用与不用的讨论，即使在最有经验的前端开发者眼中，也会形成对 data URI 截然不同的看法。</p>
+<span id="more"></span>
+
+<h1 id="什么是-Data-URI"><a href="#什么是-Data-URI" class="headerlink" title="什么是 Data URI"></a>什么是 Data URI</h1><p>减少 Request，一直是业内公认的一项优化网站加载的方案。过去，对于众多图标类的小图片，通常都会采用雪碧图的方法合并多张小图片为一张大图片、来减少请求。现在，data URI 成为了新的选择。</p>
+<p><a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc2397">RFC2397</a> 中首次定义了 data URI 的规范和格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data:[&lt;mime type&gt;][;charset=&lt;charset&gt;][;base64],&lt;encoded data&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在这种格式中，data:就是 URI 的协议，表明这是一个 data URI。<br><code>mime type</code>可能是 <code>image/png</code> 之类的，如果不填，默认是 <code>text/plain</code>。</p>
+<h1 id="性能神器-还是弃之可惜的鸡肋"><a href="#性能神器-还是弃之可惜的鸡肋" class="headerlink" title="性能神器 还是弃之可惜的鸡肋"></a>性能神器 还是弃之可惜的鸡肋</h1><h2 id="节省请求全等于优化性能？"><a href="#节省请求全等于优化性能？" class="headerlink" title="节省请求全等于优化性能？"></a>节省请求全等于优化性能？</h2><p>首先，如果直接在 <code>&lt;img&gt;</code> 标签的 src 中使用 base64 时，图片出现很多次时就会需要把 base64 图片的文本内容重复很多次，导致 HTML 变大。虽然多次重复的内容很适合 Gzip，但对于浏览器来说，导入 HTML 并生成 DOM 则会被阻碍。而且多次重复的 data URI 浏览器会不断的暂停渲染和进行解码，如果使用 data URI 的文件过多过大，就会阻碍页面的渲染。<br>当然，你可以说，在 <code>style.css</code> 里写好 <code>background</code> 可以应对这个问题。<br>固然，将 data URI 写进 CSS 以后，似乎是减少了请求。但是这样做的缺点就没那么容易发现了。<strong>样式表会变得很大，从而阻塞关键下载和渲染</strong>。通俗地讲，图片文件的体积被转移到了 HTML 或 CSS 中，而后者的体积直接影响渲染，导致用户会长时间注视空白屏幕。HTML 和 CSS 阻塞渲染，图片不会。</p>
+<blockquote>
+<p>这是用户打开网页时浏览器加载页面的过程：</p>
+<ul>
+<li>下载 HTML 文档。HTML 内容准备就绪后，浏览器解析字节并构建 DOM 树。</li>
+<li>在浏览器构建我们这个简单页面的 DOM 时，在文档的 head 部分遇到了一个 link 标签，该标记引用一个外部 CSS 样式表 <code>style.css</code>。由于预见到需要利用该资源来渲染页面，它立即发出了对该资源的请求。</li>
+<li>与处理 HTML 时一样，我们需要将收到的 CSS 转换成浏览器能够理解和处理的东西。因此浏览器会重复解析过程，不过是为解析 CSS，而不是 HTML。它需要提取并解析 CSS 文件以构建页面。</li>
+<li>在浏览器构建页面时，如果遇到了<img>标签，它意识到需要该资源来渲染页面，就会把该资源加入到请求队列。但是图片的暂时缺失不影响浏览器渲染其他部分。因此图片不会阻塞关键路径渲染。</li>
+</ul>
+</blockquote>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000089.png" alt="0000089.png"></p>
+<h2 id="Gzip-能缓解这一切？"><a href="#Gzip-能缓解这一切？" class="headerlink" title="Gzip 能缓解这一切？"></a>Gzip 能缓解这一切？</h2><p>Gzip 又是什么？</p>
+<blockquote>
+<p>Gzip 是在 Web 端最常用的一种压缩文本的方法。Gzip 压缩算法分两步。第一步，采用LZ77 算法的一个变种替换字符串，第二步，使用Huffman 树来储存出现的位置和长度。</p>
+</blockquote>
+<p>看不懂？我也看不懂。。不过我找到了下面这张图，这样就形象多了。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000090.png" alt="0000090.png"></p>
+<p>HTML 中重复出现大量的 HTML 标签以及类名等，CSS 中重复出现大量的属性，JavaScript 中重复的函数调用等（即使经过混淆）。因此 HTML、CSS、JavaScript 的 Gzip 压缩率都是很高的。但是由于 base64 近乎于乱码的文本是无规律的，所以在 Gzip 中不达不到较高的压缩率。</p>
+<h2 id="考虑考虑缓存？"><a href="#考虑考虑缓存？" class="headerlink" title="考虑考虑缓存？"></a>考虑考虑缓存？</h2><p>如果我们把样式、图片文件合并到变成一个资源，我们就无法再分别为它们配置缓存时间，以及更新资源。而图片、HTML 和 CSS 的更新频率都是不一样的。<br>然而 CSS 文件的修改频率还算是较高的，图片其次。我们一般会为不同类型的文件利用缓存头设置不同的缓存失效时间，以及在更新某个文件之后单独更新这个文件的时间戳。但是混在一起之后，即使我们只是想更新CSS规则里面一个字号，整个巨大的文件就会重新生成。用户不得不在每次更新后重新下载整个大文件，这违背了基本的缓存原则。</p>
+<hr>
+<p>总结一下：</p>
+<ul>
+<li>base64 会让样式文件变得很大而阻塞关键下载和渲染</li>
+<li>css 因 base64 增加的体积无法通过 Gzip 很好地压缩</li>
+<li>浏览器渲染方面，增加了解析 css 的耗时</li>
+<li>在 css 文件中过多使用 base64 会让首次渲染时间大幅增加，移动端影响可能更大</li>
+</ul>
+<h1 id="Data-URI-的实践"><a href="#Data-URI-的实践" class="headerlink" title="Data URI 的实践"></a>Data URI 的实践</h1><p>在 hexo-theme-material 1.4.0 版本的开发中为了优化页面加载，我们开始考虑应用 data URI。<br>由于 Material 主题 1.4.0 版本的前期开发中已经引进了一套基于 localstorage 的缓存方案，不怕强制刷新和禁用缓存，极大程度上优化了二次加载。<br>在这基础上，我将 footer sns 的 icon 独立了出来，使用 base64 加码，并独立存储在一个 css 当中。这个 css 便不需要经常更新。</p>
+<p>Material 主题的 footer sns icon 是 svg。svg 的格式是：</p>
+<figure class="highlight svg"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">svg</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.w3.org/2000/svg&quot;</span> <span class="attr">viewBox</span>= <span class="string">...</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">path</span> <span class="attr">...</span>&gt;</span><span class="tag">&lt;/<span class="name">path</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">svg</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>不同的 svg 中，只有定义图像的 <code>&lt;path&gt;</code> 部分会有所不同，开头定义规范的部分之类的都完全相同，所以这一部分也是可以被 Gzip 压缩的，一定程度上缓解了传输文件大小的问题。</p>
+<p>在实际测试中，直接加载外链的 svg，即使用了支持 HTTP2 的 CDN 可以连接多路复用，加载一个 svg 仍然需要 25ms，而且这一部分是最后加载的，直接影响了 DOMContentLoaded 的触发。采用该方案以后，DOMContentLoaded 提前了将近 15ms 左右触发，效果虽然不明显，但是说明这个方案毕竟是可行的。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/" rel="tag"># 前端优化</a>
+          
+            <a href="/tags/Web/" rel="tag"># Web</a>
+          
+            <a href="/tags/base64/" rel="tag"># base64</a>
+          
+            <a href="/tags/data-URI/" rel="tag"># data URI</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/28/pseudo-elements-and-pseudo-classes/" rel="next" title="重新认识伪类和伪元素">
+                <i class="fa fa-chevron-left"></i> 重新认识伪类和伪元素
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/01/use-hexo-at-any-time-any-place/" rel="prev" title="随时随地 Hexo——我是如何使用 Hexo 的">
+                随时随地 Hexo——我是如何使用 Hexo 的 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Data-URI"><span class="nav-number">1.</span> <span class="nav-text">什么是 Data URI</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E7%A5%9E%E5%99%A8-%E8%BF%98%E6%98%AF%E5%BC%83%E4%B9%8B%E5%8F%AF%E6%83%9C%E7%9A%84%E9%B8%A1%E8%82%8B"><span class="nav-number">2.</span> <span class="nav-text">性能神器 还是弃之可惜的鸡肋</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8A%82%E7%9C%81%E8%AF%B7%E6%B1%82%E5%85%A8%E7%AD%89%E4%BA%8E%E4%BC%98%E5%8C%96%E6%80%A7%E8%83%BD%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">节省请求全等于优化性能？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gzip-%E8%83%BD%E7%BC%93%E8%A7%A3%E8%BF%99%E4%B8%80%E5%88%87%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">Gzip 能缓解这一切？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%99%91%E8%80%83%E8%99%91%E7%BC%93%E5%AD%98%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">考虑考虑缓存？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Data-URI-%E7%9A%84%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.</span> <span class="nav-text">Data URI 的实践</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

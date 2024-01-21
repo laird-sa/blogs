@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PWA,Web,Service Worker," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="对于 native app 和 PWA 的纷争我不想发表太多看法，但是有一件事是确定的——PWA 极大改善了移动端用户的体验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为博客启用 PWA 支持">
+<meta property="og:url" content="https://www.resonanat.com/2017/04/08/pwa-support-for-my-blog/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="对于 native app 和 PWA 的纷争我不想发表太多看法，但是有一件事是确定的——PWA 极大改善了移动端用户的体验。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000085.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000086.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000156.jpg">
+<meta property="article:published_time" content="2017-04-08T11:30:27.000Z">
+<meta property="article:modified_time" content="2017-07-07T15:10:27.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="PWA">
+<meta property="article:tag" content="Web">
+<meta property="article:tag" content="Service Worker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000085.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/04/08/pwa-support-for-my-blog/"/>
+
+
+
+
+
+  <title>为博客启用 PWA 支持 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/08/pwa-support-for-my-blog/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">为博客启用 PWA 支持</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-08T19:30:27+08:00">
+                2017-04-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>对于 native app 和 PWA 的纷争我不想发表太多看法，但是有一件事是确定的——PWA 极大改善了移动端用户的体验。</p>
+</blockquote>
+<span id="more"></span>
+
+<p>好消息是改造你的网站为 Progressive Web Apps（PWAs）并不困难。这就是本文想介绍的——我是如何改造我的博客使之成为 PWA 的。</p>
+<h1 id="启用全站-HTTPS"><a href="#启用全站-HTTPS" class="headerlink" title="启用全站 HTTPS"></a>启用全站 HTTPS</h1><p>这是使用 PWA 的第一步。<br>这是由于一些显而易见的原因（其中，PWA 需要借助 ServiceWorker 是最主要的原因）<br>我旗下所有网站都已经启用了 HTTPS 支持。</p>
+<h1 id="创建一个-Service-Worker"><a href="#创建一个-Service-Worker" class="headerlink" title="创建一个 Service Worker"></a>创建一个 Service Worker</h1><p>ServiceWorker 是一个可以拦截和响应你的网络请求的编程接口，具备有可以高效的缓存、提供通知和离线访问的特性。<br>Service Worker 很复杂，你可以修改示例代码来达到自己的目的。<a target="_blank" rel="noopener" href="https://gist.github.com/neoFelhz/50800b701d00dc6d874be95da2cd7655">这里</a>是一个标准的 Web Worker，浏览器用一个单独的线程来下载和执行它。它没有调用 DOM 和其他页面 API 的能力，但它可以拦截网络请求，包括页面切换，静态资源下载。你要做的不过是启用它。<br>关于如何用上述示例代码启用一个最简单的 ServiceWorker，你可以阅读<a target="_blank" rel="noopener" href="https://blog.nfz.moe/archives/wpo-by-service-worker.html">《Web 性能优化（2）——浅尝 Service Worker》</a>。</p>
+<h1 id="创建-Web-App-Manifest"><a href="#创建-Web-App-Manifest" class="headerlink" title="创建 Web App Manifest"></a>创建 Web App Manifest</h1><p>manifest 文件提供了一些我们网站的信息，例如 name，description 和需要在主屏使用的图标的图片，启动屏的图片等。<br>manifest 文件是一个 JSON 格式的文件，位于你项目的根目录。它必须用 <code>Content-Type: application/manifest+json</code> 或者 <code>Content-Type: application/json</code> 这样的 HTTP 头来请求。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span>              <span class="punctuation">:</span> <span class="string">&quot;PWA Website&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;short_name&quot;</span>        <span class="punctuation">:</span> <span class="string">&quot;PWA&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span>       <span class="punctuation">:</span> <span class="string">&quot;An example PWA website&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;start_url&quot;</span>         <span class="punctuation">:</span> <span class="string">&quot;/&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;display&quot;</span>           <span class="punctuation">:</span> <span class="string">&quot;standalone&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;orientation&quot;</span>       <span class="punctuation">:</span> <span class="string">&quot;any&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;background_color&quot;</span>  <span class="punctuation">:</span> <span class="string">&quot;#ACE&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;theme_color&quot;</span>       <span class="punctuation">:</span> <span class="string">&quot;#ACE&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;icons&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;src&quot;</span>           <span class="punctuation">:</span> <span class="string">&quot;/images/logo/logo072.png&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;sizes&quot;</span>         <span class="punctuation">:</span> <span class="string">&quot;72x72&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span>          <span class="punctuation">:</span> <span class="string">&quot;image/png&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;src&quot;</span>           <span class="punctuation">:</span> <span class="string">&quot;/images/logo/logo192.png&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;sizes&quot;</span>         <span class="punctuation">:</span> <span class="string">&quot;192x192&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span>          <span class="punctuation">:</span> <span class="string">&quot;image/png&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;src&quot;</span>           <span class="punctuation">:</span> <span class="string">&quot;/images/logo/logo256.png&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;sizes&quot;</span>         <span class="punctuation">:</span> <span class="string">&quot;256x256&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span>          <span class="punctuation">:</span> <span class="string">&quot;image/png&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;src&quot;</span>           <span class="punctuation">:</span> <span class="string">&quot;/images/logo/logo512.png&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;sizes&quot;</span>         <span class="punctuation">:</span> <span class="string">&quot;512x512&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span>          <span class="punctuation">:</span> <span class="string">&quot;image/png&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这是一个 PWA Manifest 的示例。你可以通过简单修改它后在自己的网站上启用。<br>可选的属性有：</p>
+<ul>
+<li>name —— 网页显示给用户的完整名称</li>
+<li>short_name —— 当空间不足以显示全名时的网站缩写名称</li>
+<li>description —— 关于网站的详细描述</li>
+<li>start_url —— 网页的初始 相对 URL（比如 &#x2F;）</li>
+<li>scope —— 导航范围。比如，&#96;&#96;&#x2F;app&#x2F;<code>的 scope 就限制 </code>app&#96; 在这个文件夹里。</li>
+<li>background-color —— 启动屏和浏览器的背景颜色</li>
+<li>theme_color —— 网站的主题颜色，一般都与背景颜色相同，它可以影响网站的显示</li>
+<li>orientation —— 首选的显示方向：any, natural, landscape, landscape-primary, landscape-secondary, portrait, portrait-primary, 和 portrait-secondary。</li>
+<li>display —— 首选的显示方式：fullscreen, standalone (看起来像是native app)，minimal-ui (有简化的浏览器控制选项) 和 browser (常规的浏览器 tab)</li>
+<li>icons —— 定义了 src URL, sizes 和 type 的图片对象数组，用来定义 PWA 的 icon。</li>
+</ul>
+<blockquote>
+<p>你可以在 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/Manifest">MDN</a> 中找到对 <code>manifest</code> 详细说明。<br>另外，你也可以通过<a target="_blank" rel="noopener" href="https://app-manifest.firebaseapp.com/">这个网站</a>快速生成一个 <code>manifest.json</code> 和各种大小的图标。</p>
+</blockquote>
+<p>最后，在 HTML 内引用这个文件。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;manifest&quot;</span> <span class="attr">href</span>=<span class="string">&quot;/manifest.json&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><p>现代浏览器都提供了完善的调试工具。本文以 Chrome 为例。</p>
+<h2 id="调试-Manifest"><a href="#调试-Manifest" class="headerlink" title="调试 Manifest"></a>调试 Manifest</h2><p>在开发者工具中的 <code>Application</code> 选项卡左边有 <code>Manifest</code> 选项，你可以验证你的 manifest JSON 文件，并提供了 <code>Add to homescreen</code>。执行操作，检查控制台日志是否有报错。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000085.png" alt="0000085.png"></p>
+<h2 id="调试-ServiceWorker"><a href="#调试-ServiceWorker" class="headerlink" title="调试 ServiceWorker"></a>调试 ServiceWorker</h2><p>在开发者工具中的 <code>Application</code> 选项卡左边的 <code>Application</code> 选项中你可以轻松地调试你的 ServiceWorker。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000086.png" alt="0000086.png"></p>
+<p>点击 <code>Offline</code>，检查你的离线页面是否正常工作。</p>
+<blockquote>
+<p>在 <code>Clear storage</code> 选项中你可以清除 ServiceWorker 的缓存。</p>
+<p>技巧一：用 隐身窗口 来测试你的 PWA，这样在你关闭这个窗口之后缓存就不会保留下来。<br>技巧二：在 Chrome 新版本的开放人员面板中新增了功能 <a target="_blank" rel="noopener" href="https://chrome.google.com/webstore/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk?utm_source=chrome-app-launcher-info-dialog">Lighthouse</a> 可以快速调试 PWA。Lighthouse 还内置了 <code>pagespeed</code> 可以测试页面的加载性能。</p>
+</blockquote>
+<h2 id="让-PWA-安装提示在首次访问时弹出"><a href="#让-PWA-安装提示在首次访问时弹出" class="headerlink" title="让 PWA 安装提示在首次访问时弹出"></a>让 PWA 安装提示在首次访问时弹出</h2><p>你可以在页面中加入下述 JavaScript，可以让访客首次访问你的页面时弹出 PWA 安装下图所示的提示弹窗。</p>
+<img src="https://bbs-static.nfz.yecdn.com/i/0000156.jpg" alt="0000156.jpg" style="width:50%" />
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">window</span>.<span class="title function_">addEventListener</span>(<span class="string">&#x27;beforeinstallprompt&#x27;</span>, <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">  event.<span class="property">userChoice</span>.<span class="title function_">then</span>(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(result.<span class="property">outcome</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>不过我还是比较喜欢 Chrome 默认的做法，即首次访问并不一定弹出对话框，只有用户在 24 小时内多次访问页面（次数是根据会话数统计的）才弹出安装对话框。我认为，这样做也是对访客负责——固然安装 PWA 能吸引访客回访——但是不是所有人都愿意安装一个 PWA，尤其是不频繁访问网站的。</p>
+<hr>
+<p>上述调试都通过了？把你的网站部署上生产环境吧！</p>
+<hr>
+<blockquote>
+<p>本文更新于 2017.7.7 日，根据<a target="_blank" rel="noopener" href="https://siyuanlau.github.io/2017/06/08/%E5%9C%A8%E5%8D%9A%E5%AE%A2%E4%B8%8A%E5%AE%8C%E5%85%A8%E5%AE%9E%E7%8E%B0PWA%E6%94%AF%E6%8C%81/">《在博客上完全实现PWA支持》</a>提到的细节进行了完善。</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PWA/" rel="tag"># PWA</a>
+          
+            <a href="/tags/Web/" rel="tag"># Web</a>
+          
+            <a href="/tags/Service-Worker/" rel="tag"># Service Worker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/07/java-grammar/" rel="next" title="「Java教程」语法基础">
+                <i class="fa fa-chevron-left"></i> 「Java教程」语法基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/10/java-object/" rel="prev" title="「Java教程」面向对象">
+                「Java教程」面向对象 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E5%85%A8%E7%AB%99-HTTPS"><span class="nav-number">1.</span> <span class="nav-text">启用全站 HTTPS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA-Service-Worker"><span class="nav-number">2.</span> <span class="nav-text">创建一个 Service Worker</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-Web-App-Manifest"><span class="nav-number">3.</span> <span class="nav-text">创建 Web App Manifest</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">调试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95-Manifest"><span class="nav-number">4.1.</span> <span class="nav-text">调试 Manifest</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95-ServiceWorker"><span class="nav-number">4.2.</span> <span class="nav-text">调试 ServiceWorker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A9-PWA-%E5%AE%89%E8%A3%85%E6%8F%90%E7%A4%BA%E5%9C%A8%E9%A6%96%E6%AC%A1%E8%AE%BF%E9%97%AE%E6%97%B6%E5%BC%B9%E5%87%BA"><span class="nav-number">4.3.</span> <span class="nav-text">让 PWA 安装提示在首次访问时弹出</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

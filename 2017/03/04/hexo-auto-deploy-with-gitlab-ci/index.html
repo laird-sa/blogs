@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo,持续集成,CI,GitLab CI," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="自从使用 Hexo 博客以来，我一直在研究如何实现在任何平台上自由编写和发布 Hexo 博客。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 GitLab CI 实现 Hexo 持续部署">
+<meta property="og:url" content="https://www.resonanat.com/2017/03/04/hexo-auto-deploy-with-gitlab-ci/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="自从使用 Hexo 博客以来，我一直在研究如何实现在任何平台上自由编写和发布 Hexo 博客。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000157.png">
+<meta property="article:published_time" content="2017-03-04T05:25:00.000Z">
+<meta property="article:modified_time" content="2017-08-25T07:08:00.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="持续集成">
+<meta property="article:tag" content="CI">
+<meta property="article:tag" content="GitLab CI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000157.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/03/04/hexo-auto-deploy-with-gitlab-ci/"/>
+
+
+
+
+
+  <title>使用 GitLab CI 实现 Hexo 持续部署 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/04/hexo-auto-deploy-with-gitlab-ci/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">使用 GitLab CI 实现 Hexo 持续部署</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-04T13:25:00+08:00">
+                2017-03-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>自从使用 Hexo 博客以来，我一直在研究如何实现在任何平台上自由编写和发布 Hexo 博客。<span id="more"></span>之前我在<a target="_blank" rel="noopener" href="https://blog.neofelhz.space/archives/hexo-auto-deploy-with-daocloud.html">《Hexo 持续自动化部署》</a>和<a target="_blank" rel="noopener" href="https://blog.neofelhz.space/archives/hexo-auto-deploy-with-flow-ci.html">《用 Flow.CI 让 Hexo 持续集成》</a>两篇文章中分别讲述了使用 DaoCloud 的 Docker 和 Flow.CI 的 Sass 平台部署持续集成的 Hexo，但是如今 DaoCloud 部署越来越慢，Flow.CI 也已经转向收费；所以我不得不寻找新的替代方案。</p>
+<p>很早就听说了 GitLab。</p>
+<blockquote>
+<p>就是那个最近因为不小心使用 <code>rm rf</code> 把自家数据库删光、还在 YouTube 上直播修库、让失误的程序员看了 10 小时的 <em>nyancat</em> 的那个 GitLab。</p>
+</blockquote>
+<p>GitLab 有面向企业的计划、有开发独立的服务端程序，所以和主要面向平民化的码农天堂 Github 一口气亏损 6600 亿美元不同，GitLab 至少并没有亏损。这一点和 Coding 颇为类似——无论是运营方式还是盈利方式，甚至是网站 UI 交互层面。</p>
+<p>接下来事情就很简单了。</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>首先，在 GitLab 创建一个新的私有库，用来存储我的博客工程文件；在我的本地的 Hexo 博客工程文件中的 Repository 里添加一个新的 Remote 到 GitLab。然后从原来的 repo 上 <code>git pull</code>，并 <code>git push</code> 到 GitLab。<br>现在我在 Coding 和 GitLab 上都有了 Hexo 博客的工程文件。接下来就是直接部署 CI 平台了。</p>
+<h1 id="编写-workflow"><a href="#编写-workflow" class="headerlink" title="编写 workflow"></a>编写 workflow</h1><p>和 Github 的 Travis.CI 类似，你只需要在 Repository 的根目录上新建一个 <code>.gitlab-ci.yml</code> 你就可以实现 GitLab 的 CI 平台执行自动部署。</p>
+<blockquote>
+<p>在 GitLab，CI 和 Repository 是高度集成的。你可以在 <code>pipeline</code> 里看到你的 CI 运行信息。</p>
+</blockquote>
+<p>在 <code>.gitlab-ci.yml</code> 中填入下述内容：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">image:</span> <span class="string">neofelhz/hexo-docker</span></span><br><span class="line"><span class="attr">build:</span></span><br><span class="line">  <span class="attr">cache:</span></span><br><span class="line">    <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">node_modules/</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">hexo</span> <span class="string">g</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">d</span></span><br><span class="line">  <span class="attr">only:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上述脚本会自动在每次 push 后帮你生成 Hexo 静态文件。至于 <code>hexo d</code>，你需要事先部署好 Deploy 方式。<br>如果需要部署到 GitLab Pages，请把上面 <code>build</code> 节点更名为 <code>pages</code> 并在 <code>pages</code> 节点中添加下述子层级内容：</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">artifacts:</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">public</span></span><br></pre></td></tr></table></figure>
+
+<p>同时需要去掉 <code>hexo d</code>。</p>
+<blockquote>
+<p>至于这些脚本的原理，你可以直接参考我之前那两篇关于 CI 部署 Hexo 的博客。</p>
+</blockquote>
+<h1 id="SSH-有关"><a href="#SSH-有关" class="headerlink" title="SSH 有关"></a>SSH 有关</h1><p>一些人可能在用 Github Pages 或者 Coding Pages，或者是使用的自己的 VPS（git 部署）。这样一来你就可能需要使用 SSH 连接你的 webserver 仓库。（当然，用 Caddy 做 webserver 和定时 git pull 那个算是异类）。这些你可以在 GitLab CI 的 wiki 上查看到 <a target="_blank" rel="noopener" href="https://docs.gitlab.com/ee/ci/ssh_keys/README.html">GitLab CI SSH 配置的相关内容</a>。</p>
+<blockquote>
+<p>值得一提的是，和 DaoCloud 和 Flow.CI 不同，GitLab CI 可以通过设置 <strong>环境变量</strong> 的方式加载你的 SSH 的私钥，这样子就不需要把你的私钥放在你的项目仓库里，有效防止私钥泄露到第三方。这种环境变量的方式不仅安全，而且灵活。<br>GitLab CI 配置环境变量的位置是 <code>Setting -&gt; Pipelines -&gt; Secret variables</code>，如下图所示：</p>
+</blockquote>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000157.png" alt="0000157.png"></p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><blockquote>
+<p>本文就是由 GitLab CI 生成并发布的。</p>
+</blockquote>
+<p>本文介绍了利用 GitLab CI 进行持续集成 &#x2F; 部署，今后的使用和之前的方式一样，向仓库提交 push 就可以触发自动部署。<br>和 Daocloud 和 Flow.CI 的代码构建相比，GitLab CI 为持续集成 &#x2F; 部署优点如下：</p>
+<ul>
+<li>目前私有库完全免费</li>
+<li>可以和 GitLab 的 Repository 无缝兼容，无需第三方 CI 平台接入。</li>
+<li>支持在 <code>hexo deploy</code> 的同时自动发布到 GitLab Pages</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          
+            <a href="/tags/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/" rel="tag"># 持续集成</a>
+          
+            <a href="/tags/CI/" rel="tag"># CI</a>
+          
+            <a href="/tags/GitLab-CI/" rel="tag"># GitLab CI</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/22/the-importance-of-using-https/" rel="next" title="不仅仅只是锦上添花——谈启用 HTTPS 的重要性">
+                <i class="fa fa-chevron-left"></i> 不仅仅只是锦上添花——谈启用 HTTPS 的重要性
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/16/shadowsocks-install/" rel="prev" title="科学上网之shadowsocks 服务端安装">
+                科学上网之shadowsocks 服务端安装 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E5%86%99-workflow"><span class="nav-number">2.</span> <span class="nav-text">编写 workflow</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSH-%E6%9C%89%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">SSH 有关</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

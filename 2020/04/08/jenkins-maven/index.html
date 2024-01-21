@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="环境配置,Linux,Jenkins," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. 添加git凭据若安装Jenkins时安装的推荐插件，git已经默认安装了，我们添加git凭据：  系统管理(Manage Jenkins) -&gt; Manage Credentials -&gt; 全局 -&gt; 添加凭据。 类型选择SSH Username with private key，往下滑到Private Key，并勾选Enter directly，在Enter direct">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Jenkins」使用Maven构建Java应用程序">
+<meta property="og:url" content="https://www.resonanat.com/2020/04/08/jenkins-maven/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="1. 添加git凭据若安装Jenkins时安装的推荐插件，git已经默认安装了，我们添加git凭据：  系统管理(Manage Jenkins) -&gt; Manage Credentials -&gt; 全局 -&gt; 添加凭据。 类型选择SSH Username with private key，往下滑到Private Key，并勾选Enter directly，在Enter direct">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-04-08T04:30:53.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.556Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="环境配置">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Jenkins">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2020/04/08/jenkins-maven/"/>
+
+
+
+
+
+  <title>「Jenkins」使用Maven构建Java应用程序 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/04/08/jenkins-maven/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Jenkins」使用Maven构建Java应用程序</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-08T12:30:53+08:00">
+                2020-04-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-添加git凭据"><a href="#1-添加git凭据" class="headerlink" title="1. 添加git凭据"></a>1. 添加git凭据</h3><p>若安装Jenkins时安装的推荐插件，git已经默认安装了，我们添加git凭据：</p>
+<ol>
+<li><code>系统管理(Manage Jenkins)</code> -&gt; <code>Manage Credentials</code> -&gt; <code>全局</code> -&gt; <code>添加凭据</code>。<ul>
+<li>类型选择<code>SSH Username with private key</code>，往下滑到<code>Private Key</code>，并勾选<code>Enter directly</code>，在<code>Enter directly</code>的key区域点击<code>Add</code>，粘贴本机<code>git私钥</code>，点击确定。</li>
+<li>类型选择<code>Username with password</code>，填写git用户名和密码，点击确定。<span id="more"></span></li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>本机Git私钥获取：</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat .ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>git公钥私钥生成详细细节参考<a target="_blank" rel="noopener" href="https://my.oschina.net/chaoo/blog/4709339">物理机安装CentOS 8.0</a>的安装配置Git。</p>
+</blockquote>
+<h3 id="2-Jenkins配置Maven与Publish-Over-SSH插件"><a href="#2-Jenkins配置Maven与Publish-Over-SSH插件" class="headerlink" title="2. Jenkins配置Maven与Publish Over SSH插件"></a>2. Jenkins配置<code>Maven</code>与<code>Publish Over SSH</code>插件</h3><ol>
+<li>在插件管理搜索<code>Maven</code>，找到<code>Maven Integration</code>并勾选，然后点击<code>直接安装</code>。</li>
+<li>接下来同样方法安装<code>Publish Over SSH</code>插件(用来通过<code>ssh命令</code>发送Maven的构建)。</li>
+<li>配置全局变量，添加要部署的远程用户：<ul>
+<li><code>系统管理(Manage Jenkins)</code> -&gt; 点击<code>Configure System</code> -&gt; 往下滑到<code>SSH Server</code>；</li>
+<li>在<code>SSH Servers</code>这里点击<code>新增</code>，填写用户信息(Name:此配置名，HostNmae:要连接的SSH主机名或IP地址，UserName:远程用户名)；</li>
+<li>点击<code>高级</code>配置密码，勾选<code>Use password authentication, or use a different key</code>，在<code>Passphrase / Password</code>输入远程用户密码；</li>
+<li>点击<code>Test Configuration</code>测试能否连通，最后点击<code>保存</code>。</li>
+</ul>
+</li>
+<li>配置mavne的jenkins本地仓库：<ul>
+<li><code>系统管理(Manage Jenkins)</code> -&gt; 点击<code>Configure System</code> -&gt; 找到<code>Maven项目配置</code>；</li>
+<li><code>Local Maven Repository</code> -&gt; 选择<code>Local to the workspace</code> -&gt; <code>保存</code>。</li>
+</ul>
+</li>
+<li>全局工具配置：<ul>
+<li><code>系统管理(Manage Jenkins)</code> -&gt; 点击<code>Global Tool Configuration</code>；</li>
+<li><code>Maven配置</code> -&gt; <code>默认setting/全局setting</code>选择<code>Settings file in filesystem</code> -&gt; 填写本机安装Maven的setting路径，如<code>/usr/local/apache-maven-3.6.3/conf/settings.xml</code></li>
+<li><code>JDK</code> -&gt; <code>JDK安装</code> -&gt; <code>新增JDK</code> -&gt; <code>JAVA_HOME</code>填写java安装目录，如<code>/usr/lib/jvm/java-openjdk</code></li>
+<li><code>Git</code> -&gt; <code>Git installations</code> -&gt; <code>Path to Git executable</code>填写<code>/usr/bin/git</code>(可用which -a git查看)</li>
+<li><code>Maven</code> -&gt; <code>Maven安装</code> -&gt; <code>新增Maven</code> -&gt; <code>MAVEN_HOME</code>填写Maven安装目录，如<code>/usr/local/apache-maven-3.6.3</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="3-使用Maven构建Java应用程序"><a href="#3-使用Maven构建Java应用程序" class="headerlink" title="3. 使用Maven构建Java应用程序"></a>3. 使用Maven构建Java应用程序</h3><ol>
+<li>新建Item， 输入任务名称，选择Maven项目，点击“确定”</li>
+<li>源码管理，选择Git，填写仓库地址(<code>Repository URL</code>)和选择凭据(<code>Credentials</code>)</li>
+<li>构建环境，勾选<code>Add timestamps to the Console Output</code>，加上时间戳</li>
+<li>Build，<code>Goals and options</code>根据自己情况自行修改：<code>clean package -pl demo -am -Dmaven.test.skip=true -P beta</code><ul>
+<li>-pl 选项后可跟随{groupId}:{artifactId}或者所选模块的相对路径(多个模块以逗号分隔)，这里只想打包demo模块</li>
+<li>-am 表示同时处理选定模块所依赖的模块</li>
+<li>-P 打包的环境</li>
+</ul>
+</li>
+<li>Post Steps，发布步骤，这里可以选择执行shell脚本Execute shell（发布到和Jenkins是同一台服务器），Send files or execute commands over SSH（不同服务器）。</li>
+</ol>
+<h3 id="4-Maven构建配置【Post-Steps】"><a href="#4-Maven构建配置【Post-Steps】" class="headerlink" title="4. Maven构建配置【Post Steps】"></a>4. Maven构建配置【Post Steps】</h3><ol>
+<li>若发布到和Jenkins是同一台服务器，下拉框列表选择<code>Execute shell</code>，然后填写shell脚本；</li>
+<li>若不在同一服务器，下拉框选择<code>Send files or execute commands over SSH</code>，配置<code>SSH Server</code><ul>
+<li><code>Source files</code>填写Maven本地打包后Jar包路径，如：<code>target/demo-0.0.1-SNAPSHOT.jar</code></li>
+<li><code>Remove prefix</code>去除前缀，如：<code>target/</code></li>
+<li><code>Remote directory</code>拷贝到Linux服务器的路径，如：<code>/home/jenkins/test</code></li>
+<li><code>Exec command</code>Jar包拷贝后，执行脚本运行Jar包。</li>
+</ul>
+</li>
+<li>shell脚本详情(填写时去掉注释)：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">后台执行</span></span><br><span class="line">BUILD_ID=DONTKILLME</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入到项目</span></span><br><span class="line">cd /home/jenkins/test</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到原进程,<span class="built_in">kill</span></span></span><br><span class="line">Project_name=test</span><br><span class="line">pid=$(ps -ef | grep java| grep $Project_name|awk -F &#x27;[ ]+&#x27; &#x27;&#123;print $2&#125;&#x27;)</span><br><span class="line">kill -9 $pid</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动jar</span></span><br><span class="line">nohup java -jar $Project_name.jar &gt; run.txt &amp;</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag"># 环境配置</a>
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/06/jenkins-pipeline/" rel="next" title="「Jenkins」声明式流水线Jenkins Pipeline">
+                <i class="fa fa-chevron-left"></i> 「Jenkins」声明式流水线Jenkins Pipeline
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/10/jenkins-shell/" rel="prev" title="「Jenkins」Jenkins自动部署Jar到远程服务器">
+                「Jenkins」Jenkins自动部署Jar到远程服务器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0git%E5%87%AD%E6%8D%AE"><span class="nav-number">1.</span> <span class="nav-text">1. 添加git凭据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Jenkins%E9%85%8D%E7%BD%AEMaven%E4%B8%8EPublish-Over-SSH%E6%8F%92%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">2. Jenkins配置Maven与Publish Over SSH插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BD%BF%E7%94%A8Maven%E6%9E%84%E5%BB%BAJava%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">3. 使用Maven构建Java应用程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Maven%E6%9E%84%E5%BB%BA%E9%85%8D%E7%BD%AE%E3%80%90Post-Steps%E3%80%91"><span class="nav-number">4.</span> <span class="nav-text">4. Maven构建配置【Post Steps】</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

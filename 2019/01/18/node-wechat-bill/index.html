@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Node,NodeJs," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近逛掘金看见一片文章 非官方统计 2018 微信年度账单实现,作者利用调试微信获取到了 2018 年的所有消费明细，并根据类型进行分类统计，作文一个前端，便萌生了用 nodejs 实现一遍的想法，于是乎呢，就有了这篇文章了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="什么? 微信没有年度账单? 前端 nodejs 撸起来~ [接口实现]">
+<meta property="og:url" content="https://www.resonanat.com/2019/01/18/node-wechat-bill/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="最近逛掘金看见一片文章 非官方统计 2018 微信年度账单实现,作者利用调试微信获取到了 2018 年的所有消费明细，并根据类型进行分类统计，作文一个前端，便萌生了用 nodejs 实现一遍的想法，于是乎呢，就有了这篇文章了。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-01-18T06:24:29.000Z">
+<meta property="article:modified_time" content="2024-01-20T12:06:05.097Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Node">
+<meta property="article:tag" content="NodeJs">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2019/01/18/node-wechat-bill/"/>
+
+
+
+
+
+  <title>什么? 微信没有年度账单? 前端 nodejs 撸起来~ [接口实现] | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2019/01/18/node-wechat-bill/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">什么? 微信没有年度账单? 前端 nodejs 撸起来~ [接口实现]</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-18T14:24:29+08:00">
+                2019-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Node/" itemprop="url" rel="index">
+                    <span itemprop="name">Node</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近逛掘金看见一片文章 <a target="_blank" rel="noopener" href="https://juejin.im/post/5c383aa66fb9a049e412e9f3">非官方统计 2018 微信年度账单实现</a>,作者利用调试微信获取到了 <code>2018</code> 年的所有消费明细，并根据类型进行分类统计，作文一个前端，便萌生了用 <code>nodejs</code> 实现一遍的想法，于是乎呢，就有了这篇文章了。</p>
+<span id="more"></span>
+
+<p>由于 <code>@hibear</code> 大佬是用 <code>Java</code> 实现的，并且自己又不会 <code>Java</code>，所以呢里面很多东西确实看不太懂，然后就根据核心代码撸吧。</p>
+<p>好了，废话不多说，我们直接开始吧~</p>
+<p>首先初始化一个项目吧，按自己的习惯，配置下需要的东西</p>
+<p>大概配置完是这些文件</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">.editorconfig</span></span><br><span class="line"><span class="string">.gitignore</span></span><br><span class="line"><span class="string">config.js</span></span><br><span class="line"><span class="string">init/</span></span><br><span class="line"><span class="string">package.json</span></span><br><span class="line"><span class="string">README.md</span></span><br><span class="line"><span class="string">src/</span></span><br><span class="line"><span class="string">util/</span></span><br><span class="line"><span class="string">yarn.lock</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们来写个接口；</p>
+<p>我们这里选 <code>koa</code> 框架吧，毕竟自己还是蛮喜欢的~</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Koa 框架</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Koa</span> = <span class="built_in">require</span>(<span class="string">&#x27;koa&#x27;</span>)</span><br><span class="line"><span class="comment">// 实例化</span></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> <span class="title class_">Koa</span>()</span><br><span class="line"><span class="comment">// 监听端口</span></span><br><span class="line">app.<span class="title function_">listen</span>(config.<span class="property">port</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`the server is start at port <span class="subst">$&#123;config.port&#125;</span>`</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后我们来添加路由</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Koa</span> = <span class="built_in">require</span>(<span class="string">&#x27;koa&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">KoaRouter</span> = <span class="built_in">require</span>(<span class="string">&#x27;koa-router&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> <span class="title class_">Koa</span>()</span><br><span class="line"><span class="comment">// 创建 router 实例对象</span></span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> <span class="title class_">KoaRouter</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment">//注册路由</span></span><br><span class="line">router.<span class="title function_">get</span>(<span class="string">&#x27;/&#x27;</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">  ctx.<span class="property">body</span> = <span class="string">&#x27;welcome~&#x27;</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加路由中间件</span></span><br><span class="line">app.<span class="title function_">use</span>(router.<span class="title function_">routes</span>())</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对请求进行一些限制处理</span></span><br><span class="line">app.<span class="title function_">use</span>(router.<span class="title function_">allowedMethods</span>())</span><br><span class="line"></span><br><span class="line"><span class="comment">// 监听启动端口</span></span><br><span class="line">app.<span class="title function_">listen</span>(config.<span class="property">port</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`the server is start at port <span class="subst">$&#123;config.port&#125;</span>`</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>完整入口文件</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Koa</span> = <span class="built_in">require</span>(<span class="string">&#x27;koa&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">KoaRouter</span> = <span class="built_in">require</span>(<span class="string">&#x27;koa-router&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> bodyParser = <span class="built_in">require</span>(<span class="string">&#x27;koa-bodyparser&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&#x27;../config&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> <span class="title class_">Koa</span>()</span><br><span class="line"><span class="comment">// 创建 router 实例对象</span></span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> <span class="title class_">KoaRouter</span>()</span><br><span class="line"><span class="comment">// 账单获取核心逻辑</span></span><br><span class="line"><span class="keyword">const</span> wechatBill = <span class="built_in">require</span>(<span class="string">&#x27;./controllers/wechatBill&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 配置ctx.body解析中间件</span></span><br><span class="line">app.<span class="title function_">use</span>(<span class="title function_">bodyParser</span>())</span><br><span class="line"></span><br><span class="line"><span class="comment">//注册路由</span></span><br><span class="line">router.<span class="title function_">get</span>(<span class="string">&#x27;/&#x27;</span>, <span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">  ctx.<span class="property">body</span> = <span class="string">&#x27;welcome~&#x27;</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">router.<span class="title function_">post</span>(<span class="string">&#x27;/wechatBill&#x27;</span>, wechatBill)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加路由中间件</span></span><br><span class="line">app.<span class="title function_">use</span>(router.<span class="title function_">routes</span>())</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对请求进行一些限制处理</span></span><br><span class="line">app.<span class="title function_">use</span>(router.<span class="title function_">allowedMethods</span>())</span><br><span class="line"></span><br><span class="line"><span class="comment">// 监听启动端口</span></span><br><span class="line">app.<span class="title function_">listen</span>(config.<span class="property">port</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`the server is start at port <span class="subst">$&#123;config.port&#125;</span>`</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>好了，路由写完了，我们来看核心逻辑怎么写，根据大佬的思路是模拟微信的请求，带上必要的参数就好了，这里我们使用最熟悉的 <code>axios</code> 吧。</p>
+<p>由于代码太多这里就贴出核心的部分吧，完整版可以看下 <code>github</code> 的文件，请点击传送门-&gt; <a target="_blank" rel="noopener" href="https://github.com/ihoey/node-wechat-bill/blob/master/src/controllers/wechatBill.js">传送门</a></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="title class_">Loop</span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (lastResp.<span class="property">last_create_time</span> &lt; <span class="number">1514736000</span>) &#123;</span><br><span class="line">      wechatList.<span class="title function_">splice</span>(wechatList.<span class="title function_">indexOf</span>(wechat_id) &gt;&gt;&gt; <span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line">      <span class="title class_">Loop</span> = <span class="literal">false</span></span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;任务处理完毕，2018全部数据已存入&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    axios.<span class="title function_">request</span>(&#123;</span><br><span class="line">      <span class="attr">url</span>: <span class="string">`https://wx.tenpay.com/userroll/userrolllist`</span>,</span><br><span class="line">      <span class="attr">method</span>: <span class="string">&#x27;get&#x27;</span>,</span><br><span class="line">      <span class="attr">headers</span>: &#123;</span><br><span class="line">        <span class="string">&quot;Accept&quot;</span>: <span class="string">&quot;*/*&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Accept-Encoding&quot;</span>: <span class="string">&quot;gzip, deflate&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Accept-Language&quot;</span>: <span class="string">&quot;zh-CN,en-US;q=0.8&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Connection&quot;</span>: <span class="string">&quot;keep-alive&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Cookie&quot;</span>: <span class="string">`userroll_encryption=<span class="subst">$&#123;userroll_encryption&#125;</span>; userroll_pass_ticket=<span class="subst">$&#123;userroll_pass_ticket&#125;</span>`</span>,</span><br><span class="line">        <span class="string">&quot;Host&quot;</span>: <span class="string">&quot;wx.tenpay.com&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Q-Auth&quot;</span>: <span class="variable constant_">AUTH</span>,</span><br><span class="line">        <span class="string">&quot;Q-GUID&quot;</span>: <span class="variable constant_">GUID</span>,</span><br><span class="line">        <span class="string">&quot;Q-UA2&quot;</span>: <span class="title class_">UA2</span>,</span><br><span class="line">        <span class="string">&quot;Referer&quot;</span>: <span class="string">&quot;https://wx.tenpay.com/?classify_type=0&quot;</span>,</span><br><span class="line">        <span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Linux; Android 8.0; MIX 2 Build/OPR1.170623.027; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.132 MQQBrowser/6.2 TBS/044408 Mobile Safari/537.36 MMWEBID/4508 MicroMessenger/7.0.1380(0x27000038) Process/tools NetType/WIFI Language/zh_CN&quot;</span>,</span><br><span class="line">        <span class="string">&quot;X-DevTools-Emulate-Network-Conditions-Client-Id&quot;</span>: <span class="title class_">ClientId</span>,</span><br><span class="line">        <span class="string">&quot;X-Requested-With&quot;</span>: <span class="string">&quot;com.tencent.mm&quot;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">params</span>: &#123;</span><br><span class="line">        <span class="attr">classify_type</span>: <span class="number">0</span>,</span><br><span class="line">        <span class="attr">count</span>: <span class="variable constant_">PAGE_SIZE</span>,</span><br><span class="line">        exportkey,</span><br><span class="line">        <span class="attr">last_bill_id</span>: lastResp.<span class="property">last_bill_id</span>,</span><br><span class="line">        <span class="attr">last_bill_type</span>: lastResp.<span class="property">last_bill_type</span>,</span><br><span class="line">        <span class="attr">last_create_time</span>: lastResp.<span class="property">last_create_time</span>,</span><br><span class="line">        <span class="attr">last_trans_id</span>: lastResp.<span class="property">last_trans_id</span>,</span><br><span class="line">        <span class="attr">sort_type</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="attr">start_time</span>: lastResp.<span class="property">start_time</span>,</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line"></span><br><span class="line">      lastResp = res.<span class="property">data</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (!lastResp || lastResp.<span class="property">ret_code</span> != <span class="number">0</span> || !lastResp.<span class="property">record</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(lastResp);</span><br><span class="line">        <span class="title class_">Loop</span> = <span class="literal">false</span></span><br><span class="line">        ctx.<span class="property">body</span> = &#123;</span><br><span class="line">          <span class="attr">code</span>: <span class="number">2</span>,</span><br><span class="line">          <span class="attr">res</span>: lastResp.<span class="property">ret_msg</span> || <span class="string">&#x27;任务请求失败&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">`任务请求失败`</span>)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      ctx.<span class="property">body</span> = &#123;</span><br><span class="line">        <span class="attr">code</span>: <span class="number">0</span>,</span><br><span class="line">        <span class="attr">res</span>: <span class="string">&#x27;创建任务成功，正在获取账单中...&#x27;</span></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> dataList = res.<span class="property">data</span>.<span class="property">record</span>.<span class="title function_">map</span>(<span class="function"><span class="params">e</span> =&gt;</span> (&#123; wechat_id, ...e &#125;))</span><br><span class="line">      dataList.<span class="title function_">map</span>(<span class="keyword">async</span> e =&gt; &#123;</span><br><span class="line">        <span class="keyword">delete</span> e.<span class="property">coupon</span></span><br><span class="line">        <span class="keyword">const</span> sql = <span class="string">`INSERT INTO orders(<span class="subst">$&#123;<span class="built_in">Object</span>.keys(e)&#125;</span>) VALUES (<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(<span class="built_in">Object</span>.values(e))&#125;</span>)`</span></span><br><span class="line">        <span class="keyword">const</span> data = <span class="keyword">await</span> <span class="title function_">query</span>(sql.<span class="title function_">replace</span>(<span class="regexp">/\[|\]/g</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`存入成功`</span>, data.<span class="property">insertId</span>)</span><br><span class="line">      &#125;)</span><br><span class="line"></span><br><span class="line">    &#125;).<span class="title function_">catch</span>(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(err)</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">await</span> <span class="title function_">sleep</span>(<span class="number">1000</span>)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>好了，具体的代码可以看下 <code>github</code> 的参考~<br>-&gt; <a target="_blank" rel="noopener" href="https://github.com/ihoey/node-wechat-bill">传送门</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Node/" rel="tag"># Node</a>
+          
+            <a href="/tags/NodeJs/" rel="tag"># NodeJs</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/28/elastic-stack/" rel="next" title="「ElasticStack」Beats+Logstash+Elasticsearch+Kibana基础整合">
+                <i class="fa fa-chevron-left"></i> 「ElasticStack」Beats+Logstash+Elasticsearch+Kibana基础整合
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/01/mysql-base/" rel="prev" title="「MySQL」MySQL性能优化基础">
+                「MySQL」MySQL性能优化基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

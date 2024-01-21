@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端开发,Spring,SpringReactive,WebClient," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="WebClient是Spring WebFlux模块提供的一个非阻塞的基于响应式编程的进行HTTP请求的客户端工具。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Spring Reactive Stack」响应式 HTTP 请求客户端 WebClient">
+<meta property="og:url" content="https://www.resonanat.com/2021/03/20/spring-reactive-http/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="WebClient是Spring WebFlux模块提供的一个非阻塞的基于响应式编程的进行HTTP请求的客户端工具。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-03-20T04:01:42.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.581Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="SpringReactive">
+<meta property="article:tag" content="WebClient">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2021/03/20/spring-reactive-http/"/>
+
+
+
+
+
+  <title>「Spring Reactive Stack」响应式 HTTP 请求客户端 WebClient | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2021/03/20/spring-reactive-http/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Spring Reactive Stack」响应式 HTTP 请求客户端 WebClient</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-03-20T12:01:42+08:00">
+                2021-03-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringReactive/" itemprop="url" rel="index">
+                    <span itemprop="name">SpringReactive</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>WebClient</strong>是<code>Spring WebFlux</code>模块提供的一个非阻塞的基于响应式编程的进行<code>HTTP</code>请求的客户端工具。<span id="more"></span></p>
+<p>引入<code>WebFlux</code>依赖则可使用<code>WebClient</code>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-webflux<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="1-创建WebClient实例"><a href="#1-创建WebClient实例" class="headerlink" title="1. 创建WebClient实例"></a>1. 创建WebClient实例</h3><p><code>WebClient</code>接口提供了三个不同的静态方法（<code>create()</code>，<code>create(String baseUrl)</code>，<code>builder()</code>）和一个内部类（<code>WebClient.Bulider</code>）来创建<code>WebClient</code>实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自动注入WebClient的内部类WebClient.Builder</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> WebClient.Builder clientBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// WebClient.create()创建</span></span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient1</span> <span class="operator">=</span> WebClient.create();</span><br><span class="line">    <span class="comment">// WebClient.create(String baseUrl)</span></span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient2</span> <span class="operator">=</span> WebClient.create(<span class="string">&quot;http://www.test.com&quot;</span>);</span><br><span class="line">    <span class="comment">// WebClient.builder()创建</span></span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient3</span> <span class="operator">=</span> WebClient.builder().build();</span><br><span class="line">    <span class="comment">// 内部类WebClient.Builder创建</span></span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient4</span> <span class="operator">=</span> clientBuilder.build();</span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient5</span> <span class="operator">=</span> clientBuilder.baseUrl(<span class="string">&quot;http://www.test.com&quot;</span>).build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-GET-请求"><a href="#2-GET-请求" class="headerlink" title="2. GET 请求"></a>2. GET 请求</h3><h4 id="2-1-发起GET请求"><a href="#2-1-发起GET请求" class="headerlink" title="2.1 发起GET请求"></a>2.1 发起GET请求</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> WebClient.Builder clientBuilder;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                      <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/string&quot;</span>)        <span class="comment">// 请求路径</span></span><br><span class="line">                .retrieve()                 <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class);  <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-GET请求参数传递"><a href="#2-2-GET请求参数传递" class="headerlink" title="2.2 GET请求参数传递"></a>2.2 GET请求参数传递</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> WebClient.Builder clientBuilder;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 1. 请求路径里带参数(?id=5&amp;name=abc)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/get&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                             <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/param?id=5&amp;name=abc&quot;</span>)  <span class="comment">// 请求路径(带参数)</span></span><br><span class="line">                .retrieve()                        <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class);         <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 2. 占位符的形式传递参数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test2&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test2</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                             <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/&#123;1&#125;/&#123;2&#125;&quot;</span>, name, id)    <span class="comment">// 请求路径(占位符参数,若id=5,name=abc，则为&quot;/test/abc/5&quot;)</span></span><br><span class="line">                .retrieve()                        <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class);         <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 3. 另一种占位符的形式传递参数(类似<span class="doctag">@PathVariable</span>)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/&#123;name&#125;/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test3</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id, <span class="meta">@PathVariable(&quot;name&quot;)</span> String name)</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                              <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/&#123;name&#125;/&#123;id&#125;&quot;</span>, name, id) <span class="comment">// 请求路径(另一种占位符参数)</span></span><br><span class="line">                .retrieve()                         <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class);          <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 4. 使用 map 装载参数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test5&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test5</span><span class="params">()</span>&#123;</span><br><span class="line">        Map&lt;String,Object&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        map.put(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;abc&quot;</span>);</span><br><span class="line">        map.put(<span class="string">&quot;id&quot;</span>, <span class="number">5</span>);</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                              <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/&#123;name&#125;/&#123;id&#125;&quot;</span>, map)      <span class="comment">// 请求路径(使用map装载参数)</span></span><br><span class="line">                .retrieve()                         <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class);          <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="3-POST请求"><a href="#3-POST请求" class="headerlink" title="3. POST请求"></a>3. POST请求</h3><h4 id="3-1-发起POST请求"><a href="#3-1-发起POST请求" class="headerlink" title="3.1 发起POST请求"></a>3.1 发起POST请求</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> WebClient.Builder clientBuilder;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostMapping(&quot;/test/post&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .post()                     <span class="comment">// POST 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/post&quot;</span>)          <span class="comment">// 请求路径</span></span><br><span class="line">                .retrieve()                 <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class);  <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-2-POST请求参数传递"><a href="#3-2-POST请求参数传递" class="headerlink" title="3.2 POST请求参数传递"></a>3.2 POST请求参数传递</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@PostMapping(&quot;/test6&quot;)</span></span><br><span class="line"><span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test6</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">//提交参数设置</span></span><br><span class="line">    MultiValueMap&lt;String, String&gt; mulMap = <span class="keyword">new</span> <span class="title class_">LinkedMultiValueMap</span>&lt;&gt;();</span><br><span class="line">    mulMap.add(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;abc&quot;</span>);</span><br><span class="line">    mulMap.add(<span class="string">&quot;id&quot;</span>, <span class="string">&quot;5&quot;</span>);</span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">    Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">            .post()                                             <span class="comment">// POST 请求</span></span><br><span class="line">            .uri(<span class="string">&quot;/test/post&quot;</span>)                                  <span class="comment">// 请求路径</span></span><br><span class="line">            .contentType(MediaType.APPLICATION_FORM_URLENCODED) <span class="comment">// Content-Type: application/x-www-form-urlencoded</span></span><br><span class="line">            .body(BodyInserters.fromFormData(mulMap))           <span class="comment">// 请求参数</span></span><br><span class="line">            .retrieve()                                         <span class="comment">// 获取响应体</span></span><br><span class="line">            .bodyToMono(String.class);                          <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">    <span class="comment">// 打印响应数据</span></span><br><span class="line">    stringMono.subscribe(log::info);</span><br><span class="line">    <span class="keyword">return</span> stringMono;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="4-请求异常处理"><a href="#4-请求异常处理" class="headerlink" title="4. 请求异常处理"></a>4. 请求异常处理</h3><p>使用<code>WebClient</code>发送请求时， 如果接口返回的不是<code>200</code>状态（而是<code>4xx</code>、<code>5xx</code>这样的异常状态），则会抛出<code>WebClientResponseException</code>异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> WebClient.Builder clientBuilder;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 1. 【doOnError】方法适配所有异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/error1&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test7</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()</span><br><span class="line">                .uri(<span class="string">&quot;/test/error&quot;</span>)</span><br><span class="line">                .retrieve()</span><br><span class="line">                .bodyToMono(String.class)</span><br><span class="line">                .doOnError(WebClientResponseException.class, err -&gt; &#123;</span><br><span class="line">                    log.error(<span class="string">&quot;发生错误：&quot;</span> + err.getRawStatusCode() + <span class="string">&quot; &quot;</span> + err.getResponseBodyAsString());</span><br><span class="line">                &#125;);</span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 2. 【onStatus】方法根据状态码来适配指定异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/error2&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test8</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()</span><br><span class="line">                .uri(<span class="string">&quot;/test/error&quot;</span>)</span><br><span class="line">                .retrieve()</span><br><span class="line">                .onStatus(HttpStatus::is4xxClientError, resp -&gt; &#123;</span><br><span class="line">                    log.error(<span class="string">&quot;发生错误：&quot;</span> + resp.statusCode().value() + <span class="string">&quot; &quot;</span> + resp.statusCode().getReasonPhrase());</span><br><span class="line">                    <span class="keyword">return</span> Mono.error(<span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;请求失败&quot;</span>));</span><br><span class="line">                &#125;)</span><br><span class="line">                .onStatus(HttpStatus::is5xxServerError, resp -&gt; &#123;</span><br><span class="line">                    log.error(<span class="string">&quot;发生错误：&quot;</span> + resp.statusCode().value() + <span class="string">&quot; &quot;</span> + resp.statusCode().getReasonPhrase());</span><br><span class="line">                    <span class="keyword">return</span> Mono.error(<span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;服务器异常&quot;</span>));</span><br><span class="line">                &#125;)</span><br><span class="line">                .bodyToMono(String.class);</span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 3. 【onErrorReturn】方法来设置在发生异常时返回默认值，</span></span><br><span class="line"><span class="comment">     *    当请求发生异常是会使用该默认值作为响应结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/error3&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test9</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()</span><br><span class="line">                .uri(<span class="string">&quot;/test/error&quot;</span>)</span><br><span class="line">                .retrieve()</span><br><span class="line">                .bodyToMono(String.class)</span><br><span class="line">                .onErrorReturn(<span class="string">&quot;请求失败&quot;</span>);          <span class="comment">// 失败时返回默认值“请求失败”</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 4. 设置【超时属性】</span></span><br><span class="line"><span class="comment">     * 使用timeout()方法设置一个超时时长。如果HTTP请求超时，便会发生TimeoutException异常。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/setting&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test10</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                          <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/setting&quot;</span>)         <span class="comment">// 请求路径</span></span><br><span class="line">                .retrieve()                      <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class)        <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">                .timeout(Duration.ofSeconds(<span class="number">3</span>)); <span class="comment">// 3秒超时</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 5. 设置【异常自动重试】</span></span><br><span class="line"><span class="comment">     * 使用retry()方法可以设置当请求异常时的最大重试次数，如果不带参数则表示无限重试，直至成功。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/setting2&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test11</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">        Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">                .get()                          <span class="comment">// GET 请求</span></span><br><span class="line">                .uri(<span class="string">&quot;/test/setting&quot;</span>)         <span class="comment">// 请求路径</span></span><br><span class="line">                .retrieve()                      <span class="comment">// 获取响应体</span></span><br><span class="line">                .bodyToMono(String.class)        <span class="comment">// 响应数据类型转换(这里是String，也可以是自定义对象或集合)</span></span><br><span class="line">                .timeout(Duration.ofSeconds(<span class="number">3</span>))  <span class="comment">// 3秒超时</span></span><br><span class="line">                .retry(<span class="number">2</span>);                       <span class="comment">// 重试2次</span></span><br><span class="line">        <span class="comment">// 打印响应数据</span></span><br><span class="line">        stringMono.subscribe(log::info);</span><br><span class="line">        <span class="keyword">return</span> stringMono;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="5-Exchange获取完整的请求响应结果"><a href="#5-Exchange获取完整的请求响应结果" class="headerlink" title="5. Exchange获取完整的请求响应结果"></a>5. Exchange获取完整的请求响应结果</h3><p>前面我们都是使用<code>retrieve()</code>方法是直接获取响应体的内容。</p>
+<p>使用<code>exchangeToMono()</code>和<code>exchangeToFlux()</code>方法获取完整的代表响应结果的对象，通过该对象我们可以获取响应码、<code>contentType</code>、<code>contentLength</code>、响应消息体等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@PostMapping(&quot;/test/res&quot;)</span></span><br><span class="line"><span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">test12</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">//提交参数设置</span></span><br><span class="line">    MultiValueMap&lt;String, String&gt; mulMap = <span class="keyword">new</span> <span class="title class_">LinkedMultiValueMap</span>&lt;&gt;();</span><br><span class="line">    mulMap.add(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;abc&quot;</span>);</span><br><span class="line">    mulMap.add(<span class="string">&quot;id&quot;</span>, <span class="string">&quot;5&quot;</span>);</span><br><span class="line">    <span class="type">WebClient</span> <span class="variable">webClient</span> <span class="operator">=</span> webClientBuilder.baseUrl(<span class="string">&quot;https://www.test.com&quot;</span>).build();</span><br><span class="line">    Mono&lt;String&gt; stringMono = webClient</span><br><span class="line">            .post()                                             <span class="comment">// POST 请求</span></span><br><span class="line">            .uri(<span class="string">&quot;/test/post&quot;</span>)                               <span class="comment">// 请求路径</span></span><br><span class="line">            .contentType(MediaType.APPLICATION_FORM_URLENCODED) <span class="comment">// Content-Type: application/x-www-form-urlencoded</span></span><br><span class="line">            .body(BodyInserters.fromFormData(mulMap))           <span class="comment">// 请求参数</span></span><br><span class="line">            .exchangeToMono(response -&gt; &#123;                       <span class="comment">// 响应结果response</span></span><br><span class="line">                <span class="keyword">if</span> (response.statusCode().equals(HttpStatus.OK)) &#123;  <span class="comment">//</span></span><br><span class="line">                    <span class="keyword">return</span> response.bodyToMono(String.class);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> response.createException().flatMap(Mono::error);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">    <span class="comment">// 打印响应数据</span></span><br><span class="line">    stringMono.subscribe(log::info);</span><br><span class="line">    <span class="keyword">return</span> stringMono;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="6-WebClient在Spring-Cloud中的使用"><a href="#6-WebClient在Spring-Cloud中的使用" class="headerlink" title="6. WebClient在Spring Cloud中的使用"></a>6. WebClient在Spring Cloud中的使用</h3><p>引入依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-webflux<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-loadbalancer<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>编写配置，创建<code>WebClient.Bulider</code>类型的<code>Bean</code>，加上<code>@LoadBalaced</code>为<code>WebClient</code>增加负载均衡的支持。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.cloud.client.loadbalancer.LoadBalanced;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.reactive.function.client.WebClient;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LoadbalanceConfiguration</span> &#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span></span><br><span class="line">    <span class="keyword">public</span> WebClient.Builder <span class="title function_">builder</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> WebClient.builder();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编写Controller，客户端实现访问服务端资源，并对外提供访问接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/test&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReactiveClient</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> WebClient.Builder clientBuilder;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/get/string&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Mono&lt;String&gt; <span class="title function_">getServerString</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 通过 WebClient 访问 CLOUD-SERVER 服务的资源 （这里的CLOUD-SERVER是服务注册中心注册的微服务名）</span></span><br><span class="line">        <span class="keyword">return</span> clientBuilder.baseUrl(<span class="string">&quot;http://CLOUD-SERVER&quot;</span>).build().get().uri(<span class="string">&quot;/test/string&quot;</span>).retrieve().bodyToMono(String.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag"># 后端开发</a>
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+            <a href="/tags/SpringReactive/" rel="tag"># SpringReactive</a>
+          
+            <a href="/tags/WebClient/" rel="tag"># WebClient</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/12/spring-reactive-sse/" rel="next" title="「Spring Reactive Stack」服务端事件推送Server-Sent Events">
+                <i class="fa fa-chevron-left"></i> 「Spring Reactive Stack」服务端事件推送Server-Sent Events
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/05/06/redis-error/" rel="prev" title="「Redis」Redis故障处理-持久化时内存不足">
+                「Redis」Redis故障处理-持久化时内存不足 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BAWebClient%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.</span> <span class="nav-text">1. 创建WebClient实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-GET-%E8%AF%B7%E6%B1%82"><span class="nav-number">2.</span> <span class="nav-text">2. GET 请求</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E5%8F%91%E8%B5%B7GET%E8%AF%B7%E6%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 发起GET请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-GET%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 GET请求参数传递</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-POST%E8%AF%B7%E6%B1%82"><span class="nav-number">3.</span> <span class="nav-text">3. POST请求</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-%E5%8F%91%E8%B5%B7POST%E8%AF%B7%E6%B1%82"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 发起POST请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-POST%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 POST请求参数传递</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AF%B7%E6%B1%82%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">4. 请求异常处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Exchange%E8%8E%B7%E5%8F%96%E5%AE%8C%E6%95%B4%E7%9A%84%E8%AF%B7%E6%B1%82%E5%93%8D%E5%BA%94%E7%BB%93%E6%9E%9C"><span class="nav-number">5.</span> <span class="nav-text">5. Exchange获取完整的请求响应结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-WebClient%E5%9C%A8Spring-Cloud%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">6. WebClient在Spring Cloud中的使用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

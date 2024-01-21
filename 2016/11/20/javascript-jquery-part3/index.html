@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="原生Js,Js框架,JQuery," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="JQuery模块分析及其实现第三部分属性模块功能及实现,接第二部分!">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JQuery分析及实现part3之属性模块功能及实现">
+<meta property="og:url" content="https://www.resonanat.com/2016/11/20/javascript-jquery-part3/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="JQuery模块分析及其实现第三部分属性模块功能及实现,接第二部分!">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-11-20T03:51:28.000Z">
+<meta property="article:modified_time" content="2024-01-20T12:06:05.090Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="原生Js">
+<meta property="article:tag" content="Js框架">
+<meta property="article:tag" content="JQuery">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/11/20/javascript-jquery-part3/"/>
+
+
+
+
+
+  <title>JQuery分析及实现part3之属性模块功能及实现 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/11/20/javascript-jquery-part3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">JQuery分析及实现part3之属性模块功能及实现</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-20T11:51:28+08:00">
+                2016-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/" itemprop="url" rel="index">
+                    <span itemprop="name">javascript</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>JQuery模块分析及其实现第三部分属性模块功能及实现,接第二部分!</p>
+<span id="more"></span>
+
+<h2 id="知识点复习"><a href="#知识点复习" class="headerlink" title="知识点复习"></a>知识点复习</h2><ol>
+<li><p><code>css</code> 方法</p>
+<ul>
+<li>如果只传入一个参数<ul>
+<li>如果参数类型为对象,表示同时设置多个样式</li>
+<li>如果参数类型为字符串,表示获取指定的样式值</li>
+</ul>
+</li>
+<li>如果传入的两个参数,表示设置单个样式值</li>
+</ul>
+</li>
+<li><p><code>itcast.each</code> 方法: 遍历数组或伪数组</p>
+<ul>
+<li>第一个参数,指定遍历的对象</li>
+<li>第二个参数,指定的回调函数,对遍历到的每一个元素,进行相关处理</li>
+</ul>
+</li>
+</ol>
+<h2 id="attr方法-setAttribute-和-getAttribute"><a href="#attr方法-setAttribute-和-getAttribute" class="headerlink" title="attr方法( setAttribute 和 getAttribute )"></a>attr方法( setAttribute 和 getAttribute )</h2><ol>
+<li>功能: 获取(设置)属性节点值</li>
+<li>实现思路<ul>
+<li>给原型添加 <code>attr</code> 方法,定义两个参数:属性节点名字 <code>name</code> 以及属性节点值</li>
+<li>如果只传入一个参数<ul>
+<li>如果参数类型为对象,表示设置多个节点值</li>
+<li>否则获取指定的属性节点值(默认获取第一个 <code>dom</code> 元素的属性节点值)</li>
+</ul>
+</li>
+<li>如果传入两个参数,表示设置单个属性节点值.</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">attr</span>: <span class="keyword">function</span>(<span class="params">name,value</span>)&#123;</span><br><span class="line">	<span class="comment">//只传入一个参数</span></span><br><span class="line">	<span class="keyword">if</span>(value == <span class="literal">undefined</span>)&#123;</span><br><span class="line">		<span class="comment">//如果类型为对象,表示设置多个属性</span></span><br><span class="line">		<span class="keyword">if</span>(<span class="keyword">typeof</span> name ===<span class="string">&#x27;object&#x27;</span>)&#123;</span><br><span class="line">			<span class="comment">//遍历itcast上的每一个dom元素,并设置属性节点值</span></span><br><span class="line">			<span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params">v</span>)&#123;</span><br><span class="line">				<span class="comment">//枚举name对象上的每一个属性</span></span><br><span class="line">				<span class="keyword">for</span>(<span class="keyword">var</span> k <span class="keyword">in</span> name)&#123;</span><br><span class="line">					v.<span class="title function_">setAttribute</span>(k, name[k]);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123; <span class="comment">//如果类型为字符串,获取属性节点值</span></span><br><span class="line">			<span class="keyword">if</span>(!<span class="variable language_">this</span>[<span class="number">0</span>]) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">			<span class="keyword">return</span> <span class="variable language_">this</span>[<span class="number">0</span>].<span class="title function_">getAttribute</span>(name);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;<span class="keyword">else</span> &#123; <span class="comment">//传入两个参数,表示设置单个属性节点值</span></span><br><span class="line">		<span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params">v</span>) &#123;</span><br><span class="line">			v.<span class="title function_">setAttribute</span>(name, value)</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="variable language_">this</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<h2 id="html方法"><a href="#html方法" class="headerlink" title="html方法"></a>html方法</h2><ol>
+<li>功能:<ul>
+<li>不传参数,表示获取指定 <code>dom</code> 元素的 <code>innerHTML</code> 属性值</li>
+<li>否则,表示设置指定 <code>dom</code> 元素的 <code>innerHTML</code> 属性</li>
+</ul>
+</li>
+<li>实行思路<ul>
+<li>判断是否传入参数</li>
+<li>如果没穿,获取 <code>itcast</code> 对象上的第一个 <code>dom</code> 元素的 <code>innerHTML</code> 属性值</li>
+<li>否则,给 <code>itcast</code> 对象上的每一个 <code>dom</code> 元素设置 <code>innerHTML</code> 属性</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">html</span>: <span class="keyword">function</span>(<span class="params">html</span>) &#123;</span><br><span class="line">	<span class="comment">//如果没有给html传值,表示获取</span></span><br><span class="line">	<span class="keyword">if</span>(html==<span class="literal">undefined</span>)&#123;</span><br><span class="line">		<span class="comment">//如果icast没有任何dom元素,就返回一个期望值,即空字符串</span></span><br><span class="line">		<span class="comment">//如果有的话,就返回一个dom元素的innerHTML属性值</span></span><br><span class="line">		<span class="keyword">return</span> <span class="variable language_">this</span>[<span class="number">0</span>] ? <span class="variable language_">this</span>[<span class="number">0</span>].<span class="property">innerHTML</span> : <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;<span class="comment">//如果给html船只,给itcast对象上的每一个dom元素设置innerHTML属性</span></span><br><span class="line">		<span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params">v</span>)&#123;</span><br><span class="line">			v.<span class="property">innerHTML</span> = html;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<h2 id="text方法"><a href="#text方法" class="headerlink" title="text方法"></a>text方法</h2><ol>
+<li>功能<ul>
+<li>不传值,表示获取文本节点(返回的是后代中所有文本节点值)</li>
+<li>传值,设置指定 <code>dom</code> 元素文本值</li>
+</ul>
+</li>
+<li>实现思路<ul>
+<li>如果不传值,优先考虑浏览器是否支持 <code>textContent</code> 属性<ul>
+<li>如果支持,就使用 <code>textContent</code> 返回结果集中每一个 <code>dom</code> 元素的文本节点值</li>
+<li>否则,就是用 <code>innerText</code> 返回结果集中每一个 <code>dom</code> 元素的文本节点值</li>
+</ul>
+</li>
+<li>如果传值,给 <code>itcast</code> 对象上的每一个 <code>dom</code> 元素设置文本节点值.<ul>
+<li>如果支持 <code>textContent</code> 属性,就是用该属性设置文本</li>
+<li>否则,就是用 <code>innerText</code> 来设置文本.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">text</span>: <span class="keyword">function</span>(<span class="params">text</span>) &#123;</span><br><span class="line">	<span class="comment">// 如果没有传值，表示获取文本值</span></span><br><span class="line">	<span class="keyword">if</span>(text == <span class="literal">undefined</span>)&#123;</span><br><span class="line">		<span class="comment">// 定义结果变量，存储每个dom元素的文本</span></span><br><span class="line">		<span class="keyword">var</span> ret = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">		<span class="comment">// 遍历每一个dom元素</span></span><br><span class="line">		<span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params">v</span>) &#123;</span><br><span class="line">			<span class="comment">// 如果支持textContent，使用其获取文本，累加到ret上</span></span><br><span class="line">			ret += <span class="string">&#x27;textContent&#x27;</span> <span class="keyword">in</span> <span class="variable language_">document</span> ?</span><br><span class="line">				v.<span class="property">textContent</span> :</span><br><span class="line">				v.<span class="property">innerText</span>.<span class="title function_">replace</span>(<span class="regexp">/\r\n/g</span>, <span class="string">&#x27;&#x27;</span>);</span><br><span class="line">		&#125;);</span><br><span class="line">		<span class="comment">// 返回所有文本</span></span><br><span class="line">		<span class="keyword">return</span> ret;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果传值了，表示为每个dom设置文本</span></span><br><span class="line">		<span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params">v</span>) &#123;</span><br><span class="line">			<span class="comment">// 如果支持textContent，就使用该属性为当前dom元素设置文本节点值</span></span><br><span class="line">			<span class="comment">// 否则，使用innerText设置文本节点值。</span></span><br><span class="line">			<span class="keyword">if</span>(<span class="string">&#x27;textContent&#x27;</span> <span class="keyword">in</span> <span class="variable language_">document</span>)&#123;</span><br><span class="line">				v.<span class="property">textContent</span> = text;</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				v.<span class="property">innerText</span> = text;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<h2 id="val方法"><a href="#val方法" class="headerlink" title="val方法"></a>val方法</h2><ol>
+<li>功能( <code>value</code> 属性)<ul>
+<li>如果不传值,表示获取输入框的文本值</li>
+<li>如果传值, 表示给输入框 设置文本</li>
+</ul>
+</li>
+<li>实现思路<ul>
+<li>如果不传值，表示获取输入框的文本值（获取第一个文本框值）</li>
+<li>如果传值，表示给输入框 设置文本<ul>
+<li>遍历每一个输入框，同时给其设置文本</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">val</span>: <span class="keyword">function</span>(<span class="params">value</span>) &#123;</span><br><span class="line">	<span class="comment">// 如果没有传值，表示获取第一个dom元素的value属性值</span></span><br><span class="line">	<span class="comment">// 如果itcast对象上没有任何dom元素，返回空字符串</span></span><br><span class="line">	<span class="keyword">if</span>(value == <span class="literal">undefined</span>)&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="variable language_">this</span>[<span class="number">0</span>] ? <span class="variable language_">this</span>[<span class="number">0</span>].<span class="property">value</span> : <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;<span class="comment">// 否则，为每一个dom元素设置value属性值</span></span><br><span class="line">		<span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">			<span class="variable language_">this</span>.<span class="property">value</span> = value;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="prop方法"><a href="#prop方法" class="headerlink" title="prop方法"></a>prop方法</h2><ol>
+<li>功能:和 <code>attr</code> 相似<ul>
+<li>注意: 有些属性名称,比如 <code>for</code> , <code>class</code> 是保留字或关键字不能作为对象属性名称,所以要创建一个对象,需要转换这类的属性</li>
+<li>定义 <code>propFix</code> 对象,存储上述属性到这属性名称的映射关系</li>
+<li>如果只传入一个参数<ul>
+<li>类型为对象,同时给  <code>dom</code> 对象添加属性</li>
+<li>类型为字符串,获取 <code>itcast</code> 对象上的第一个 <code>dom</code> 对象的指定属性值</li>
+</ul>
+</li>
+<li>如果传入的参数,给所有的 <code>dom</code> 对象添加单个属性</li>
+<li>细节: 无论是设置还是获取属性,在操作之前,先要从 <code>propFix</code> 对象拿到映射后的属性名称<ul>
+<li>如果拿到的心的属性名称不为 <code>undefined</code> ,就用映射后的属性名来操作 <code>dom</code> 对象</li>
+<li>否则,那么久使用旧的属性名称来操作 <code>dom</code> 对象.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 属性模块</span></span><br><span class="line">itcast.<span class="property">propFix</span> = &#123;</span><br><span class="line">	<span class="string">&#x27;for&#x27;</span>: <span class="string">&#x27;htmlFor&#x27;</span>,</span><br><span class="line">	<span class="string">&#x27;class&#x27;</span>: <span class="string">&#x27;className&#x27;</span></span><br><span class="line">&#125;;</span><br><span class="line">itcast.<span class="title function_">each</span>([</span><br><span class="line">	<span class="string">&quot;tabIndex&quot;</span>,</span><br><span class="line">	<span class="string">&quot;readOnly&quot;</span>,</span><br><span class="line">	<span class="string">&quot;maxLength&quot;</span>,</span><br><span class="line">	<span class="string">&quot;cellSpacing&quot;</span>,</span><br><span class="line">	<span class="string">&quot;cellPadding&quot;</span>,</span><br><span class="line">	<span class="string">&quot;rowSpan&quot;</span>,</span><br><span class="line">	<span class="string">&quot;colSpan&quot;</span>,</span><br><span class="line">	<span class="string">&quot;useMap&quot;</span>,</span><br><span class="line">	<span class="string">&quot;frameBorder&quot;</span>,</span><br><span class="line">	<span class="string">&quot;contentEditable&quot;</span></span><br><span class="line">], <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">	itcast.<span class="property">propFix</span>[<span class="variable language_">this</span>.<span class="title function_">toLowerCase</span>()] = <span class="variable language_">this</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="attr">prop</span>: <span class="keyword">function</span>(<span class="params">name, value</span>) &#123;</span><br><span class="line">	<span class="comment">// 如果没有给value传值</span></span><br><span class="line">	<span class="keyword">var</span> prop;</span><br><span class="line">	<span class="keyword">if</span> (value == <span class="literal">undefined</span>) &#123;</span><br><span class="line">		<span class="comment">// 并且name的类型为 对象，表示给每一个dom对象添加多个属性</span></span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">typeof</span> name === <span class="string">&#x27;object&#x27;</span>) &#123;</span><br><span class="line">			<span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">				<span class="keyword">for</span> (<span class="keyword">var</span> k <span class="keyword">in</span> name) &#123;</span><br><span class="line">					<span class="comment">// 首先从propFix对象上获取属性名字</span></span><br><span class="line">					<span class="comment">// 如果有，就使用新的属性名字</span></span><br><span class="line">					<span class="comment">// 如果没有，就使用原来的属性名字</span></span><br><span class="line">					prop = itcast.<span class="property">propFix</span>[k] ? itcast.<span class="property">propFix</span>[k] : k;</span><br><span class="line">					<span class="variable language_">this</span>[prop] = name[k];</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果name的类型 为字符串，表示获取第一个dom对象的指定属性值</span></span><br><span class="line">			prop = itcast.<span class="property">propFix</span>[name] ? itcast.<span class="property">propFix</span>[name]: name;</span><br><span class="line">			<span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">length</span> &gt; <span class="number">0</span> ? <span class="variable language_">this</span>[<span class="number">0</span>][prop] : <span class="literal">null</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果传入两个参数，表示给每一个dom对象添加单个属性</span></span><br><span class="line">		<span class="comment">// 遍历itcast上的每一个dom对象，添加属性</span></span><br><span class="line">		prop = itcast.<span class="property">propFix</span>[name] ? itcast.<span class="property">propFix</span>[name]: name;</span><br><span class="line">		<span class="variable language_">this</span>.<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">			<span class="variable language_">this</span>[prop] = value;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 实现链式编程</span></span><br><span class="line">	<span class="keyword">return</span> <span class="variable language_">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%8E%9F%E7%94%9FJs/" rel="tag"># 原生Js</a>
+          
+            <a href="/tags/Js%E6%A1%86%E6%9E%B6/" rel="tag"># Js框架</a>
+          
+            <a href="/tags/JQuery/" rel="tag"># JQuery</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/19/javascript-jquery-part2/" rel="next" title="JQuery分析及实现part2之css部分功能及实现">
+                <i class="fa fa-chevron-left"></i> JQuery分析及实现part2之css部分功能及实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/21/javascript-jquery-part4/" rel="prev" title="JQuery分析及实现part4之DOM操作模块功能及实现">
+                JQuery分析及实现part4之DOM操作模块功能及实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0"><span class="nav-number">1.</span> <span class="nav-text">知识点复习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attr%E6%96%B9%E6%B3%95-setAttribute-%E5%92%8C-getAttribute"><span class="nav-number">2.</span> <span class="nav-text">attr方法( setAttribute 和 getAttribute )</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#html%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">html方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#text%E6%96%B9%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">text方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#val%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">val方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#prop%E6%96%B9%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">prop方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端开发,安全认证,SpringSecurity," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. Spring Security Servlet 安全架构Spring Security 设计的 Servlet 安全从架构上分为三个层次，分别是「认证」、「鉴权」、「入侵防护」。通过过滤器机制将安全逻辑应用到 Servlet 项目。 请求的接收和处理是通过一个一个的过滤器顺序执行实现的，过滤器是 Servlet 项目处理请求的基础。 Spring 将自己体系内的过滤器交由「过滤器代理Filt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Spring Security」安全架构与认证鉴权原理">
+<meta property="og:url" content="https://www.resonanat.com/2021/11/29/spring-security-filter/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="1. Spring Security Servlet 安全架构Spring Security 设计的 Servlet 安全从架构上分为三个层次，分别是「认证」、「鉴权」、「入侵防护」。通过过滤器机制将安全逻辑应用到 Servlet 项目。 请求的接收和处理是通过一个一个的过滤器顺序执行实现的，过滤器是 Servlet 项目处理请求的基础。 Spring 将自己体系内的过滤器交由「过滤器代理Filt">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/up-0190e15403889a4a54ded3892f2a2d7cd18.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-911c8967517a976252c03eb5d98f9a97151.webp">
+<meta property="article:published_time" content="2021-11-29T06:01:00.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.587Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="安全认证">
+<meta property="article:tag" content="SpringSecurity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/up-0190e15403889a4a54ded3892f2a2d7cd18.webp">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2021/11/29/spring-security-filter/"/>
+
+
+
+
+
+  <title>「Spring Security」安全架构与认证鉴权原理 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2021/11/29/spring-security-filter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Spring Security」安全架构与认证鉴权原理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-11-29T14:01:00+08:00">
+                2021-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" itemprop="url" rel="index">
+                    <span itemprop="name">安全认证</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-Spring-Security-Servlet-安全架构"><a href="#1-Spring-Security-Servlet-安全架构" class="headerlink" title="1. Spring Security Servlet 安全架构"></a>1. Spring Security Servlet 安全架构</h3><p><code>Spring Security</code> 设计的 <code>Servlet</code> 安全从架构上分为三个层次，分别是「认证」、「鉴权」、「入侵防护」。通过<strong>过滤器机制</strong>将安全逻辑应用到 <code>Servlet</code> 项目。</p>
+<p>请求的接收和处理是通过一个一个的过滤器顺序执行实现的，过滤器是 <code>Servlet</code> 项目处理请求的基础。</p>
+<p><code>Spring</code> 将自己体系内的过滤器交由「过滤器代理<code>FilterChainProxy</code>」管理，<code>FilterChainProxy</code> 同样也是一个过滤器，被封装在 <code>Spring</code> 的「过滤器委托代理<code>DelegatingFilterProxy</code>」中。<br><code>Spring Security</code> 在 <code>FilterChainProxy</code> 中加入了「安全过滤器链<code>SecurityFilterChain</code>」实现安全保护功能。<span id="more"></span></p>
+<p>其过程如图：<br><img src="/up-0190e15403889a4a54ded3892f2a2d7cd18.webp"></p>
+<p>安全过滤器链（<code>SecurityFilterChain</code>）的特点：</p>
+<ul>
+<li>为所有 <code>Spring Security</code> 支持的 <code>Servlet</code> 指明了起点；</li>
+<li>对于一些后台操作，可以提升执行效率；</li>
+<li>在 <code>Servlet</code> 容器中，过滤器的选择是由 <code>URL</code> 决定的，如此便可针对不同 <code>URL</code> 指定相互独立的安全策略。</li>
+</ul>
+<h4 id="1-1-安全过滤器-Filter"><a href="#1-1-安全过滤器-Filter" class="headerlink" title="1.1 安全过滤器 Filter"></a>1.1 安全过滤器 Filter</h4><p><code>Spring Security</code> 内置了 <code>33</code> 种安全过滤器，每个过滤器有固定的顺序及应用场景；内置过滤器的参数设置通过 <code>HttpSecurity</code> 类相应的配置方法完成。</p>
+<p>在认证与授权中关键的三个过滤器：</p>
+<ol>
+<li><code>UsernamePasswordAuthenticationFilter</code>：该过滤器用于拦截我们表单提交的请求（默认为&#x2F;login），进行用户的认证过程。</li>
+<li><code>FilterSecurityInterceptor</code>：该过滤器主要用来进行授权判断。</li>
+<li><code>ExceptionTranslationFilter</code>：该过滤器主要用来捕获处理<code>spring security</code>抛出的异常，异常主要来源于<code>FilterSecurityInterceptor</code>。</li>
+</ol>
+<p><code>Spring Security</code> 的认证、授权异常在过滤器校验过程中产生，并在 <code>ExceptionTranslationFilter</code> 中接收并进行处理，</p>
+<ol>
+<li><code>ExceptionTranslationFilter</code> 过滤器首先像其他过滤器一样，调用过滤器链的执行方法 <code>FilterChain.doFilter(request, response)</code> 启动过滤处理；</li>
+<li>如果当前的用户没有通过认证或者因为其他原因在执行过程中抛出了 AuthenticationException 异常，此时将开启「认证流程」：<ul>
+<li>清空 <code>SecurityContextHolder</code> 对象；</li>
+<li>并将原始请求信息「<code>request</code>」保存到 <code>RequestCache</code> 对象中；</li>
+<li>使用 <code>AuthenticationEntryPoint</code> 对象存储的认证地址，向客户端索要身份证明。例如，使用浏览器登录的用户，将浏览器地址重定向到 &#x2F;login 或者回传一个 WWW-Authenticate 认证请求头。</li>
+</ul>
+</li>
+<li>如果当前用户身份信息已确认，但是没有访问权限，则会产生 <code>AccessDeniedException</code> 异常，然后访问被拒绝。继续执行拒绝处理 <code>AccessDeniedHandler</code>。</li>
+</ol>
+<h4 id="1-2-自定义过滤器-Filter"><a href="#1-2-自定义过滤器-Filter" class="headerlink" title="1.2 自定义过滤器 Filter"></a>1.2 自定义过滤器 Filter</h4><p>在 <code>HttpSecurity</code> 对象中增加自定义 <code>Filter</code> 可用于实现认证方式的扩展等场景，扩展 <code>Filter</code> 需要实现 <code>javax.servlet.Filter</code> 接口；并且需要指定新过滤器的位置。</p>
+<p>例如，扩展自定义接口 SimpleFilter。</p>
+<ol>
+<li>自定义接口类</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleFilter</span> <span class="keyword">implements</span> <span class="title class_">Filter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)</span> <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;In SimpleFilter&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>加入到指定位置，比如加在 UsernamePasswordAuthenticationFilter 之前</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http.addFilterBefore(<span class="keyword">new</span> <span class="title class_">SimpleFilter</span>(), UsernamePasswordAuthenticationFilter.class);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Spring-Security-认证"><a href="#2-Spring-Security-认证" class="headerlink" title="2. Spring Security 认证"></a>2. Spring Security 认证</h3><h4 id="2-1-Spring-Security-基本认证组件"><a href="#2-1-Spring-Security-基本认证组件" class="headerlink" title="2.1 Spring Security 基本认证组件"></a>2.1 Spring Security 基本认证组件</h4><table>
+    <thead><tr><th>组别</th><th>组件名</th><th>简述</th></tr></thead>
+    <tbody>
+        <tr><td rowspan="4">存储单元</td><td>Authentication</td><td>维护用户用于认证的信息</td></tr>
+        <tr><td>GrantedAuthority</td><td>认证用户的权限信息比如角色、范围等等</td></tr>
+        <tr><td>SecurityContextHolder</td><td>用于维护 SpringContext</td></tr>
+        <tr><td>SecurityContext</td><td>用来存储当前认证用户的信息</td></tr>
+        <tr><td rowspan="4">认证管理</td><td>AuthenticationManager</td><td>SpringSecurity 向外提供的用于认证的 API 集合</td></tr>
+        <tr><td>ProviderManager</td><td>AuthenticationManager 的常见实现类</td></tr>
+        <tr><td>AuthenticationProvider</td><td>用于 ProviderManager 提供认证实现</td></tr>
+        <tr><td>AuthenticationEntryPoint</td><td>用于获取用户认证信息</td></tr>
+        <tr><td>流程管理</td><td>AbstractAuthenticationProcessingFilter</td><td>是认证过滤器的基础，用于组合认证流程</td></tr>
+    </tbody>
+</table>
+
+
+<h4 id="2-2-存储单元"><a href="#2-2-存储单元" class="headerlink" title="2.2 存储单元"></a>2.2 存储单元</h4><p><img src="/up-911c8967517a976252c03eb5d98f9a97151.webp"></p>
+<ol>
+<li><code>SecurityContextHolder</code> 对象是整个 <code>Spring Security</code> 体系的核心，它维护着 <code>SecurityContext</code> 对象。它是唯一的。</li>
+<li><code>SecurityContext</code> 对象用于衔接 <code>SecurityContextHolder</code> 和 <code>Authentication</code> 对象，是对 <code>Authentication</code> 的外层封装。</li>
+<li><code>Authentication</code> 是用户的认证信息。</li>
+</ol>
+<p><code>Authentication</code>对象有三个核心属性：</p>
+<ul>
+<li><strong>principal</strong>：用户的身份信息；</li>
+<li><strong>credentials</strong>：用户的认证凭据，比如密码，通常情况下，当用户完成认证后，此项内容就会被清空；</li>
+<li><strong>authorities</strong>：用户的权限，用于更高层次的鉴权功能，通常包括角色、使用范围等信息。该属性基本由 <code>GrantedAuthority</code> 实现。<code>GrantedAuthority</code> 是在前述 <code>Authentication</code> 对象中所指的权限信息。在开发过程中，可以通过 <code>Authentication.getAuthorities()</code> 方法获取。权限信息通常包括角色、范围，或者其他扩展内容。</li>
+</ul>
+<p><code>Authentication</code> 两个主要作用：</p>
+<ol>
+<li>为 <code>AuthenticationManager</code> 对象提供用于认证的信息载体；</li>
+<li>用于获取某个用户的基本信息。</li>
+</ol>
+<h4 id="2-3-认证管理"><a href="#2-3-认证管理" class="headerlink" title="2.3 认证管理"></a>2.3 认证管理</h4><ol>
+<li><code>AuthenticationManager</code> 为 <code>Spring</code> 过滤器提供认证支持 <code>API</code>。<code>AuthenticationManager</code> 的实现形式并没有严格限制，通常情况下使用 <code>ProviderManager</code>。</li>
+<li><code>ProviderManager</code> 是 <code>AuthenticationManager</code> 的最常用的实现类，它包含了一系列的 <code>AuthenticationProvider</code> 对象，用以判断认证流程是否完成、认证结构是否成功。</li>
+<li><code>AuthenticationProvider</code>：每个 <code>ProviderManager</code> 可以包含多个 <code>AuthenticationProvider</code> ，每个 <code>AuthenticationProvider</code> 提供一种认证类型，例如：<code>DaoAuthenticationProvider</code> 可以完成「用户名 &#x2F; 密码」的认证，<code>JwtAuthenticationProvider</code> 用于完成 JWT 方式的认证。</li>
+<li><code>AuthenticationEntryPoint</code> 在当一个请求包含的认证信息不全时，比如未认证终端访问受保护资源时发挥作用，如跳转到登录页面、返回认证要求等。</li>
+</ol>
+<h4 id="2-4-流程管理"><a href="#2-4-流程管理" class="headerlink" title="2.4 流程管理"></a>2.4 流程管理</h4><p><code>AbstractAuthenticationProcessingFilter</code> 是所有认证过滤器的基类。</p>
+<ol>
+<li>当用户提交认证信息，AbstractAuthenticationProcessingFilter 首先从请求信息（例如用户名、密码）中创建 Authentication 对象；</li>
+<li>将 Authentication 对象传递给 AuthenticationManager 对象，用于后续认证；</li>
+<li>如果认证失败，则执行失败流程：<ul>
+<li>清空 SecurityContextHolder 对象；</li>
+<li>触发 RememberMeServices.loginFail 方法；</li>
+<li>触发 AuthenticationFailureHandler。</li>
+</ul>
+</li>
+<li>如果认证成功，则执行成功流程：<ul>
+<li>SessionAuthenticationStrategy 登记新的登录；</li>
+<li>将 Authentication 对象设置到 SecurityContextHolder 对象中，并将 SecurityContext 对象保持到 Session 中；</li>
+<li>调用 RememberMeServices.loginSuccess 方法；</li>
+<li>ApplicationEventPublisher 发起事件 InteractiveAuthenticationSuccessEvent</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-Spring-Security-鉴权"><a href="#3-Spring-Security-鉴权" class="headerlink" title="3. Spring Security 鉴权"></a>3. Spring Security 鉴权</h3><p>Spring Security 包含<strong>确认身份</strong>和<strong>确认身份的可执行操作</strong>两部分，前者为认证(<code>Authentication</code>)，后者即为鉴权(<code>Authorization</code>)；</p>
+<h4 id="3-1-权限"><a href="#3-1-权限" class="headerlink" title="3.1 权限"></a>3.1 权限</h4><p><code>Spring Security</code> 的权限默认是以字符串形式存储的权限信息，比如角色名称、功能名称等；</p>
+<p>在用户身份信息得到确认后，<code>Authentication</code> 中会存储一系列的 <code>GrantedAuthority</code> 对象，这些对象用来判断用户可以使用哪些资源。</p>
+<p><code>GrantedAuthority</code> 对象通过 <code>AuthenticationManager</code> 插入到 <code>Authentication</code> 对象中，并被 <code>AccessDecisionManager</code> 使用，判断其权限。</p>
+<p><code>GrantedAuthority</code> 是一个接口，其仅包含一个 <code>getAuthority()</code> 方法，返回一个字符串值，该值作为权限的描述，当权限较为复杂，该方法需要返回 null，此时 <code>AccessDecisionManager</code> 会根据 <code>getAuthority()</code> 返回值情况判断是否要进行特殊处理。</p>
+<p><code>SimpleGrantedAuthority</code> 是 <code>GrantedAuthority</code> 的一个基础实现类，可以满足一般的业务需求。</p>
+<h4 id="3-2-鉴权"><a href="#3-2-鉴权" class="headerlink" title="3.2 鉴权"></a>3.2 鉴权</h4><ul>
+<li>前置鉴权：由 <code>AccessDecisionManager</code> 对象判断其是否允许继续执行； 权限判断发生在方法被调用前，或者 WEB 请求之前。不满足抛出 <code>AccessDeniedException</code> 异常。</li>
+<li>后置鉴权：通过 <code>AfterInvocationManager</code> 进行管理；后置鉴权在资源被访问后，根据权限的判定来修改返回的内容，或者返回 <code>AccessDeniedException</code>。</li>
+</ul>
+<p>前置鉴权 <code>AccessDecisionManager</code> 对象由 <code>AbstractSecurityInterceptor</code> 发起调用，其职责是给出资源是否能被访问的最终结果；</p>
+<ul>
+<li><code>AccessDecisionManager</code> 包含三个主要方法：<ul>
+<li><code>boolean supports(ConfigAttribute attribute);</code>：判断配置属性是否可被访问；</li>
+<li><code>boolean supports(Class clazz);</code>：判断安全对象的类型是否支持被访问；</li>
+<li><code>void decide(Authentication authentication, Object secureObject,Collection&lt;ConfigAttribute&gt; attrs) throws AccessDeniedException;</code>：通过认证信息、安全对象、权限信息综合判断安全对象是否允许被访问。</li>
+</ul>
+</li>
+</ul>
+<p><code>Spring Security</code> 内置了以「<strong>投票</strong>」为判定方法的鉴权策略。<code>Spring Security</code> 的鉴权策略可以由用户自己实现。</p>
+<p><strong>投票策略</strong>下，<code>AccessDecisionManager</code> 控制着一系列的 <code>AccessDecisionVoter</code> 实例，判断权限是否满足，如果不满足抛出 <code>AccessDeniedException</code> 异常。</p>
+<ul>
+<li><code>AccessDecisionVoter</code> 也包含三个方法：<ul>
+<li><code>boolean supports(ConfigAttribute attribute);</code>：判断配置属性是否支持；</li>
+<li><code>boolean supports(Class clazz);</code>：判断类型是否支持；</li>
+<li><code>int vote(Authentication authentication, Object object, Collection&lt;ConfigAttribute&gt; attrs);</code>：根据认证信息对安全资源进行投票。</li>
+</ul>
+</li>
+</ul>
+<p>投票鉴权分为三类：</p>
+<ul>
+<li>基于角色的投票：<code>RoleVoter</code>；</li>
+<li>基于认证信息的投票：<code>AuthenticatedVoter</code>，主要区分认证用户、匿名用户等；</li>
+<li>自定义投票策略。</li>
+</ul>
+<h4 id="3-3-Servlet-请求鉴权流程"><a href="#3-3-Servlet-请求鉴权流程" class="headerlink" title="3.3 Servlet 请求鉴权流程"></a>3.3 Servlet 请求鉴权流程</h4><p><code>Servlet</code> 鉴权主要围绕着 <code>FilterSecurityInterceptor</code> 类展开，该类作为一个安全过滤器，被放置在 <code>FilterChainProxy</code> 中。</p>
+<p>具体流程如下：</p>
+<ol>
+<li><code>FilterSecurityInterceptor</code> 从 <code>SecurityContextHolder</code> 中获取 <code>Authentication</code> 对象；</li>
+<li><code>FilterSecurityInterceptor</code> 从 <code>HttpServletRequest</code>、<code>HttpServletREsponse</code>、 <code>FilterChain</code> 中创建 <code>FilterInvocation</code> 对象；</li>
+<li>将创建的 <code>FilterInvocation</code> 对象传递给 <code>SecurityMetadataSource</code> 用来获取 <code>ConfigAttribute</code> 对象集合；</li>
+<li>最后，将 <code>Authentication</code>、<code>FilterInvocation</code> 和 <code>ConfigAttribute</code> 对象传递给 <code>AccessDecisionManager</code> 实例验证权限：<ul>
+<li>如果验证失败，将抛出 <code>AccessDeniedException</code> 异常，并由 <code>ExceptionTranslationFilter</code> 接收并处理；</li>
+<li>如果验证通过，<code>FilterSecurityInterceptor</code> 将控制权交还给 <code>FilterChain</code>，使程序继续执行。</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag"># 后端开发</a>
+          
+            <a href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" rel="tag"># 安全认证</a>
+          
+            <a href="/tags/SpringSecurity/" rel="tag"># SpringSecurity</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/11/25/spring-security-base/" rel="next" title="「Spring Security」Spring Security 基础入门示例">
+                <i class="fa fa-chevron-left"></i> 「Spring Security」Spring Security 基础入门示例
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/12/09/spring-security-jwt/" rel="prev" title="「Spring Security」整合 JWT 实现无状态登录示例">
+                「Spring Security」整合 JWT 实现无状态登录示例 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Spring-Security-Servlet-%E5%AE%89%E5%85%A8%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">1. Spring Security Servlet 安全架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-%E5%AE%89%E5%85%A8%E8%BF%87%E6%BB%A4%E5%99%A8-Filter"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 安全过滤器 Filter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%87%E6%BB%A4%E5%99%A8-Filter"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 自定义过滤器 Filter</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Spring-Security-%E8%AE%A4%E8%AF%81"><span class="nav-number">2.</span> <span class="nav-text">2. Spring Security 认证</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Spring-Security-%E5%9F%BA%E6%9C%AC%E8%AE%A4%E8%AF%81%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Spring Security 基本认证组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E5%AD%98%E5%82%A8%E5%8D%95%E5%85%83"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 存储单元</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E8%AE%A4%E8%AF%81%E7%AE%A1%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 认证管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-%E6%B5%81%E7%A8%8B%E7%AE%A1%E7%90%86"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 流程管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Spring-Security-%E9%89%B4%E6%9D%83"><span class="nav-number">3.</span> <span class="nav-text">3. Spring Security 鉴权</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-%E6%9D%83%E9%99%90"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 权限</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-%E9%89%B4%E6%9D%83"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 鉴权</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-Servlet-%E8%AF%B7%E6%B1%82%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Servlet 请求鉴权流程</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

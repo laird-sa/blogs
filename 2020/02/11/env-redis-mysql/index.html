@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="环境配置,MySQL,Redis," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近由于工作的需要，需要在同一台服务器上搭建两个Redis与MySQL的实例。多实例：就是在一台机器上面开启多个不同的端口(如Redis用6379&#x2F;6380，MySQL用3306&#x2F;3307等)，运行多个服务进程；公用一套安装程序，使用不同的配置文件，数据文件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「环境配置」Redis与MySQL多实例配置">
+<meta property="og:url" content="https://www.resonanat.com/2020/02/11/env-redis-mysql/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="最近由于工作的需要，需要在同一台服务器上搭建两个Redis与MySQL的实例。多实例：就是在一台机器上面开启多个不同的端口(如Redis用6379&#x2F;6380，MySQL用3306&#x2F;3307等)，运行多个服务进程；公用一套安装程序，使用不同的配置文件，数据文件。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-11T15:08:46.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.544Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="环境配置">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2020/02/11/env-redis-mysql/"/>
+
+
+
+
+
+  <title>「环境配置」Redis与MySQL多实例配置 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/02/11/env-redis-mysql/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「环境配置」Redis与MySQL多实例配置</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-11T23:08:46+08:00">
+                2020-02-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近由于工作的需要，需要在同一台服务器上搭建两个<code>Redis</code>与<code>MySQL</code>的实例。<br>多实例：就是在一台机器上面开启多个不同的端口(如<code>Redis</code>用<code>6379</code>&#x2F;<code>6380</code>，<code>MySQL</code>用<code>3306</code>&#x2F;<code>3307</code>等)，运行多个服务进程；公用一套安装程序，使用不同的配置文件，数据文件。</p>
+<span id="more"></span>
+
+<h3 id="1-Redis多实例配置"><a href="#1-Redis多实例配置" class="headerlink" title="1. Redis多实例配置"></a>1. Redis多实例配置</h3><h4 id="1-1-查看主机Redis信息"><a href="#1-1-查看主机Redis信息" class="headerlink" title="1.1 查看主机Redis信息"></a>1.1 查看主机Redis信息</h4><ol>
+<li>用<code>ps</code>命令查看<code>Redis</code>进程</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] ps -ef |grep redis</span><br><span class="line">root      1706     1  0  2019 ?        04:12:09 /usr/local/bin/redis-server *:6379                    </span><br><span class="line">root     18174  2560  0 15:35 pts/0    00:00:00 grep redis</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查找配置文件位置</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] locate redis.conf</span><br><span class="line">/etc/redis.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-2-拷贝配置文件并修改"><a href="#1-2-拷贝配置文件并修改" class="headerlink" title="1.2 拷贝配置文件并修改"></a>1.2 拷贝配置文件并修改</h4><ol>
+<li>拷贝<code>redis.conf</code>并命名为<code>redis6380.conf</code>，并修改参数</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] <span class="built_in">cp</span> /etc/redis.conf /etc/redis6380.conf</span><br><span class="line">[root@localhost ~] vim /etc/redis6380.conf</span><br><span class="line"><span class="comment"># 查找 /pidfile 找到pid位置</span></span><br><span class="line"><span class="comment"># pidfile /var/run/redis.pid        #修改pid，每个实例需要运行在不同的pid</span></span><br><span class="line">pidfile /var/run/redis6380.pid</span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># 查找 /port 6379 找到端口位置</span></span><br><span class="line"><span class="comment"># port 6379                         #修改端口</span></span><br><span class="line">port 6380</span><br><span class="line"><span class="comment">#                      </span></span><br><span class="line"><span class="comment"># 查找 /dir 找到数据目录位置</span></span><br><span class="line"><span class="comment"># dir /mnt/newdatadrive/data/redis  #修改数据存放目录</span></span><br><span class="line"><span class="built_in">dir</span> /mnt/newdatadrive/data/redis6380</span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># 已开启Redis持久化</span></span><br><span class="line">appendonly <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>准备上面配置的文件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] <span class="built_in">mkdir</span> –p /mnt/newdatadrive/data/redis6380</span><br><span class="line">[root@localhost ~] <span class="built_in">cp</span> /var/run/redis.pid /var/run/redis6380.pid</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="1-3-启动测试"><a href="#1-3-启动测试" class="headerlink" title="1.3 启动测试"></a>1.3 启动测试</h4><ol>
+<li>启动<code>6380</code>端口<code>Redis</code>服务，并查看<code>Redis</code>进程</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] /usr/local/bin/redis-server /etc/redis6380.conf</span><br><span class="line">[root@localhost ~] ps -ef |grep redis</span><br><span class="line">root      1706     1  0  2019 ?        04:12:00 /usr/local/bin/redis-server *:6379         </span><br><span class="line">root     15967     1  0 12:16 ?        00:00:00 /usr/local/bin/redis-server *:6380             </span><br><span class="line">root     15994  8014  0 12:16 pts/2    00:00:00 grep redis</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>测试登录<code>Redis</code>客户端</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] redis-cli -p 6380</span><br><span class="line">127.0.0.1:6380&gt; QUIT     <span class="comment">#退出</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>停止<code>6380</code>端口的<code>Redis</code>服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -p 6380 shutdown</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="1-4-Redis数据迁移"><a href="#1-4-Redis数据迁移" class="headerlink" title="1.4 Redis数据迁移"></a>1.4 Redis数据迁移</h4><ol>
+<li>登录原<code>Redis</code>客户端(<code>6379</code>)</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] redis-cli -p 6379</span><br><span class="line">127.0.0.1:6379&gt; SAVE             <span class="comment">#数据备份</span></span><br><span class="line">127.0.0.1:6379&gt; CONFIG GET <span class="built_in">dir</span>   <span class="comment">#查看Redis数据目录</span></span><br><span class="line">1) <span class="string">&quot;dir&quot;</span></span><br><span class="line">2) <span class="string">&quot;/mnt/newdatadrive/data/redis&quot;</span></span><br><span class="line">127.0.0.1:6379&gt; QUIT             <span class="comment">#退出</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>拷贝数据文件<code>appendonly.aof</code>和<code>dump.rdb</code>到<code>6380</code></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看6379的数据文件</span></span><br><span class="line">[root@localhost ~] <span class="built_in">cd</span> /mnt/newdatadrive/data/redis &amp;&amp; ll</span><br><span class="line">total 55176</span><br><span class="line">-rw-r--r-- 1 root root 55411226 Feb 11 09:25 appendonly.aof</span><br><span class="line">-rw-r--r-- 1 root root  1017181 Feb 11 12:28 dump.rdb</span><br><span class="line"><span class="comment"># 拷贝到6380</span></span><br><span class="line">[root@localhost ~] \<span class="built_in">cp</span> /mnt/newdatadrive/data/redis/appendonly.aof /mnt/newdatadrive/data/redis6380/appendonly.aof</span><br><span class="line">[root@localhost ~] \<span class="built_in">cp</span> /mnt/newdatadrive/data/redis/dump.rdb /mnt/newdatadrive/data/redis6380/dump.rdb</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>启动<code>6380</code>端口<code>Redis</code>服务，导入<code>AOF</code>数据文件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] /usr/local/bin/redis-server /etc/redis6380.conf</span><br><span class="line">[root@localhost ~] redis-cli -p 6380 --pipe &lt; /mnt/newdatadrive/data/redis6380/appendonly.aof</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>登录<code>Redis</code>查看数据</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] redis-cli -p 6380</span><br><span class="line">127.0.0.1:6380&gt;   <span class="comment">#输入具体命令查看数据</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-5-配置远程可访问"><a href="#1-5-配置远程可访问" class="headerlink" title="1.5 配置远程可访问"></a>1.5 配置远程可访问</h4><ol>
+<li>修改配置文件<code>redis6380.conf</code></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] vim /etc/redis6380.conf</span><br><span class="line"><span class="comment"># 查找 /bind 找到：bind 127.0.0.1并注释，其它ip地址也可访问</span></span><br><span class="line"><span class="comment"># bind 127.0.0.1</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># 查找 /requirepass 去掉注释#，并把foobared 替换为密码，例如：password123456</span></span><br><span class="line"><span class="comment"># requirepass foobared</span></span><br><span class="line">requirepass password123456</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>开启防火墙的端口号规则（安全组），将<code>6380</code>端口号开通</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] /sbin/iptables -I INPUT -p tcp --dport 6380 -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改完成后，要在服务里重启<code>Redis</code>服务才能使设置生效</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/bin/redis-server /etc/redis6380.conf</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>测试远程访问</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\zc&gt; redis-cli -h 192.168.111.226 -p 6380 -a password123456</span><br><span class="line">192.168.111.226:6380&gt;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>停止<code>6380</code>的<code>Redis</code>服务也需要密码</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] redis-cli -p 6380 -a password123456 shutdown</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-MySQL多实例配置"><a href="#2-MySQL多实例配置" class="headerlink" title="2. MySQL多实例配置"></a>2. MySQL多实例配置</h3><h4 id="2-1-查看主机MySQL信息"><a href="#2-1-查看主机MySQL信息" class="headerlink" title="2.1 查看主机MySQL信息"></a>2.1 查看主机MySQL信息</h4><ol>
+<li>查看现有<code>MySQL</code>数据库实例占用端口</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] netstat -anp | grep mysqld</span><br><span class="line">tcp6       0      0 :::3306                 :::*                    LISTEN      1089/mysqld         </span><br><span class="line">unix  2      [ ACC ]     STREAM     LISTENING     20497    1089/mysqld          /var/lib/mysql/mysql.sock</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>须先关闭单实例，跟多实例会有冲突</strong></p>
+<ul>
+<li>备份数据：<code>[root@localhost ~] mysqldump -P 3306 -u root -p --all-databases &gt; /home/backup/data3306.bak</code></li>
+<li>停止单实例服务：<code>[root@localhost ~] service mysqld stop</code></li>
+</ul>
+</blockquote>
+<ol start="2">
+<li>查找配置文件位置</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] locate my.cnf</span><br><span class="line">/etc/my.cnf</span><br><span class="line">/etc/my.cnf.d</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-添加一个3307端口的实例"><a href="#2-2-添加一个3307端口的实例" class="headerlink" title="2.2 添加一个3307端口的实例"></a>2.2 添加一个3307端口的实例</h4><ol>
+<li>拷贝<code>my.cnf</code>并命名为<code>my3307.cnf</code>，并修改参数，主要修改port,sockt,datadir</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] <span class="built_in">cp</span> /etc/my.cnf /etc/my3307.cnf</span><br><span class="line">[root@localhost ~] vi /etc/my3307.cnf</span><br><span class="line">[mysqld]</span><br><span class="line"><span class="comment"># server端字符集</span></span><br><span class="line">character-set-server=utf8</span><br><span class="line">collation-server=utf8_general_ci</span><br><span class="line">user=root</span><br><span class="line"><span class="comment"># 修改端口</span></span><br><span class="line">port=3307</span><br><span class="line"><span class="comment"># 修改数据存放目录</span></span><br><span class="line">datadir=/var/lib/mysql3307</span><br><span class="line"><span class="comment"># 客户端连接socket</span></span><br><span class="line">socket=/var/lib/mysql/mysql3307.sock</span><br><span class="line"><span class="comment"># 修改日志文件</span></span><br><span class="line">log-error=/var/log/mysqld3307.<span class="built_in">log</span></span><br><span class="line"><span class="comment"># 修改pid，每个实例需要运行在不同的pid</span></span><br><span class="line">pid-file=/var/run/mysqld/mysqld3307.pid</span><br><span class="line"><span class="comment"># 解决问题：TIMESTAMP with implicit DEFAULT value is deprecated</span></span><br><span class="line">explicit_defaults_for_timestamp=<span class="literal">true</span></span><br><span class="line"><span class="comment"># skip_grant_tables</span></span><br><span class="line">[mysql]</span><br><span class="line">socket=/var/lib/mysql/mysql3307.sock</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysql.server]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysql_safe]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[client]</span><br><span class="line">socket=/var/lib/mysql/mysql3307.sock</span><br><span class="line">default-character-set=utf8</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>初始化数据库</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写入host避免反解析报错</span></span><br><span class="line">[root@localhost ~] <span class="built_in">echo</span> <span class="string">&quot;127.0.0.1   `hostname`&quot;</span> &gt;&gt; /etc/hosts &amp;&amp; <span class="built_in">cat</span> /etc/hosts</span><br><span class="line">[root@localhost ~] mysqld --defaults-file=/etc/my3307.cnf --initialize-insecure</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>启动<code>3307</code>端口<code>MySQL</code>服务，并查看<code>MySQL</code>进程</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] mysqld --defaults-file=/etc/my3307.cnf --user=root &amp;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>登录<code>MySQL</code></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 多实例为root增加密码</span></span><br><span class="line">[root@localhost ~] mysqladmin -u root -S /var/lib/mysql/mysql3307.sock password <span class="string">&#x27;123qwe&#x27;</span></span><br><span class="line"><span class="comment"># 登录</span></span><br><span class="line">[root@localhost ~] mysql -S /var/lib/mysql/mysql3307.sock -p</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>停止本实例<code>MySQL</code>服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] mysqladmin -u root -S /var/lib/mysql/mysql3307.sock shutdown</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="2-3-再添加一个3308端口的实例"><a href="#2-3-再添加一个3308端口的实例" class="headerlink" title="2.3 再添加一个3308端口的实例"></a>2.3 再添加一个3308端口的实例</h4><ol>
+<li>拷贝<code>my.cnf</code>并命名为<code>my3308.cnf</code>，并修改参数，主要修改port,sockt,datadir</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] <span class="built_in">cp</span> /etc/my.cnf /etc/my3308.cnf</span><br><span class="line">[root@localhost ~] vi /etc/my3308.cnf</span><br><span class="line">[mysqld]</span><br><span class="line"><span class="comment"># server端字符集</span></span><br><span class="line">character-set-server=utf8</span><br><span class="line">collation-server=utf8_general_ci</span><br><span class="line">user=root</span><br><span class="line"><span class="comment"># 修改端口</span></span><br><span class="line">port=3308</span><br><span class="line"><span class="comment"># 修改数据存放目录</span></span><br><span class="line">datadir=/var/lib/mysql3308</span><br><span class="line"><span class="comment"># 客户端连接socket</span></span><br><span class="line">socket=/var/lib/mysql/mysql3308.sock</span><br><span class="line"><span class="comment"># 修改日志文件</span></span><br><span class="line">log-error=/var/log/mysqld3308.<span class="built_in">log</span></span><br><span class="line"><span class="comment"># 修改pid，每个实例需要运行在不同的pid</span></span><br><span class="line">pid-file=/var/run/mysqld/mysqld3308.pid</span><br><span class="line"><span class="comment"># 解决问题：TIMESTAMP with implicit DEFAULT value is deprecated</span></span><br><span class="line">explicit_defaults_for_timestamp=<span class="literal">true</span></span><br><span class="line"><span class="comment"># skip_grant_tables</span></span><br><span class="line">[mysql]</span><br><span class="line">socket=/var/lib/mysql/mysql3308.sock</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysql.server]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysql_safe]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[client]</span><br><span class="line">socket=/var/lib/mysql/mysql3308.sock</span><br><span class="line">default-character-set=utf8</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>初始化数据库</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] mysqld --defaults-file=/etc/my3308.cnf --initialize-insecure</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>启动<code>3308</code>端口<code>MySQL</code>服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] mysqld --defaults-file=/etc/my3308.cnf --user=root &amp;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>登录<code>MySQL</code></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 多实例为root增加密码</span></span><br><span class="line">[root@localhost ~] mysqladmin -u root -S /var/lib/mysql/mysql3308.sock password <span class="string">&#x27;123qwe&#x27;</span></span><br><span class="line"><span class="comment"># 登录</span></span><br><span class="line">[root@localhost ~] mysql -S /var/lib/mysql/mysql3308.sock -p</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>停止本实例<code>MySQL</code>服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] mysqladmin -u root -S /var/lib/mysql/mysql3308.sock shutdown</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="2-4-实例3307开启远程访问"><a href="#2-4-实例3307开启远程访问" class="headerlink" title="2.4 实例3307开启远程访问"></a>2.4 实例3307开启远程访问</h4><ol>
+<li>开启<code>3307</code>端口防火墙</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~] /sbin/iptables -I INPUT -p tcp --dport 3307 -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>测试远程访问</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\zc&gt;mysql -h 192.168.111.227 -P 3307 -u root -p</span><br><span class="line">Enter password: ******</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag"># 环境配置</a>
+          
+            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          
+            <a href="/tags/Redis/" rel="tag"># Redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/07/authenticate-shiro-vue/" rel="next" title="「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇)">
+                <i class="fa fa-chevron-left"></i> 「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/15/env-centos8/" rel="prev" title="「环境配置」物理机安装CentOS 8">
+                「环境配置」物理机安装CentOS 8 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Redis%E5%A4%9A%E5%AE%9E%E4%BE%8B%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">1. Redis多实例配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-%E6%9F%A5%E7%9C%8B%E4%B8%BB%E6%9C%BARedis%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 查看主机Redis信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-%E6%8B%B7%E8%B4%9D%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%B9%B6%E4%BF%AE%E6%94%B9"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 拷贝配置文件并修改</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-%E5%90%AF%E5%8A%A8%E6%B5%8B%E8%AF%95"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 启动测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-Redis%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 Redis数据迁移</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5-%E9%85%8D%E7%BD%AE%E8%BF%9C%E7%A8%8B%E5%8F%AF%E8%AE%BF%E9%97%AE"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 配置远程可访问</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-MySQL%E5%A4%9A%E5%AE%9E%E4%BE%8B%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">2. MySQL多实例配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E6%9F%A5%E7%9C%8B%E4%B8%BB%E6%9C%BAMySQL%E4%BF%A1%E6%81%AF"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 查看主机MySQL信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA3307%E7%AB%AF%E5%8F%A3%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 添加一个3307端口的实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E5%86%8D%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA3308%E7%AB%AF%E5%8F%A3%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 再添加一个3308端口的实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-%E5%AE%9E%E4%BE%8B3307%E5%BC%80%E5%90%AF%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 实例3307开启远程访问</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

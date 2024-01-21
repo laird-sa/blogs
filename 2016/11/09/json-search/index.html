@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="hexo,BlueLake,Javascript," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="开始之前目前很多Hexo博客都用的Swiftype和Algolia等第三方搜索服务。其实针对无数据库的情况下，Hexo本身也提供了两个插件来生成数据文件作为数据源：    hexo-generator-search生成xml格式的数据文件。    hexo-generator-json-content 生成json格式的数据文件。今天的主角是hexo-generator-json-content，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义HEXO站内搜索Javascript+json">
+<meta property="og:url" content="https://www.resonanat.com/2016/11/09/json-search/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="开始之前目前很多Hexo博客都用的Swiftype和Algolia等第三方搜索服务。其实针对无数据库的情况下，Hexo本身也提供了两个插件来生成数据文件作为数据源：    hexo-generator-search生成xml格式的数据文件。    hexo-generator-json-content 生成json格式的数据文件。今天的主角是hexo-generator-json-content，">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-11-09T01:24:56.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.560Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="hexo">
+<meta property="article:tag" content="BlueLake">
+<meta property="article:tag" content="Javascript">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/11/09/json-search/"/>
+
+
+
+
+
+  <title>自定义HEXO站内搜索Javascript+json | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/11/09/json-search/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">自定义HEXO站内搜索Javascript+json</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-09T09:24:56+08:00">
+                2016-11-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index">
+                    <span itemprop="name">Hexo博客</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h3><p>目前很多<a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>博客都用的Swiftype和Algolia等第三方搜索服务。其实针对无数据库的情况下，Hexo本身也提供了两个插件来生成数据文件作为数据源：<br>    <a target="_blank" rel="noopener" href="https://github.com/PaicHyperionDev/hexo-generator-search">hexo-generator-search</a>生成<code>xml</code>格式的数据文件。<br>    <a target="_blank" rel="noopener" href="https://github.com/alexbruno/hexo-generator-json-content">hexo-generator-json-content</a> 生成<code>json</code>格式的数据文件。<br>今天的主角是<a target="_blank" rel="noopener" href="https://github.com/alexbruno/hexo-generator-json-content">hexo-generator-json-content</a>，对于 Javascript语言来说还是解析 json 更方便，如果需要用 xml 做数据文件也可以使用已有的atom.xml。</p>
+<span id="more"></span>
+<h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1.安装"></a>1.安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install hexo-generator-json-content@2.2.0 --save</span><br></pre></td></tr></table></figure>
+<p>然后执行<code>hexo generate</code>时会自动生成<code>content.json</code>文件，若使用默认设置，生成的数据结构如下 </p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">meta<span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    title<span class="punctuation">:</span> hexo.config.title<span class="punctuation">,</span></span><br><span class="line">    subtitle<span class="punctuation">:</span> hexo.config.subtitle<span class="punctuation">,</span></span><br><span class="line">    description<span class="punctuation">:</span> hexo.config.description<span class="punctuation">,</span></span><br><span class="line">    author<span class="punctuation">:</span> hexo.config.author<span class="punctuation">,</span></span><br><span class="line">    url<span class="punctuation">:</span> hexo.config.url</span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">pages<span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span> <span class="comment">//-&gt; all pages</span></span><br><span class="line">    title<span class="punctuation">:</span> page.title<span class="punctuation">,</span></span><br><span class="line">    slug<span class="punctuation">:</span> page.slug<span class="punctuation">,</span></span><br><span class="line">    date<span class="punctuation">:</span> page.date<span class="punctuation">,</span></span><br><span class="line">    updated<span class="punctuation">:</span> page.updated<span class="punctuation">,</span></span><br><span class="line">    comments<span class="punctuation">:</span> page.comments<span class="punctuation">,</span></span><br><span class="line">    permalink<span class="punctuation">:</span> page.permalink<span class="punctuation">,</span></span><br><span class="line">    path<span class="punctuation">:</span> page.path<span class="punctuation">,</span></span><br><span class="line">    excerpt<span class="punctuation">:</span> page.excerpt<span class="punctuation">,</span> <span class="comment">//-&gt; only text ;)</span></span><br><span class="line">    keywords<span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span> <span class="comment">//-&gt; it needs settings</span></span><br><span class="line">    text<span class="punctuation">:</span> page.content<span class="punctuation">,</span> <span class="comment">//-&gt; only text minified ;)</span></span><br><span class="line">    raw<span class="punctuation">:</span> page.raw<span class="punctuation">,</span> <span class="comment">//-&gt; original MD content</span></span><br><span class="line">    content<span class="punctuation">:</span> page.content <span class="comment">//-&gt; final HTML content</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">posts<span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span> <span class="comment">//-&gt; only published posts</span></span><br><span class="line">    title<span class="punctuation">:</span> post.title<span class="punctuation">,</span></span><br><span class="line">    slug<span class="punctuation">:</span> post.slug<span class="punctuation">,</span></span><br><span class="line">    date<span class="punctuation">:</span> post.date<span class="punctuation">,</span></span><br><span class="line">    updated<span class="punctuation">:</span> post.updated<span class="punctuation">,</span></span><br><span class="line">    comments<span class="punctuation">:</span> post.comments<span class="punctuation">,</span></span><br><span class="line">    permalink<span class="punctuation">:</span> post.permalink<span class="punctuation">,</span></span><br><span class="line">    path<span class="punctuation">:</span> post.path<span class="punctuation">,</span></span><br><span class="line">    excerpt<span class="punctuation">:</span> post.excerpt<span class="punctuation">,</span> <span class="comment">//-&gt; only text ;)</span></span><br><span class="line">    keywords<span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span> <span class="comment">//-&gt; it needs settings</span></span><br><span class="line">    text<span class="punctuation">:</span> post.content<span class="punctuation">,</span> <span class="comment">//-&gt; only text minified ;)</span></span><br><span class="line">    raw<span class="punctuation">:</span> post.raw<span class="punctuation">,</span> <span class="comment">//-&gt; original MD content</span></span><br><span class="line">    content<span class="punctuation">:</span> post.content<span class="punctuation">,</span> <span class="comment">//-&gt; final HTML content</span></span><br><span class="line">    categories<span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span></span><br><span class="line">        name<span class="punctuation">:</span> category.name<span class="punctuation">,</span></span><br><span class="line">        slug<span class="punctuation">:</span> category.slug<span class="punctuation">,</span></span><br><span class="line">        permalink<span class="punctuation">:</span> category.permalink</span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    tags<span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span></span><br><span class="line">        name<span class="punctuation">:</span> tag.name<span class="punctuation">,</span></span><br><span class="line">        slug<span class="punctuation">:</span> tag.slug<span class="punctuation">,</span></span><br><span class="line">        permalink<span class="punctuation">:</span> tag.permalink</span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2.配置"></a>2.配置</h3><p>hexo-generator-json-content默认生成的json数据内容非常全，默认配置如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jsonContent:</span></span><br><span class="line">  <span class="attr">meta:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">keywords:</span> <span class="literal">false</span> <span class="comment"># (english, spanish, polish, german, french, italian, dutch, russian, portuguese, swedish)</span></span><br><span class="line">  <span class="attr">pages:</span></span><br><span class="line">    <span class="attr">title:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">slug:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">date:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">updated:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">comments:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">path:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">link:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">permalink:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">excerpt:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">keywords:</span> <span class="literal">true</span> <span class="comment"># but only if root keywords option language was set</span></span><br><span class="line">    <span class="attr">text:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">raw:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">content:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">posts:</span></span><br><span class="line">    <span class="attr">title:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">slug:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">date:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">updated:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">comments:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">path:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">link:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">permalink:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">excerpt:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">keywords:</span> <span class="literal">true</span> <span class="comment"># but only if root keywords option language was set</span></span><br><span class="line">    <span class="attr">text:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">raw:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">content:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">categories:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">tags:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>因为默认生成了很多我们不需要的数据，所以我们要对其进行配置让它只生成我们想要的内容,在<code>hexo/_config.yml</code>中加入：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jsonContent:</span></span><br><span class="line">  <span class="attr">meta:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">pages:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">posts:</span></span><br><span class="line">    <span class="attr">title:</span> <span class="literal">true</span> <span class="comment">#文章标题</span></span><br><span class="line">    <span class="attr">date:</span> <span class="literal">true</span> <span class="comment">#发表日期</span></span><br><span class="line">    <span class="attr">path:</span> <span class="literal">true</span> <span class="comment">#路径</span></span><br><span class="line">    <span class="attr">text:</span> <span class="literal">true</span> <span class="comment">#文本字段</span></span><br><span class="line">    <span class="attr">raw:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">content:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">slug:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">updated:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">link:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">permalink:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">excerpt:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">categories:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">tags:</span> <span class="literal">true</span> <span class="comment">#标签</span></span><br></pre></td></tr></table></figure>
+<p>这样，就只生成每篇文章的标题，日期，路径，标签和文本字段，同时也减小了文件的大小。<br>例如：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;title&quot;</span><span class="punctuation">:</span> <span class="string">&quot;自定义HEXO站内搜索Javascript+json&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;date&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2016-11-09T01:24:56.000Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;path&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2016/11/09/自定义HEXO站内搜索Javascript-json.html&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;目前很多Hexo博客都用的Swiftype和Algolia等第三......#这里显示整篇文章的内容&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;tags&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;javascript,hexo&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;slug&quot;</span><span class="punctuation">:</span> <span class="string">&quot;javascript-hexo&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;permalink&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://chaoo.oschina.io/tags/javascript-hexo/&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-JavaScript实现代码"><a href="#3-JavaScript实现代码" class="headerlink" title="3.JavaScript实现代码"></a>3.JavaScript实现代码</h3><p>接下来就是用JS实现查询方法并把结果渲染到页面。</p>
+<h4 id="3-1-xhr加载数据"><a href="#3-1-xhr加载数据" class="headerlink" title="3.1 xhr加载数据"></a>3.1 xhr加载数据</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> searchData;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">loadData</span>(<span class="params">success</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!searchData) &#123;</span><br><span class="line">        <span class="keyword">var</span> xhr = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>();</span><br><span class="line">        xhr.<span class="title function_">open</span>(<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;/content.json&#x27;</span>, <span class="literal">true</span>);</span><br><span class="line">        xhr.<span class="property">onload</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">status</span> &gt;= <span class="number">200</span> &amp;&amp; <span class="variable language_">this</span>.<span class="property">status</span> &lt; <span class="number">300</span>) &#123;</span><br><span class="line">                <span class="keyword">var</span> res = <span class="title class_">JSON</span>.<span class="title function_">parse</span>(<span class="variable language_">this</span>.<span class="property">response</span> || <span class="variable language_">this</span>.<span class="property">responseText</span>);</span><br><span class="line">                searchData = res <span class="keyword">instanceof</span> <span class="title class_">Array</span> ? res : res.<span class="property">posts</span>;</span><br><span class="line">                <span class="title function_">success</span>(searchData);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="variable language_">this</span>.<span class="property">statusText</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        xhr.<span class="property">onerror</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="variable language_">this</span>.<span class="property">statusText</span>);</span><br><span class="line">        &#125;;</span><br><span class="line">        xhr.<span class="title function_">send</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title function_">success</span>(searchData);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-2-匹配文章内容返回结果"><a href="#3-2-匹配文章内容返回结果" class="headerlink" title="3.2 匹配文章内容返回结果"></a>3.2 匹配文章内容返回结果</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">matcher</span>(<span class="params">post, regExp</span>) &#123;</span><br><span class="line">    <span class="comment">// 匹配优先级：title &gt; tags &gt; text</span></span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">regtest</span>(post.<span class="property">title</span>, regExp) || post.<span class="property">tags</span>.<span class="title function_">some</span>(<span class="keyword">function</span>(<span class="params">tag</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">regtest</span>(tag.<span class="property">name</span>, regExp);</span><br><span class="line">    &#125;) || <span class="title function_">regtest</span>(post.<span class="property">text</span>, regExp);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">regtest</span>(<span class="params">raw, regExp</span>) &#123;</span><br><span class="line">    regExp.<span class="property">lastIndex</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> regExp.<span class="title function_">test</span>(raw);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-3-结果渲染到页面"><a href="#3-3-结果渲染到页面" class="headerlink" title="3.3 结果渲染到页面"></a>3.3 结果渲染到页面</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">render</span>(<span class="params">data</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> html = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (data.<span class="property">length</span>) &#123;</span><br><span class="line">        html = data.<span class="title function_">map</span>(<span class="keyword">function</span>(<span class="params">post</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">tpl</span>(searchTpl, &#123;</span><br><span class="line">                <span class="attr">title</span>: post.<span class="property">title</span>,</span><br><span class="line">                <span class="attr">path</span>: post.<span class="property">path</span>,</span><br><span class="line">                <span class="attr">date</span>: <span class="keyword">new</span> <span class="title class_">Date</span>(post.<span class="property">date</span>).<span class="title function_">toLocaleDateString</span>(),</span><br><span class="line">                <span class="attr">tags</span>: post.<span class="property">tags</span>.<span class="title function_">map</span>(<span class="keyword">function</span>(<span class="params">tag</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="string">&#x27;&lt;span&gt;&#x27;</span> + tag.<span class="property">name</span> + <span class="string">&#x27;&lt;/span&gt;&#x27;</span>;</span><br><span class="line">                &#125;).<span class="title function_">join</span>(<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;).<span class="title function_">join</span>(<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-3-查询匹配"><a href="#3-3-查询匹配" class="headerlink" title="3.3 查询匹配"></a>3.3 查询匹配</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">search</span>(<span class="params">key</span>) &#123;</span><br><span class="line">    <span class="comment">// 关键字 =&gt; 正则，空格隔开的看作多个关键字</span></span><br><span class="line">    <span class="comment">// a b c =&gt; /a|b|c/gmi</span></span><br><span class="line">    <span class="keyword">var</span> regExp = <span class="keyword">new</span> <span class="title class_">RegExp</span>(key.<span class="title function_">replace</span>(<span class="regexp">/[ ]/g</span>, <span class="string">&#x27;|&#x27;</span>), <span class="string">&#x27;gmi&#x27;</span>);</span><br><span class="line">    <span class="title function_">loadData</span>(<span class="keyword">function</span>(<span class="params">data</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> result = data.<span class="title function_">filter</span>(<span class="keyword">function</span>(<span class="params">post</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">matcher</span>(post, regExp);</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="title function_">render</span>(result);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/hexo/" rel="tag"># hexo</a>
+          
+            <a href="/tags/BlueLake/" rel="tag"># BlueLake</a>
+          
+            <a href="/tags/Javascript/" rel="tag"># Javascript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/08/javascript-part3/" rel="next" title="JavaScript高级篇之part3">
+                <i class="fa fa-chevron-left"></i> JavaScript高级篇之part3
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/09/javascript-part4/" rel="prev" title="JavaScript高级篇之part4">
+                JavaScript高级篇之part4 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E4%B9%8B%E5%89%8D"><span class="nav-number">1.</span> <span class="nav-text">开始之前</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">1.安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">2.配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-JavaScript%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">3.JavaScript实现代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-xhr%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 xhr加载数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-%E5%8C%B9%E9%85%8D%E6%96%87%E7%AB%A0%E5%86%85%E5%AE%B9%E8%BF%94%E5%9B%9E%E7%BB%93%E6%9E%9C"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 匹配文章内容返回结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-%E7%BB%93%E6%9E%9C%E6%B8%B2%E6%9F%93%E5%88%B0%E9%A1%B5%E9%9D%A2"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 结果渲染到页面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-%E6%9F%A5%E8%AF%A2%E5%8C%B9%E9%85%8D"><span class="nav-number">4.4.</span> <span class="nav-text">3.3 查询匹配</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

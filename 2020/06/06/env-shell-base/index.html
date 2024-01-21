@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="环境配置,Linux,Shell," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. Shell概述 Shell简介 shell是操作系统提供给我们用户来访问系统资源的一个接口。 shell同时还是一个Linux下的命令行解释器，类似Windows下的cmd。 shell 同时还是解释型的脚本语言：运行时翻译，执行一条语句翻译一条，每次执行程序都需要进行解释。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Shell」Shell 编程入门">
+<meta property="og:url" content="https://www.resonanat.com/2020/06/06/env-shell-base/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="1. Shell概述 Shell简介 shell是操作系统提供给我们用户来访问系统资源的一个接口。 shell同时还是一个Linux下的命令行解释器，类似Windows下的cmd。 shell 同时还是解释型的脚本语言：运行时翻译，执行一条语句翻译一条，每次执行程序都需要进行解释。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-06-06T07:12:46.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.545Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="环境配置">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Shell">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2020/06/06/env-shell-base/"/>
+
+
+
+
+
+  <title>「Shell」Shell 编程入门 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/06/06/env-shell-base/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Shell」Shell 编程入门</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-06-06T15:12:46+08:00">
+                2020-06-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-Shell概述"><a href="#1-Shell概述" class="headerlink" title="1. Shell概述"></a>1. Shell概述</h3><ol>
+<li>Shell简介<ul>
+<li>shell是操作系统提供给我们用户来访问系统资源的一个<strong>接口</strong>。</li>
+<li>shell同时还是一个Linux下的<strong>命令行解释器</strong>，类似Windows下的cmd。</li>
+<li>shell 同时还是解释型的脚本语言：运行时翻译，执行一条语句翻译一条，每次执行程序都需要进行解释。<span id="more"></span></li>
+</ul>
+</li>
+<li>Shell的发展<ul>
+<li>shell有多个版本：Bourne Shell，C Shell，Korn Shell，Bash Shell。现在广泛使用的是 Bash Shell，也就是Linux中默认内嵌的Shell。</li>
+</ul>
+</li>
+<li>Shell脚本<ul>
+<li><code>Shell脚本</code>(shell script)，是一种为Shell编写的脚本程序。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-Shell变量基础"><a href="#2-Shell变量基础" class="headerlink" title="2. Shell变量基础"></a>2. Shell变量基础</h3><h4 id="2-1-Shell变量的分类"><a href="#2-1-Shell变量的分类" class="headerlink" title="2.1 Shell变量的分类"></a>2.1 Shell变量的分类</h4><ol>
+<li>用户自定义变量：由用户自己定义，修改和使用的变量</li>
+<li>Shell环境变量：用于<strong>设置shell的运行环境</strong>，只要少数的环境变量可以修改其值。环境变量也是可以自定义的。</li>
+<li>位置参数变量：通过命令行给脚本传递参数，<strong>变量名已经固定</strong>，不能自定义。</li>
+<li>内部参数变量：是<strong>bash中已经定义好的变量</strong>，变量名不能自定义，变量作用也是固定的。</li>
+</ol>
+<h4 id="2-2-变量赋值与设置"><a href="#2-2-变量赋值与设置" class="headerlink" title="2.2 变量赋值与设置"></a>2.2 变量赋值与设置</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">赋值有两种格式</span></span><br><span class="line">var1=value</span><br><span class="line">var2=`command`      # 注意：command是可以执行的命令</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清除变量 与 设置只读</span></span><br><span class="line">unset var1          # 清除var1变量</span><br><span class="line">readonly var2       # 设置var2变量为只读</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">变量的引用有两种方式（使用时加美元符号）</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">var1               <span class="comment"># $变量名</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">&#123;var1&#125;             <span class="comment"># $&#123;变量名&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-位置参数变量"><a href="#2-3-位置参数变量" class="headerlink" title="2.3 位置参数变量"></a>2.3 位置参数变量</h4><p>位置参数变量是一种特殊的shell变量，用于从命令行向脚本中传递参数。<br>$0表示脚本的名称，$1表示第一个参数，$2表示第二个参数，依次下去代表第几个参数，<br>但是从第十个参数位开始表示方法有所改变，需要加大括号，例如：${10}，${11}</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[chao@localhost ~]$ ls anaconda-ks.cfg install.log install.log.syslog</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>$0</code>的值就是<code>ls</code>命令本身，<code>$1</code>的值就是<code>anaconda-ks.cfg</code>这个文件，<code>$2</code>是<code>install.log</code>文件，<code>$3</code>是<code>install.log.syslog</code>文件</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>位置参数变量</th>
+<th>作 用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$n</td>
+<td>n 为数字，$0 代表命令本身，$1〜$9 代表第 1〜9 个参数，10 以上的参数需要用大括号包含， 如${10}</td>
+</tr>
+<tr>
+<td>$*</td>
+<td>这个变量代表命令行中所有的参数，把所有的参数看成一个整体</td>
+</tr>
+<tr>
+<td>$@</td>
+<td>这个变量也代表命令行中所有的参数，不过 $@ 把每个参数区别对待</td>
+</tr>
+<tr>
+<td>$#</td>
+<td>这个变量代表命令行中所有参数的个数</td>
+</tr>
+</tbody></table>
+<p>位置参数变量要用于向命令或程序脚本中传递信息，比如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[chao@localhost ~]$ vi count.sh</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">num1=$1</span><br><span class="line">num2=$2</span><br><span class="line">sum=$(($num1 + $num2))</span><br><span class="line">echo $sum</span><br><span class="line"></span><br><span class="line">[chao@localhost ~]$ ./count.sh 11 22</span><br><span class="line">33</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="2-4-Shell环境变量"><a href="#2-4-Shell环境变量" class="headerlink" title="2.4 Shell环境变量"></a>2.4 Shell环境变量</h4><ul>
+<li>Shell 变量的作用域可以分为三种：<ul>
+<li>有的变量只能在函数内部使用，这叫做局部变量（local variable）；</li>
+<li>有的变量可以在当前 Shell 进程中使用，这叫做全局变量（global variable），在 Shell 中定义的变量，默认就是全局变量；</li>
+<li>而有的变量还可以在子进程中使用，这叫做环境变量（environment variable）。<br>全局变量只在当前 Shell 进程中有效，对其它 Shell 进程和子进程都无效。如果使用export命令将全局变量导出，那么它就在所有的子进程中也有效了，这称为“环境变量”。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-5-内置参数变量"><a href="#2-5-内置参数变量" class="headerlink" title="2.5 内置参数变量"></a>2.5 内置参数变量</h4><p>内部参数分为两类：命令行参数，与进程相关的内部参数</p>
+<ol>
+<li><p>命令行参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$</span><span class="language-bash">@   <span class="comment"># 表示传递给脚本或函数的所有参数。被双引号引用时，与$*有所不同。</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">*   <span class="comment"># 表示传递给脚本或函数的所有参数</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">0   <span class="comment"># 表示命令行输入的脚本名称</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash"><span class="comment">#   # 表示命令行上的参数个数</span></span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p> 注意： $@和$*不加引号时,二者都是返回传入的参数,但加了引号后$*把参数作为一个字符串整体(单字符串)返回, $@把每个参数作为一个一个字符串返回</p>
+</blockquote>
+</li>
+<li><p>与进程相关的内部参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$</span><span class="language-bash">?   <span class="comment"># 表示上一个命令执行的返回结果</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">$   <span class="comment"># 表示当前程序运行的 PID</span></span> </span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">!   <span class="comment"># 表示获取上一个在后台工作进程的PID</span></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">_   <span class="comment"># 表示获取在此之前执行命令或脚本的最后一个参数</span></span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="3-退出状态码"><a href="#3-退出状态码" class="headerlink" title="3. 退出状态码"></a>3. 退出状态码</h3><p><code>exit</code>是一个Shell内置命令，用来退出当前Shell进程，并返回一个退出状态；使用$?可以接收这个退出状态。<br><code>exit</code>命令可以接受一个整数值作为参数，代表退出状态。如果不指定，默认状态值是 0。<br><code>exit</code>退出状态只能是一个介于 0~255 之间的整数，其中只有 0 表示成功，其它值都表示失败，可以根据退出状态来判断具体出现了什么错误。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[chao@localhost ~]$ vi test.sh</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">echo &quot;befor exit&quot;</span><br><span class="line">exit 8</span><br><span class="line">echo &quot;after exit&quot;</span><br><span class="line"></span><br><span class="line">[chao@localhost ~]$ bash ./test.sh</span><br><span class="line">befor exit</span><br><span class="line">[chao@localhost ~]$ echo $?</span><br><span class="line">8</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag"># 环境配置</a>
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/Shell/" rel="tag"># Shell</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/05/env-linux/" rel="next" title="「环境配置」Linux常用命令整理">
+                <i class="fa fa-chevron-left"></i> 「环境配置」Linux常用命令整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/07/env-shell-variable/" rel="prev" title="「Shell」Shell 变量的用法与数学运算">
+                「Shell」Shell 变量的用法与数学运算 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Shell%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">1. Shell概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Shell%E5%8F%98%E9%87%8F%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">2. Shell变量基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Shell%E5%8F%98%E9%87%8F%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Shell变量的分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E5%8F%98%E9%87%8F%E8%B5%8B%E5%80%BC%E4%B8%8E%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 变量赋值与设置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E4%BD%8D%E7%BD%AE%E5%8F%82%E6%95%B0%E5%8F%98%E9%87%8F"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 位置参数变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-Shell%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 Shell环境变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-%E5%86%85%E7%BD%AE%E5%8F%82%E6%95%B0%E5%8F%98%E9%87%8F"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 内置参数变量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%80%80%E5%87%BA%E7%8A%B6%E6%80%81%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">3. 退出状态码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

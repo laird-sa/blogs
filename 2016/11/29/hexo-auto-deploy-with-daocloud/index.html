@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo,持续集成,CI,DaoCloud," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="用 Hexo 搭建好博客，使用起来算方便，而且静态页面使用起来很方便，但是每次还要在安装了 Hexo 环境的机器上才能写文章和发布。能不能在任何地方只要新增或修改了 post 就自动生成并部署 hexo 呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 DaoCloud 让 Hexo 持续集成">
+<meta property="og:url" content="https://www.resonanat.com/2016/11/29/hexo-auto-deploy-with-daocloud/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="用 Hexo 搭建好博客，使用起来算方便，而且静态页面使用起来很方便，但是每次还要在安装了 Hexo 环境的机器上才能写文章和发布。能不能在任何地方只要新增或修改了 post 就自动生成并部署 hexo 呢？">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000029.jpg">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000030.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000032.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000031.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000033.png">
+<meta property="article:published_time" content="2016-11-29T12:51:00.000Z">
+<meta property="article:modified_time" content="2016-11-29T12:51:00.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="持续集成">
+<meta property="article:tag" content="CI">
+<meta property="article:tag" content="DaoCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000029.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/11/29/hexo-auto-deploy-with-daocloud/"/>
+
+
+
+
+
+  <title>使用 DaoCloud 让 Hexo 持续集成 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/11/29/hexo-auto-deploy-with-daocloud/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">使用 DaoCloud 让 Hexo 持续集成</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-29T20:51:00+08:00">
+                2016-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>用 Hexo 搭建好博客，使用起来算方便，而且静态页面使用起来很方便，但是每次还要在安装了 Hexo 环境的机器上才能写文章和发布。能不能在任何地方只要新增或修改了 post 就自动生成并部署 hexo 呢？</p>
+<span id="more"></span>
+
+<h1 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h1><ul>
+<li>用 CODING 开源社区对 Hexo 项目的源码进行管理（master 分支，要配置好 Hexo 部署信息）</li>
+<li>在 Daocloud 上进行 Hexo 环境的构建</li>
+<li>Daocloud 通过持续集成功能自动生成静态页面</li>
+<li>通过 FtpSync 插件上传到我的虚拟空间</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000029.jpg" alt="0000029.jpg"></p>
+<h1 id="需要的东西"><a href="#需要的东西" class="headerlink" title="需要的东西"></a>需要的东西</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>——静态页面生成器</li>
+<li><a target="_blank" rel="noopener" href="https://coding.io/">CODING.NET</a>——中国版 Github，可以拥有免费无限私有项目。</li>
+<li><a target="_blank" rel="noopener" href="https://www.daocloud.io/">Daocloud</a>——中国版 Docker hub，而且还能持续集成。</li>
+</ul>
+<h1 id="开始配置"><a href="#开始配置" class="headerlink" title="开始配置"></a>开始配置</h1><p>首先自然是根据Hexo的官方文档对Hexo进行基本的配置。然后是创建一个<strong>私有仓库</strong>把Hexo文件夹push到你建好的私有仓库中。</p>
+<h2 id="通过master构建Hexo基础运行环境镜像"><a href="#通过master构建Hexo基础运行环境镜像" class="headerlink" title="通过master构建Hexo基础运行环境镜像"></a>通过<code>master</code>构建Hexo基础运行环境镜像</h2><p>国内貌似也没找到什么合适的、支持Coding的CI平台，最后我找到了Daocloud。Daocloud可以根据dockerfile自动构建Docker私有镜像并同时进行持续集成的能力。所以可以把Hexo及其运行环境（node.js）打包成一个镜像。</p>
+<ol>
+<li>编写DockerFile。</li>
+</ol>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Dockerfile</span></span><br><span class="line"><span class="keyword">FROM</span> node:slim</span><br><span class="line"><span class="keyword">MAINTAINER</span> 你的用户名 你的邮箱</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装git、ssh等基本工具</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get update &amp;&amp; apt-get install -y git ssh-client ca-certificates --no-install-recommends &amp;&amp; <span class="built_in">rm</span> -r /var/lib/apt/lists/*</span></span><br><span class="line"><span class="comment"># 设置时区，不知道为什么？</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> <span class="built_in">echo</span> <span class="string">&quot;Asia/Shanghai&quot;</span> &gt; /etc/timezone &amp;&amp; dpkg-reconfigure -f noninteractive tzdata</span></span><br><span class="line"><span class="comment"># 只安装Hexo命令行工具，其他依赖项根据项目package.json在持续集成过程中安装</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> npm install hexo-cli -g</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">4000</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>在Daocloud的控制面板内的代码构建选项卡内，选择“创建新项目”</li>
+</ol>
+<ul>
+<li>输入你的应用名</li>
+<li>设置代码源的地方绑定你的Coding或Github，并绑定你建立好的Repository。</li>
+<li>开启持续集成</li>
+<li>执行环境设在国外（The GirlFriend Wall越来越高了，有时连npm都执行不了）</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000030.png" alt="0000030.png"></p>
+<ul>
+<li>镜像选择发布在“镜像仓库”中（这个镜像仓库是私有的）</li>
+</ul>
+<h2 id="通过-DaoCloud-yml-定义流程"><a href="#通过-DaoCloud-yml-定义流程" class="headerlink" title="通过 DaoCloud.yml 定义流程"></a>通过 DaoCloud.yml 定义流程</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Daocloud.yml</span></span><br><span class="line"><span class="attr">image:</span> <span class="string">daocloud.io/&lt;你的用户名&gt;/&lt;你的应用名&gt;:latest</span>  <span class="comment">#使用已经在上一步创建好的Hexo基础环境镜像（并不包括博客项目源码）</span></span><br><span class="line"><span class="attr">install:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"><span class="attr">before_script:</span></span><br><span class="line"><span class="attr">script:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">clean</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">g</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">d</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>yml当中有一段<code>before_script</code>，这个是用户自定义脚本。如果说你是在用Github<br>或者Coding的Pages服务，需要把生成的静态页面push到你的Repository中，你就需要用SSH使Daocloud和Repository连接。配置SSH的具体用法见文章最后附录。</p>
+</blockquote>
+<blockquote>
+<p>在install过程中才进行了npm install，并没有在镜像构建时进行依赖项安装，这是因为依赖项安装过程根据不同用户的Hexo的配置和安装的功能不同而不同（<code>package.json</code>中记录的不仅仅是Hexo依赖项，还有用户装了的插件），并没有通用性，而且本身它就属于build过程，尽管花费时间稍长（平均耗时90秒），但是这样更科学。</p>
+</blockquote>
+<p>接下来是对Daocloud进行配置。</p>
+<ul>
+<li>在设置选项卡中设置用<code>daocloud.yml</code>定义流程。</li>
+<li>镜像构建中两个勾都选上。</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000032.png" alt="0000032.png"></p>
+<ul>
+<li>触发规则按照如图所示的定义。</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000031.png" alt="0000031.png"></p>
+<h2 id="大功告成"><a href="#大功告成" class="headerlink" title="大功告成"></a>大功告成</h2><p>之后写文章发布就是使用<code>git commit</code>而不是<code>hexo g</code>和<code>hexo d</code>了。只要提交以后，持续集成平台就会自动生成静态网页并发布。</p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="关于daocloud-yml"><a href="#关于daocloud-yml" class="headerlink" title="关于daocloud.yml"></a>关于daocloud.yml</h2><p>Daocloud如今已经开始用daocloud YAML 2.0定义流程了（1.0版本的YAML于9月份停用了）,然而本篇博客中的依然是YAML 1.0，所以请自行按照网页提示进行YAML升级。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000033.png" alt="0000033.png"></p>
+<h2 id="HexoAutoBuildScript项目"><a href="#HexoAutoBuildScript项目" class="headerlink" title="HexoAutoBuildScript项目"></a>HexoAutoBuildScript项目</h2><p>本文提到的有关的dockerfile和daocloud.yml（包括1.0和2.0）开源在Github上，并包括更加详细的使用教程</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/neoFelhz/HexoAutoBuildScript">项目地址</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/neoFelhz/HexoAutoBuildScript/wiki">使用教程</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          
+            <a href="/tags/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/" rel="tag"># 持续集成</a>
+          
+            <a href="/tags/CI/" rel="tag"># CI</a>
+          
+            <a href="/tags/DaoCloud/" rel="tag"># DaoCloud</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/27/use-tools-part1-markdown/" rel="next" title="工具使用篇之Markdown">
+                <i class="fa fa-chevron-left"></i> 工具使用篇之Markdown
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/01/hexo-auto-deploy-with-flow-ci/" rel="prev" title="用 Flow.CI 让 Hexo 持续集成">
+                用 Flow.CI 让 Hexo 持续集成 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="nav-number">1.</span> <span class="nav-text">实现思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="nav-number">2.</span> <span class="nav-text">需要的东西</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">开始配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87master%E6%9E%84%E5%BB%BAHexo%E5%9F%BA%E7%A1%80%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E9%95%9C%E5%83%8F"><span class="nav-number">3.1.</span> <span class="nav-text">通过master构建Hexo基础运行环境镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87-DaoCloud-yml-%E5%AE%9A%E4%B9%89%E6%B5%81%E7%A8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">通过 DaoCloud.yml 定义流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%A7%E5%8A%9F%E5%91%8A%E6%88%90"><span class="nav-number">3.3.</span> <span class="nav-text">大功告成</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">4.</span> <span class="nav-text">附录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Edaocloud-yml"><span class="nav-number">4.1.</span> <span class="nav-text">关于daocloud.yml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HexoAutoBuildScript%E9%A1%B9%E7%9B%AE"><span class="nav-number">4.2.</span> <span class="nav-text">HexoAutoBuildScript项目</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

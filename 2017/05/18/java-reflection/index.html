@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端开发,Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="反射(Reflection)是Java 程序开发语言的特征之一，它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。多数情况下反射是为了提高程序的灵活性，运行时动态加载需要加载的对象。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Java教程」反射机制">
+<meta property="og:url" content="https://www.resonanat.com/2017/05/18/java-reflection/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="反射(Reflection)是Java 程序开发语言的特征之一，它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。多数情况下反射是为了提高程序的灵活性，运行时动态加载需要加载的对象。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-05-18T07:47:15.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.552Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/05/18/java-reflection/"/>
+
+
+
+
+
+  <title>「Java教程」反射机制 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/18/java-reflection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Java教程」反射机制</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-18T15:47:15+08:00">
+                2017-05-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">Java教程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>反射(Reflection)是Java 程序开发语言的特征之一，它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。<br>多数情况下反射是为了提高程序的灵活性，运行时动态加载需要加载的对象。</p>
+<span id="more"></span>
+
+
+<h3 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>JAVA反射机制是在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意方法和属性；这种动态获取信息以及动态调用对象方法的功能称为java语言的反射机制。</p>
+<p>反射（reflect）就是把java类中的各种成分映射成一个个的Java对象；<br>类是用来描述一组对象，反射机制可以理解为是用来描述一组类</p>
+<p>通俗来讲，反射机制就是用于动态创建对象并且动态调用方法的机制；目前主流的框架底层都采用反射机制实现的。</p>
+<h4 id="1-1-相关类及描述"><a href="#1-1-相关类及描述" class="headerlink" title="1.1 相关类及描述"></a>1.1 相关类及描述</h4><ul>
+<li>Class：用来描述类和接口；该类没有公共构造方法，由虚拟机和类加载器自动构造完成</li>
+<li>Package：用来描述类所属的包</li>
+<li>Field：用来描述类中的属性</li>
+<li>Method：用来描述类中的方法</li>
+<li>Constructor：用来描述类中的构造方法</li>
+<li>Annotation：用来描述类中的注解</li>
+</ul>
+<h3 id="2-Class类"><a href="#2-Class类" class="headerlink" title="2. Class类"></a>2. Class类</h3><p>java.lang.Class：用来描述类和接口；该类没有公共构造方法，由虚拟机和类加载器自动构造完成</p>
+<h4 id="2-1-获取Class类型对象的三种方式"><a href="#2-1-获取Class类型对象的三种方式" class="headerlink" title="2.1 获取Class类型对象的三种方式"></a>2.1 获取Class类型对象的三种方式</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;包名.类名&quot;</span>);<span class="comment">//用的最多，但可能抛出ClassNotFoundException异常</span></span><br><span class="line"><span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> 类名.class;<span class="comment">//任何类都有一个隐含的静态成员变量class</span></span><br><span class="line"><span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> 对象.getClass();<span class="comment">//Object类中的方法</span></span><br><span class="line"><span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> 包装类.TYPE;<span class="comment">//获取对应基本数据类型的class对象</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-常用方法"><a href="#2-2-常用方法" class="headerlink" title="2.2 常用方法"></a>2.2 常用方法</h4><ul>
+<li>static Class&lt;?&gt; forName(String className)<ul>
+<li>用于获取参数指定对应的Class对象并返回</li>
+</ul>
+</li>
+<li>T newInstance()<ul>
+<li>默认调用无参数构造方法创建对象，若类中不存在无参数构造方法抛出异常NoSuchMethodException</li>
+</ul>
+</li>
+<li>Constructor<T> getConstructor(Class&lt;?&gt;… parameterTypes)<ul>
+<li>用于获取此Class对象所表示类型中参数指定的公共构造方法。</li>
+</ul>
+</li>
+<li>Constructor&lt;?&gt;[] getConstructors()<ul>
+<li>用于获取此Class对象所表示类型中所有的公共构造方法</li>
+</ul>
+</li>
+<li>Field getDeclaredField(String name)<ul>
+<li>用于获取此Class对象所表示类中参数指定的单个成员变量信息</li>
+</ul>
+</li>
+<li>Field[] fs &#x3D; getDeclaredFields()<ul>
+<li>用于获取此Class对象所表示类中所有成员变量信息</li>
+</ul>
+</li>
+<li>Method getMethod(String name, Class&lt;?&gt;… parameterTypes)<ul>
+<li>用于获取该Class对象所表示类型中名字为name参数为parameterTypes的指定公共成员方法</li>
+</ul>
+</li>
+<li>Method[] getMethods()<ul>
+<li>用于获取该Class对象表示类中所有公共成员方法。</li>
+</ul>
+</li>
+<li>获取私有相关方法<ul>
+<li>getDeclaredConstructor(Class&lt;?&gt;… parameterTypes)；获取该类对象表示的类或接口的指定构造函数(包括私有)</li>
+<li>getDeclaredConstructors()；获取该类对象所表示的类声明的所有构造函数(包括私有)</li>
+<li>getDeclaredMethod(String name, Class&lt;?&gt;… parameterTypes) 获取一个方法(自己类 公有 私有)</li>
+<li>getDeclaredMethods(); 获取全部的方法(自己类 公有 私有)</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-3-其他方法"><a href="#2-3-其他方法" class="headerlink" title="2.3 其他方法"></a>2.3 其他方法</h4><ol>
+<li>int result &#x3D; getModifiers(); 获取类的修饰符(权限+特征)<ul>
+<li>每一个修饰符 用一个整数来进行表示：0–默认不写，1–public，2–private，4–protected，-static， 16–final，32–synchronized，64volatile，128–transient，256–native，512–interface，1024–abstract</li>
+</ul>
+</li>
+<li>String name &#x3D; getName(); 获取类的全名(包名.类名)</li>
+<li>String name &#x3D; getSimpleName(); 获取类简单名(只有类名 缺少包)</li>
+<li>Package p &#x3D; getPackage(); 获取当前类所属的包<ul>
+<li>p.getName(); 获取包名(Package类中的方法)</li>
+</ul>
+</li>
+<li>Class sclazz &#x3D; getSuperClass(); 获取超类(父类)对应Class</li>
+<li>Class[] classes &#x3D; getInterface(); 获取当前类父亲接口</li>
+<li>Class[] classes &#x3D; getClasses(); 获取类中的内部类</li>
+<li>Object obj &#x3D; <strong>newInstance()</strong>; 默认调用无参数构造方法创建对象，若类中不存在无参数构造方法抛出异常NoSuchMethodException</li>
+<li>Field f &#x3D; getField(“属性名”); 获取类中的属性(公有的 自己类+父类)</li>
+<li>Field[] fs &#x3D; getFields(); 获取类中的全部属性(公有的 自己类+父类)</li>
+<li>getDeclaredField(“属性”); 获取当前类中的属性(公有+私有 自己类)</li>
+<li>Field[] fs &#x3D; getDeclaredFields(); 获取当前类中全部的属性(公有+私有 自己类)</li>
+</ol>
+<h3 id="3-Constructor类"><a href="#3-Constructor类" class="headerlink" title="3. Constructor类"></a>3. Constructor类</h3><p>java.lang.reflect.Constructor类主要用于描述获取到的构造方法信息</p>
+<h4 id="3-1-Constructor类中的常用方法"><a href="#3-1-Constructor类中的常用方法" class="headerlink" title="3.1 Constructor类中的常用方法"></a>3.1 Constructor类中的常用方法</h4><ul>
+<li>T newInstance(Object… initargs)<ul>
+<li>使用此Constructor对象描述的构造方法来构造Class对象代表类型的新实例；该方法的参数用于给新实例中的成员变量进行初始化操作。</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-2-其他方法"><a href="#3-2-其他方法" class="headerlink" title="3.2 其他方法"></a>3.2 其他方法</h4><ul>
+<li>con.getModifiers();</li>
+<li>con.getName();</li>
+<li>con.getParameterTypes();</li>
+<li>con.getExceptionTypes();</li>
+<li>如何操作构造方法<ul>
+<li>执行一次,创建对象</li>
+<li>Object &#x3D; newInstance(执行构造方法时的所有参数);</li>
+<li>con.setAccessible(true);</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-Field类"><a href="#4-Field类" class="headerlink" title="4. Field类"></a>4. Field类</h3><p>java.lang.reflect.Field类主要用于描述获取到的单个成员变量信息。</p>
+<h4 id="4-1-Field类中的常用方法"><a href="#4-1-Field类中的常用方法" class="headerlink" title="4.1 Field类中的常用方法"></a>4.1 Field类中的常用方法</h4><ul>
+<li>Object get(Object obj)<ul>
+<li>调用该方法的意义就是获取参数对象obj中此Field对象所表示成员变量的数值。</li>
+</ul>
+</li>
+<li>Object set(Object obj, Object value)<ul>
+<li>将参数对象obj中此Field对象表示成员变量的数值修改为参数value的数值。</li>
+</ul>
+</li>
+<li>void setAccessible(boolean flag)<ul>
+<li>当实参传递true时，则反射的对象在使用时应该取消java语言访问检查</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-2-其他方法"><a href="#4-2-其他方法" class="headerlink" title="4.2 其他方法"></a>4.2 其他方法</h4><ol>
+<li>int &#x3D; getModifiers(); 获取属性修饰符(权限+特征)</li>
+<li>Class &#x3D; getType(); 获取属性的类型对应的那个class</li>
+<li>String &#x3D; getName(); 获取属性的名字</li>
+<li>操作属性: set(对象,值); Object &#x3D; get(对象);<ul>
+<li>如果是私有属性不能直接操作的，需设置一个使用权setAccessable(true);准入</li>
+</ul>
+</li>
+</ol>
+<h3 id="5-Method类"><a href="#5-Method类" class="headerlink" title="5. Method类"></a>5. Method类</h3><p>java.lang.reflect.Method类主要用于描述获取到的单个成员方法信息。</p>
+<h4 id="5-1-Method类中的常用方法"><a href="#5-1-Method类中的常用方法" class="headerlink" title="5.1 Method类中的常用方法"></a>5.1 Method类中的常用方法</h4><ul>
+<li>Object invoke(Object obj, Object… args)<ul>
+<li>使用对象obj来调用此Method对象所表示的成员方法，实参传递args。</li>
+</ul>
+</li>
+</ul>
+<h4 id="5-2-其他方法"><a href="#5-2-其他方法" class="headerlink" title="5.2 其他方法"></a>5.2 其他方法</h4><ul>
+<li>int mm &#x3D; m.getModifiers(); 获取方法的修饰符(权限+特征)</li>
+<li>Class mrt &#x3D; m.getReturnType(); 获取返回值数据类型</li>
+<li>String mn &#x3D; m.getName(); 获取方法的名字</li>
+<li>Class[] mpts &#x3D; m.getParameterTypes(); 获取方法参数列表的类型</li>
+<li>Class[] mets &#x3D; m.getExceptionTypes(); 获取方法抛出异常的类型</li>
+<li>如何操作方法</li>
+<li>调用方法   让他执行一次</li>
+<li>Object result &#x3D; invoke(对象,执行方法需要传递的所有参数…);</li>
+<li>若方法是私有的方法  不允许操作</li>
+<li>可以设置setAccessable(true)   设置方法使用权  准入</li>
+</ul>
+<h3 id="6-原始方式与反射方式构造对象实例"><a href="#6-原始方式与反射方式构造对象实例" class="headerlink" title="6. 原始方式与反射方式构造对象实例"></a>6. 原始方式与反射方式构造对象实例</h3><ol>
+<li>使用原始方式来构造对象</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">//1.采用无参的方式构造Person对象并打印</span></span><br><span class="line"><span class="type">Person</span> <span class="variable">p</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">System.out.println(p); <span class="comment">//null 0</span></span><br><span class="line">  <span class="comment">//2.使用有参方式来构造Person对象</span></span><br><span class="line"><span class="type">Person</span> <span class="variable">p2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&quot;zhangfei&quot;</span>, <span class="number">30</span>);</span><br><span class="line">System.out.println(p2); <span class="comment">//zhangfei 30</span></span><br><span class="line">  <span class="comment">//3.修改与获取属性(成员变量)，调用get,set方法</span></span><br><span class="line">p2.setName(<span class="string">&quot;guanyu&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;修改后的姓名是：&quot;</span> + p2.getName()); <span class="comment">//guanyu</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用反射机制来构造对象</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">//1.使用获取到的Class对象来构造Person对象并打印</span></span><br><span class="line"><span class="type">Class</span> <span class="variable">c1</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;myproject.Person&quot;</span>);<span class="comment">//不可省略包名</span></span><br><span class="line">System.out.println(c1.newInstance());<span class="comment">//null 0</span></span><br><span class="line">    <span class="comment">//2.使用有参方式来构造对象</span></span><br><span class="line"><span class="type">Class</span> <span class="variable">c2</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;myproject.Person&quot;</span>);</span><br><span class="line"><span class="type">Constructor</span> <span class="variable">ct2</span> <span class="operator">=</span> c2.getConstructor(String.class, <span class="type">int</span>.class);</span><br><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> ct2.newInstance(<span class="string">&quot;zhangfei&quot;</span>, <span class="number">30</span>);</span><br><span class="line">System.out.println(obj);<span class="comment">//zhangfei 30</span></span><br><span class="line">    <span class="comment">//3.修改与获取属性(成员变量)</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">f2</span> <span class="operator">=</span> c2.getDeclaredField(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">f2.setAccessible(<span class="literal">true</span>);<span class="comment">//暴力反射，设置使用权</span></span><br><span class="line">f2.set(obj, <span class="string">&quot;guanyu&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;修改后的姓名是：&quot;</span> + f2.get(obj)); <span class="comment">//guanyu</span></span><br><span class="line">    <span class="comment">//4.获取成员方法getName，使用获取到的成员方法来获取姓名并打印出来</span></span><br><span class="line"><span class="type">Method</span> <span class="variable">m1</span> <span class="operator">=</span> c2.getMethod(<span class="string">&quot;getName&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;获取到的姓名是：&quot;</span> + m1.invoke(obj)); <span class="comment">//zhangfei</span></span><br><span class="line">    <span class="comment">//5.成员方法setName，调用getMethod方法来修改姓名并打印出来</span></span><br><span class="line"><span class="type">Method</span> <span class="variable">m2</span> <span class="operator">=</span> c2.getMethod(<span class="string">&quot;setName&quot;</span>, String.class);</span><br><span class="line"><span class="type">Object</span> <span class="variable">res</span> <span class="operator">=</span> m2.invoke(obj, <span class="string">&quot;guanyu&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;方法调用的返回值是：&quot;</span> + res); <span class="comment">//null</span></span><br><span class="line">System.out.println(<span class="string">&quot;修改后的姓名是：&quot;</span> + m1.invoke(obj)); <span class="comment">//guanyu</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="7-注解-Annotation"><a href="#7-注解-Annotation" class="headerlink" title="7. 注解(Annotation)"></a>7. 注解(Annotation)</h3><h4 id="7-1-注解相关概念"><a href="#7-1-注解相关概念" class="headerlink" title="7.1 注解相关概念"></a>7.1 注解相关概念</h4><ul>
+<li>注释<ul>
+<li>单行注释：<code>//</code></li>
+<li>多行注释：<code>/*   */</code></li>
+<li>文档注释：<code>/**   */</code></li>
+</ul>
+</li>
+<li>注解的写法<ul>
+<li><code>@XXX [(一些信息)]</code></li>
+</ul>
+</li>
+<li>注解位置<ul>
+<li>类的上面，属性上面，方法上面，构造方法上面，参数前面</li>
+</ul>
+</li>
+<li>注解的作用<ol>
+<li>用来充当注释的作用(仅仅是一个文字的说明)，@Deprecated</li>
+<li>用来做代码的检测(验证)，@Override</li>
+<li>*可以携带一些信息(内容)，文件.properties&#x2F;.xml，注解</li>
+</ol>
+</li>
+<li>常用的注解<ul>
+<li>@Deprecated：用来说明方法是废弃的</li>
+<li>@Override：用来做代码检测   检测此方法是否是一个重写</li>
+<li>@SuppressWarnings(String[])：{“”}，如果数组内的元素只有一个长度，可以省略{}<ul>
+<li>unused：变量定义后未被使用</li>
+<li>serial：类实现了序列化接口  不添加序列化ID号</li>
+<li>rawtypes：集合没有定义泛型</li>
+<li>deprecation：方法以废弃    </li>
+<li>*unchecked：出现了泛型的问题  可以不检测</li>
+<li>all：包含了以上所有(不推荐)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>注解中可以携带信息，可以不携带；信息不能随意写，信息的类型只能是如下的类型：<ol>
+<li>基本数据类型</li>
+<li>String类型</li>
+<li>枚举类型enum</li>
+<li>注解类型@</li>
+<li>数组类型[]，数组的内部需要是如上的四种类型</li>
+</ol>
+</li>
+<li>注解的分类<ol>
+<li>按运行机制分：源码注解，编译时注解，运行时注解</li>
+<li>按照来源分：来自JDK的注解，来自第三方的注解，自定义注解</li>
+</ol>
+</li>
+</ul>
+<h4 id="7-2-自定义注解类型的语法要求："><a href="#7-2-自定义注解类型的语法要求：" class="headerlink" title="7.2 自定义注解类型的语法要求："></a>7.2 自定义注解类型的语法要求：</h4><ol>
+<li>使用@interface关键字定义注解</li>
+<li>成员以<strong>无参无异常</strong>方式声明</li>
+<li>可以用default为成员指定一个默认值</li>
+<li>成员类型是受限的，合法类型包括原始类型及String,Class,Annotation,Enumeration</li>
+<li>如果注解只有一个成员，则成员名必须取名<strong>value()</strong>,在使用时可以忽略成员名和赋值号(&#x3D;)</li>
+<li>注解类可以没有成员，没有成员的注解称为标识注解</li>
+<li>需要元注解来描述说明<ul>
+<li>@Target：当前注解的放置(CONSTRUCTOR，FIELD，LOCAL_VARIABLE，METHOD，PACKAGE，PARAMETER，TYPE)</li>
+<li>@Retention：当前注解的生命周期作用域(SOURCE，CLASS，RUNTIME)，源代码文件(SOURCE)—&gt;编译—&gt;字节码文件(CLASS)—&gt;加载—&gt;内存执行(RUNTIME)</li>
+<li>@Inherited：允许子类继承</li>
+<li>@Document：当前注解是否能被文档(javadoc)所记录</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.METHOD, ElementType.TYPE&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Description&#123;</span><br><span class="line">    String <span class="title function_">desc</span><span class="params">()</span>;</span><br><span class="line">    String <span class="title function_">author</span><span class="params">()</span>;</span><br><span class="line">    <span class="type">int</span> <span class="title function_">age</span><span class="params">()</span> <span class="keyword">default</span> <span class="number">18</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-3-使用自定义注解："><a href="#7-3-使用自定义注解：" class="headerlink" title="7.3 使用自定义注解："></a>7.3 使用自定义注解：</h4><ul>
+<li>@&lt;注解名&gt;(&lt;成员名1&gt;&#x3D;&lt;成员值1&gt;,&lt;成员名2&gt;&#x3D;&lt;成员值2&gt;,…)</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Description(desc=&quot;I am eyeColor&quot;, author=&quot;Chao&quot;, age=18)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">eyeColor</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;red&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果自定义注解只有一个value成员，在使用的时候就可以省略方法名，如果方法是两个以上，每一个方法必须写名字</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Description(&quot;I am class annotation&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Child</span> <span class="keyword">implements</span> <span class="title class_">Person</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="meta">@Description(&quot;I am method annotation&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">name</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">age</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sing</span><span class="params">()</span>&#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-4-解析注解"><a href="#7-4-解析注解" class="headerlink" title="7.4 解析注解"></a>7.4 解析注解</h4><p>通过反射获取类、函数或成员上的运行时注解信息，从而实现动态控制程序运行的逻辑。</p>
+<ol>
+<li>使用类加载器加载类<ul>
+<li><code>Class c=Class.forName（&quot;com.ann.test.Child&quot;)</code></li>
+</ul>
+</li>
+<li>找到类上面的注解<ul>
+<li><code>isAnnotationPresent（类类型）</code>：Class对象的方法，判断当前类类型是否存在某个类类型的注解，返回类型为boolean。</li>
+</ul>
+</li>
+<li>拿到注解实例，需要强制类型转换。<ul>
+<li><code>Description d=（Description）c.getAnnotation(Description.class);</code></li>
+</ul>
+</li>
+<li>找到方法上的注解，首先，遍历所有方法，通过方法对象的isAnnotation查看是否有自定义注解。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ParseAnn</span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[])</span>&#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;<span class="comment">//1. 使用类加载器加载类</span></span><br><span class="line">      Class c=Class.forName（<span class="string">&quot;com.ann.test.Child&quot;</span>)</span><br><span class="line">      <span class="comment">//2. 找到类上面的注解</span></span><br><span class="line">      <span class="type">boolean</span> <span class="variable">isExist</span> <span class="operator">=</span> c.isAnnotationPresent(Description.class);</span><br><span class="line">      <span class="keyword">if</span>(isExist)&#123;</span><br><span class="line">        <span class="comment">//3. 拿到注解实例</span></span><br><span class="line">        Description d=（Description）c.getAnnotation(Description.class);</span><br><span class="line">        System.out.println(d.value());</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//4.找到方法上的注解</span></span><br><span class="line">      Method[] ms = c.getMethods();</span><br><span class="line">      <span class="keyword">for</span>(Method m:ms)&#123;</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">isMExist</span> <span class="operator">=</span> m.isAnnotationPresent(Description.class);</span><br><span class="line">        <span class="keyword">if</span>(isMExist)&#123;</span><br><span class="line">          Description md=（Description）c.getAnnotation(Description.class);</span><br><span class="line">          System.out.println(md.value());</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;<span class="keyword">catch</span>(ClassNotFoundException e)&#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>另一种解析方法上的注解:<ul>
+<li>获取这个方法的所有注解，<code>Annotation [] as=m.getAnnotations();</code>然后遍历该注解，如果遍历的注解是Description类型，则把遍历的注解强转为Description类型，并进行输出value()信息。</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(Method m:ms)&#123;</span><br><span class="line">  Annotation [] as=m.getAnnotations();</span><br><span class="line">  <span class="keyword">for</span>(Annotation a:as)&#123;</span><br><span class="line">    <span class="keyword">if</span>(a <span class="keyword">instanceof</span> Description)&#123;</span><br><span class="line">      <span class="type">Description</span> <span class="variable">md</span> <span class="operator">=</span> (Description)a;</span><br><span class="line">      System.out.println(md.value());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>@Inherited:当自定义注解上使用了该注解，如果在父类上标识该注解，解析一个子类，子类也可以获取该注解的信息。 </p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag"># 后端开发</a>
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/16/meizu-qrcode-screenshot/" rel="next" title="魅族系统截图被附上全屏二维码水印，其中包含设备信息·转载">
+                <i class="fa fa-chevron-left"></i> 魅族系统截图被附上全屏二维码水印，其中包含设备信息·转载
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/22/java-net/" rel="prev" title="「Java教程」网络编程基础">
+                「Java教程」网络编程基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">1. 基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-%E7%9B%B8%E5%85%B3%E7%B1%BB%E5%8F%8A%E6%8F%8F%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 相关类及描述</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Class%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">2. Class类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E8%8E%B7%E5%8F%96Class%E7%B1%BB%E5%9E%8B%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 获取Class类型对象的三种方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 常用方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 其他方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Constructor%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">3. Constructor类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-Constructor%E7%B1%BB%E4%B8%AD%E7%9A%84%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Constructor类中的常用方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 其他方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Field%E7%B1%BB"><span class="nav-number">4.</span> <span class="nav-text">4. Field类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-Field%E7%B1%BB%E4%B8%AD%E7%9A%84%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 Field类中的常用方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 其他方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Method%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">5. Method类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-Method%E7%B1%BB%E4%B8%AD%E7%9A%84%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 Method类中的常用方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 其他方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%8E%9F%E5%A7%8B%E6%96%B9%E5%BC%8F%E4%B8%8E%E5%8F%8D%E5%B0%84%E6%96%B9%E5%BC%8F%E6%9E%84%E9%80%A0%E5%AF%B9%E8%B1%A1%E5%AE%9E%E4%BE%8B"><span class="nav-number">6.</span> <span class="nav-text">6. 原始方式与反射方式构造对象实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E6%B3%A8%E8%A7%A3-Annotation"><span class="nav-number">7.</span> <span class="nav-text">7. 注解(Annotation)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-%E6%B3%A8%E8%A7%A3%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 注解相关概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%E7%B1%BB%E5%9E%8B%E7%9A%84%E8%AF%AD%E6%B3%95%E8%A6%81%E6%B1%82%EF%BC%9A"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 自定义注解类型的语法要求：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-3-%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%EF%BC%9A"><span class="nav-number">7.3.</span> <span class="nav-text">7.3 使用自定义注解：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-4-%E8%A7%A3%E6%9E%90%E6%B3%A8%E8%A7%A3"><span class="nav-number">7.4.</span> <span class="nav-text">7.4 解析注解</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

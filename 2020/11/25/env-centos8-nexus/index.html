@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="环境配置,CentOS,Nexus,Maven," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Maven私服 就是在内网架设一个Maven仓库服务器，在代理远程仓库的同时维护本地仓库。当我们需要下载一些构件（artifact）时，如果本地仓库没有，再去私服下载，私服没有，再去中央仓库下载。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「环境配置」使用Nexus搭建Maven私服（CentOS 8）">
+<meta property="og:url" content="https://www.resonanat.com/2020/11/25/env-centos8-nexus/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="Maven私服 就是在内网架设一个Maven仓库服务器，在代理远程仓库的同时维护本地仓库。当我们需要下载一些构件（artifact）时，如果本地仓库没有，再去私服下载，私服没有，再去中央仓库下载。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/up-502db1f338b345d6fd3148a090e2fd2fe12.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-0c975f956016a64ea320c944c072af7411e.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-7f1d30bc0b032cf43278b9074ca9aee21dc.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-c6a3ab35342767a6a95ef40073278967a11.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-bf6e3f140adb09aeddfd2f6f6366740263b.webp">
+<meta property="og:image" content="https://www.resonanat.com/up-8419fbf8913733269363b199c0260abae0b.webp">
+<meta property="article:published_time" content="2020-11-25T10:11:23.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.538Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="环境配置">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="Nexus">
+<meta property="article:tag" content="Maven">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/up-502db1f338b345d6fd3148a090e2fd2fe12.webp">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2020/11/25/env-centos8-nexus/"/>
+
+
+
+
+
+  <title>「环境配置」使用Nexus搭建Maven私服（CentOS 8） | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/11/25/env-centos8-nexus/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「环境配置」使用Nexus搭建Maven私服（CentOS 8）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-25T18:11:23+08:00">
+                2020-11-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>Maven私服</strong> 就是在内网架设一个<code>Maven仓库服务器</code>，在代理远程仓库的同时维护本地仓库。<br>当我们需要下载一些构件（artifact）时，如果本地仓库没有，再去私服下载，私服没有，再去中央仓库下载。<span id="more"></span></p>
+<p><strong>Nexus</strong>是一个专门的 Maven仓库管理软件。它提供了强大的仓库管理功能，构件搜索功能；<br>它占用较少的内存，基于REST，基于简单文件系统而非数据库。</p>
+<h3 id="1-安装Nexus服务"><a href="#1-安装Nexus服务" class="headerlink" title="1. 安装Nexus服务"></a>1. 安装Nexus服务</h3><h4 id="1-1-前置条件：jdk1-8环境"><a href="#1-1-前置条件：jdk1-8环境" class="headerlink" title="1.1 前置条件：jdk1.8环境 "></a>1.1 前置条件：<code>jdk1.8环境 </code></h4><h4 id="1-2-下载Nexus"><a href="#1-2-下载Nexus" class="headerlink" title="1.2 下载Nexus"></a>1.2 下载Nexus</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://sonatype-download.global.ssl.fastly.net/repository/repositoryManager/3/nexus-3.18.1-01-unix.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>下载失败的话，可以试试这个：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">百度云: https://pan.baidu.com/s/16IfFUtL3W0YGciS-XPlPfQ</span><br><span class="line">提取码: naxi </span><br></pre></td></tr></table></figure>
+
+<h4 id="1-3-安装Nexus"><a href="#1-3-安装Nexus" class="headerlink" title="1.3 安装Nexus"></a>1.3 安装Nexus</h4><p>解压到安装目录（<code>/data/apps/nexus/</code>），会得到两个文件夹：nexus-3.18.1-01（nexus 服务目录）、sonatype-work（私有库目录）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# mkdir -p /data/apps/nexus/</span><br><span class="line">[root@localhost ~]# mv nexus-3.18.1-01-unix.tar.gz /data/apps/nexus/nexus-3.18.1-01-unix.tar.gz</span><br><span class="line">[root@localhost ~]# cd /data/apps/nexus/</span><br><span class="line">[root@localhost nexus]# tar -zvxf nexus-3.18.1-01-unix.tar.gz</span><br><span class="line">[root@localhost nexus]# ls</span><br><span class="line">nexus-3.18.1-01  nexus-3.18.1-01-unix.tar.gz  sonatype-work</span><br></pre></td></tr></table></figure>
+
+<p>进入 nexus-3.18.1-01 文件夹，其中 etc&#x2F;nexus-default.properties 文件配置端口（默认为 8081）和 work 目录信息，可以按需修改。</p>
+<h4 id="1-4-开放端口并启动服务"><a href="#1-4-开放端口并启动服务" class="headerlink" title="1.4 开放端口并启动服务"></a>1.4 开放端口并启动服务</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost nexus-3.18.1-01]# firewall-cmd --zone=public --add-port=8081/tcp --permanent &amp;&amp; firewall-cmd --reload</span><br><span class="line">[root@localhost nexus-3.18.1- /data/apps/nexus/nexus-3.18.1-01/bin</span><br><span class="line">[root@localhost bin]# ./nexus start</span><br><span class="line">WARNING: ************************************************************</span><br><span class="line">WARNING: Detected execution as &quot;root&quot; user.  This is NOT recommended!</span><br><span class="line">WARNING: ************************************************************</span><br><span class="line">Starting nexus</span><br></pre></td></tr></table></figure>
+
+<p>首次启动，初始账号为：<code>admin</code>，查看初始密码：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost bin]# cat /data/apps/nexus/sonatype-work/nexus3/admin.password</span><br><span class="line">e6c47f75-dc91-4f87-a2a9-0188df6e4b7c</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-配置Nexus"><a href="#2-配置Nexus" class="headerlink" title="2. 配置Nexus"></a>2. 配置Nexus</h3><h4 id="2-1-登录Nexus"><a href="#2-1-登录Nexus" class="headerlink" title="2.1 登录Nexus"></a>2.1 登录Nexus</h4><p>Nexus服务启动以后，使用浏览器访问<code>http://IP:8081/</code>，并用初始账号密码登录，登陆后会让我们先修改初始密码。</p>
+<p><img src="/up-502db1f338b345d6fd3148a090e2fd2fe12.webp"></p>
+<p>仓库浏览在左侧菜单栏<code>Browse</code>，这里有多种仓库：</p>
+<ol>
+<li><code>maven-central</code>：maven 中央库，默认从 <a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/">https://repo1.maven.org/maven2/</a> 拉取 jar</li>
+<li><code>maven-releases</code>：私库发行版 jar，初次安装请将 Deployment policy 设置为 Allow redeploy</li>
+<li><code>maven-snapshots</code>：私库快照（调试版本）jar</li>
+<li><code>maven-public</code>：仓库分组，把上面三个仓库组合在一起对外提供服务，在本地 maven 基础配置 settings.xml 或项目 pom.xml 中使用</li>
+</ol>
+<ul>
+<li>仓库类型说明：<ul>
+<li><code>group</code>：这是一个仓库聚合的概念，用户仓库地址选择 Group 的地址，即可访问 Group 中配置的，用于方便开发人员自己设定的仓库。maven-public 就是一个 Group 类型的仓库，内部设置了多个仓库，访问顺序取决于配置顺序，3.x 默认为 Releases、Snapshots、Central，当然你也可以自己设置。</li>
+<li><code>hosted</code>：私有仓库，内部项目的发布仓库，专门用来存储我们自己生成的 jar 文件</li>
+<li><code>snapshots</code>：本地项目的快照仓库</li>
+<li><code>releases</code>： 本地项目发布的正式版本</li>
+<li><code>proxy</code>：代理类型，从远程中央仓库中寻找数据的仓库（可以点击对应的仓库的 Configuration 页签下 Remote Storage 属性的值即被代理的远程仓库的路径），如可配置阿里云 maven 仓库</li>
+<li><code>central</code>：中央仓库</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-2-设置"><a href="#2-2-设置" class="headerlink" title="2.2 设置"></a>2.2 设置</h4><ol>
+<li>配置Releases版本可重复上传: <code>Deployment pollcy --&gt; Allow redeploy</code>。</li>
+</ol>
+<p><img src="/up-0c975f956016a64ea320c944c072af7411e.webp"></p>
+<ol start="2">
+<li>增加一个代理仓库，使用的是阿里云公共仓库。首先点击<code>Create repository</code>按钮开始创建一个仓库，类型选择 maven2（proxy）。</li>
+</ol>
+<p><img src="/up-7f1d30bc0b032cf43278b9074ca9aee21dc.webp"></p>
+<ol start="3">
+<li>配置阿里云地址<code>http://maven.aliyun.com/nexus/content/groups/public/</code>，并创建。</li>
+</ol>
+<p><img src="/up-c6a3ab35342767a6a95ef40073278967a11.webp"></p>
+<ol start="4">
+<li>阿里云代理仓库创建完毕后，我们编辑<code>maven-public</code>，将其添加到放入<code>group</code>中，并调整优先级，然后保存。</li>
+</ol>
+<p><img src="/up-bf6e3f140adb09aeddfd2f6f6366740263b.webp"></p>
+<ol start="5">
+<li>点击maven-public条目的<code>copy</code>按钮即可拷贝私服地址</li>
+</ol>
+<p><img src="/up-8419fbf8913733269363b199c0260abae0b.webp"></p>
+<h3 id="3-Maven配置使用私服"><a href="#3-Maven配置使用私服" class="headerlink" title="3. Maven配置使用私服"></a>3. Maven配置使用私服</h3><h4 id="3-1-使用配置（下载依赖）"><a href="#3-1-使用配置（下载依赖）" class="headerlink" title="3.1 使用配置（下载依赖）"></a>3.1 使用配置（下载依赖）</h4><p>两种方式：①通过<code>Maven</code>的<code>setting.xml</code>文件配置（全局模式），②通过<code>项目</code>的<code>pom.xml</code>文件配置（项目独享模式）。</p>
+<blockquote>
+<p>注意：若<code>pom.xml</code>和<code>setting.xml</code>同时配置了，以<code>pom.xml</code>为准。</p>
+</blockquote>
+<ol>
+<li>全局模式：通过<code>Maven</code>的<code>setting.xml</code>文件配置</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">mirrors</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mirror</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--该镜像的唯一标识符。id用来区分不同的mirror元素。 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>maven-public<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--镜像名称 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>maven-public<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--*指的是访问任何仓库都使用我们的私服--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mirrorOf</span>&gt;</span>*<span class="tag">&lt;/<span class="name">mirrorOf</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--该镜像的URL。构建系统会优先考虑使用该URL，而非使用默认的服务器URL。 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.2.100:8081/repository/maven-public/<span class="tag">&lt;/<span class="name">url</span>&gt;</span>     </span><br><span class="line">    <span class="tag">&lt;/<span class="name">mirror</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mirrors</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>项目独享模式：通过<code>项目</code>的<code>pom.xml</code>文件配置</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>maven-nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>maven-nexus<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.2.100:8081/repository/maven-public/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">releases</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">releases</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">snapshots</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">snapshots</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="3-2-发布配置（发布依赖）"><a href="#3-2-发布配置（发布依赖）" class="headerlink" title="3.2 发布配置（发布依赖）"></a>3.2 发布配置（发布依赖）</h4><ol>
+<li>修改<code>setting.xml</code>文件，指定<code>releases</code>和<code>snapshots server</code>的用户名和密码：</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servers</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">server</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">username</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">password</span>&gt;</span>456<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">server</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">server</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>snapshots<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">username</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">password</span>&gt;</span>123456<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">server</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servers</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>在发布依赖项目的<code>pom.xml</code>文件中加入<code>distributionManagement</code>节点（这里<code>repository id</code>需要和上一步里的<code>server id</code>名称保持一致）：</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">distributionManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Releases<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.2.100:8081/repository/maven-releases/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">snapshotRepository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>snapshots<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Snapshot<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://192.168.2.100:8081/repository/maven-snapshots/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">snapshotRepository</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">distributionManagement</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>执行<code>mvn deploy</code>命令发布。</li>
+<li>登录<code>Nexus</code>，查看对应的仓库就能看到发布的依赖包了。</li>
+</ol>
+<blockquote>
+<p>发布到的仓库说明：<br>①若项目版本号末尾带有<code>-SNAPSHOT</code>，则会发布到<code>snapshots</code>快照版本仓库。<br>②若项目版本号末尾带有<code>-RELEASES</code>或什么都不带，则会发布到<code>releases</code>正式版本仓库。</p>
+</blockquote>
+<h3 id="4-设置Nexus开机自启"><a href="#4-设置Nexus开机自启" class="headerlink" title="4. 设置Nexus开机自启"></a>4. 设置Nexus开机自启</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /usr/lib/systemd/system/nexus.service</span><br></pre></td></tr></table></figure>
+
+<p><code>nexus.service</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unitt]</span><br><span class="line">Description=nexus service</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=forking</span><br><span class="line">ExecStart=/data/apps/nexus/nexus-3.18.1-01/bin/nexus start</span><br><span class="line">ExecReload=/data/apps/nexus/nexus-3.18.1-01/bin/nexus restart</span><br><span class="line">ExecStop=/data/apps/nexus/nexus-3.18.1-01/bin/nexus stop</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开启开机启动</span></span><br><span class="line">systemctl enable nexus.service</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动服务</span></span><br><span class="line">systemctl start nexus.service</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">停止服务</span></span><br><span class="line">systemctl stop nexus.service</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" rel="tag"># 环境配置</a>
+          
+            <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+          
+            <a href="/tags/Nexus/" rel="tag"># Nexus</a>
+          
+            <a href="/tags/Maven/" rel="tag"># Maven</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/20/env-centos8-tomcat9/" rel="next" title="「环境配置」Tomcat9安装及多实例多应用配置(CentOS 8)">
+                <i class="fa fa-chevron-left"></i> 「环境配置」Tomcat9安装及多实例多应用配置(CentOS 8)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/11/25/env-centos8-git-gogs/" rel="prev" title="「环境配置」Centos 8 私人Git服务器搭建(Gogs)">
+                「环境配置」Centos 8 私人Git服务器搭建(Gogs) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85Nexus%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">1. 安装Nexus服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6%EF%BC%9Ajdk1-8%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 前置条件：jdk1.8环境 </span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-%E4%B8%8B%E8%BD%BDNexus"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 下载Nexus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-%E5%AE%89%E8%A3%85Nexus"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 安装Nexus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-%E5%BC%80%E6%94%BE%E7%AB%AF%E5%8F%A3%E5%B9%B6%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 开放端口并启动服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AENexus"><span class="nav-number">2.</span> <span class="nav-text">2. 配置Nexus</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E7%99%BB%E5%BD%95Nexus"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 登录Nexus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 设置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Maven%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8%E7%A7%81%E6%9C%8D"><span class="nav-number">3.</span> <span class="nav-text">3. Maven配置使用私服</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-%E4%BD%BF%E7%94%A8%E9%85%8D%E7%BD%AE%EF%BC%88%E4%B8%8B%E8%BD%BD%E4%BE%9D%E8%B5%96%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 使用配置（下载依赖）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-%E5%8F%91%E5%B8%83%E9%85%8D%E7%BD%AE%EF%BC%88%E5%8F%91%E5%B8%83%E4%BE%9D%E8%B5%96%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 发布配置（发布依赖）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AENexus%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF"><span class="nav-number">4.</span> <span class="nav-text">4. 设置Nexus开机自启</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

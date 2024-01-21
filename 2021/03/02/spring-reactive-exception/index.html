@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端开发,Spring,SpringReactive,Reactor," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="不管是在响应式编程还是普通的程序设计中，异常处理都是一个非常重要的方面。 对于Flux或者Mono来说，所有的异常都是一个终止的操作，即使你使用了异常处理，原生成序列也不会继续。但是如果你对异常进行了处理，那么它会将oneError信号转换成为新的序列的开始，并将替换掉之前上游产生的序列。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「Spring Reactive Stack」Reactor异常处理">
+<meta property="og:url" content="https://www.resonanat.com/2021/03/02/spring-reactive-exception/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="不管是在响应式编程还是普通的程序设计中，异常处理都是一个非常重要的方面。 对于Flux或者Mono来说，所有的异常都是一个终止的操作，即使你使用了异常处理，原生成序列也不会继续。但是如果你对异常进行了处理，那么它会将oneError信号转换成为新的序列的开始，并将替换掉之前上游产生的序列。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-03-02T12:12:42.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.580Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="SpringReactive">
+<meta property="article:tag" content="Reactor">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2021/03/02/spring-reactive-exception/"/>
+
+
+
+
+
+  <title>「Spring Reactive Stack」Reactor异常处理 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2021/03/02/spring-reactive-exception/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「Spring Reactive Stack」Reactor异常处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-03-02T20:12:42+08:00">
+                2021-03-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringReactive/" itemprop="url" rel="index">
+                    <span itemprop="name">SpringReactive</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>不管是在响应式编程还是普通的程序设计中，异常处理都是一个非常重要的方面。</p>
+<p>对于<code>Flux</code>或者<code>Mono</code>来说，所有的异常都是一个终止的操作，即使你使用了异常处理，原生成序列也不会继续。<br>但是如果你对异常进行了处理，那么它会将<code>oneError</code>信号转换成为新的序列的开始，并将替换掉之前上游产生的序列。<span id="more"></span></p>
+<p>先看一个<code>Flux</code>产生异常的例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test1</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>会得到一个异常<code>ErrorCallbackNotImplemented</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">100 / 10 = 1</span><br><span class="line">100 / 5 = 2</span><br><span class="line">reactor.core.Exceptions<span class="variable">$ErrorCallbackNotImplemented</span>: java.lang.ArithmeticException: / by zero</span><br><span class="line">Caused by: java.lang.ArithmeticException: / by zero</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="1-onError方法"><a href="#1-onError方法" class="headerlink" title="1. onError方法"></a>1. onError方法</h3><p><code>Reactor</code>中<code>subscribe</code>的<code>onError</code>方法(subscribe第二个参数)，就是<code>try catch</code>的一个具体应用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test2</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .subscribe(System.out::println,</span><br><span class="line">            error -&gt; System.err.println(<span class="string">&quot;Error: &quot;</span> + error));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">100 / 10 = 1</span><br><span class="line">100 / 5 = 2</span><br><span class="line">Error: java.lang.ArithmeticException: / by zero</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-onErrorReturn方法"><a href="#2-onErrorReturn方法" class="headerlink" title="2. onErrorReturn方法"></a>2. onErrorReturn方法</h3><p><code>onErrorReturn</code>可以在遇到异常的时候<code>fallback</code>到一个静态的默认值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test3</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .onErrorReturn(<span class="string">&quot;Divided by zero :(&quot;</span>)</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">100 / 10 = 1</span><br><span class="line">100 / 5 = 2</span><br><span class="line">Divided by zero :(</span><br></pre></td></tr></table></figure>
+
+<p><code>onErrorReturn</code>还支持一个<code>Predicate</code>参数，用来判断要<code>falback</code>的异常是否满足条件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> Flux&lt;T&gt; <span class="title function_">onErrorReturn</span><span class="params">(Predicate&lt;? <span class="built_in">super</span> Throwable&gt; predicate, T fallbackValue)</span> </span><br></pre></td></tr></table></figure>
+
+
+<h3 id="3-onErrorResume方法"><a href="#3-onErrorResume方法" class="headerlink" title="3. onErrorResume方法"></a>3. onErrorResume方法</h3><p><code>onErrorResume</code>可以在捕获异常之后调用其他的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test4</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .onErrorResume(e -&gt; System.out::println)</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">100 / 10 = 1</span><br><span class="line">100 / 5 = 2</span><br><span class="line">reactor.core.publisher.FluxOnErrorResume<span class="variable">$ResumeSubscriber</span>@23469199</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-retry方法"><a href="#4-retry方法" class="headerlink" title="4. retry方法"></a>4. retry方法</h3><p><code>retry</code>的作用就是当遇到异常的时候，重启一个新的序列</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test8</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .retry(<span class="number">1</span>)</span><br><span class="line">        .elapsed()</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[4,100 / 10 = 1]</span><br><span class="line">[0,100 / 5 = 2]</span><br><span class="line">[9,100 / 10 = 1]</span><br><span class="line">[0,100 / 5 = 2]</span><br><span class="line">reactor.core.Exceptions<span class="variable">$ErrorCallbackNotImplemented</span>: java.lang.ArithmeticException: / by zero</span><br><span class="line">Caused by: java.lang.ArithmeticException: / by zero</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>elapsed</code>是用来展示产生的value时间之间的duration。从结果我们可以看到，<code>retry</code>之前是不会产生异常信息的。</p>
+</blockquote>
+<h3 id="5-doOnError方法"><a href="#5-doOnError方法" class="headerlink" title="5. doOnError方法"></a>5. doOnError方法</h3><p><code>doOnError</code>只记录异常信息，不破坏原来的<code>React</code>结构。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test5</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .doOnError(error -&gt; System.out.println(<span class="string">&quot;we got the error: &quot;</span>+ error))</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">100 / 10 = 1</span><br><span class="line">100 / 5 = 2</span><br><span class="line">we got the error: java.lang.ArithmeticException: / by zero</span><br><span class="line">reactor.core.Exceptions<span class="variable">$ErrorCallbackNotImplemented</span>: java.lang.ArithmeticException: / by zero</span><br><span class="line">Caused by: java.lang.ArithmeticException: / by zero</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>doOn</code>系列方法是<code>publisher</code>的同步钩子方法，在<code>subscriber</code>触发一系列事件的时候触发</p>
+</blockquote>
+<h3 id="6-doFinally方法"><a href="#6-doFinally方法" class="headerlink" title="6. doFinally方法"></a>6. doFinally方法</h3><p><code>doFinally</code>可以像传统的同步代码那样使用<code>finally</code>去做一些事情，比如关闭<code>http</code>连接，清理资源等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test6</span><span class="params">()</span> &#123;</span><br><span class="line">    Flux.just(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">        .map(i -&gt; <span class="string">&quot;100 / &quot;</span> + i + <span class="string">&quot; = &quot;</span> + (<span class="number">10</span> / i))</span><br><span class="line">        .doFinally(error -&gt; System.out.println(<span class="string">&quot;Finally，I will make sure to do something:&quot;</span>+error))</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">100 / 10 = 1</span><br><span class="line">100 / 5 = 2</span><br><span class="line">reactor.core.Exceptions<span class="variable">$ErrorCallbackNotImplemented</span>: java.lang.ArithmeticException: / by zero</span><br><span class="line">Caused by: java.lang.ArithmeticException: / by zero</span><br><span class="line">	at ...</span><br><span class="line">Finally，我会确保做一些事情:onError</span><br></pre></td></tr></table></figure>
+
+<p>第二种收尾操作的方法是<code>using</code>，我们先看一个<code>using</code>的定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T, D&gt; Flux&lt;T&gt; <span class="title function_">using</span><span class="params">(Callable&lt;? extends D&gt; resourceSupplier, Function&lt;? <span class="built_in">super</span> D, ? extends</span></span><br><span class="line"><span class="params">    Publisher&lt;? extends T&gt;&gt; sourceSupplier, Consumer&lt;? <span class="built_in">super</span> D&gt; resourceCleanup)</span></span><br></pre></td></tr></table></figure>
+<p>可以看到<code>using</code>支持三个参数，<code>resourceSupplier</code>是一个生成器，用来在<code>subscribe</code>的时候生成要发送的<code>resource</code>对象。<br><code>sourceSupplier</code>是一个生成<code>Publisher</code>的工厂，接收<code>resourceSupplier</code>传过来的<code>resource</code>，然后生成<code>Publisher</code>对象。<br><code>resourceCleanup</code>用来对<code>resource</code>进行收尾操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">test7</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">AtomicBoolean</span> <span class="variable">isDisposed</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicBoolean</span>();</span><br><span class="line">    <span class="type">Disposable</span> <span class="variable">disposableInstance</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Disposable</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">dispose</span><span class="params">()</span> &#123;</span><br><span class="line">            isDisposed.set(<span class="literal">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;DISPOSABLE&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    Flux.using(</span><br><span class="line">        () -&gt; disposableInstance,</span><br><span class="line">        disposable -&gt; Flux.just(disposable.toString()),</span><br><span class="line">        Disposable::dispose)</span><br><span class="line">        .subscribe(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag"># 后端开发</a>
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+            <a href="/tags/SpringReactive/" rel="tag"># SpringReactive</a>
+          
+            <a href="/tags/Reactor/" rel="tag"># Reactor</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/25/spring-reactive-webflux/" rel="next" title="「Spring Reactive Stack」Spring WebFlux响应式Web框架入门">
+                <i class="fa fa-chevron-left"></i> 「Spring Reactive Stack」Spring WebFlux响应式Web框架入门
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/03/03/spring-reactive-r2dbc/" rel="prev" title="「Spring Reactive Stack」使用R2DBC访问MySQL">
+                「Spring Reactive Stack」使用R2DBC访问MySQL <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-onError%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">1. onError方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-onErrorReturn%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">2. onErrorReturn方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-onErrorResume%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">3. onErrorResume方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-retry%E6%96%B9%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">4. retry方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-doOnError%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">5. doOnError方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-doFinally%E6%96%B9%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">6. doFinally方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

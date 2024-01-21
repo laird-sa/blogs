@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="算法,数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="平衡二叉查找树其实有很多，比如，红黑树（Red-Black Tree，简称 R-B Tree）、伸展树（Splay Tree）、树堆（Treap）等，但是我们提到平衡二叉查找树，听到的基本都是红黑树，它是一种不严格的平衡二叉查找树。红黑树是一种含有红黑节点并能自平衡的二叉查找树。它必须满足下面性质：  每个节点要么是红色，要么是黑色； 根节点是黑色的； 每个叶子节点都是黑色的空节点（NIL），也就">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「数据结构与算法」红黑树（Red-Black Tree）">
+<meta property="og:url" content="https://www.resonanat.com/2022/04/25/data-structure-redblacktree/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="平衡二叉查找树其实有很多，比如，红黑树（Red-Black Tree，简称 R-B Tree）、伸展树（Splay Tree）、树堆（Treap）等，但是我们提到平衡二叉查找树，听到的基本都是红黑树，它是一种不严格的平衡二叉查找树。红黑树是一种含有红黑节点并能自平衡的二叉查找树。它必须满足下面性质：  每个节点要么是红色，要么是黑色； 根节点是黑色的； 每个叶子节点都是黑色的空节点（NIL），也就">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/09_01.png">
+<meta property="og:image" content="https://www.resonanat.com/rotate_left.gif">
+<meta property="og:image" content="https://www.resonanat.com/rotate_right.gif">
+<meta property="og:image" content="https://www.resonanat.com/09_02.png">
+<meta property="og:image" content="https://www.resonanat.com/09_03.png">
+<meta property="og:image" content="https://www.resonanat.com/09_04.png">
+<meta property="og:image" content="https://www.resonanat.com/09_05.png">
+<meta property="og:image" content="https://www.resonanat.com/09_06.png">
+<meta property="og:image" content="https://www.resonanat.com/09_07.png">
+<meta property="og:image" content="https://www.resonanat.com/09_08.png">
+<meta property="og:image" content="https://www.resonanat.com/09_09.png">
+<meta property="og:image" content="https://www.resonanat.com/09_10.png">
+<meta property="og:image" content="https://www.resonanat.com/09_12.png">
+<meta property="og:image" content="https://www.resonanat.com/09_13.png">
+<meta property="og:image" content="https://www.resonanat.com/09_14.png">
+<meta property="og:image" content="https://www.resonanat.com/09_15.png">
+<meta property="og:image" content="https://www.resonanat.com/09_16.png">
+<meta property="og:image" content="https://www.resonanat.com/09_17.png">
+<meta property="og:image" content="https://www.resonanat.com/09_18.png">
+<meta property="og:image" content="https://www.resonanat.com/09_19.png">
+<meta property="og:image" content="https://www.resonanat.com/09_11.png">
+<meta property="article:published_time" content="2022-04-25T11:05:10.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.468Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/09_01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2022/04/25/data-structure-redblacktree/"/>
+
+
+
+
+
+  <title>「数据结构与算法」红黑树（Red-Black Tree） | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2022/04/25/data-structure-redblacktree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「数据结构与算法」红黑树（Red-Black Tree）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2022-04-25T19:05:10+08:00">
+                2022-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index">
+                    <span itemprop="name">数据结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>平衡二叉查找树其实有很多，比如，红黑树（Red-Black Tree，简称 R-B Tree）、伸展树（Splay Tree）、树堆（Treap）等，但是我们提到平衡二叉查找树，听到的基本都是红黑树，它是一种不严格的平衡二叉查找树。<br>红黑树是一种含有红黑节点并能自平衡的二叉查找树。它必须满足下面性质：</p>
+<ol>
+<li>每个节点要么是红色，要么是黑色；</li>
+<li>根节点是黑色的；</li>
+<li>每个叶子节点都是黑色的空节点（NIL），也就是说，叶子节点不存储数据；</li>
+<li>任何相邻的节点都不能同时为红色，也就是说，红色节点是被黑色节点隔开的；</li>
+<li>任意一节点到每个叶子节点的路径，都包含相同数目的黑色节点；<span id="more"></span></li>
+</ol>
+<h3 id="1-红黑树的平衡特征"><a href="#1-红黑树的平衡特征" class="headerlink" title="1. 红黑树的平衡特征"></a>1. 红黑树的平衡特征</h3><p>红黑树与<code>AVL</code>树类似，都在添加和删除的时候通过旋转操作保持二叉树的平衡，以求更高效的查询性能。</p>
+<p><strong>红黑树牺牲了部分平衡性</strong>，以换取插入&#x2F;删除操作时较少的旋转操作，整体来说性能要优于<code>AVL</code>树。</p>
+<p>红黑树的黑色属性（即性质第五点）：任意一节点到每个叶子节点的路径，都包含相同数目的黑色节点。<br>黑色属性，可以理解为<strong>平衡特征</strong>， 如果满足不了平衡特征，就要进行平衡操作（变色、左旋、右旋）。</p>
+<p>红黑树的平衡条件，是以<strong>黑色节点的高度</strong>来约束的，所以称红黑树这种平衡为<strong>黑色完美平衡</strong>。</p>
+<p>如下图，去掉红色节点，会得到一个四叉树， 从根节点到每一个叶子节点高度相同，就是红黑树的根节点到叶子的黑色路径长度。<br><img src="/09_01.png"></p>
+<h3 id="2-红黑树的平衡调整"><a href="#2-红黑树的平衡调整" class="headerlink" title="2. 红黑树的平衡调整"></a>2. 红黑树的平衡调整</h3><p>三种操作：左旋（rotate left）、右旋（rotate right）和 变色。</p>
+<ul>
+<li><p>左旋，即是<strong>逆时针</strong>旋转，以某个节点作为旋转点，其右子节点变为旋转节点的父节点，右子节点的左子节点变为旋转节点的右子节点，左子节点保持不变；<br><img src="/rotate_left.gif"></p>
+</li>
+<li><p>右旋，即是<strong>顺时针</strong>旋转，以某个节点作为旋转点，其左子节点变为旋转节点的父节点，左子节点的右子节点变为旋转节点的左子节点，右子节点保持不变。<br><img src="/rotate_right.gif"></p>
+</li>
+<li><p>变色，节点的颜色由红变黑或由黑变红；</p>
+</li>
+</ul>
+<h3 id="3-插入操作的平衡调整"><a href="#3-插入操作的平衡调整" class="headerlink" title="3. 插入操作的平衡调整"></a>3. 插入操作的平衡调整</h3><p>红黑树规定，<strong>插入的节点一定是红色的</strong>。而且，<strong>二叉查找树中新插入的节点都是放在叶子节点上</strong>。</p>
+<p>红黑树的平衡调整过程是一个迭代的过程。<br>我们把正在处理的节点叫做<strong>关注节点</strong>。关注节点会随着不停地迭代处理，而不断发生变化。<strong>最开始的关注节点就是新插入的节点</strong>。</p>
+<ol>
+<li><p>新插入节点的父节点是黑色的，红黑树不需要调整。</p>
+</li>
+<li><p>新插入节点是根节点，<strong>根节点变黑</strong>即可。</p>
+</li>
+<li><p>新插入节点的父节点和它的叔叔都是红色，红黑树只需要<strong>变色</strong>，不需要旋转。<br><img src="/09_02.png"></p>
+</li>
+<li><p>新插入节点的父节点是红色，但它叔叔是黑色（可能为null的黑色空节点），红黑树需要<strong>变色+旋转</strong>。</p>
+</li>
+</ol>
+<p>需要红黑树<strong>变色+旋转</strong>（父节点红色，叔节点黑色）的四种情形：</p>
+<ul>
+<li><p>一、<strong>LL型</strong>（左左插），即父节点和插入的节点都是左节点：</p>
+<ul>
+<li>①父节点变黑色，爷节点变红色</li>
+<li>②爷节点右旋<br><img src="/09_03.png"></li>
+</ul>
+</li>
+<li><p>二、<strong>LR型</strong>（左右插），即父节点是左节点，插入节点是右节点：</p>
+<ul>
+<li>①父节点左旋，父子交换变成了【情形一·LL】</li>
+<li>②跳到【LL型】的调整<br><img src="/09_04.png"></li>
+</ul>
+</li>
+<li><p>三、<strong>RR型</strong>（右右插），即父节点和插入的节点都是右节点：</p>
+<ul>
+<li>①父节点变黑色，爷节点变红色</li>
+<li>②爷节点左旋<br><img src="/09_05.png"></li>
+</ul>
+</li>
+<li><p>二、<strong>RL型</strong>（右左插），即父节点是右节点，插入的节点是左节点：</p>
+<ul>
+<li>①父节点右旋，父子交换变成了【情形三·RR】</li>
+<li>②跳到【RR型】的调整<br><img src="/09_06.png"></li>
+</ul>
+</li>
+</ul>
+<h3 id="4-删除操作的平衡调整"><a href="#4-删除操作的平衡调整" class="headerlink" title="4. 删除操作的平衡调整"></a>4. 删除操作的平衡调整</h3><p>红黑树的删除情况相对插入会复杂一些，不过原理都是类似的。</p>
+<h4 id="4-1-二叉查找树的删除操作"><a href="#4-1-二叉查找树的删除操作" class="headerlink" title="4.1 二叉查找树的删除操作"></a>4.1 二叉查找树的删除操作</h4><ol>
+<li>待删除节点没有子节点，将父节点中，指向要删除节点的指针置为<code>null</code>。</li>
+<li>待删除节点只有一个子节点，更新父节点中，指向要删除节点的指针，让它指向要删除节点的子节点。</li>
+<li>待删除节点有两个子节点，用后继节点或者前继节点替换删除节点，然后再删除掉替换节点。<blockquote>
+<ul>
+<li>后继节点：删除节点的右子树中的最小节点，即右子树中最左节点。</li>
+<li>前继节点：删除节点的左子树中最大节点，即左子树中最右节点。</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h4 id="4-2-红黑树的删除动作"><a href="#4-2-红黑树的删除动作" class="headerlink" title="4.2 红黑树的删除动作"></a>4.2 红黑树的删除动作</h4><p>红黑树和二叉查找树的删除类似，只不过加上颜色属性（这里的子节点均指<strong>非黑色叶子NULL节点</strong>）：</p>
+<ol>
+<li><p>无子节点时，删除节点可能为红色或者黑色；</p>
+<ul>
+<li>1.1 如果为红色，直接删除即可，不会影响黑色节点的数量；</li>
+<li>1.2 如果为黑色，则需要进行删除平衡的操作（如果是根节点，无需平衡操作）；<br><img src="/09_07.png"></li>
+</ul>
+</li>
+<li><p>只有一个子节点时，删除节点只能是黑色，其子节点是红色（否则无法满足红黑树的性质）。 此时用删除节点的子节点接到父节点，且将子节点颜色涂黑，保证黑色数量。<br><img src="/09_08.png"></p>
+</li>
+<li><p>有两个子节点时，与二叉搜索树一样，使用后继节点作为替换的删除节点，情形转至为【1】或【2】处理。<br><img src="/09_09.png"></p>
+</li>
+</ol>
+<p>删除情形【3】总是会转换为情形【1】或【2】的，<br>而情形【1.2】（删除节点无子节点且是黑色）还需要额外的平衡调整；<br>因为一旦该节点被拿掉，红黑树中通过该节点的路径黑色节点数量将会减1，而且无法像情形【2】那样将子节点涂黑来达到平衡。此时只能自底向上进行平衡操作。</p>
+<h4 id="4-3-红黑树删除后的平衡操作"><a href="#4-3-红黑树删除后的平衡操作" class="headerlink" title="4.3 红黑树删除后的平衡操作"></a>4.3 红黑树删除后的平衡操作</h4><p>为了简化描述，先约定关注节点及相关节点的名称：<br><img src="/09_10.png"></p>
+<h5 id="【情形-1-1】：-兄黑（S-黑），兄子全黑（L-和-R-全黑），父红（P-红）；"><a href="#【情形-1-1】：-兄黑（S-黑），兄子全黑（L-和-R-全黑），父红（P-红）；" class="headerlink" title="【情形 1.1】： 兄黑（S 黑），兄子全黑（L 和 R 全黑），父红（P 红）；"></a>【情形 1.1】： 兄黑（S 黑），兄子全黑（L 和 R 全黑），父红（P 红）；</h5><p>即 兄弟节点为黑色，兄弟节点的子节点全部黑色，父节点为红色。<br><img src="/09_12.png"></p>
+<h5 id="【情形-1-2】：-兄黑（S-黑），兄子全黑（L-和-R-全黑），父黑（P-黑）；"><a href="#【情形-1-2】：-兄黑（S-黑），兄子全黑（L-和-R-全黑），父黑（P-黑）；" class="headerlink" title="【情形 1.2】： 兄黑（S 黑），兄子全黑（L 和 R 全黑），父黑（P 黑）；"></a>【情形 1.2】： 兄黑（S 黑），兄子全黑（L 和 R 全黑），父黑（P 黑）；</h5><p>即 兄弟节点为黑色，兄弟节点的子节点全部黑色，父节点为黑色。<br><img src="/09_13.png"></p>
+<h5 id="【情形-2-1】：-兄黑（S-黑），兄在左（S-左），兄左子红（L-红）；"><a href="#【情形-2-1】：-兄黑（S-黑），兄在左（S-左），兄左子红（L-红）；" class="headerlink" title="【情形 2.1】： 兄黑（S 黑），兄在左（S 左），兄左子红（L 红）；"></a>【情形 2.1】： 兄黑（S 黑），兄在左（S 左），兄左子红（L 红）；</h5><p>即 兄弟节点为黑色，且兄弟节点在左边，兄弟节点的左子节点为红色。<br><img src="/09_14.png"></p>
+<h5 id="【情形-2-2】：-兄黑（S-黑），兄在左（S-左），兄左子黑（L-黑）；"><a href="#【情形-2-2】：-兄黑（S-黑），兄在左（S-左），兄左子黑（L-黑）；" class="headerlink" title="【情形 2.2】： 兄黑（S 黑），兄在左（S 左），兄左子黑（L 黑）；"></a>【情形 2.2】： 兄黑（S 黑），兄在左（S 左），兄左子黑（L 黑）；</h5><p>即 兄弟节点为黑色，且兄弟节点在左边，兄弟节点的左子节点为黑色。<br><img src="/09_15.png"></p>
+<h5 id="【情形-2-3】：-兄黑（S-黑），兄在右（S-右），兄右子红（R-红）；"><a href="#【情形-2-3】：-兄黑（S-黑），兄在右（S-右），兄右子红（R-红）；" class="headerlink" title="【情形 2.3】： 兄黑（S 黑），兄在右（S 右），兄右子红（R 红）；"></a>【情形 2.3】： 兄黑（S 黑），兄在右（S 右），兄右子红（R 红）；</h5><p>即 兄弟节点为黑色，且兄弟节点在右边，兄弟节点的右子节点为红色。<br><img src="/09_16.png"></p>
+<h5 id="【情形-2-4】：-兄黑（S-黑），兄在右（S-右），兄右子黑（R-黑）；"><a href="#【情形-2-4】：-兄黑（S-黑），兄在右（S-右），兄右子黑（R-黑）；" class="headerlink" title="【情形 2.4】： 兄黑（S 黑），兄在右（S 右），兄右子黑（R 黑）；"></a>【情形 2.4】： 兄黑（S 黑），兄在右（S 右），兄右子黑（R 黑）；</h5><p>即 兄弟节点为黑色，且兄弟节点在右边，兄弟节点的右子节点为黑色。<br><img src="/09_17.png"></p>
+<h5 id="【情形-3-1】：-兄红（S-红），兄在左（S-左）；"><a href="#【情形-3-1】：-兄红（S-红），兄在左（S-左）；" class="headerlink" title="【情形 3.1】： 兄红（S 红），兄在左（S 左）；"></a>【情形 3.1】： 兄红（S 红），兄在左（S 左）；</h5><p>即 兄弟节点为红色，且兄弟节点在左边。<br><img src="/09_18.png"></p>
+<h5 id="【情形-3-2】：-兄红（S-红），兄在右（S-右）；"><a href="#【情形-3-2】：-兄红（S-红），兄在右（S-右）；" class="headerlink" title="【情形 3.2】： 兄红（S 红），兄在右（S 右）；"></a>【情形 3.2】： 兄红（S 红），兄在右（S 右）；</h5><p>即 兄弟节点为红色，且兄弟节点在右边。<br><img src="/09_19.png"></p>
+<h4 id="4-4-红黑树删除总结"><a href="#4-4-红黑树删除总结" class="headerlink" title="4.4 红黑树删除总结"></a>4.4 红黑树删除总结</h4><p>删除动作（移除节点）之后，若待平衡节点是黑色的叶子节点：<br>平衡调整情形，主要根据 [兄节点的位置&#x2F;颜色]、[兄的子节点的颜色]、[父节点颜色] 进行分类：<br><img src="/09_11.png"></p>
+<h3 id="5-红黑树的应用场景"><a href="#5-红黑树的应用场景" class="headerlink" title="5. 红黑树的应用场景"></a>5. 红黑树的应用场景</h3><p>二叉查找树的时间复杂度会受到其树深度的影响，而红黑树可以保证在最坏情况下的时间复杂度仍为O(lgn)。<br>当数据量多到一定程度时，使用红黑树比二叉查找树的效率要高。</p>
+<blockquote>
+<p>平衡二叉树的时间复杂度是O(logn)，红黑树的时间复杂度为O(lgn)，两者都表示的都是时间复杂度为对数关系（lg 函数为底是 10 的对数）。</p>
+</blockquote>
+<p>同平衡二叉树相比较，红黑树没有像平衡二叉树对平衡性要求的那么苛刻，虽然两者的时间复杂度相同，但是红黑树在实际测算中的速度要更胜一筹！</p>
+<p>红黑树的使用非常广泛，</p>
+<ul>
+<li>如<code>Java</code>的<code>TreeMap</code>和<code>TreeSet</code>都是基于红黑树实现的（相对与<code>HashMap</code>优势，内部<code>key</code>保持有序，且支持自定义排序比较器）；</li>
+<li>而<code>JDK8</code>中<code>HashMap</code>当链表长度大于<code>8</code>时也会转化为红黑树（时间复杂度从<code>O(n)--&gt;O(lgn)</code> ，且自旋开销比其他树低）。</li>
+<li>其他：如epoll在内核中的实现，用红黑树管理事件块（文件描述符）；linux进程调度Completely Fair Scheduler，用红黑树管理进程控制块；nginx中，用红黑树管理timer等。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/04/15/data-structure-avltree/" rel="next" title="「数据结构与算法」AVL树">
+                <i class="fa fa-chevron-left"></i> 「数据结构与算法」AVL树
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/05/02/data-structure-heap/" rel="prev" title="「数据结构与算法」堆（Heap）">
+                「数据结构与算法」堆（Heap） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%B9%B3%E8%A1%A1%E7%89%B9%E5%BE%81"><span class="nav-number">1.</span> <span class="nav-text">1. 红黑树的平衡特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%B9%B3%E8%A1%A1%E8%B0%83%E6%95%B4"><span class="nav-number">2.</span> <span class="nav-text">2. 红黑树的平衡调整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8F%92%E5%85%A5%E6%93%8D%E4%BD%9C%E7%9A%84%E5%B9%B3%E8%A1%A1%E8%B0%83%E6%95%B4"><span class="nav-number">3.</span> <span class="nav-text">3. 插入操作的平衡调整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C%E7%9A%84%E5%B9%B3%E8%A1%A1%E8%B0%83%E6%95%B4"><span class="nav-number">4.</span> <span class="nav-text">4. 删除操作的平衡调整</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 二叉查找树的删除操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4%E5%8A%A8%E4%BD%9C"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 红黑树的删除动作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-%E7%BA%A2%E9%BB%91%E6%A0%91%E5%88%A0%E9%99%A4%E5%90%8E%E7%9A%84%E5%B9%B3%E8%A1%A1%E6%93%8D%E4%BD%9C"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 红黑树删除后的平衡操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-1-1%E3%80%91%EF%BC%9A-%E5%85%84%E9%BB%91%EF%BC%88S-%E9%BB%91%EF%BC%89%EF%BC%8C%E5%85%84%E5%AD%90%E5%85%A8%E9%BB%91%EF%BC%88L-%E5%92%8C-R-%E5%85%A8%E9%BB%91%EF%BC%89%EF%BC%8C%E7%88%B6%E7%BA%A2%EF%BC%88P-%E7%BA%A2%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.1.</span> <span class="nav-text">【情形 1.1】： 兄黑（S 黑），兄子全黑（L 和 R 全黑），父红（P 红）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-1-2%E3%80%91%EF%BC%9A-%E5%85%84%E9%BB%91%EF%BC%88S-%E9%BB%91%EF%BC%89%EF%BC%8C%E5%85%84%E5%AD%90%E5%85%A8%E9%BB%91%EF%BC%88L-%E5%92%8C-R-%E5%85%A8%E9%BB%91%EF%BC%89%EF%BC%8C%E7%88%B6%E9%BB%91%EF%BC%88P-%E9%BB%91%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.2.</span> <span class="nav-text">【情形 1.2】： 兄黑（S 黑），兄子全黑（L 和 R 全黑），父黑（P 黑）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-2-1%E3%80%91%EF%BC%9A-%E5%85%84%E9%BB%91%EF%BC%88S-%E9%BB%91%EF%BC%89%EF%BC%8C%E5%85%84%E5%9C%A8%E5%B7%A6%EF%BC%88S-%E5%B7%A6%EF%BC%89%EF%BC%8C%E5%85%84%E5%B7%A6%E5%AD%90%E7%BA%A2%EF%BC%88L-%E7%BA%A2%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.3.</span> <span class="nav-text">【情形 2.1】： 兄黑（S 黑），兄在左（S 左），兄左子红（L 红）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-2-2%E3%80%91%EF%BC%9A-%E5%85%84%E9%BB%91%EF%BC%88S-%E9%BB%91%EF%BC%89%EF%BC%8C%E5%85%84%E5%9C%A8%E5%B7%A6%EF%BC%88S-%E5%B7%A6%EF%BC%89%EF%BC%8C%E5%85%84%E5%B7%A6%E5%AD%90%E9%BB%91%EF%BC%88L-%E9%BB%91%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.4.</span> <span class="nav-text">【情形 2.2】： 兄黑（S 黑），兄在左（S 左），兄左子黑（L 黑）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-2-3%E3%80%91%EF%BC%9A-%E5%85%84%E9%BB%91%EF%BC%88S-%E9%BB%91%EF%BC%89%EF%BC%8C%E5%85%84%E5%9C%A8%E5%8F%B3%EF%BC%88S-%E5%8F%B3%EF%BC%89%EF%BC%8C%E5%85%84%E5%8F%B3%E5%AD%90%E7%BA%A2%EF%BC%88R-%E7%BA%A2%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.5.</span> <span class="nav-text">【情形 2.3】： 兄黑（S 黑），兄在右（S 右），兄右子红（R 红）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-2-4%E3%80%91%EF%BC%9A-%E5%85%84%E9%BB%91%EF%BC%88S-%E9%BB%91%EF%BC%89%EF%BC%8C%E5%85%84%E5%9C%A8%E5%8F%B3%EF%BC%88S-%E5%8F%B3%EF%BC%89%EF%BC%8C%E5%85%84%E5%8F%B3%E5%AD%90%E9%BB%91%EF%BC%88R-%E9%BB%91%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.6.</span> <span class="nav-text">【情形 2.4】： 兄黑（S 黑），兄在右（S 右），兄右子黑（R 黑）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-3-1%E3%80%91%EF%BC%9A-%E5%85%84%E7%BA%A2%EF%BC%88S-%E7%BA%A2%EF%BC%89%EF%BC%8C%E5%85%84%E5%9C%A8%E5%B7%A6%EF%BC%88S-%E5%B7%A6%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.7.</span> <span class="nav-text">【情形 3.1】： 兄红（S 红），兄在左（S 左）；</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E3%80%90%E6%83%85%E5%BD%A2-3-2%E3%80%91%EF%BC%9A-%E5%85%84%E7%BA%A2%EF%BC%88S-%E7%BA%A2%EF%BC%89%EF%BC%8C%E5%85%84%E5%9C%A8%E5%8F%B3%EF%BC%88S-%E5%8F%B3%EF%BC%89%EF%BC%9B"><span class="nav-number">4.3.8.</span> <span class="nav-text">【情形 3.2】： 兄红（S 红），兄在右（S 右）；</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-4-%E7%BA%A2%E9%BB%91%E6%A0%91%E5%88%A0%E9%99%A4%E6%80%BB%E7%BB%93"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 红黑树删除总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">5.</span> <span class="nav-text">5. 红黑树的应用场景</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

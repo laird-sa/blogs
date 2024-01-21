@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,安全,病毒," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一日，某不安好心者在酷安的 Xposed 模块 “App Setting” 的评论区发布了一条评论——“APP Setting 专业版”。一位用户下载使用后中招——微信密码泄露，账户被盗刷。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="拨开云雾见天明——解析酷安新出现的微信盗号木马">
+<meta property="og:url" content="https://www.resonanat.com/2017/01/21/lets-check-and-study-wechat-trojan/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="一日，某不安好心者在酷安的 Xposed 模块 “App Setting” 的评论区发布了一条评论——“APP Setting 专业版”。一位用户下载使用后中招——微信密码泄露，账户被盗刷。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000012.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000014.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000015.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000016.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000009.png">
+<meta property="og:image" content="https://p0.ssl.qhmsg.com/t01cedd34ff12d84b79.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000013.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000021.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000019.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000010.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000005.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000020.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000007.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000025.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000026.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000043.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000044.jpg">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000042.png">
+<meta property="article:published_time" content="2017-01-21T13:42:00.000Z">
+<meta property="article:modified_time" content="2017-01-23T15:47:00.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="安全">
+<meta property="article:tag" content="病毒">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000012.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/01/21/lets-check-and-study-wechat-trojan/"/>
+
+
+
+
+
+  <title>拨开云雾见天明——解析酷安新出现的微信盗号木马 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/21/lets-check-and-study-wechat-trojan/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">拨开云雾见天明——解析酷安新出现的微信盗号木马</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-21T21:42:00+08:00">
+                2017-01-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>一日，某不安好心者在酷安的 Xposed 模块 “App Setting” 的评论区发布了一条评论——“APP Setting 专业版”。一位用户下载使用后中招——微信密码泄露，账户被盗刷。</p>
+<span id="more"></span>
+
+<p>随后，酷友反应，在著名 Android 优化应用 “绿色守护” 的评论区同一个人发布了所谓 “绿色守护绿色版” 同样有涉嫌病毒的嫌疑。一时间酷安疑云四起，甚至引起了酷安的多位小编对各类修改版应用的抵制，对 QQ 美化版影响尤为巨大。<br>本人有幸在那个居心叵测的人被酷安的小编们删帖之前成功地下载到了两个样本。现在我将通过逆向这个病毒，来弄清楚这个里面到底有多少猫腻。</p>
+<blockquote>
+<p>另外，感谢酷友 <a target="_blank" rel="noopener" href="http://www.coolapk.com/u/523048">DBin_K</a> 以身试毒、安装“体验”并抓包，获得了宝贵的截图和数据。</p>
+</blockquote>
+<h1 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h1><blockquote>
+<p>工欲善其事必先利其器。这是本人使用的工具。</p>
+</blockquote>
+<ul>
+<li>ROM IDE+</li>
+<li>MT 管理器</li>
+<li>Packet Capture</li>
+<li>Beyond Compare</li>
+<li>安装包解析工具</li>
+</ul>
+<blockquote>
+<p><del>这些是病毒的样本。本人已经混淆了这些 Apk 资源，确保不会再被其它不法分子反编译、用于其它非法用途！</del>不再提供病毒样本。</p>
+</blockquote>
+<h1 id="0x01"><a href="#0x01" class="headerlink" title="0x01"></a>0x01</h1><p>以下是受害者酷友“阿光正传”的经历。</p>
+<img src="https://bbs-static.nfz.yecdn.com/i/0000012.png" alt="0000012.png" style="width:50%" />
+
+<h1 id="0x02"><a href="#0x02" class="headerlink" title="0x02"></a>0x02</h1><p>以被打包过的 App Setting 为例。<br>首先使用 ROM IDE+（核心是 APkTool）对正常的 APP Setting 和被打包多的 APK Setting 进行反编译，然后使用 Beyond Compare 比对反编译出来的东西有什么区别。<br>首先可以看到 <code>AndroidManiFest.xml</code> 的区别，可以看到被打包过的 App Setting 多申请了这些权限。</p>
+<ul>
+<li>读取设备信息</li>
+<li>读写短信</li>
+<li>读取联系人</li>
+<li>开机自动启动</li>
+<li>震动权限</li>
+<li>挂载文件系统</li>
+<li>读取存储</li>
+<li><strong>在其它应用上层显示内容</strong></li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000014.png" alt="0000014.png"></p>
+<blockquote>
+<p>上图中左边是被打包应用的 <code>AndroidManiFest.xml</code>，右边是正常应用的 <code>AndroidManiFest.xml</code>。</p>
+</blockquote>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000015.png" alt="0000015.png"></p>
+<p>除此以外还可以从第二张图里看到，被打包过的应用还额外内置了两个 Activity，分别是 <code>com.android.append.MainActivity</code> 和 <code>com.android.append.MainActivity2</code>。这两个活动所包含的包名和应用本身的包名 <code>de.robv.android.xposed.mods.appsettings</code> 并不相符。所以意味着这两个活动并没有写进打包的应用中，而是额外的独立应用。</p>
+<blockquote>
+<p>而且，这个应用伪装成了系统组件（这个额外的应用的包名为 com.android.append）</p>
+</blockquote>
+<h1 id="0x03"><a href="#0x03" class="headerlink" title="0x03"></a>0x03</h1><p><img src="https://bbs-static.nfz.yecdn.com/i/0000016.png" alt="0000016.png"></p>
+<p>这张图可以看到被打包的应用还新增了一个 <code>drawable</code> 文件夹，内建了一个假的微信悬浮窗和微信登陆界面的样式，可以看到微信的 icon 和登陆的界面图片，以及定义界面的 xml。随便摘录一段给大家看看。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;shapexmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;</span><br><span class="line">    <span class="tag">&lt;<span class="name">solid</span> <span class="attr">android:color</span>=<span class="string">&quot;#e5fafafa&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">corners</span> <span class="attr">android:radius</span>=<span class="string">&quot;5.0dip&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">shape</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<img src="https://bbs-static.nfz.yecdn.com/i/0000009.png" alt="0000009.png" style="width:50%" />
+
+<p><img src="https://p0.ssl.qhmsg.com/t01cedd34ff12d84b79.png" alt="0000018.png"></p>
+<p>实际效果像这样（由 DBIn_K 提供截图）：</p>
+<img src="https://bbs-static.nfz.yecdn.com/i/0000013.png" alt="0000013.png" style="width:50%" />
+
+<blockquote>
+<p>还有模有样的，不是么？</p>
+</blockquote>
+<h1 id="0x04"><a href="#0x04" class="headerlink" title="0x04"></a>0x04</h1><p>从那张图里还可以看到，除了一些 smali 的不同，还有一个显著区别就是<code>asset</code>目录下竟然内置了一个小的 timesync.apk！<br>将它提取出来，用 MT 管理器和安装包解析工具加以分析：</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000021.png" alt="0000021.png"></p>
+<blockquote>
+<p>原来这个就是那个 <code>com.android.append</code>。伪装应用名为 SuperSU,，以便瞒天过海。</p>
+</blockquote>
+<p>再对其进行反编译，查看里面到底有什么猫腻。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000019.png" alt="0000019.png"></p>
+<p>查看里面的文件目录树可以看出来同样是内置了一套悬浮窗的样式，除此以外还内置了一套微信登录界面的样式。<br>同样只摘录一段给大家看看就行：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ImageView</span> <span class="attr">android:background</span>=<span class="string">&quot;#ff393a3f&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;48.0dip&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;0.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;0.0dip&quot;</span> <span class="attr">android:src</span>=<span class="string">&quot;@drawable/wx_top&quot;</span> <span class="attr">android:scaleType</span>=<span class="string">&quot;fitStart&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">View</span> <span class="attr">android:background</span>=<span class="string">&quot;#00000000&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;48.0dip&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;48.0dip&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;0.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;0.0dip&quot;</span> <span class="attr">android:onClick</span>=<span class="string">&quot;btnBack_onClick&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textSize</span>=<span class="string">&quot;18.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ffffffff&quot;</span> <span class="attr">android:paddingLeft</span>=<span class="string">&quot;60.0dip&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;48.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;3.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;解除登录限制&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textSize</span>=<span class="string">&quot;14.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff999999&quot;</span> <span class="attr">android:paddingLeft</span>=<span class="string">&quot;60.0dip&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;48.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;26.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;微信安全支付&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textSize</span>=<span class="string">&quot;16.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff999999&quot;</span> <span class="attr">android:gravity</span>=<span class="string">&quot;center_horizontal&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;40.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;请输入支付密码，以验证身份&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>还有这一段：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">android:orientation</span>=<span class="string">&quot;horizontal&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textSize</span>=<span class="string">&quot;16.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff353535&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;69.0dip&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;20.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;30.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;账  号&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">EditText</span> <span class="attr">android:textSize</span>=<span class="string">&quot;16.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff353535&quot;</span> <span class="attr">android:textColorHint</span>=<span class="string">&quot;#ffdddddd&quot;</span> <span class="attr">android:id</span>=<span class="string">&quot;@id/ed_wx_account&quot;</span> <span class="attr">android:background</span>=<span class="string">&quot;@null&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;220.0dip&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;30.0dip&quot;</span> <span class="attr">android:hint</span>=<span class="string">&quot;微信号/手机号/Email&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">View</span> <span class="attr">android:id</span>=<span class="string">&quot;@id/vw_wx_line1&quot;</span> <span class="attr">android:background</span>=<span class="string">&quot;#ff45c01a&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;0.5dip&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;13.0dip&quot;</span> <span class="attr">android:layout_marginRight</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:layout_marginBottom</span>=<span class="string">&quot;13.0dip&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">android:orientation</span>=<span class="string">&quot;horizontal&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textSize</span>=<span class="string">&quot;16.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff353535&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;69.0dip&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;20.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;密  码&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">EditText</span> <span class="attr">android:textSize</span>=<span class="string">&quot;16.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff353535&quot;</span> <span class="attr">android:textColorHint</span>=<span class="string">&quot;#ffdddddd&quot;</span> <span class="attr">android:id</span>=<span class="string">&quot;@id/ed_wx_password&quot;</span> <span class="attr">android:background</span>=<span class="string">&quot;@null&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:hint</span>=<span class="string">&quot;密码&quot;</span> <span class="attr">android:inputType</span>=<span class="string">&quot;textPassword&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">View</span> <span class="attr">android:id</span>=<span class="string">&quot;@id/vw_wx_line2&quot;</span> <span class="attr">android:background</span>=<span class="string">&quot;#ffd8d8d8&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;0.5dip&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;13.0dip&quot;</span> <span class="attr">android:layout_marginRight</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:layout_marginBottom</span>=<span class="string">&quot;13.0dip&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:enabled</span>=<span class="string">&quot;false&quot;</span> <span class="attr">android:textSize</span>=<span class="string">&quot;17.0dip&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;@drawable/login_button_textcolor&quot;</span> <span class="attr">android:id</span>=<span class="string">&quot;@id/btn_wx_login&quot;</span> <span class="attr">android:background</span>=<span class="string">&quot;@drawable/login_button_background&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;fill_parent&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;47.0dip&quot;</span> <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:layout_marginRight</span>=<span class="string">&quot;10.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;登录&quot;</span> <span class="attr">android:onClick</span>=<span class="string">&quot;Button_onClick&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">android:textSize</span>=<span class="string">&quot;15.0sp&quot;</span> <span class="attr">android:textColor</span>=<span class="string">&quot;#ff576b95&quot;</span> <span class="attr">android:layout_gravity</span>=<span class="string">&quot;center&quot;</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span> <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;20.0dip&quot;</span> <span class="attr">android:text</span>=<span class="string">&quot;登录遇到问题 ?&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>实际效果就像这样（由以身试毒的酷友 DBin_K 提供截图）：</p>
+<img src="https://bbs-static.nfz.yecdn.com/i/0000010.png" alt="0000010.png" style="width:50%" />
+<img src="https://bbs-static.nfz.yecdn.com/i/0000005.png" alt="0000005.png" style="width:50%" />
+
+<blockquote>
+<p>“解除登录限制”、“微信安全支付”、“请输入支付密码，以验证身份”、“登录遇到问题？” ，真的很具有迷惑性。</p>
+</blockquote>
+<h1 id="0x05"><a href="#0x05" class="headerlink" title="0x05"></a>0x05</h1><p>酷友 DBin_K 还发现病毒的核心组件还申请了 root 权限，他把 su 权限以后 SuperSU 抓到些日志。这些日志都是满满的 <code>cat</code> 指令，从微信的数据文件夹<code>/data/data/com.tencent.mm</code>合并了很多文件到它自己的数据目录<code>/data/user/0/com.android.append</code>下面。具体要这些数据是为了什么还不清楚（我自己没有微信，所以没法知道它获取的这些是什么数据）</p>
+<blockquote>
+<p>更新：获取这些数据是为了微信跨设备登陆，具体参见 0x07。</p>
+</blockquote>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000020.png" alt="0000020.png"></p>
+<p>现在来看他病毒核心的 smali，粗略一看，里面值得我们关注的主要是三个部分，一个是基于 google 开发的解析 json 的框架 gson，一个是由 Jakewharton 开发的 DiskLruCache 缓存，一个是 loopj 开发的 android-async-http。这几个就是用来把获取到的数据传回作者的服务器。<br>本来我可以直接一个一个看 smali ，直到找到他数据回源的域名，但是后来 DBin_K 直接开了抓包，拿到了数据回源的地址：<code>uu636.com/update.aspx</code>。所以我就没有继续看下去。</p>
+<img src="https://bbs-static.nfz.yecdn.com/i/0000007.png" alt="0000007.png" style="width:50%" />
+
+<h1 id="0x06"><a href="#0x06" class="headerlink" title="0x06"></a>0x06</h1><p>现在这个病毒的原理很明显了：始作俑者专找 Xposed 和 Root 类应用下手，因为这类应用有很好的后台存活性，以便随时出来作案；然后是病毒的核心组件伪装成 SuperSU 向受害者申请 root 权限，把病毒核心注入 system&#x2F;app ，并收集用户的微信的数据库；接着是由于<code>ANdroidManiFest.xml</code>中定义了在在其它应用显示的权限，每十分钟会弹出一个假的弹窗提示你“微信登陆已过期，需要重新登陆”，从而把受害者骗进他们那个做的非常逼真的登陆界面，直到套出用户的用户名和密码；最后这些信息会被回传给始作俑者的服务器，然后很快就会用这些信息盗刷受害者的微信钱包。同时，root 权限帮助病毒核心组件长期存活，就算受害者使用 RE 管理器删除了组件，也会不断复活。</p>
+<h1 id="0x07"><a href="#0x07" class="headerlink" title="0x07"></a>0x07</h1><blockquote>
+<p>2017-01-23 更新：</p>
+</blockquote>
+<ol>
+<li>根据学习软件工程的逆向大佬 iKirby 分析，获取微信的数据文件是为了实现跨设备微信登陆；</li>
+<li>从百度贴吧可以获得的公开的资料得知，这个团伙从今年年初就已经开始作案（几次病毒的行为都高度相似），已经有将近十名受害者被骗。</li>
+<li>查询一下这个域名的 Whois 信息可以看到，这个域名是在国内购买的，同时启用了域名 Whois 隐私保护，所以查不到域名所有人的信息。</li>
+</ol>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000025.png" alt="0000025.png"><br><img src="https://bbs-static.nfz.yecdn.com/i/0000026.png" alt="0000026.png"></p>
+<p>根据全网 ping 的响应速度，的确应该是靠近国内地区的服务器。但是又找不到备案信息，所以这个服务器应该是在香港（我用我朋友在香港沙田机房的 VPS ping 了一下发现耗时是 0ms，结果不言而喻）<br>5. 在酷友 <a target="_blank" rel="noopener" href="http://www.coolapk.com/u/554126">llllllllllll666</a> 和酷安的开发组成员 <a target="_blank" rel="noopener" href="http://www.coolapk.com/u/346976">liubaoyua</a> 对病毒的逆向下获得了 java 部分。详见 0x08。</p>
+<h1 id="0x08"><a href="#0x08" class="headerlink" title="0x08"></a>0x08</h1><p>在酷友 llllllllllll666 和酷安开发组成员 liubaoyua 的反编译下发现了几个类，大概就是这些作用：</p>
+<ul>
+<li>劫持微信快捷方式</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000043.png" alt="0000043.png"></p>
+<p>代码如图，当获取到 root 权限以后木马核心会开始寻找启动器下的微信的快捷方式劫持到自己的桌面活动 <code>com.android.append.Launcher.Activity</code>，这样受害者点击微信你图标也会触发打开伪造的登陆界面。</p>
+<ul>
+<li>卸载微信</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000044.jpg" alt="0000044.jpg"></p>
+<p>这个就简单了，仅仅只是卸载微信而已。</p>
+<ul>
+<li>一键变砖</li>
+</ul>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000042.png" alt="0000042.png"></p>
+<p>这个是挂载 system 分区，然后删除 <code>system/framework/</code> 文件夹，也就是删除了系统框架，可以导致手机变砖。</p>
+<blockquote>
+<p>后面两个是服务端远程控制实现的，所以请各位“以身试毒”的大无畏者务必小心，小心<strong>被远端遥控一键变砖</strong>！！</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/%E5%AE%89%E5%85%A8/" rel="tag"># 安全</a>
+          
+            <a href="/tags/%E7%97%85%E6%AF%92/" rel="tag"># 病毒</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/31/good-bye-2016/" rel="next" title="Goodbye 2016">
+                <i class="fa fa-chevron-left"></i> Goodbye 2016
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/26/hello-disqus-and-goodbye-duoshuo/" rel="prev" title="你好 Disqus，再见多说">
+                你好 Disqus，再见多说 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0x00"><span class="nav-number">1.</span> <span class="nav-text">0x00</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x01"><span class="nav-number">2.</span> <span class="nav-text">0x01</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x02"><span class="nav-number">3.</span> <span class="nav-text">0x02</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x03"><span class="nav-number">4.</span> <span class="nav-text">0x03</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x04"><span class="nav-number">5.</span> <span class="nav-text">0x04</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x05"><span class="nav-number">6.</span> <span class="nav-text">0x05</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x06"><span class="nav-number">7.</span> <span class="nav-text">0x06</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x07"><span class="nav-number">8.</span> <span class="nav-text">0x07</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x08"><span class="nav-number">9.</span> <span class="nav-text">0x08</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

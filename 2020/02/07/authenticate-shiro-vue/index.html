@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端开发,安全认证," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前两篇我们整合了SpringBoot+Shiro+JWT+Redis实现了登录认证，接口权限控制，接下来将要实现前端 Vue 的动态路由控制。 1. 前端权限控制思路（Vue）前端的权限控制，不同的权限对应着不同的路由，同时菜单也需根据不同的权限，异步生成。先回顾下整体流程：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇)">
+<meta property="og:url" content="https://www.resonanat.com/2020/02/07/authenticate-shiro-vue/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前两篇我们整合了SpringBoot+Shiro+JWT+Redis实现了登录认证，接口权限控制，接下来将要实现前端 Vue 的动态路由控制。 1. 前端权限控制思路（Vue）前端的权限控制，不同的权限对应着不同的路由，同时菜单也需根据不同的权限，异步生成。先回顾下整体流程：">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/auth-global.png">
+<meta property="og:image" content="https://www.resonanat.com/auth-admin.jpg">
+<meta property="article:published_time" content="2020-02-06T18:10:46.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.406Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="后端开发">
+<meta property="article:tag" content="安全认证">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/auth-global.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2020/02/07/authenticate-shiro-vue/"/>
+
+
+
+
+
+  <title>「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇) | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/02/07/authenticate-shiro-vue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇)</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-07T02:10:46+08:00">
+                2020-02-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" itemprop="url" rel="index">
+                    <span itemprop="name">安全认证</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前两篇我们整合了<code>SpringBoot+Shiro+JWT+Redis</code>实现了登录认证，接口权限控制，接下来将要实现前端 Vue 的动态路由控制。</p>
+<h3 id="1-前端权限控制思路（Vue）"><a href="#1-前端权限控制思路（Vue）" class="headerlink" title="1. 前端权限控制思路（Vue）"></a>1. 前端权限控制思路（Vue）</h3><p>前端的权限控制，不同的权限对应着不同的路由，同时菜单也需根据不同的权限，异步生成。<br>先回顾下整体流程：<span id="more"></span><br><img src="/auth-global.png"></p>
+<ul>
+<li>登录: 提交账号和密码到服务端签发<code>token</code>，拿到<code>token</code>之后存入浏览器，再携带<code>token</code>(一般放在请求头中)再去获取用户的详细信息(包括用户权限等信息)。</li>
+<li>权限验证：通过用户权限信息 构建 对应权限的路由，通过<code>router.addRoutes</code>动态挂载这些路由。</li>
+</ul>
+<p>接下来将基于 Vue 开源后台模板<a target="_blank" rel="noopener" href="https://github.com/PanJiaChen/vue-admin-template">vue-admin-template</a>来演示具体流程，这里只演示重要代码，完整项目移步文章末尾获取源码。</p>
+<h3 id="2-登录"><a href="#2-登录" class="headerlink" title="2. 登录"></a>2. 登录</h3><ol>
+<li>先准备基础的静态路由(<code>src/router/index.js</code>)</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> constantRoutes = [</span><br><span class="line">  <span class="comment">// 登陆页面</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/login&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/login/index&#x27;</span>),</span><br><span class="line">    <span class="attr">hidden</span>: <span class="literal">true</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 首页</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="title class_">Layout</span>,</span><br><span class="line">    <span class="attr">redirect</span>: <span class="string">&#x27;/dashboard&#x27;</span>,</span><br><span class="line">    <span class="attr">children</span>: [&#123;</span><br><span class="line">      <span class="attr">path</span>: <span class="string">&#x27;dashboard&#x27;</span>,</span><br><span class="line">      <span class="attr">name</span>: <span class="string">&#x27;Dashboard&#x27;</span>,</span><br><span class="line">      <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/dashboard/index&#x27;</span>),</span><br><span class="line">      <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;首页&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;dashboard&#x27;</span> &#125;</span><br><span class="line">    &#125;]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/404&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/404&#x27;</span>),</span><br><span class="line">    <span class="attr">hidden</span>: <span class="literal">true</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>登录页面(src&#x2F;views&#x2F;login&#x2F;index.vue)<code>click</code>事件触发登录操作</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">this</span>.<span class="property">$store</span>.<span class="title function_">dispatch</span>(<span class="string">&#x27;user/login&#x27;</span>, <span class="variable language_">this</span>.<span class="property">loginForm</span>).<span class="title function_">then</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">$router</span>.<span class="title function_">push</span>(&#123; <span class="attr">path</span>: <span class="string">&#x27;/&#x27;</span> &#125;); <span class="comment">//登录成功之后重定向到首页</span></span><br><span class="line">&#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">$message</span>.<span class="title function_">error</span>(err); <span class="comment">//登录失败提示错误</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>登录逻辑(src&#x2F;store&#x2F;modules&#x2F;user.js)<code>action</code>:</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> actions = &#123;</span><br><span class="line">  <span class="comment">// user login</span></span><br><span class="line">  <span class="title function_">login</span>(<span class="params">&#123; commit &#125;, userInfo</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; account, password &#125; = userInfo</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="comment">// 这里的login调用api接口请求数据</span></span><br><span class="line">      <span class="title function_">login</span>(&#123; <span class="attr">account</span>: account.<span class="title function_">trim</span>(), <span class="attr">password</span>: password &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">response</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; data &#125; = response</span><br><span class="line">        <span class="title function_">commit</span>(<span class="string">&#x27;SET_TOKEN&#x27;</span>, data)</span><br><span class="line">        <span class="title function_">setToken</span>(data)</span><br><span class="line">        <span class="title function_">resolve</span>()</span><br><span class="line">      &#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="title function_">reject</span>(error)</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// get user info</span></span><br><span class="line">  <span class="title function_">getInfo</span>(<span class="params">&#123; commit, state &#125;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="comment">// 这里的getInfo调用api接口请求数据</span></span><br><span class="line">      <span class="title function_">getInfo</span>(state.<span class="property">token</span>).<span class="title function_">then</span>(<span class="function"><span class="params">response</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; data &#125; = response</span><br><span class="line">        <span class="keyword">if</span> (!data) &#123;</span><br><span class="line">          <span class="title function_">reject</span>(<span class="string">&#x27;Verification failed, please Login again.&#x27;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">const</span> &#123; nickname, avatar, roles, permissions &#125; = data</span><br><span class="line">        <span class="comment">// 全局储存用户信息</span></span><br><span class="line">        <span class="title function_">commit</span>(<span class="string">&#x27;SET_NAME&#x27;</span>, nickname)</span><br><span class="line">        <span class="title function_">commit</span>(<span class="string">&#x27;SET_AVATAR&#x27;</span>, avatar)</span><br><span class="line">        <span class="comment">// 角色信息</span></span><br><span class="line">        <span class="title function_">commit</span>(<span class="string">&#x27;SET_ROLES&#x27;</span>, roles)</span><br><span class="line">        <span class="comment">// 指令权限信息</span></span><br><span class="line">        <span class="title function_">commit</span>(<span class="string">&#x27;SET_PERMISSIONS&#x27;</span>, permissions)</span><br><span class="line">        <span class="title function_">resolve</span>(data)</span><br><span class="line">      &#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="title function_">reject</span>(error)</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><code>/login</code>与<code>/getInfo</code>接口与返回的数据</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">POST</span> (<span class="attr">localhost</span>:<span class="number">8282</span>/login)</span><br><span class="line">请求参数: &#123;<span class="string">&quot;username&quot;</span>:<span class="string">&quot;admin&quot;</span>,<span class="string">&quot;password&quot;</span>:<span class="string">&quot;123456&quot;</span>&#125;</span><br><span class="line">响应: &#123;</span><br><span class="line">    <span class="string">&quot;code&quot;</span>:<span class="number">0</span>,</span><br><span class="line">    <span class="string">&quot;msg&quot;</span>:<span class="string">&quot;登录成功&quot;</span>,</span><br><span class="line">    <span class="string">&quot;data&quot;</span>:<span class="string">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsInVpZCI6MSwiZXhwIjoxNTgwOTk4MTIzfQ.6jgqt_opjnosASlJ2oSIYZn1Sb2BQO-eUo_6OVTHv50&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ------------getInfo--------------</span></span><br><span class="line"><span class="variable constant_">GET</span> (<span class="attr">localhost</span>:<span class="number">8282</span>/user/info)</span><br><span class="line"><span class="title class_">Headers</span>: &#123;<span class="string">&quot;X-Token&quot;</span>:<span class="string">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhZG1pbiIsInVpZCI6MSwiZXhwIjoxNTgwOTk4MTIzfQ.6jgqt_opjnosASlJ2oSIYZn1Sb2BQO-eUo_6OVTHv50&quot;</span>&#125;</span><br><span class="line">响应: &#123;</span><br><span class="line">    <span class="string">&quot;code&quot;</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="string">&quot;msg&quot;</span>: <span class="string">&quot;获取成功&quot;</span>,</span><br><span class="line">    <span class="string">&quot;data&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;account&quot;</span>: <span class="string">&quot;admin&quot;</span>,</span><br><span class="line">        <span class="string">&quot;nickname&quot;</span>: <span class="string">&quot;超级管理员&quot;</span>,</span><br><span class="line">        <span class="string">&quot;roles&quot;</span>: [<span class="string">&quot;admin&quot;</span>],</span><br><span class="line">        <span class="string">&quot;permissions&quot;</span>: [<span class="string">&quot;user:list&quot;</span>,<span class="string">&quot;user:add&quot;</span>,<span class="string">&quot;user:delete&quot;</span>,<span class="string">&quot;user:update&quot;</span>]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>获取用户信息(src&#x2F;permission.js)<ul>
+<li>用户登录成功之后，我们会在全局钩子<code>router.beforeEach</code>中拦截路由，判断是否已获得<code>token</code>，在获得<code>token</code>之后我们就要去获取用户的基本信息 并且根据用户角色动态挂载路由。</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> whiteList = [<span class="string">&#x27;/login&#x27;</span>] <span class="comment">// 白名单</span></span><br><span class="line">router.<span class="title function_">beforeEach</span>(<span class="title function_">async</span>(to, <span class="keyword">from</span>, next) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 判断是否已获得token</span></span><br><span class="line">  <span class="keyword">const</span> hasToken = <span class="title function_">getToken</span>()</span><br><span class="line">  <span class="keyword">if</span> (hasToken) &#123;</span><br><span class="line">    <span class="keyword">if</span> (to.<span class="property">path</span> === <span class="string">&#x27;/login&#x27;</span>) &#123;</span><br><span class="line">      <span class="title function_">next</span>(&#123; <span class="attr">path</span>: <span class="string">&#x27;/&#x27;</span> &#125;)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> hasRole = store.<span class="property">getters</span>.<span class="property">role</span></span><br><span class="line">      <span class="keyword">if</span> (hasRole) &#123;</span><br><span class="line">        <span class="title function_">next</span>()</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">// 获取用户角色 [&#x27;admin&#x27;] 或,[&#x27;developer&#x27;,&#x27;editor&#x27;]</span></span><br><span class="line">          <span class="keyword">const</span> &#123; roles &#125; = <span class="keyword">await</span> store.<span class="title function_">dispatch</span>(<span class="string">&#x27;user/getInfo&#x27;</span>)</span><br><span class="line">          <span class="comment">// 动态根据 角色 算出其对应有权限的路由</span></span><br><span class="line">          <span class="keyword">const</span> accessRoutes = <span class="keyword">await</span> store.<span class="title function_">dispatch</span>(<span class="string">&#x27;permission/generateRoutes&#x27;</span>, roles)</span><br><span class="line">          <span class="comment">// 动态挂载路由</span></span><br><span class="line">          router.<span class="title function_">addRoutes</span>(accessRoutes)</span><br><span class="line">          <span class="comment">// addRouter是让挂载的路由生效，但是挂载后&#x27;router.options.routes&#x27;并未刷新(应该是个bug)</span></span><br><span class="line">          <span class="comment">// 所以还需要手动将路由加入&#x27;router.options.routes&#x27;</span></span><br><span class="line">          router.<span class="property">options</span>.<span class="property">routes</span> = constantRoutes.<span class="title function_">concat</span>(accessRoutes)</span><br><span class="line">          <span class="title function_">next</span>()</span><br><span class="line">        &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">          <span class="keyword">await</span> store.<span class="title function_">dispatch</span>(<span class="string">&#x27;user/resetToken&#x27;</span>)</span><br><span class="line">          <span class="title class_">Message</span>.<span class="title function_">error</span>(error || <span class="string">&#x27;Has Error&#x27;</span>)</span><br><span class="line">          <span class="title function_">next</span>(<span class="string">`/login?redirect=<span class="subst">$&#123;to.path&#125;</span>`</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">/* has no token*/</span></span><br><span class="line">    <span class="keyword">if</span> (whiteList.<span class="title function_">indexOf</span>(to.<span class="property">path</span>) !== -<span class="number">1</span>) &#123;</span><br><span class="line">      <span class="title function_">next</span>()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="title function_">next</span>(<span class="string">`/login?redirect=<span class="subst">$&#123;to.path&#125;</span>`</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-动态挂载路由"><a href="#3-动态挂载路由" class="headerlink" title="3. 动态挂载路由"></a>3. 动态挂载路由</h3><p>主要思路，前端会有一份包含所有路由的路由表。创建<code>Vue</code>实例时会先挂载登录等公共路由；当用户登录之后，通过<code>getInfo(token)</code>获取用户的角色(<code>roles</code>)，动态根据用户的<code>roles</code>算出其对应有权限的路由，再通过<code>router.addRoutes</code>动态挂载路由；使用<code>vuex</code>管理路由表，根据<code>vuex</code>中可访问的路由渲染菜单。但这些控制都只是页面级的，后端接口也需要做权限验证。</p>
+<ol>
+<li>改造一下路由表，添加异步路由列表，将角色添加到元数据<code>meta</code>中：</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 动态路由</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> asyncRoutes = [</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/user&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="title class_">Layout</span>,</span><br><span class="line">    <span class="attr">redirect</span>: <span class="string">&#x27;/user/list&#x27;</span>,</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;User&#x27;</span>,</span><br><span class="line">    <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;用户管理&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;example&#x27;</span> &#125;,</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;list&#x27;</span>,</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;UserList&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/user/list&#x27;</span>),</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;用户列表&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;nested&#x27;</span> &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;edit&#x27;</span>,</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;UserEdit&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/user/form&#x27;</span>),</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;添加用户&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;form&#x27;</span> &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/admin&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="title class_">Layout</span>,</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;index&#x27;</span>,</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;Form1&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/test/index&#x27;</span>),</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;管理员角色测试&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;form&#x27;</span>, <span class="attr">roles</span>: [<span class="string">&#x27;admin&#x27;</span>] &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/editor&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="title class_">Layout</span>,</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;index&#x27;</span>,</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;Form2&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/test/index&#x27;</span>),</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;编辑角色测试&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;form&#x27;</span>, <span class="attr">roles</span>: [<span class="string">&#x27;editor&#x27;</span>] &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/form&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="title class_">Layout</span>,</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;index&#x27;</span>,</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;Form3&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/test/index&#x27;</span>),</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;用户角色测试&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;form&#x27;</span>, <span class="attr">roles</span>: [<span class="string">&#x27;user&#x27;</span>] &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/nested&#x27;</span>,</span><br><span class="line">    <span class="attr">component</span>: <span class="title class_">Layout</span>,</span><br><span class="line">    <span class="attr">redirect</span>: <span class="string">&#x27;/nested/menu3&#x27;</span>,</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;Nested&#x27;</span>,</span><br><span class="line">    <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;子菜单权限测试&#x27;</span>, <span class="attr">icon</span>: <span class="string">&#x27;form&#x27;</span> &#125;,</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;menu1&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/test/index&#x27;</span>),</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;Menu1&#x27;</span>,</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;管理员可见&#x27;</span>, <span class="attr">roles</span>: [<span class="string">&#x27;admin&#x27;</span>] &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;menu2&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/test/index&#x27;</span>),</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;Menu1&#x27;</span>,</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;编辑者可见&#x27;</span>, <span class="attr">roles</span>: [<span class="string">&#x27;editor&#x27;</span>] &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">path</span>: <span class="string">&#x27;menu3&#x27;</span>,</span><br><span class="line">        <span class="attr">component</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;@/views/test/index&#x27;</span>),</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;Menu1&#x27;</span>,</span><br><span class="line">        <span class="attr">meta</span>: &#123; <span class="attr">title</span>: <span class="string">&#x27;普通用户可见&#x27;</span>, <span class="attr">roles</span>: [<span class="string">&#x27;user&#x27;</span>] &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>根据前面获取用户信息的代码可发现，通过<code>store.dispatch(&#39;permission/generateRoutes&#39;,roles)</code>来获得有权限的路由，新建<code>src/store/modules/permission.js</code>如下：</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; asyncRoutes, constantRoutes &#125; <span class="keyword">from</span> <span class="string">&#x27;@/router&#x27;</span></span><br><span class="line"><span class="comment">/** 判断用户是否拥有此路由的权限 */</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">hasPermission</span>(<span class="params">roles, route</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (route.<span class="property">meta</span> &amp;&amp; route.<span class="property">meta</span>.<span class="property">roles</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> roles.<span class="title function_">some</span>(<span class="function"><span class="params">role</span> =&gt;</span> route.<span class="property">meta</span>.<span class="property">roles</span>.<span class="title function_">includes</span>(role))</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/** 递归组装路由表，返回符合用户角色权限的路由列表 */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">filterAsyncRoutes</span>(<span class="params">routes, roles</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> res = []</span><br><span class="line">  routes.<span class="title function_">forEach</span>(<span class="function"><span class="params">route</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> tmp = &#123; ...route &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">hasPermission</span>(roles, tmp)) &#123;</span><br><span class="line">      <span class="keyword">if</span> (tmp.<span class="property">children</span>) &#123;</span><br><span class="line">        <span class="comment">// 递归调用</span></span><br><span class="line">        tmp.<span class="property">children</span> = <span class="title function_">filterAsyncRoutes</span>(tmp.<span class="property">children</span>, roles)</span><br><span class="line">      &#125;</span><br><span class="line">      res.<span class="title function_">push</span>(tmp)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> state = &#123;</span><br><span class="line">  <span class="attr">routes</span>: [], <span class="comment">// 所有路由,包括静态路由和动态路由</span></span><br><span class="line">  <span class="attr">addRoutes</span>: [] <span class="comment">// 动态路由</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> mutations = &#123;</span><br><span class="line">  <span class="attr">SET_ROUTES</span>: <span class="function">(<span class="params">state, routes</span>) =&gt;</span> &#123;</span><br><span class="line">    state.<span class="property">addRoutes</span> = routes</span><br><span class="line">    <span class="comment">// 合并路由</span></span><br><span class="line">    state.<span class="property">routes</span> = constantRoutes.<span class="title function_">concat</span>(routes)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> actions = &#123;</span><br><span class="line">  <span class="comment">// 生成动态路由</span></span><br><span class="line">  <span class="title function_">generateRoutes</span>(<span class="params">&#123; commit &#125;, roles</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">let</span> accessedRoutes</span><br><span class="line">      <span class="keyword">if</span> (roles.<span class="title function_">includes</span>(<span class="string">&#x27;admin&#x27;</span>)) &#123;</span><br><span class="line">        <span class="comment">// &#x27;超级管理员&#x27;拥有所有的路由，这样判断节省加载时间</span></span><br><span class="line">        accessedRoutes = asyncRoutes || []</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 筛选出该角色有权限的路由</span></span><br><span class="line">        accessedRoutes = <span class="title function_">filterAsyncRoutes</span>(asyncRoutes, roles)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="title function_">commit</span>(<span class="string">&#x27;SET_ROUTES&#x27;</span>, accessedRoutes)</span><br><span class="line">      <span class="title function_">resolve</span>(accessedRoutes)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">namespaced</span>: <span class="literal">true</span>,</span><br><span class="line">  state,</span><br><span class="line">  mutations,</span><br><span class="line">  actions</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-axios-拦截器"><a href="#4-axios-拦截器" class="headerlink" title="4. axios 拦截器"></a>4. axios 拦截器</h3><p>通过<code>request</code>拦截器在每个请求头里面塞入<code>token</code>，好让后端对请求进行权限验证；代码位置:<code>src/utils/request.js</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;axios&#x27;</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&#x27;@/store&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; getToken &#125; <span class="keyword">from</span> <span class="string">&#x27;@/utils/auth&#x27;</span></span><br><span class="line"><span class="comment">// create an axios instance</span></span><br><span class="line"><span class="keyword">const</span> service = axios.<span class="title function_">create</span>(&#123;</span><br><span class="line">  <span class="attr">baseURL</span>: process.<span class="property">env</span>.<span class="property">VUE_APP_BASE_API</span>, <span class="comment">// url = base url + request url</span></span><br><span class="line">  <span class="attr">withCredentials</span>: <span class="literal">false</span>, <span class="comment">// send cookies when cross-domain requests</span></span><br><span class="line">  <span class="attr">timeout</span>: <span class="number">5000</span> <span class="comment">// request timeout</span></span><br><span class="line">&#125;)</span><br><span class="line">service.<span class="property">interceptors</span>.<span class="property">request</span>.<span class="title function_">use</span>(</span><br><span class="line">  <span class="function"><span class="params">config</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (store.<span class="property">getters</span>.<span class="property">token</span>) &#123;</span><br><span class="line">      <span class="comment">// 登陆后将token放入headers[&#x27;X-Token&#x27;]中</span></span><br><span class="line">      config.<span class="property">headers</span>[<span class="string">&#x27;X-Token&#x27;</span>] = <span class="title function_">getToken</span>()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> config</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(error)</span><br><span class="line">  &#125;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> service</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-指令权限"><a href="#5-指令权限" class="headerlink" title="5. 指令权限"></a>5. 指令权限</h3><p>可以使用全局权限判断函数，实现按钮级别的权限判断。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">el-button</span> <span class="attr">v-if</span>=<span class="string">&quot;checkPermission(&#x27;user:add&#x27;)&quot;</span>&gt;</span>添加<span class="tag">&lt;/<span class="name">el-button</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">el-button</span> <span class="attr">v-if</span>=<span class="string">&quot;checkPermission(&#x27;user:delete&#x27;)&quot;</span>&gt;</span>删除<span class="tag">&lt;/<span class="name">el-button</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">el-button</span> <span class="attr">v-if</span>=<span class="string">&quot;checkPermission(&#x27;user:update&#x27;)&quot;</span>&gt;</span>修改<span class="tag">&lt;/<span class="name">el-button</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">el-button</span> <span class="attr">v-if</span>=<span class="string">&quot;checkPermission(&#x27;user:list&#x27;)&quot;</span>&gt;</span>查看<span class="tag">&lt;/<span class="name">el-button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">import</span> checkPermission <span class="keyword">from</span> <span class="string">&#x27;@/utils/permission&#x27;</span> <span class="comment">// 权限判断函数</span></span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">export</span> <span class="keyword">default</span> &#123;</span></span><br><span class="line"><span class="language-javascript">		<span class="attr">methods</span>: &#123;</span></span><br><span class="line"><span class="language-javascript">			<span class="title function_">checkPermission</span>(<span class="params">value</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">				<span class="keyword">return</span> <span class="title function_">checkPermission</span>(value)</span></span><br><span class="line"><span class="language-javascript">			&#125;,</span></span><br><span class="line"><span class="language-javascript">		&#125;,</span></span><br><span class="line"><span class="language-javascript">	&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>src/utils/permission.js</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&#x27;@/store&#x27;</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="title function_">checkPermission</span>(<span class="params">value</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> permissions = store.<span class="property">getters</span>.<span class="property">permissions</span></span><br><span class="line">  <span class="keyword">return</span> permissions.<span class="title function_">indexOf</span>(value) &gt; -<span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-效果演示："><a href="#6-效果演示：" class="headerlink" title="6. 效果演示："></a>6. 效果演示：</h3><p><img src="/auth-admin.jpg"></p>
+<blockquote>
+<p>注：搭建到这里的代码在<code>github</code>源码<code>tag</code>的<code>V3.0</code>中。<br>源码地址: <a target="_blank" rel="noopener" href="https://github.com/chaooo/springboot-vue-shiro.git">https://github.com/chaooo/springboot-vue-shiro.git</a></p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag"># 后端开发</a>
+          
+            <a href="/tags/%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81/" rel="tag"># 安全认证</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/21/authenticate-shiro-authorize/" rel="next" title="「安全认证」基于Shiro前后端分离的认证与授权(二.授权篇)">
+                <i class="fa fa-chevron-left"></i> 「安全认证」基于Shiro前后端分离的认证与授权(二.授权篇)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/02/11/env-redis-mysql/" rel="prev" title="「环境配置」Redis与MySQL多实例配置">
+                「环境配置」Redis与MySQL多实例配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%89%8D%E7%AB%AF%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%E6%80%9D%E8%B7%AF%EF%BC%88Vue%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">1. 前端权限控制思路（Vue）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%99%BB%E5%BD%95"><span class="nav-number">2.</span> <span class="nav-text">2. 登录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8A%A8%E6%80%81%E6%8C%82%E8%BD%BD%E8%B7%AF%E7%94%B1"><span class="nav-number">3.</span> <span class="nav-text">3. 动态挂载路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-axios-%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">4. axios 拦截器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%8C%87%E4%BB%A4%E6%9D%83%E9%99%90"><span class="nav-number">5.</span> <span class="nav-text">5. 指令权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%95%88%E6%9E%9C%E6%BC%94%E7%A4%BA%EF%BC%9A"><span class="nav-number">6.</span> <span class="nav-text">6. 效果演示：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

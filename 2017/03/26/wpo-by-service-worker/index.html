@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="前端优化,Web,Service Worker," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="静态内容非常适合做缓存来加速页面的访问，除了使用 CDN 实现加速之外，通过客户端也可以实现更好的访问体验。本文就利用 Service Worker 来探讨基于静态资源的加速方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web 性能优化（1）——浅尝 Service Worker">
+<meta property="og:url" content="https://www.resonanat.com/2017/03/26/wpo-by-service-worker/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="静态内容非常适合做缓存来加速页面的访问，除了使用 CDN 实现加速之外，通过客户端也可以实现更好的访问体验。本文就利用 Service Worker 来探讨基于静态资源的加速方案。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000071.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000072.png">
+<meta property="og:image" content="https://bbs-static.nfz.yecdn.com/i/0000073.png">
+<meta property="article:published_time" content="2017-03-26T05:01:18.000Z">
+<meta property="article:modified_time" content="2017-09-01T04:48:17.000Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="前端优化">
+<meta property="article:tag" content="Web">
+<meta property="article:tag" content="Service Worker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbs-static.nfz.yecdn.com/i/0000071.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/03/26/wpo-by-service-worker/"/>
+
+
+
+
+
+  <title>Web 性能优化（1）——浅尝 Service Worker | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/26/wpo-by-service-worker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Web 性能优化（1）——浅尝 Service Worker</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-26T13:01:18+08:00">
+                2017-03-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>静态内容非常适合做缓存来加速页面的访问，除了使用 CDN 实现加速之外，通过客户端也可以实现更好的访问体验。本文就利用 Service Worker 来探讨基于静态资源的加速方案。</p>
+<span id="more"></span>
+
+<blockquote>
+<p><del>ServiceWorker 对动态页面依然有效，但是效果不如静态站效果显著。</del><br>对于动态页面，Google 推出了 sw-toolbox，借助 Service Worker 的一系列接口实现了更强的缓存 API 和网络加载请求处理，使其能适合动态页面缓存。我也在《<a target="_blank" rel="noopener" href="https://blog.nfz.moe/archives/sw-toolbox-practice.html">本博客对 sw-toolbox 的实践</a>》一文中介绍了 sw-toolbox。我推荐无论是静态站还是动态站，都使用 sw-toolbox。</p>
+</blockquote>
+<p>Service worker 是 PWA 这类 WebApp 的重要支持，因为可以使 web 支持离线体验。除此以外，Service Worker 还支持通知推送和后台同步。当然这里我们用的是它离线加载的特性来优化网站体验。</p>
+<h1 id="启用-Service-Worker-支持"><a href="#启用-Service-Worker-支持" class="headerlink" title="启用 Service Worker 支持"></a>启用 Service Worker 支持</h1><h2 id="在首页添加-Service-Worker-注册代码"><a href="#在首页添加-Service-Worker-注册代码" class="headerlink" title="在首页添加 Service Worker 注册代码"></a>在首页添加 Service Worker 注册代码</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"><span class="keyword">if</span> (<span class="string">&#x27;serviceWorker&#x27;</span> <span class="keyword">in</span> navigator) &#123;</span></span><br><span class="line"><span class="language-javascript"> navigator.<span class="property">serviceWorker</span>.<span class="title function_">register</span>(<span class="string">&#x27;/sw.js&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码向下兼容 Service Worker，检测浏览器是否支持 Service Workers。如果支持就会根据 <code>sw.js</code> 注册 Service Workers 服务。如果浏览器不支持就不会注册。</p>
+<h2 id="添加-Service-Workers-所需文件"><a href="#添加-Service-Workers-所需文件" class="headerlink" title="添加 Service Workers 所需文件"></a>添加 Service Workers 所需文件</h2><p>你可以从<a target="_blank" rel="noopener" href="https://gist.github.com/neoFelhz/50800b701d00dc6d874be95da2cd7655">这里</a>下载到所需的文件，将其放在网站根目录下。</p>
+<ul>
+<li><code>sw.js</code></li>
+<li><code>offline.svg</code></li>
+<li><code>offline.html</code> 你可以用 Hexo 生成一个独立页面，也可以自己写一个。</li>
+</ul>
+<blockquote>
+<p>由于 Service Worker 的离线加载特性，在浏览者离线以后依然可以访问已经缓存了的页面。但是对于没有缓存的页面和图片，你可以通过 <code>offline.svg</code> 和 <code>offline.html</code> 加以提示。</p>
+</blockquote>
+<p>修改 <code>sw.js</code> 中的下述内容。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> ignoreFetch = [</span><br><span class="line">  <span class="regexp">/https?:\/\/cdn.bootcss.com\//</span>,</span><br><span class="line">  <span class="regexp">/https?:\/\/www.google-analytics.com\//</span>,</span><br><span class="line">  <span class="regexp">/chrome-extension:\/\//</span>,</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+
+<p>这部分定义了你不需要缓存的资源，用的是正则表达式对资源进行匹配。这里给出了按域名进行排除的例子。如果你无法判断哪些资源不需要缓存，请用 F12 打开 Dev Tools 的 Source 选项卡逐个加以筛选；如果还不会，就把你看到的所有不是源站的域名统统输进去。</p>
+<h1 id="加速效果"><a href="#加速效果" class="headerlink" title="加速效果"></a>加速效果</h1><p>这是第一次访问的效果。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000071.png" alt="0000071.png"></p>
+<p>可以看到，第一次访问不能算太理想，花费 1.39s 才完成了 DOMLoad，所需资源全部加载完实际上花了 1.69s。</p>
+<blockquote>
+<p>可以看到，实际上网络资源花费了 3.11s 才加载完。我特意截图了最后加载的几个有齿轮标识的资源。<del>这些是 ServiceWorker 在 <code>sw.js</code> 里加载的资源——offline.svg 和 offline.html。</del>博客更新以后，离线提示页面被下线，不会再加载 offline.svg 和 offline.html。</p>
+</blockquote>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000072.png" alt="0000072.png"></p>
+<p>这是第二次访问的效果。DOMLoad 只花费了 571ms，全部资源加载只需要 608ms。可以看到，很多资源 <code>from  ServiceWorker</code>。说明 ServiceWorker 拦截了请求，直接从 ServiceWorker 获得资源。</p>
+<blockquote>
+<p>看见没有？连 <code>blog.nfz.moe</code> 都被 ServiceWorker 拦截了，现在你知道为什么可以离线加载了吧。</p>
+</blockquote>
+<h1 id="先决条件"><a href="#先决条件" class="headerlink" title="先决条件"></a>先决条件</h1><h2 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h2><p>你的网站必须 <strong>完整使用  HTTPS 进行加密</strong>！ServiceWorker 一旦被注册，除非有进行定义、或者访问者手动在 Dev Tools 内 Unregister 了 ServiceWorker，否则你的资源都将被 ServiceWorker 接管，一旦访问者第一次加载资源时被攻击或者被劫持，后果则不堪设想。在开发过程中，可以通过 <code>localhost</code> 予以调试，但是生产环境必须高度可靠。</p>
+<h2 id="Can-I-Use"><a href="#Can-I-Use" class="headerlink" title="Can I Use?"></a>Can I Use?</h2><p><a target="_blank" rel="noopener" href="http://caniuse.com/#feat=serviceworkers">http://caniuse.com/#feat=serviceworkers</a></p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000073.png" alt="0000073.png"></p>
+<p>根据 Google 的文档表明，Chorme、Firefox 和 Opera 都支持；Microsoft Edge 现在表示公开支持。Safari 也暗示未来会进行相关开发。</p>
+<hr>
+<p>参考文章：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://yangbo.tech/2017/01/15/2017-01-15-speedy-and-offline-site-by-service-worker/">使用Service worker实现加速&#x2F;离线访问静态blog网站</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.anotherhome.net/2954">Service Workers 实现网站加速和离线缓存</a></li>
+<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000008491458">Service Workers 与离线缓存</a></li>
+</ul>
+<p>以及 Google 的 <a target="_blank" rel="noopener" href="https://developer.google.com/web/fundamentals/getting-started/primers/service-workers">ServiceWorker</a> 有关文档。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96/" rel="tag"># 前端优化</a>
+          
+            <a href="/tags/Web/" rel="tag"># Web</a>
+          
+            <a href="/tags/Service-Worker/" rel="tag"># Service Worker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/23/add-comment-system-to-hexo/" rel="next" title="为 Hexo 博客添加评论系统">
+                <i class="fa fa-chevron-left"></i> 为 Hexo 博客添加评论系统
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/26/wpo-by-prefetch/" rel="prev" title="Web 性能优化（2）——分析 Prefetch">
+                Web 性能优化（2）——分析 Prefetch <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%AF%E7%94%A8-Service-Worker-%E6%94%AF%E6%8C%81"><span class="nav-number">1.</span> <span class="nav-text">启用 Service Worker 支持</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E9%A6%96%E9%A1%B5%E6%B7%BB%E5%8A%A0-Service-Worker-%E6%B3%A8%E5%86%8C%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">在首页添加 Service Worker 注册代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-Service-Workers-%E6%89%80%E9%9C%80%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">添加 Service Workers 所需文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A0%E9%80%9F%E6%95%88%E6%9E%9C"><span class="nav-number">2.</span> <span class="nav-text">加速效果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%88%E5%86%B3%E6%9D%A1%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">先决条件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTPS"><span class="nav-number">3.1.</span> <span class="nav-text">HTTPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Can-I-Use"><span class="nav-number">3.2.</span> <span class="nav-text">Can I Use?</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

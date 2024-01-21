@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="算法,数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="哈希算法（Hash）又称摘要算法（Digest），它的作用是：对任意一组输入数据进行计算，得到一个固定长度的输出摘要。 哈希算法最重要的特点就是：相同的输入一定得到相同的输出；不同的输入大概率得到不同的输出。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「数据结构与算法」哈希算法">
+<meta property="og:url" content="https://www.resonanat.com/2022/03/25/data-structure-hashalgorithm/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="哈希算法（Hash）又称摘要算法（Digest），它的作用是：对任意一组输入数据进行计算，得到一个固定长度的输出摘要。 哈希算法最重要的特点就是：相同的输入一定得到相同的输出；不同的输入大概率得到不同的输出。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/06_01.png">
+<meta property="og:image" content="https://www.resonanat.com/06_02.png">
+<meta property="og:image" content="https://www.resonanat.com/06_03.png">
+<meta property="og:image" content="https://www.resonanat.com/06_04.png">
+<meta property="og:image" content="https://www.resonanat.com/06_05.png">
+<meta property="og:image" content="https://www.resonanat.com/06_06.png">
+<meta property="article:published_time" content="2022-03-25T13:40:12.000Z">
+<meta property="article:modified_time" content="2024-01-20T11:55:43.459Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/06_01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2022/03/25/data-structure-hashalgorithm/"/>
+
+
+
+
+
+  <title>「数据结构与算法」哈希算法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2022/03/25/data-structure-hashalgorithm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">「数据结构与算法」哈希算法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2022-03-25T21:40:12+08:00">
+                2022-03-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index">
+                    <span itemprop="name">数据结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>哈希算法（Hash）又称摘要算法（Digest），它的作用是：对任意一组输入数据进行计算，得到一个固定长度的输出摘要。</p>
+<p>哈希算法最重要的特点就是：相同的输入一定得到相同的输出；不同的输入大概率得到不同的输出。</p>
+<span id="more"></span>
+<p>哈希算法的目的就是为了验证原始数据是否被篡改。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Java字符串的hashCode()就是一个哈希算法，它的输入是任意字符串，输出是固定的4字节int整数：</span></span><br><span class="line"><span class="string">&quot;hello&quot;</span>.hashCode(); <span class="comment">// 0x5e918d2</span></span><br><span class="line"><span class="string">&quot;hello, java&quot;</span>.hashCode(); <span class="comment">// 0x7a9d88e8</span></span><br><span class="line"><span class="string">&quot;hello, bob&quot;</span>.hashCode(); <span class="comment">// 0xa0dbae2f</span></span><br></pre></td></tr></table></figure>
+
+<p>哈希碰撞是指，两个不同的输入得到了相同的输出。一个安全的哈希算法必须满足：碰撞概率低，不能猜测输出。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;AaAaAa&quot;</span>.hashCode(); <span class="comment">// 0x7460e8c0</span></span><br><span class="line"><span class="string">&quot;BBAaBB&quot;</span>.hashCode(); <span class="comment">// 0x7460e8c0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-常用的哈希算法"><a href="#1-常用的哈希算法" class="headerlink" title="1. 常用的哈希算法"></a>1. 常用的哈希算法</h3><table>
+<thead>
+<tr>
+<th align="left">算法</th>
+<th align="left">输出长度（位）</th>
+<th align="left">输出长度（字节）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">MD5</td>
+<td align="left">128 bits</td>
+<td align="left">16 bytes</td>
+</tr>
+<tr>
+<td align="left">SHA-1</td>
+<td align="left">160 bits</td>
+<td align="left">20 bytes</td>
+</tr>
+<tr>
+<td align="left">RipeMD-160</td>
+<td align="left">160 bits</td>
+<td align="left">20 bytes</td>
+</tr>
+<tr>
+<td align="left">SHA-256</td>
+<td align="left">256 bits</td>
+<td align="left">32 bytes</td>
+</tr>
+<tr>
+<td align="left">SHA-512</td>
+<td align="left">512 bits</td>
+<td align="left">64 bytes</td>
+</tr>
+</tbody></table>
+<p>根据碰撞概率，哈希算法的输出长度越长，就越难产生碰撞，也就越安全。</p>
+<h3 id="2-哈希算法的应用"><a href="#2-哈希算法的应用" class="headerlink" title="2. 哈希算法的应用"></a>2. 哈希算法的应用</h3><p>哈希算法的应用非常非常多，这里介绍最常见的七个，分别是安全加密、唯一标识、数据校验、散列函数、负载均衡、数据分片、分布式存储。</p>
+<h4 id="2-1-安全加密"><a href="#2-1-安全加密" class="headerlink" title="2.1 安全加密"></a>2.1 安全加密</h4><p>最常用于加密的哈希算法是 <code>MD5</code>（MD5 Message-Digest Algorithm，MD5 消息摘要算法）和 <code>SHA</code>（Secure Hash Algorithm，安全散列算法）。<br>除了这两个之外，当然还有很多其他加密算法，比如计算机网络的<code>SSL/TLS</code>协议里面的对称加密（<code>AES</code>）、非对称加密（<code>RSA</code>）。</p>
+<p>安全加密的关键点：①很难根据哈希值反向推导出原始数据；②散列冲突的概率要很小。</p>
+<p>不管是什么哈希算法，只能尽量减少碰撞冲突的概率，理论上是无法做到完全不冲突的。<br>一般情况下，哈希值越长的哈希算法，散列冲突的概率越低。</p>
+<p>没有绝对安全的加密。任何哈希算法都会出现散列冲突，但是这个冲突概率非常小。越是复杂哈希算法越难破解，但同样计算时间也就越长。所以，选择哈希算法的时候，要权衡安全性和计算时间来决定用哪种哈希算法。</p>
+<h4 id="2-2-唯一标识"><a href="#2-2-唯一标识" class="headerlink" title="2.2 唯一标识"></a>2.2 唯一标识</h4><p>哈希算法可以对大数据做信息摘要，通过一个较短的二进制编码来表示很大的数据。</p>
+<p>比如<code>URL</code>字段或者图片字段要求不能重复，这个时候就可以通过哈希算法对这个数据取唯一标识，或者说信息摘要（比如<code>MD5</code>处理）。<br>此外，还可以对文件之类的二进制数据做<code>MD5</code>处理，作为唯一标识，这样判定重复文件的时候更快捷。</p>
+<h4 id="2-3-数据校验"><a href="#2-3-数据校验" class="headerlink" title="2.3 数据校验"></a>2.3 数据校验</h4><p>网络传输数据不安全，传输数据的过程中，数据可能被宿主机篡改，或数据丢失，所以需要校验文件的安全，正确，完整性。</p>
+<p>因为哈希算法对数据很敏感，只要文件块的内容有一丁点儿的改变，最后计算出的哈希值就会完全不同；所以在文件块下载完后，使用相同的哈希算法，对于文件计算，判断是否相同。</p>
+<h4 id="2-4-散列函数"><a href="#2-4-散列函数" class="headerlink" title="2.4 散列函数"></a>2.4 散列函数</h4><p>散列函数是设计一个散列表的关键。它直接决定了散列冲突的概率和散列表的性能。不过，散列函数对于散列算法冲突的要求要低很多。即便出现个别散列冲突，只要不是过于严重，我们都可以通过开放寻址法或者链表法解决。</p>
+<p>散列函数中用到的散列算法，更加关注散列后的值是否能平均分布，也就是，一组数据是否能均匀地散列在各个槽中。除此之外，散列函数执行的快慢，也会影响散列表的性能，所以，散列函数用的散列算法一般都比较简单，比较追求效率。</p>
+<h4 id="2-5-负载均衡"><a href="#2-5-负载均衡" class="headerlink" title="2.5 负载均衡"></a>2.5 负载均衡</h4><p>负载均衡算法有很多，比如轮询、随机、加权轮询等。利用哈希算法替代映射表，可以实现一个会话粘滞的负载均衡策略。</p>
+<p>我们可以通过哈希算法，对客户端 IP 地址或者会话 ID 计算哈希值，将取得的哈希值与服务器列表的大小进行取模运算，最终得到的值就是应该被路由到的服务器编号。 这样，我们就可以把同一个 IP 过来的所有请求，都路由到同一个后端服务器上。</p>
+<h4 id="2-6-数据分片"><a href="#2-6-数据分片" class="headerlink" title="2.6 数据分片"></a>2.6 数据分片</h4><p>针对海量数据的处理问题，通过哈希算法对处理的海量数据进行分片，多机分布式处理。借助这种分片的思路，可以突破单机内存、CPU 等资源的限制。</p>
+<h4 id="2-7-分布式存储"><a href="#2-7-分布式存储" class="headerlink" title="2.7 分布式存储"></a>2.7 分布式存储</h4><p>在分布式存储应用中，利用一致性哈希算法，可以解决缓存等分布式系统的扩容、缩容导致数据大量搬移的难题。</p>
+<h5 id="2-7-1-一致性哈希算法"><a href="#2-7-1-一致性哈希算法" class="headerlink" title="2.7.1 一致性哈希算法"></a>2.7.1 一致性哈希算法</h5><p>一致性哈希算法是对<code>2^32</code>进行取模运算，是一个固定的值。即<code>0~(2^32)-1</code>的数字空间中。现在我们可以将这些数字头尾相连，想象成一个闭合的环形。如下图：<br><img src="/06_01.png"></p>
+<p>一致性哈希要进行的两步哈希：</p>
+<ol>
+<li>对存储节点进行哈希计算，也就是对存储节点做哈希映射，比如根据节点的 IP 地址进行哈希；</li>
+<li>当对数据进行存储或访问时，对数据进行哈希映射；</li>
+<li>所以，<strong>一致性哈希是指将「存储节点」和「数据」都映射到一个首尾相连的哈希环上</strong>。</li>
+</ol>
+<p>如下图，已经有3个节点经过哈希计算，映射到了哈希环上相应的位置，有三个数据进行哈希映射到节点上；<br>①首先，对 <code>key</code> 进行哈希计算，确定此 <code>key</code> 在环上的位置；<br>②然后，从这个位置沿着顺时针方向走，遇到的第一节点就是存储 <code>key</code> 的节点。<br><img src="/06_02.png"></p>
+<p>假设节点数量从 3 增加到了 4，新的节点 D 经过哈希计算后映射到了下图中的位置；<br>可以看到，key-1、key-3 都不受影响，只有 key-2 需要被迁移节点 D。<br><img src="/06_03.png"></p>
+<p>假设节点数量从 3 减少到了 2，比如将节点 A 移除；<br>你可以看到，key-2 和 key-3 不会受到影响，只有 key-1 需要被迁移节点 B。<br><img src="/06_04.png"></p>
+<p>在一致性哈希算法中，如果增加或者移除一个节点，<strong>仅影响该节点在哈希环上顺时针相邻的后继节点</strong>，其它数据也不会受到影响。</p>
+<h5 id="2-7-2-虚拟节点"><a href="#2-7-2-虚拟节点" class="headerlink" title="2.7.2 虚拟节点"></a>2.7.2 虚拟节点</h5><p><strong>一致性哈希算法虽然减少了数据迁移量，但是并不保证节点能够在哈希环上分布均匀</strong>，这样就会带来一个问题，会有大量的请求集中在一个节点上。在这种情况下进行容灾与扩容时，容易出现雪崩的连锁反应。<br>如下图中 3 个节点的映射位置都在哈希环的右半边：<br><img src="/06_05.png"></p>
+<p>要想解决节点能在哈希环上分配不均匀的问题，就是要有大量的节点，节点数越多，哈希环上的节点分布的就越均匀。<br>这个时候我们就加入<strong>虚拟节点</strong>，也就是对一个真实节点做多个副本。<br>具体做法是，不再将真实节点映射到哈希环上，而是将虚拟节点映射到哈希环上，并将虚拟节点映射到实际节点，所以这里有<strong>「两层」映射关系</strong>。</p>
+<p>比如对每个节点分别设置 3 个虚拟节点，引入虚拟节点后，原本哈希环上只有 3 个节点的情况，就会变成有 9 个虚拟节点映射到哈希环上，哈希环上的节点数量多了 3 倍。<br>节点数量多了后，节点在哈希环上的分布就相对均匀了。<br><img src="/06_06.png"><br>这时候，如果有访问请求寻址到「A-01」这个虚拟节点，接着再通过「A-01」虚拟节点找到真实节点 A，这样请求就能访问到真实节点 A 了。</p>
+<p>虚拟节点除了会提高节点的均衡度，还会提高系统的稳定性。当节点变化时，会有不同的节点共同分担系统的变化，因此稳定性更高。</p>
+<p>有了虚拟节点后，还可以为硬件配置更好的节点增加权重，比如对权重更高的节点增加更多的虚拟机节点即可。</p>
+<p>因此，<strong>带虚拟节点的一致性哈希方法不仅适合硬件配置不同的节点的场景，而且适合节点规模会发生变化的场景</strong>。</p>
+<h5 id="2-7-3-分布式存储的哈希算法总结"><a href="#2-7-3-分布式存储的哈希算法总结" class="headerlink" title="2.7.3 分布式存储的哈希算法总结"></a>2.7.3 分布式存储的哈希算法总结</h5><p>一致性哈希是指将「存储节点」和「数据」都映射到一个首尾相连的哈希环上，如果增加或者移除一个节点，仅影响该节点在哈希环上顺时针相邻的后继节点，其它数据也不会受到影响。</p>
+<p>但是一致性哈希算法不能够均匀的分布节点，会出现大量请求都集中在一个节点的情况，在这种情况下进行容灾与扩容时，容易出现雪崩的连锁反应。</p>
+<p>为了解决一致性哈希算法不能够均匀的分布节点的问题，就需要引入虚拟节点，对一个真实节点做多个副本。不再将真实节点映射到哈希环上，而是将虚拟节点映射到哈希环上，并将虚拟节点映射到实际节点，所以这里有「两层」映射关系。</p>
+<p>引入虚拟节点后，可以会提高节点的均衡度，还会提高系统的稳定性。所以，带虚拟节点的一致性哈希方法不仅适合硬件配置不同的节点的场景，而且适合节点规模会发生变化的场景。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/03/18/data-structure-hashtable/" rel="next" title="「数据结构与算法」散列表（Hash Table）">
+                <i class="fa fa-chevron-left"></i> 「数据结构与算法」散列表（Hash Table）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/04/08/data-structure-binarytree/" rel="prev" title="「数据结构与算法」二叉树">
+                「数据结构与算法」二叉树 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%B8%B8%E7%94%A8%E7%9A%84%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">1. 常用的哈希算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">2. 哈希算法的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E5%AE%89%E5%85%A8%E5%8A%A0%E5%AF%86"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 安全加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 唯一标识</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E6%95%B0%E6%8D%AE%E6%A0%A1%E9%AA%8C"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 数据校验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 散列函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 负载均衡</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6-%E6%95%B0%E6%8D%AE%E5%88%86%E7%89%87"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 数据分片</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-7-%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8"><span class="nav-number">2.7.</span> <span class="nav-text">2.7 分布式存储</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-7-1-%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95"><span class="nav-number">2.7.1.</span> <span class="nav-text">2.7.1 一致性哈希算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-7-2-%E8%99%9A%E6%8B%9F%E8%8A%82%E7%82%B9"><span class="nav-number">2.7.2.</span> <span class="nav-text">2.7.2 虚拟节点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-7-3-%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E7%9A%84%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93"><span class="nav-number">2.7.3.</span> <span class="nav-text">2.7.3 分布式存储的哈希算法总结</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
