@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Machine Learning," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这一讲介绍了我们的第一个机器学习算法，”批量“梯度下降算法(Batch Gradiant Descent)。注意到他在前面加了个“批量(Batch)”，这其实是为了与以后的另一种梯度下降算法进行区分从而体现出这个算法的特点。 线性回归梯度下降算法这是用来解决所谓的“线性回归”问题。线性回归应该都懂了，这里大概的进行下定义（以单变量为例）： 1、给你一个数据集（Training Set），数据集中有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="批量梯度下降算法">
+<meta property="og:url" content="https://www.resonanat.com/2016/01/26/%E6%89%B9%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="这一讲介绍了我们的第一个机器学习算法，”批量“梯度下降算法(Batch Gradiant Descent)。注意到他在前面加了个“批量(Batch)”，这其实是为了与以后的另一种梯度下降算法进行区分从而体现出这个算法的特点。 线性回归梯度下降算法这是用来解决所谓的“线性回归”问题。线性回归应该都懂了，这里大概的进行下定义（以单变量为例）： 1、给你一个数据集（Training Set），数据集中有">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/01/26/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/01/26/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/01/26/1/3.png">
+<meta property="article:published_time" content="2016-01-26T07:25:13.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.093Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/01/26/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/01/26/批量梯度下降算法/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>批量梯度下降算法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/26/%E6%89%B9%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">批量梯度下降算法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-26T15:25:13+08:00">
+                2016-01-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这一讲介绍了我们的第一个机器学习算法，”批量“梯度下降算法(Batch Gradiant Descent)。注意到他在前面加了个“批量(Batch)”，这其实是为了与以后的另一种梯度下降算法进行区分从而体现出这个算法的特点。</p>
+<h2 id="线性回归"><a href="#线性回归" class="headerlink" title="线性回归"></a>线性回归</h2><p>梯度下降算法这是用来解决所谓的“线性回归”问题。线性回归应该都懂了，这里大概的进行下定义（以单变量为例）：</p>
+<p>1、给你一个数据集（Training Set），数据集中有很多个数对，表示$(x_i,y_i)$。</p>
+<p>2、你的任务是构造一个预测函数$h_\theta(x)&#x3D;\theta_0+\theta_1x$，使得这个函数对于任意给定的$x$，能很好的预测出他对应的$y$。</p>
+<p>3、为了判断预测函数的准确性，我们引入一个费用方程:<br>$$J(\theta_0,\theta_1)&#x3D;\frac{1}{2m} \underset{i&#x3D;1}{\overset{m}{\Sigma}}(h(x_i)-y_i)^2$$<br>这里的m表示数据集中数据的个数，x和y表示每一个数据。很明显这里用的是最常见的求平方差的二次误差函数，不过这里多引入了一个$\frac{1}{2}$，其实没有别的意思，只是为了后面求导的时候方便约掉他，从而使求导后的式子更好看。</p>
+<p>4、我们的目标就是找到$\theta_0,\theta_1$使得J函数取最小值。</p>
+<h2 id="一个具体的数据"><a href="#一个具体的数据" class="headerlink" title="一个具体的数据"></a>一个具体的数据</h2><p>为了更加直观的表现，我在<a target="_blank" rel="noopener" href="http://people.sc.fsu.edu/~jburkardt/datasets/regression/regression.html">people.sc.fsu.edu</a> 上找到了一些线性回归的数据集，用了其中的第一个来展示(去掉了一些夸张的数据)：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"> 1     3.385    44.500</span><br><span class="line"> 2     0.480    15.500</span><br><span class="line"> 3     1.350     8.100</span><br><span class="line"> 4   465.000   423.000</span><br><span class="line"> 5    36.330   119.500</span><br><span class="line"> 6    27.660   115.000</span><br><span class="line"> 7    14.830    98.200</span><br><span class="line"> 8     1.040     5.500</span><br><span class="line"> 9     4.190    58.000</span><br><span class="line">10     0.425     6.400</span><br><span class="line">11     0.101     4.000</span><br><span class="line">12     0.920     5.700</span><br><span class="line">13     1.000     6.600</span><br><span class="line">14     0.005     0.140</span><br><span class="line">15     0.060     1.000</span><br><span class="line">16     3.500    10.800</span><br><span class="line">17     2.000    12.300</span><br><span class="line">18     1.700     6.300</span><br><span class="line">19     4.235    50.400</span><br><span class="line">20     0.023     0.300</span><br><span class="line">21   187.100   419.000</span><br><span class="line">22   521.000   655.000</span><br><span class="line">23     0.785     3.500</span><br><span class="line">24    10.000   115.000</span><br><span class="line">25     3.300    25.600</span><br><span class="line">26     0.200     5.000</span><br><span class="line">27     1.410    17.500</span><br><span class="line">28   529.000   680.000</span><br><span class="line">29   207.000   406.000</span><br><span class="line">30    85.000   325.000</span><br><span class="line">31     0.750    12.300</span><br><span class="line">32    62.000  1320.000</span><br><span class="line">33     0.104     2.500</span><br><span class="line">34     3.500     3.900</span><br><span class="line">35     6.800   179.000</span><br><span class="line">36    35.000    56.000</span><br><span class="line">37     4.050    17.000</span><br><span class="line">38     0.120     1.000</span><br><span class="line">39     0.023     0.400</span><br><span class="line">40     0.010     0.250</span><br><span class="line">41     1.400    12.500</span><br><span class="line">42   250.000   490.000</span><br><span class="line">43     2.500    12.100</span><br><span class="line">44    55.500   175.000</span><br><span class="line">45   100.000   157.000</span><br><span class="line">46    52.160   440.000</span><br><span class="line">47    10.550   179.500</span><br><span class="line">48     0.550     2.400</span><br><span class="line">49    60.000    81.000</span><br><span class="line">50     3.600    21.000</span><br><span class="line">51     4.288    39.200</span><br><span class="line">52     0.280     1.900</span><br><span class="line">53     0.075     1.200</span><br><span class="line">54     0.122     3.000</span><br><span class="line">55     0.048     0.330</span><br><span class="line">56   192.000   180.000</span><br><span class="line">57     3.000    25.000</span><br><span class="line">58   160.000   169.000</span><br><span class="line">59     0.900     2.600</span><br><span class="line">60     1.620    11.400</span><br></pre></td></tr></table></figure>
+<p>第一列是编号，第二列表示人脑的重量，第三列表示人身体的重量，我们用<a href="/2016/01/23/1/">matplotlib</a>画个图来看看：</p>
+<p><img src="/images/2016/01/26/1/1.png"></p>
+<h2 id="绘图代码"><a href="#绘图代码" class="headerlink" title="绘图代码"></a>绘图代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line">plt.scatter(brain,body,s=<span class="number">100</span>,alpha=<span class="number">.5</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>ok，接下来我们就是找出符合条件的$\theta_0,\theta_1$了。</p>
+<h2 id="J函数"><a href="#J函数" class="headerlink" title="J函数"></a>J函数</h2><p>根据J函数的表达式，我们可以很容易的求出他的具体的表达式。当然，我们也可以很容易的画出他的函数图像。很明显，他的图像应该是一个三维图像（当然，如果因变量不止一个的话，得到的应该是更高维度的图像）：</p>
+<p><img src="/images/2016/01/26/1/2.png"></p>
+<h2 id="绘图代码-1"><a href="#绘图代码-1" class="headerlink" title="绘图代码"></a>绘图代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="comment">#read file</span></span><br><span class="line"></span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line"></span><br><span class="line">brain=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line">body=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#calculate p</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">p</span>(<span class="params">t0,t1</span>):</span><br><span class="line">	<span class="built_in">sum</span>=<span class="number">0</span></span><br><span class="line">	num=<span class="built_in">len</span>(brain)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,num):</span><br><span class="line">		<span class="built_in">sum</span>+=<span class="built_in">pow</span>((t0+t1*brain[i]-body[i]),<span class="number">2</span>)</span><br><span class="line">	<span class="built_in">sum</span>/=<span class="number">2</span>*num</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">sum</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#important values</span></span><br><span class="line"></span><br><span class="line">size=<span class="number">20</span></span><br><span class="line">X=np.linspace(-<span class="number">100</span>,<span class="number">100</span>,size)</span><br><span class="line">Y=np.linspace(<span class="number">0</span>,<span class="number">2</span>,size)</span><br><span class="line"></span><br><span class="line"><span class="comment">#draw the picture</span></span><br><span class="line">X,Y=np.meshgrid(X,Y)</span><br><span class="line"></span><br><span class="line">X=X.reshape(size*size)</span><br><span class="line">Y=Y.reshape(size*size)</span><br><span class="line"></span><br><span class="line">Z=np.arange(<span class="number">0</span>,size*size)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,size*size):</span><br><span class="line">	Z[i]=p(X[i],Y[i])</span><br><span class="line">X=X.reshape(size,size)</span><br><span class="line">Y=Y.reshape(size,size)</span><br><span class="line">Z=Z.reshape(size,size)</span><br><span class="line"></span><br><span class="line">fig=figure()</span><br><span class="line">ax=Axes3D(fig)</span><br><span class="line">ax.plot_surface(X,Y,Z,rstride=<span class="number">1</span>,cstride=<span class="number">1</span>,cmap=plt.cm.hot)</span><br><span class="line">ax.contourf(X, Y, Z, zdir=<span class="string">&#x27;z&#x27;</span>, offset=-<span class="number">2</span> )</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>（画图时注意设置图像的各部分参数使他的表现效果最好，语法不熟，写的蠢了）</p>
+<p>从图中大概也能看到他的最低点啦，$\theta_0$大概是0±50,$\theta_1$大概是1±0.5(纯属目测)。</p>
+<h2 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h2><p>有了直观的感受我们就来看看对J求梯度下降的具体意义了。其实也很好理解，就是对于J函数上的某一个点，每一次迭代时都将他沿下降最快的方向走一小段距离(所谓方向，当然是要分到各个变量上面了)。这样经过一段时间，他就会接近图像的最低点了。用数学表达式来理解就是：</p>
+<p>repeat until convergence:</p>
+<p>$$\begin{aligned}\theta_j&amp;:&#x3D;\theta_j-\alpha\frac{\partial}{\partial\theta_j}J(\theta_0,\theta_1)\\&amp;:&#x3D;\theta_j-\frac{\alpha}{m}\underset{i&#x3D;1}{\overset{m}{\Sigma}}(h(x_i)-y_i)x_i\\&amp;(for\ j&#x3D;0\ and\ j&#x3D;1)\end{aligned}$$</p>
+<p>上式兼容了多元变量的情况，事实上在本例中$x_0$显然是1，$x_1$就是数据中的x。</p>
+<p>这里的$:&#x3D;$是为了强调这是赋值操作而不是判等。</p>
+<p>要注意的是，每一次迭代都要将每一个方向计算一次，而且要注意赋值的顺序，$\theta_j$一定要在迭代最后同时(simultaneously)用新值代替。</p>
+<p>这里的$\alpha$又被称为”学习因子(learning rate)“，在迭代的时候要注意这个值的选取。形象的看其实就是每次下降迈的步子的大小。如果过大则会导致跨越了最低点甚至导致越走越远，如果过小则会导致迭代代价太高，运行缓慢。</p>
+<p>当然，理论上这个算法也只能求得局部最低点，并不能保证是全局最低点。</p>
+<p>根据这个公式，我们注意到每一次迭代都得将所有的数据用一遍，这导致了效率的低下。所以由于这个算法又被称为批量梯度下降算法(BGD)。</p>
+<h2 id="简单实现"><a href="#简单实现" class="headerlink" title="简单实现"></a>简单实现</h2><h3 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="comment">#read file</span></span><br><span class="line"></span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line"></span><br><span class="line">brain=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line">body=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">partial_t0</span>(<span class="params">a,t0,t1</span>):</span><br><span class="line">	<span class="built_in">sum</span>=<span class="number">0</span></span><br><span class="line">	num=<span class="built_in">len</span>(brain)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,num):</span><br><span class="line">		<span class="built_in">sum</span>+=(t0+t1*brain[i]-body[i])</span><br><span class="line">	<span class="keyword">return</span> t0-<span class="built_in">sum</span>*a/num</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">partial_t1</span>(<span class="params">a,t0,t1</span>):</span><br><span class="line">	<span class="built_in">sum</span>=<span class="number">0</span></span><br><span class="line">	num=<span class="built_in">len</span>(brain)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,num):</span><br><span class="line">		<span class="built_in">sum</span>+=(t0+t1*brain[i]-body[i])*brain[i]</span><br><span class="line">	<span class="keyword">return</span> t1-<span class="built_in">sum</span>*a/num</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;%-6s%20s%20s%20s&quot;</span> %(<span class="string">&#x27;alpha&#x27;</span>,<span class="string">&#x27;theta0&#x27;</span>,<span class="string">&#x27;theta1&#x27;</span>,<span class="string">&#x27;times&#x27;</span>))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">11</span>):</span><br><span class="line">	a=<span class="built_in">pow</span>(<span class="number">10</span>,-i)</span><br><span class="line">	t0=<span class="number">0</span></span><br><span class="line">	t1=<span class="number">0</span></span><br><span class="line">	dt0=<span class="number">10000000</span></span><br><span class="line">	dt1=<span class="number">10000000</span></span><br><span class="line">	cnt=<span class="number">0</span></span><br><span class="line">	<span class="keyword">while</span> <span class="built_in">abs</span>(t0-dt0)+<span class="built_in">abs</span>(t1-dt1)&gt;<span class="number">0.0001</span>:</span><br><span class="line">		dt0=t0</span><br><span class="line">		dt1=t1</span><br><span class="line">		t0=partial_t0(a,dt0,dt1)</span><br><span class="line">		t1=partial_t1(a,dt0,dt1)</span><br><span class="line">		cnt+=<span class="number">1</span></span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;%-6s%20s%20s%20s&quot;</span> %(a,t0,t1,cnt))</span><br></pre></td></tr></table></figure>
+<h3 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">alpha               theta0              theta1               times</span><br><span class="line">0.1                   -inf                 nan                  96</span><br><span class="line">0.01                   inf                 nan                 139</span><br><span class="line">0.001                  inf                 nan                 255</span><br><span class="line">0.0001    0.00310245521884      0.999954444466                  26</span><br><span class="line">1e-05     0.00310682944277      0.999536382475                  42</span><br><span class="line">1e-06     0.00309052228147      0.994195497596                 305</span><br><span class="line">1e-07     0.00292431336052      0.940626826916                1685</span><br><span class="line">1e-08     0.00125884490338       0.40488187492                3099</span><br><span class="line">1e-09    5.20663166667e-08   1.67458362859e-05                   1</span><br><span class="line">1e-10    5.20663166667e-09   1.67458362859e-06                   1</span><br></pre></td></tr></table></figure>
+<p>代码比较简单，就不展开了。这次我把迭代起点选在（0，0）。需要注意的是这个结果，在$\alpha$取不同值的时候，输出的结果和性能的表现也大不相同。</p>
+<p>1、由于我是用变化前后的差别来判断聚合程度的，所以当学习因子过小的时候会出现一次迭代就终止了，这显然不是我们想看到的结果；</p>
+<p>2、同时，当学习因子过大的时候，会出现函数发散的现象，这显然也不是我们想要的结果；</p>
+<p>3、在能得到正确解的学习因子里，程序的运行速度也随着因子的减小而减慢，但是准确程度也因而增加。</p>
+<p>所以学习因子的选择至关重要。</p>
+<p>因此最终的拟合结果就是。。。。莫急，让我们换一个迭代起点看看，这次我们选（2，2）为迭代起点（将t0和t1分别改成2），这次得到的结果是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">alpha               theta0              theta1               times</span><br><span class="line">0.1                    inf                 nan                  96</span><br><span class="line">0.01                  -inf                 nan                 139</span><br><span class="line">0.001                 -inf                 nan                 255</span><br><span class="line">0.0001       1.18929235272        0.9963020556                6183</span><br><span class="line">1e-05        1.99615299339      0.994173518979                  43</span><br><span class="line">1e-06        1.99637710179      0.999525819249                 306</span><br><span class="line">1e-07        1.99677269246       1.05302607963                1690</span><br><span class="line">1e-08        1.99866893391       1.58880170812                3137</span><br><span class="line">1e-09        1.99999994593       1.99998315003                   1</span><br><span class="line">1e-10        1.99999999459         1.999998315                   1</span><br></pre></td></tr></table></figure>
+<p>卧槽，傻眼了，结果与上一个差别还是很大的，那么到底哪一个才更准确呢～～～额，，其实我也不晓得，只能说以现在的知识并不知道怎样很好的解决这个问题。我想应该是因为基于我电脑的速度，我的阈值设置的不够小，导致无论从哪个起点开始迭代最终到达的应该是一个离最优解附近的一个类圆形区域里，无法深入到内部。有一个解决方案大概就是遍历最内部的这个区域来求解吧，不过设置参数应该也是挺麻烦的，复杂度也挺大的…</p>
+<p>最后，画一下拟合的结果（取上面提到的所有合理的值）：</p>
+<p><img src="/images/2016/01/26/1/3.png"></p>
+<p>（怎么和想象中差别有点大。。。）</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/25/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E5%BC%95%E8%A8%80/" rel="next" title="机器学习笔记引言">
+                <i class="fa fa-chevron-left"></i> 机器学习笔记引言
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/27/%E5%A4%9A%E5%8F%98%E9%87%8F%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/" rel="prev" title="多变量线性回归算法">
+                多变量线性回归算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.</span> <span class="nav-text">线性回归</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%85%B7%E4%BD%93%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">一个具体的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%98%E5%9B%BE%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">绘图代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#J%E5%87%BD%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">J函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%98%E5%9B%BE%E4%BB%A3%E7%A0%81-1"><span class="nav-number">5.</span> <span class="nav-text">绘图代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D"><span class="nav-number">6.</span> <span class="nav-text">梯度下降</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.</span> <span class="nav-text">简单实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="nav-number">7.1.</span> <span class="nav-text">参考代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA"><span class="nav-number">7.2.</span> <span class="nav-text">输出</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

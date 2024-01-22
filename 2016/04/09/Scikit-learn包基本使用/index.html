@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,Machine Learning," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Scikit-learn的包是机器学习使用的最全也是实用的包，封装了许多机器学习算法，包括各种分类、回归、聚类、降维、模型选择、预处理等许多方面的内容，提供了相当于黑盒的接口，非常适合初学者使用。 在朋友的推荐下发现了Kaggle这个网站，这里面有很多的机器学习的数据和基本的题目，通过这些练习可以比较好的掌握机器学习的算法。因此就在这当中拿了Titanic号遇难人员的预测做了个实验。其实做法十分简">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scikit-learn包基本使用">
+<meta property="og:url" content="https://www.resonanat.com/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="Scikit-learn的包是机器学习使用的最全也是实用的包，封装了许多机器学习算法，包括各种分类、回归、聚类、降维、模型选择、预处理等许多方面的内容，提供了相当于黑盒的接口，非常适合初学者使用。 在朋友的推荐下发现了Kaggle这个网站，这里面有很多的机器学习的数据和基本的题目，通过这些练习可以比较好的掌握机器学习的算法。因此就在这当中拿了Titanic号遇难人员的预测做了个实验。其实做法十分简">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/09/1/1.png">
+<meta property="article:published_time" content="2016-04-09T06:50:02.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.055Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/04/09/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/04/09/Scikit-learn包基本使用/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Scikit-learn包基本使用 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Scikit-learn包基本使用</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-09T14:50:02+08:00">
+                2016-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a target="_blank" rel="noopener" href="http://scikit-learn.org/stable/">Scikit-learn</a>的包是机器学习使用的最全也是实用的包，封装了许多机器学习算法，包括各种分类、回归、聚类、降维、模型选择、预处理等许多方面的内容，提供了相当于黑盒的接口，非常适合初学者使用。</p>
+<p>在朋友的推荐下发现了<a target="_blank" rel="noopener" href="https://www.kaggle.com/">Kaggle</a>这个网站，这里面有很多的机器学习的数据和基本的题目，通过这些练习可以比较好的掌握机器学习的算法。因此就在这当中拿了<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/titanic">Titanic号遇难人员的预测</a>做了个实验。其实做法十分简单，权当熟悉框架了。</p>
+<h2 id="题目要求"><a href="#题目要求" class="headerlink" title="题目要求"></a>题目要求</h2><p>题目给定了Titannic号上人员的信息（包括阶层、姓名、性别、年龄、船上直系亲属的个数、船上表亲的个数、船票号、船费、包厢、登船地点等内容），并给出他们的生存情况；然后再给定一些人的信息，让我们预测他们的生存情况。</p>
+<p><img src="/images/2016/04/09/1/1.png"></p>
+<p>数据是以csv文件的形式给出的，如上图所示。</p>
+<p>最后从类似的文件里读取另外一波人的信息，并将预测结果输出到一个csv文件中。具体数据规范见原题《<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/titanic">Titanic号遇难人员的预测</a>》。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>对于这种问题其实只要把字符串的描述的特征提取成特征向量然后随便跑个学习算法就可以了，至于什么学习算法好还是要具体问题具体分析，都用一遍就知道了，我这里用的是朴素贝叶斯模型。</p>
+<p>注意到有些特征是没有意义的，比如名字、船票号啥的，这些特征可以忽略；还有就是有的年龄和票价是没有的，那么简单点考虑就用平均值代替就好了。</p>
+<p>具体实现也就很简单了，主要是Scikit-learn的使用。</p>
+<p><strong>代码如下：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> csv,re</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> metrics</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#read csv data</span></span><br><span class="line">reader=csv.reader(file(<span class="string">&#x27;train.csv&#x27;</span>))</span><br><span class="line">data=[]</span><br><span class="line">age=[]</span><br><span class="line">price=[]</span><br><span class="line">start=<span class="literal">True</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> reader:</span><br><span class="line">    <span class="keyword">if</span> start:</span><br><span class="line">        start=<span class="literal">False</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    data.append(item)</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">5</span>]!=<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        age.append(<span class="built_in">float</span>(item[<span class="number">5</span>]))</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">9</span>]!=<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        price.append(<span class="built_in">float</span>(item[<span class="number">9</span>]))</span><br><span class="line">meanAge=np.array(age).mean()</span><br><span class="line">meanPrice=np.array(price).mean()</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">5</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        item[<span class="number">5</span>]=meanAge</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">9</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        item[<span class="number">9</span>]=meanPrice</span><br><span class="line"></span><br><span class="line"><span class="comment">#generate learning data</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getFeature</span>(<span class="params">dataItem</span>):</span><br><span class="line">    feature=[]</span><br><span class="line">    <span class="comment">#Pclass</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">2</span>]==<span class="string">&#x27;1&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">elif</span> dataItem[<span class="number">2</span>]==<span class="string">&#x27;2&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Sex</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">4</span>]==<span class="string">&#x27;female&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Age</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">5</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#SibSp</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">6</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Parch</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">7</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Fare</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">9</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Cabin</span></span><br><span class="line">    <span class="keyword">if</span>  dataItem[<span class="number">10</span>]==<span class="string">&#x27;&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Embarked</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">11</span>]==<span class="string">&#x27;S&#x27;</span>:</span><br><span class="line">        feature.extend([<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">elif</span> dataItem[<span class="number">11</span>]==<span class="string">&#x27;C&#x27;</span>:</span><br><span class="line">        feature.extend([<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.extend([<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> feature,<span class="built_in">int</span>(dataItem[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">x=[]</span><br><span class="line">y=[]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">    f,l=getFeature(item)</span><br><span class="line">    x.append(f)</span><br><span class="line">    y.append(l)</span><br><span class="line"></span><br><span class="line"><span class="comment">#classify</span></span><br><span class="line">model = GaussianNB()</span><br><span class="line">model.fit(x, y)</span><br><span class="line"></span><br><span class="line">expected=y</span><br><span class="line">predicted = model.predict(x)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(metrics.classification_report(expected, predicted))</span><br><span class="line"><span class="built_in">print</span>(metrics.confusion_matrix(expected, predicted))</span><br><span class="line"></span><br><span class="line"><span class="comment">#predict and write</span></span><br><span class="line">reader=csv.reader(file(<span class="string">&#x27;test.csv&#x27;</span>,<span class="string">&#x27;rb&#x27;</span>))</span><br><span class="line">testData=[]</span><br><span class="line">start=<span class="literal">True</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> reader:</span><br><span class="line">    <span class="keyword">if</span> start:</span><br><span class="line">        start=<span class="literal">False</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    newItem=[]</span><br><span class="line">    newItem.append(-<span class="number">1</span>)</span><br><span class="line">    newItem.append(item[<span class="number">0</span>])</span><br><span class="line">    newItem.extend(item[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">if</span>(newItem[<span class="number">5</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        newItem[<span class="number">5</span>]=meanAge</span><br><span class="line">    <span class="keyword">if</span>(newItem[<span class="number">9</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        newItem[<span class="number">9</span>]=meanPrice</span><br><span class="line"></span><br><span class="line">    testData.append(newItem)</span><br><span class="line"></span><br><span class="line">testX=[]</span><br><span class="line">testId=[]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> testData:</span><br><span class="line">    f,Id=getFeature(item)</span><br><span class="line">    testX.append(f)</span><br><span class="line">    testId.append(Id)</span><br><span class="line"></span><br><span class="line">predictY=model.predict(testX)</span><br><span class="line"></span><br><span class="line">writer=csv.writer(file(<span class="string">&#x27;result.csv&#x27;</span>,<span class="string">&#x27;wb&#x27;</span>))</span><br><span class="line"></span><br><span class="line">writer.writerow([<span class="string">&#x27;PassengerId&#x27;</span>,<span class="string">&#x27;Survived&#x27;</span>])</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(testId)):</span><br><span class="line">    writer.writerow([testId[i],predictY[i]])</span><br></pre></td></tr></table></figure>
+
+<p>要注意以下几点：</p>
+<ol>
+<li>在对csv文件进行读取时，我们从reader中只能逐行读取一遍，因此需要将他读到临时list里方便后续处理；</li>
+<li>区分list的append和extend方法的使用，一个是添加一个元素，一个是合并两个list。</li>
+<li>传入的学习参数时必须都是float数据类型。</li>
+<li>学习模型可以非常容易进行替换，我当前用的是高斯朴素贝叶斯模型，其实完全可以换成决策树（DecisionTreeClassifier）、SVM（SVC）等其他分类模型，而我们要改的只是<code>model = GaussianNB()</code>一行而已。</li>
+</ol>
+<p><strong>输出结果：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          0       0.83      0.83      0.83       549</span><br><span class="line">          1       0.72      0.72      0.72       342</span><br><span class="line"></span><br><span class="line">avg / total       0.79      0.79      0.79       891</span><br><span class="line"></span><br><span class="line">[[454  95]</span><br><span class="line"> [ 96 246]]</span><br></pre></td></tr></table></figure>
+<p>第一块是对于每一个分类所得到的准确率、召回率、f1-score，和分出的总数；</p>
+<p>第二块是混淆矩阵；</p>
+<p>具体含义可见<a href="/2016/04/09/2">机器学习中分类准确率的评估方法</a>。</p>
+<p>最后尝试了下决策树跟SVM，发现使用决策树的结果是最好的（准确率甚至到了99%）。不过最终提交上去才发现最终的识别率还是好低(72%)。。。不过仔细想想，想这种的预测还是挺不靠谱的，毕竟偶然因素太大了，仅仅凭着这些东西感觉完全不可能达到100%的准确率啊。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/08/%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8/" rel="next" title="朴素贝叶斯分类器">
+                <i class="fa fa-chevron-left"></i> 朴素贝叶斯分类器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/09/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E5%88%86%E7%B1%BB%E5%87%86%E7%A1%AE%E7%8E%87%E7%9A%84%E8%AF%84%E4%BC%B0%E6%96%B9%E6%B3%95/" rel="prev" title="机器学习中分类准确率的评估方法">
+                机器学习中分类准确率的评估方法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E8%A6%81%E6%B1%82"><span class="nav-number">1.</span> <span class="nav-text">题目要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">解决方案</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

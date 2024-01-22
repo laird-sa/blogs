@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在ubuntu用也有类似于windows中快捷方式这种类型的东西，即链接。这里一般使用ln命令来执行得到，ln命令用法简单，但是与windows不同，这里有硬链接和软链接两种类型的链接。在介绍两种链接的时候，我们先来了解一下Linux的文件系统。 文件系统在Linux中每一个文件大体上由三个部分组成：  文件名：这个是用来标记这个文件的符号，也就是我们所理解的文件名； inode：inode存放的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux中ln命令的用法以及分析">
+<meta property="og:url" content="https://www.resonanat.com/2015/11/03/Linux%E4%B8%ADln%E5%91%BD%E4%BB%A4%E7%9A%84%E7%94%A8%E6%B3%95%E4%BB%A5%E5%8F%8A%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="在ubuntu用也有类似于windows中快捷方式这种类型的东西，即链接。这里一般使用ln命令来执行得到，ln命令用法简单，但是与windows不同，这里有硬链接和软链接两种类型的链接。在介绍两种链接的时候，我们先来了解一下Linux的文件系统。 文件系统在Linux中每一个文件大体上由三个部分组成：  文件名：这个是用来标记这个文件的符号，也就是我们所理解的文件名； inode：inode存放的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2015/11/03/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2015/11/03/1/2.png">
+<meta property="article:published_time" content="2015-11-03T15:44:41.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.044Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2015/11/03/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/11/03/Linux中ln命令的用法以及分析/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Linux中ln命令的用法以及分析 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/03/Linux%E4%B8%ADln%E5%91%BD%E4%BB%A4%E7%9A%84%E7%94%A8%E6%B3%95%E4%BB%A5%E5%8F%8A%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux中ln命令的用法以及分析</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-03T23:44:41+08:00">
+                2015-11-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在ubuntu用也有类似于windows中快捷方式这种类型的东西，即链接。这里一般使用ln命令来执行得到，ln命令用法简单，但是与windows不同，这里有硬链接和软链接两种类型的链接。在介绍两种链接的时候，我们先来了解一下Linux的文件系统。</p>
+<h2 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h2><p>在Linux中每一个文件大体上由三个部分组成：</p>
+<ol>
+<li>文件名：这个是用来标记这个文件的符号，也就是我们所理解的文件名；</li>
+<li>inode：inode存放的是文件的metadata，也就是元信息，包括了文件的权限、创建时间、修改时间、唯一id、文件种类、一个与文件名数目对应的链接数，最后还有一个指向实际数据区域的指针。我们可以用stat命令来查看文件的inode信息。</li>
+<li>数据区：这里是真正保存数据的地方。</li>
+</ol>
+<p>当我们创建一个文件的时候，我们实际上是创建了这个文件的文件名以及inode，只有当我们真正写数据的时候，我们才会想数据区里写入数据。<br>当我们删除一个文件的时候，我们实际上是删除了这个文件的文件名，然后这个文件对应的inode的连接数会减一，当这个连接数减为0的时候，操作系统才会讲这个inode删除，也就是删除了这个文件。</p>
+<h2 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h2><p><img src="/images/2015/11/03/1/1.png"></p>
+<p>硬链接相当于给文件重新起了一个名字，没有创建inode，只是对inode的链接数加了1，更没有数据的拷贝，新创建的名字与原来的名字从本质上没有任何先后次序，是对等存在的。对一个文件的修改就是对另一个文件的修改。当删除一个文件的时候，只是删除了这个文件名，并且将对应inode的链接数减了1。</p>
+<p>硬链接还有一些非常有趣的性质：</p>
+<h3 id="不允许给目录创建硬链接"><a href="#不允许给目录创建硬链接" class="headerlink" title="不允许给目录创建硬链接"></a>不允许给目录创建硬链接</h3><p>为什么不允许给目录创建硬链接呢？原因其实非常好玩。事实上Linux对目录本身是有硬链接的，我们知道每一个文件夹下都至少会有两个链接，一个是’.’、表示当前文件本身；另一个是’..’、表示当前文件的父目录。事实上，这个’.’就是对当前文件的一个硬链接，而’..’是对当前文件夹的父目录的硬链接，这就是为什么如果我们新建一个文件夹后，用stat查看这个文件夹的链接数，会发现这个数至少是2而不是1。<br>既然有硬链接，那么为什么不允许用户创建呢？原因也很有趣。如果任由用户随意添加硬链接，那么很容易出现一种情况，就是比如dir1-&gt;dir3 , dir2-&gt;dir3，这时如果我们在dir3下执行cd .. ，那么我们应该跳到哪里呢？显然这是一个不可描述的问题。因此，为了避免这种情况的发生，Linux的设计者才做了这样一个规定。</p>
+<h3 id="只有在同一文件系统中的文件之间才能创建链接。"><a href="#只有在同一文件系统中的文件之间才能创建链接。" class="headerlink" title="只有在同一文件系统中的文件之间才能创建链接。"></a>只有在同一文件系统中的文件之间才能创建链接。</h3><p>这一点跟软链接不同，由于硬链接中的两个文件名需要映射到同一个inode上，而这个文件系统的inode显然不能被另一个文件系统直接看到，因此也就不能跨文件系统访问了。</p>
+<p>事实上，硬链接用的不多，比较常用的是软链接：</p>
+<h2 id="软链接"><a href="#软链接" class="headerlink" title="软链接"></a>软链接</h2><p><img src="/images/2015/11/03/1/2.png"></p>
+<p>软链接又叫符号链接，就是传统意义上windows中的那种链接，本身可以看做是一种指针，指向实际的文件。</p>
+<p>具体ln命令的用法：</p>
+<p>ln 源文件 目标文件        &#x2F;&#x2F;默认创建硬链接</p>
+<p>ln -s 源文件 目标文件    &#x2F;&#x2F;加-s （symbolic）选项创建软链接</p>
+<p>创建的软链接在用ls -l 查看的时候是会显示细节的，比如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/test$ <span class="built_in">ln</span> -s a.txt b.txt</span><br><span class="line">myths@myths-X450LD:~/test$ <span class="built_in">ls</span></span><br><span class="line">a.txt  b.txt</span><br><span class="line">myths@myths-X450LD:~/test$ <span class="built_in">ls</span> -l</span><br><span class="line">总用量 4</span><br><span class="line">-rw-rw-r-- 1 myths myths 6 11月  6 00:27 a.txt</span><br><span class="line">lrwxrwxrwx 1 myths myths 5 11月  6 00:29 b.txt -&gt; a.txt</span><br><span class="line">myths@myths-X450LD:~/test$</span><br></pre></td></tr></table></figure>
+<p>这里权限的第一个位置写的是  l  表明这是一个软链接，而且最后还会有一个箭头指向实际的文件。</p>
+<p>当然也可以用readlink 命令来显示链接目的地：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/test$ readlink  b.txt</span><br><span class="line">a.txt</span><br></pre></td></tr></table></figure>
+<p>实际中用到软链接的地方是很多的，比如显示网站的时候，一般将index.html指向实际想执行的文件来默认显示网站打开的网页。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a target="_blank" rel="noopener" href="https://www.cs.nmsu.edu/~pfeiffer/classes/474/notes/inodefs.html">NMSU CS课件</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/02/Qt%E4%B8%AD%E5%9F%BA%E6%9C%AC%E7%9A%84%E7%BB%98%E5%9B%BE%E6%96%B9%E6%B3%95/" rel="next" title="Qt中基本的绘图方法">
+                <i class="fa fa-chevron-left"></i> Qt中基本的绘图方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/04/apache2%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE/" rel="prev" title="apache2服务器的搭建与配置">
+                apache2服务器的搭建与配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.</span> <span class="nav-text">文件系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E9%93%BE%E6%8E%A5"><span class="nav-number">2.</span> <span class="nav-text">硬链接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%85%81%E8%AE%B8%E7%BB%99%E7%9B%AE%E5%BD%95%E5%88%9B%E5%BB%BA%E7%A1%AC%E9%93%BE%E6%8E%A5"><span class="nav-number">2.1.</span> <span class="nav-text">不允许给目录创建硬链接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AA%E6%9C%89%E5%9C%A8%E5%90%8C%E4%B8%80%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E6%96%87%E4%BB%B6%E4%B9%8B%E9%97%B4%E6%89%8D%E8%83%BD%E5%88%9B%E5%BB%BA%E9%93%BE%E6%8E%A5%E3%80%82"><span class="nav-number">2.2.</span> <span class="nav-text">只有在同一文件系统中的文件之间才能创建链接。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E9%93%BE%E6%8E%A5"><span class="nav-number">3.</span> <span class="nav-text">软链接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">4.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

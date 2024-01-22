@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Machine Learning," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在整理最近学习的知识时，突然意识到机器学习与深度学习的差别。之前学的gd算法，logistic回归算法，svm算法等都属于机器学习的范畴，而深度学习与他们其实是并列的关系，同属机器学习这个大的范畴。个人认为深度学习其实是曾经没落的BP神经网络的发展，可以说神经网络就是趁着深度学习的浪潮借尸还魂的。不过，深度学习想要理解起来也不是那么容易的。既然如此，我们何不搭建一个黑盒环境，先直观感受一下深度学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Caffe深度学习框架搭建">
+<meta property="og:url" content="https://www.resonanat.com/2016/02/27/Caffe%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="在整理最近学习的知识时，突然意识到机器学习与深度学习的差别。之前学的gd算法，logistic回归算法，svm算法等都属于机器学习的范畴，而深度学习与他们其实是并列的关系，同属机器学习这个大的范畴。个人认为深度学习其实是曾经没落的BP神经网络的发展，可以说神经网络就是趁着深度学习的浪潮借尸还魂的。不过，深度学习想要理解起来也不是那么容易的。既然如此，我们何不搭建一个黑盒环境，先直观感受一下深度学习">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/27/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/27/1/2.png">
+<meta property="article:published_time" content="2016-02-27T11:53:26.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.036Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/02/27/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/02/27/Caffe深度学习框架搭建/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Caffe深度学习框架搭建 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/27/Caffe%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Caffe深度学习框架搭建</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-27T19:53:26+08:00">
+                2016-02-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在整理最近学习的知识时，突然意识到机器学习与深度学习的差别。之前学的gd算法，logistic回归算法，svm算法等都属于机器学习的范畴，而深度学习与他们其实是并列的关系，同属机器学习这个大的范畴。个人认为深度学习其实是曾经没落的BP神经网络的发展，可以说神经网络就是趁着深度学习的浪潮借尸还魂的。不过，深度学习想要理解起来也不是那么容易的。既然如此，我们何不搭建一个黑盒环境，先直观感受一下深度学习的魅力再慢慢研究呢？这里我们用到的工具就是Caffe深度学习框架。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>说道Caffe，我们不得不提他的作者<a target="_blank" rel="noopener" href="http://daggerfs.com/">贾扬清</a>（点击进入个人主页）。没错是一个中国人，而且是一个非常厉害的中国人（我词穷）。话不多说，我们来看看他的CV：</p>
+<p><img src="/images/2016/02/27/1/1.png" alt="Yangqing"><img src="/images/2016/02/27/1/2.png" alt="cv"></p>
+<p>只是很少的一部分，不说话，我们用心来感受就可以了。</p>
+<p>Caffe其实是他与他的朋友利用课余时间写的一个框架，而且写的时候正逢他写博士毕业论文的时候。这么推来大概是2014年左右完成的。</p>
+<p>因此说白了Caffe只是一个普通的小团体的开源项目而已，就连他的官网也是挂靠在berkeleyvision.org上。官网：<a target="_blank" rel="noopener" href="http://caffe.berkeleyvision.org/">http://caffe.berkeleyvision.org/</a></p>
+<h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><p>根据惯例，本人还是一切以<a target="_blank" rel="noopener" href="http://caffe.berkeleyvision.org/installation.html">官方文档</a>做参考，搭建在ubuntu14.04系统上。</p>
+<h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>项目托管在github上，见他的<a target="_blank" rel="noopener" href="https://github.com/BVLC/caffe">github</a>即可。</p>
+<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><p>依赖有很多，除了常见的包之外，还要下这些：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler</span><br><span class="line">sudo apt-get install --no-install-recommends libboost-all-dev</span><br><span class="line">sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev</span><br><span class="line">sudo apt-get install libatlas-base-dev</span><br></pre></td></tr></table></figure>
+<p>当然，原则上还要有GPU的依赖，但是不用GPU照样可以工作，只是要注意之后的参数设定。</p>
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>和OpenCV一样，这里用cmake编译。</p>
+<p>打开项目根目录，依次输入以下指令即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make all</span><br><span class="line">make install</span><br><span class="line">make runtest</span><br></pre></td></tr></table></figure>
+<p>这样就会在build文件加里面生成很多的文件。注意，这些文件不能删的，因为事实上他编译得到的头文件啊、二进制文件啊都在这里，将来使用caffe的时候都要用到。</p>
+<p>如果需要安装python接口的话还要输入<code>make pycaffe</code>，而且还需要下载python的依赖。在项目根目录下，输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd ./build/install/python/</span><br><span class="line">for req in $(cat requirements.txt); do sudo pip install $req; done</span><br></pre></td></tr></table></figure>
+<p>就是要满足这个文件里的所有依赖(除此之外还有一个skimage.so需要下载i)。但是，由于国内的pip镜像普遍不全，如果不翻墙，总有一些包下不下来。因此，我手动打开requirements.txt，查看具体需要的包，然后通过<code>$sudo apt-get install python-*****</code>的办法下载某些无法下载的包。</p>
+<p>如果完全下载好了，那么在项目中进入.&#x2F;python目录中打开ipython，就能import caffe 了。当然，为了方便，我们可以把caffe文件夹（caffe模块的位置）复制到<code>/usr/lib/python2.7/dist-packages</code> 目录下，这样就可以在任意的地方调用了。</p>
+<h3 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h3><p>事实上在编译阶段就进行了测试，只是这样并没有具体的感悟，下面就结合mnist来简单测试下。</p>
+<p>在项目根目录下输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./data/mnist/get_mnist.sh</span><br><span class="line">./examples/mnist/create_mnist.sh</span><br></pre></td></tr></table></figure>
+<p>表示下载mnist训练集，并转换为指定格式。</p>
+<p>然后需要打开<code>./examples/mnist/lenet_solver.prototxt</code> 文件，并将最后一行的GPU改成CPU。(毕竟之前没有装GPU，果断是不支持的)。</p>
+<p>最后就可以跑训练程序了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./examples/mnist/train_lenet.sh</span><br></pre></td></tr></table></figure>
+<p>得到结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">I0227 16:58:31.228276  5528 solver.cpp:228] Iteration 9800, loss = 0.0148246</span><br><span class="line">I0227 16:58:31.228313  5528 solver.cpp:244]     Train net output #0: loss = 0.0148246 (* 1 = 0.0148246 loss)</span><br><span class="line">I0227 16:58:31.228335  5528 sgd_solver.cpp:106] Iteration 9800, lr = 0.00599102</span><br><span class="line">I0227 16:58:37.839028  5528 solver.cpp:228] Iteration 9900, loss = 0.00598603</span><br><span class="line">I0227 16:58:37.839066  5528 solver.cpp:244]     Train net output #0: loss = 0.00598603 (* 1 = 0.00598603 loss)</span><br><span class="line">I0227 16:58:37.839088  5528 sgd_solver.cpp:106] Iteration 9900, lr = 0.00596843</span><br><span class="line">I0227 16:58:44.390777  5528 solver.cpp:454] Snapshotting to binary proto file examples/mnist/lenet_iter_10000.caffemodel</span><br><span class="line">I0227 16:58:44.395431  5528 sgd_solver.cpp:273] Snapshotting solver state to binary proto file examples/mnist/lenet_iter_10000.solverstate</span><br><span class="line">I0227 16:58:44.425786  5528 solver.cpp:317] Iteration 10000, loss = 0.00296525</span><br><span class="line">I0227 16:58:44.425813  5528 solver.cpp:337] Iteration 10000, Testing net (#0)</span><br><span class="line">I0227 16:58:48.531802  5528 solver.cpp:404]     Test net output #0: accuracy = 0.9909</span><br><span class="line">I0227 16:58:48.531833  5528 solver.cpp:404]     Test net output #1: loss = 0.0281938 (* 1 = 0.0281938 loss)</span><br><span class="line">I0227 16:58:48.531841  5528 solver.cpp:322] Optimization Done.</span><br><span class="line">I0227 16:58:48.531859  5528 caffe.cpp:222] Optimization Done.</span><br></pre></td></tr></table></figure>
+<p>最后可以发现拟合的准确率为99.09%。</p>
+<p>至于每一个命令文件到底是做了什么可以直接打开看看。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/26/%E5%9B%BE%E5%83%8F%E5%8C%B9%E9%85%8D%E4%B8%ADHarris%E8%A7%92%E7%82%B9%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/" rel="next" title="图像匹配中Harris角点特征提取">
+                <i class="fa fa-chevron-left"></i> 图像匹配中Harris角点特征提取
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/03/Python%E4%B8%AD%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84format%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8/" rel="prev" title="Python中字符串的format函数使用">
+                Python中字符串的format函数使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">1.1.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD"><span class="nav-number">1.2.</span> <span class="nav-text">下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96"><span class="nav-number">1.3.</span> <span class="nav-text">依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">1.4.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%B5%8B%E8%AF%95"><span class="nav-number">1.5.</span> <span class="nav-text">运行测试</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

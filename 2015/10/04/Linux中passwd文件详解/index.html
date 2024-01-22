@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Linux的用户信息很多都保存在这个&#x2F;etc&#x2F;passwd文件中，以前觉得这种配置文件挺难看懂的，但是静下心来瞅瞅其实也就一点东西，我们来一起看下。 文件样例1234567891011121314151617181920212223242526272829303132333435363738394041root@myths-X450LD:&#x2F;home# cat &#x2F;etc&#x2F;pass">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux中passwd文件详解">
+<meta property="og:url" content="https://www.resonanat.com/2015/10/04/Linux%E4%B8%ADpasswd%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="Linux的用户信息很多都保存在这个&#x2F;etc&#x2F;passwd文件中，以前觉得这种配置文件挺难看懂的，但是静下心来瞅瞅其实也就一点东西，我们来一起看下。 文件样例1234567891011121314151617181920212223242526272829303132333435363738394041root@myths-X450LD:&#x2F;home# cat &#x2F;etc&#x2F;pass">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-10-04T07:10:46.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.044Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/10/04/Linux中passwd文件详解/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Linux中passwd文件详解 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Linux%E4%B8%ADpasswd%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux中passwd文件详解</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T15:10:46+08:00">
+                2015-10-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Linux的用户信息很多都保存在这个&#x2F;etc&#x2F;passwd文件中，以前觉得这种配置文件挺难看懂的，但是静下心来瞅瞅其实也就一点东西，我们来一起看下。</p>
+<h2 id="文件样例"><a href="#文件样例" class="headerlink" title="文件样例"></a>文件样例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:/home# cat /etc/passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span><br><span class="line">bin:x:2:2:bin:/bin:/usr/sbin/nologin</span><br><span class="line">sys:x:3:3:sys:/dev:/usr/sbin/nologin</span><br><span class="line">sync:x:4:65534:sync:/bin:/bin/sync</span><br><span class="line">games:x:5:60:games:/usr/games:/usr/sbin/nologin</span><br><span class="line">man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span><br><span class="line">lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span><br><span class="line">mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span><br><span class="line">news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span><br><span class="line">uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin</span><br><span class="line">proxy:x:13:13:proxy:/bin:/usr/sbin/nologin</span><br><span class="line">www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin</span><br><span class="line">backup:x:34:34:backup:/var/backups:/usr/sbin/nologin</span><br><span class="line">list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin</span><br><span class="line">irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin</span><br><span class="line">gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin</span><br><span class="line">nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin</span><br><span class="line">libuuid:x:100:101::/var/lib/libuuid:</span><br><span class="line">syslog:x:101:104::/home/syslog:/bin/false</span><br><span class="line">messagebus:x:102:106::/var/run/dbus:/bin/false</span><br><span class="line">usbmux:x:103:46:usbmux daemon,,,:/home/usbmux:/bin/false</span><br><span class="line">dnsmasq:x:104:65534:dnsmasq,,,:/var/lib/misc:/bin/false</span><br><span class="line">avahi-autoipd:x:105:113:Avahi autoip daemon,,,:/var/lib/avahi-autoipd:/bin/false</span><br><span class="line">kernoops:x:106:65534:Kernel Oops Tracking Daemon,,,:/:/bin/false</span><br><span class="line">rtkit:x:107:114:RealtimeKit,,,:/proc:/bin/false</span><br><span class="line">saned:x:108:115::/home/saned:/bin/false</span><br><span class="line">whoopsie:x:109:116::/nonexistent:/bin/false</span><br><span class="line">speech-dispatcher:x:110:29:Speech Dispatcher,,,:/var/run/speech-dispatcher:/bin/sh</span><br><span class="line">avahi:x:111:117:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/bin/false</span><br><span class="line">lightdm:x:112:118:Light Display Manager:/var/lib/lightdm:/bin/false</span><br><span class="line">colord:x:113:121:colord colour management daemon,,,:/var/lib/colord:/bin/false</span><br><span class="line">hplip:x:114:7:HPLIP system user,,,:/var/run/hplip:/bin/false</span><br><span class="line">pulse:x:115:122:PulseAudio daemon,,,:/var/run/pulse:/bin/false</span><br><span class="line">myths:x:1000:1000:myths,,,:/home/myths:/bin/bash</span><br><span class="line">ftp:x:116:125:ftp daemon,,,:/srv/ftp:/bin/false</span><br><span class="line">postfix:x:117:126::/var/spool/postfix:/bin/false</span><br><span class="line">smmta:x:118:128:Mail Transfer Agent,,,:/var/lib/sendmail:/bin/false</span><br><span class="line">smmsp:x:119:129:Mail Submission Program,,,:/var/lib/sendmail:/bin/false</span><br><span class="line">guest-g1Jo1T:x:120:130:Guest,,,:/tmp/guest-g1Jo1T:/bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>这是我这里的passwd文件配置，可以看到有很多条记录，每条记录有7个以“：”分隔的字段他们的意义分别是：</p>
+<pre><code>用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell
+</code></pre>
+<h2 id="文件简析"><a href="#文件简析" class="headerlink" title="文件简析"></a>文件简析</h2><h3 id="用户名"><a href="#用户名" class="headerlink" title="用户名"></a>用户名</h3><p>用户名是代表用户账号的字符串。通常长度不超过8个字符，并且由大小写字母和&#x2F;或数字组成。登录名中不能有冒号(:)，因为冒号在这里是分隔符。为了兼容起见，登录名中最好不要包含点字符(.)，并且不使用连字符(-)和加号(+)打头。（什么规则的不用记的，反正正常点的名字就行了）</p>
+<h3 id="口令"><a href="#口令" class="headerlink" title="口令"></a>口令</h3><p>口令就是密码了，一些系统中，存放着加密后的用户口令字。虽然这个字段存放的只是用户口令的加密串，不是明文，但是由于&#x2F;etc&#x2F;passwd文件对所有用户都可读，所以这仍是一个安全隐患。因此，现在许多Linux系统（如SVR4）都使用了shadow技术，把真正的加密后的用户口令字存放到&#x2F;etc&#x2F;shadow文件中，而在&#x2F;etc&#x2F;passwd文件的口令字段中只存放一个特殊的字符，例如x或者*也就是这里不给看，让你晓得个有这个意思就行，想看的话去&#x2F;etc&#x2F;shadow。</p>
+<h3 id="用户标识号"><a href="#用户标识号" class="headerlink" title="用户标识号"></a>用户标识号</h3><p>这是一个整数，系统内部用它来标识用户。一般情况下它与用户名是一一对应的。如果几个用户名对应的用户标识号是一样的，系统内部将把它们视为同一个用户，但是它们可以有不同的口令、不同的主目录以及不同的登录Shell等。通常用户标识号的取值范围是0～65535。0是超级用户root的标识号，1～99由系统保留，作为管理账号，普通用户的标识号从100开始。在Linux系统中，这个界限是500。（一般这都没必要记的，晓得就行）</p>
+<h3 id="组标识号"><a href="#组标识号" class="headerlink" title="组标识号"></a>组标识号</h3><p>这个记录的是用户所属的用户组。它对应着&#x2F;etc&#x2F;group文件中的一条记录。（就是告诉你他属于哪个组）</p>
+<h3 id="注释性描述"><a href="#注释性描述" class="headerlink" title="注释性描述"></a>注释性描述</h3><p>记录着用户的一些个人情况，例如用户的真实姓名、电话、地址等，这个字段并没有什么实际的用途。在不同的Linux系统中，这个字段的格式并没有统一。在许多Linux系统中，这个字段存放的是一段任意的注释性描述文字。（也就是我们用adduser的时候选填的哪个信息，没啥大用，看着玩玩）</p>
+<h3 id="主目录"><a href="#主目录" class="headerlink" title="主目录"></a>主目录</h3><p>也就是用户的起始工作目录，它是用户在登录到系统之后所处的目录。在大多数系统中，各用户的主目录都被组织在同一个特定的目录下，而用户主目录的名称就是该用户的登录名。各用户对自己的主目录有读、写、执行（搜索）权限，其他用户对此目录的访问权限则根据具体情况设置。（废话，不过注意一定是绝对路径）</p>
+<h3 id="登陆shell"><a href="#登陆shell" class="headerlink" title="登陆shell"></a>登陆shell</h3><p>用户登录后，要启动一个进程，负责将用户的操作传给内核，这个进程是用户登录到系统后运行的命令解释器或某个特定的程序，即Shell。Shell是用户与Linux系统之间的接口。Linux的Shell有许多种，每种都有不同的特点。常用的有：</p>
+<ul>
+<li>sh(BourneShell)</li>
+<li>csh(CShell)</li>
+<li>ksh(KornShell)</li>
+<li>tcsh(TENEX&#x2F;TOPS-20typeCShell)</li>
+<li>bash(BourneAgainShell)</li>
+</ul>
+<p>系统管理员可以根据系统情况和用户习惯为用户指定某个Shell。如果不指定Shell，那么系统使用sh为默认的登录Shell，即这个字段的值为&#x2F;bin&#x2F;sh。</p>
+<p>用户的登录Shell也可以指定为某个特定的程序（此程序不是一个命令解释器）。利用这一特点，我们可以限制用户只能运行指定的应用程序，在该应用程序运行结束后，用户就自动退出了系统。有些Linux系统要求只有那些在系统中登记了的程序才能出现在这个字段中。（不用管了，晓得意思就行）<br>基本就这么内容，晓得怎么回事就行了。以后用户管理遇到问题多进来瞅瞅。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/04/Linux%E7%94%A8%E6%88%B7%E7%BB%84%E7%AE%A1%E7%90%86%E5%92%8C%E6%9D%83%E9%99%90%E5%A4%84%E7%90%86%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="next" title="Linux用户组管理和权限处理常用命令">
+                <i class="fa fa-chevron-left"></i> Linux用户组管理和权限处理常用命令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/04/Linux%E4%B8%ADgroup%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/" rel="prev" title="Linux中group文件详解">
+                Linux中group文件详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%A0%B7%E4%BE%8B"><span class="nav-number">1.</span> <span class="nav-text">文件样例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%AE%80%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">文件简析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%90%8D"><span class="nav-number">2.1.</span> <span class="nav-text">用户名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%A3%E4%BB%A4"><span class="nav-number">2.2.</span> <span class="nav-text">口令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%A0%87%E8%AF%86%E5%8F%B7"><span class="nav-number">2.3.</span> <span class="nav-text">用户标识号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E6%A0%87%E8%AF%86%E5%8F%B7"><span class="nav-number">2.4.</span> <span class="nav-text">组标识号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E9%87%8A%E6%80%A7%E6%8F%8F%E8%BF%B0"><span class="nav-number">2.5.</span> <span class="nav-text">注释性描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E7%9B%AE%E5%BD%95"><span class="nav-number">2.6.</span> <span class="nav-text">主目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%99%BB%E9%99%86shell"><span class="nav-number">2.7.</span> <span class="nav-text">登陆shell</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

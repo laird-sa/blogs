@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,Computer Vision," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="边缘检测在图像的检测中是经常会用到的。图片的边缘会包含大量的信息，因此在图像的分割、识别、分析中通常可以取边缘作为图像特征。边缘检测最经典的应用就是图像的锐化了，想必大家都用过。 为了进行边缘检测，我们通常会用到以下的一些算子，即一阶算子（梯度算子）和二阶算子（拉普拉斯算子）。 拉普拉斯算子（Laplacian　Operator）拉普拉斯算子其实就是二阶微分算子，具有各向同性。他也会增强噪声，因此">
+<meta property="og:type" content="article">
+<meta property="og:title" content="边缘检测">
+<meta property="og:url" content="https://www.resonanat.com/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="边缘检测在图像的检测中是经常会用到的。图片的边缘会包含大量的信息，因此在图像的分割、识别、分析中通常可以取边缘作为图像特征。边缘检测最经典的应用就是图像的锐化了，想必大家都用过。 为了进行边缘检测，我们通常会用到以下的一些算子，即一阶算子（梯度算子）和二阶算子（拉普拉斯算子）。 拉普拉斯算子（Laplacian　Operator）拉普拉斯算子其实就是二阶微分算子，具有各向同性。他也会增强噪声，因此">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/3.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/4.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/5.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/6.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/7.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/8.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/21/1/9.png">
+<meta property="article:published_time" content="2016-02-21T14:47:53.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.104Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Computer Vision">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/02/21/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/02/21/边缘检测/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>边缘检测 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">边缘检测</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-21T22:47:53+08:00">
+                2016-02-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>边缘检测在图像的检测中是经常会用到的。图片的边缘会包含大量的信息，因此在图像的分割、识别、分析中通常可以取边缘作为图像特征。边缘检测最经典的应用就是图像的锐化了，想必大家都用过。</p>
+<p>为了进行边缘检测，我们通常会用到以下的一些算子，即一阶算子（梯度算子）和二阶算子（拉普拉斯算子）。</p>
+<h2 id="拉普拉斯算子（Laplacian-Operator）"><a href="#拉普拉斯算子（Laplacian-Operator）" class="headerlink" title="拉普拉斯算子（Laplacian　Operator）"></a>拉普拉斯算子（Laplacian　Operator）</h2><p>拉普拉斯算子其实就是二阶微分算子，具有各向同性。他也会增强噪声，因此在使用拉普拉斯算子之前需要进行平滑处理。他的主要用处其实是判断一个像素是处于图像的亮区还是暗区。</p>
+<p><strong>拉普拉斯算子定义式</strong>：<br>$$\begin{aligned}\nabla^2 f(x,y)&amp;&#x3D;\frac{\partial^2 f}{\partial x}+\frac{\partial^2 f}{\partial y}\\&amp;&#x3D;f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1)-4f(x,y)\end{aligned}$$</p>
+<p><strong>常用模板公式</strong>：(1)$\begin{bmatrix}0&amp;1&amp;0\\1&amp;-4&amp;1\\0&amp;1&amp;0\end{bmatrix}$(2)$\begin{bmatrix}1&amp;1&amp;1\\1&amp;-8&amp;1\\1&amp;1&amp;1\end{bmatrix}$</p>
+<p>拉普拉斯模板有多个变种，上面是常用的两个，对于每一个像素，我们把他作为模板的中心元素，套用公式进行更新。需要注意的是，与梯度算子不同，他是各向同性的，因此不需要$G_x$，$G_y$两个模板，也就不能区分边缘的方向了。</p>
+<p>还有一个常用的<strong>高斯－拉普拉斯算子</strong>（Gauss-Laplacian　Operator），将平滑滤波器和拉普拉斯边缘检测算子结合起来的：</p>
+<p><strong>高斯－拉普拉斯算子模板</strong>：$\begin{bmatrix}-2&amp;-4&amp;-4&amp;-4&amp;-2\\-4&amp;0&amp;8&amp;0&amp;-4\\-4&amp;8&amp;24&amp;8&amp;-4\\-4&amp;0&amp;8&amp;0&amp;-4\\-2&amp;-4&amp;-4&amp;-4&amp;-2\end{bmatrix}$</p>
+<p>另外，拉普拉斯算子有一个很实用的用途，就是对图像进行锐化，这时候只要将常用模板稍微改动一下即可得到<strong>锐化模板</strong>：</p>
+<p>(1)$\begin{bmatrix}0&amp;-1&amp;0\\-1&amp;5&amp;-1\\0&amp;-1&amp;0\end{bmatrix}$(2)$\begin{bmatrix}-1&amp;-1&amp;-1\\-1&amp;9&amp;-1\\-1&amp;-1&amp;-1\end{bmatrix}$</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>OK，最后就是用代码实现一下了，总体还是很简单的，而且类似于OpenCV之类的库都有实现的函数。不过我还是用pil来简单实现一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image,matplotlib,sys,ImageEnhance,ImageFont,ImageDraw</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gauss</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[-<span class="number">2</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">2</span>],[-<span class="number">4</span>,<span class="number">0</span>,<span class="number">8</span>,<span class="number">0</span>,-<span class="number">4</span>],[-<span class="number">4</span>,<span class="number">8</span>,<span class="number">24</span>,<span class="number">8</span>,-<span class="number">4</span>],[-<span class="number">4</span>,<span class="number">0</span>,<span class="number">8</span>,<span class="number">0</span>,<span class="number">4</span>],[-<span class="number">2</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">2</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">4</span>,width-<span class="number">4</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">4</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">4</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">5</span>,j:j+<span class="number">5</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">laplacian</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">1</span>,-<span class="number">8</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sharpen</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[-<span class="number">1</span>,<span class="number">9</span>,-<span class="number">1</span>],[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">robert</span>(<span class="params">im_arr</span>):</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">1</span>,width-<span class="number">1</span>))</span><br><span class="line">    <span class="keyword">for</span>	i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">1</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">1</span>):</span><br><span class="line">    		ans[i,j]=np.<span class="built_in">abs</span>(im_arr[i,j]-im_arr[i+<span class="number">1</span>,j+<span class="number">1</span>])+np.<span class="built_in">abs</span>(im_arr[i+<span class="number">1</span>,j]-im_arr[i,j+<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sobel</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>],[-<span class="number">2</span>,<span class="number">0</span>,<span class="number">2</span>],[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[-<span class="number">1</span>,-<span class="number">2</span>,-<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">prewitt</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">isotropic</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1.414</span>,<span class="number">0</span>,-<span class="number">1.414</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[-<span class="number">1</span>,-<span class="number">1.414</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1.414</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>(<span class="params">im_arr,name</span>):</span><br><span class="line">    im=Image.fromarray(im_arr)</span><br><span class="line">    draw=ImageDraw.Draw(im)</span><br><span class="line">    font = ImageFont.truetype(<span class="string">&#x27;/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf&#x27;</span>, <span class="number">18</span>)</span><br><span class="line">    draw.text((<span class="number">0</span>,<span class="number">0</span>),name,font=font,fill=<span class="string">&#x27;red&#x27;</span>)</span><br><span class="line">    <span class="keyword">del</span> draw</span><br><span class="line">    im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">    im.save(name+<span class="string">&#x27;.png&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    im=Image.<span class="built_in">open</span>(sys.argv[<span class="number">1</span>])</span><br><span class="line">    im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">    im.save(<span class="string">&#x27;source.png&#x27;</span>)</span><br><span class="line">    show(laplacian(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Laplace&#x27;</span>)</span><br><span class="line">    show(sobel(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Sobel&#x27;</span>)</span><br><span class="line">    show(robert(np.array(im,<span class="string">&#x27;int&#x27;</span>)),<span class="string">&#x27;Robert&#x27;</span>)</span><br><span class="line">    show(prewitt(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Prewitt&#x27;</span>)</span><br><span class="line">    show(isotropic(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Isotropic&#x27;</span>)</span><br><span class="line">    show(sharpen(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;sharpen&#x27;</span>)</span><br><span class="line">    show(gauss(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;gauss-laplace&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/2016/02/21/1/1.png" alt="test"><br><img src="/images/2016/02/21/1/2.png" alt="source"><br><img src="/images/2016/02/21/1/3.png" alt="Sobel"><br><img src="/images/2016/02/21/1/4.png" alt="sharpen"><br><img src="/images/2016/02/21/1/5.png" alt="Robert"><br><img src="/images/2016/02/21/1/6.png" alt="Prewitt"><br><img src="/images/2016/02/21/1/7.png" alt="Isotropic"><br><img src="/images/2016/02/21/1/8.png" alt="Laplace"><br><img src="/images/2016/02/21/1/9.png" alt="gauss-laplace"></p>
+<p>最后用他来处理一下lena.png，会的到上面的结果。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Computer-Vision/" rel="tag"># Computer Vision</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/" rel="next" title="Julia集分形图案绘制">
+                <i class="fa fa-chevron-left"></i> Julia集分形图案绘制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/22/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/" rel="prev" title="最小二乘法">
+                最小二乘法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E7%AE%97%E5%AD%90%EF%BC%88Laplacian-Operator%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">拉普拉斯算子（Laplacian　Operator）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">2.</span> <span class="nav-text">测试</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

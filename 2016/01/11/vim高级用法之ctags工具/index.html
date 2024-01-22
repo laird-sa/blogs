@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,Vim," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="都说vim强大，然而之前的简单用法并没有让我觉得vim有多强大，顶多是一个功能齐全的记事本，只到我发现了这个工具－－ctags，以及由他衍生出来的很多插件，让我明白了，“哦，vim 至少可以作为一个很不错的C语言的IDE”。～～ 概述ctags工具其实可以认为是为C语言的文件添加索引的工具。C文件经过他的处理后会生成一个tags文件来保存文件中所有函数、变量、宏的索引，通过这个索引，就能非常方便的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vim高级用法之ctags工具">
+<meta property="og:url" content="https://www.resonanat.com/2016/01/11/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Bctags%E5%B7%A5%E5%85%B7/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="都说vim强大，然而之前的简单用法并没有让我觉得vim有多强大，顶多是一个功能齐全的记事本，只到我发现了这个工具－－ctags，以及由他衍生出来的很多插件，让我明白了，“哦，vim 至少可以作为一个很不错的C语言的IDE”。～～ 概述ctags工具其实可以认为是为C语言的文件添加索引的工具。C文件经过他的处理后会生成一个tags文件来保存文件中所有函数、变量、宏的索引，通过这个索引，就能非常方便的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-01-11T14:59:32.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.076Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Vim">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/01/11/vim高级用法之ctags工具/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>vim高级用法之ctags工具 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/11/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Bctags%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">vim高级用法之ctags工具</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-11T22:59:32+08:00">
+                2016-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>都说vim强大，然而之前的简单用法并没有让我觉得vim有多强大，顶多是一个功能齐全的记事本，只到我发现了这个工具－－ctags，以及由他衍生出来的很多插件，让我明白了，“哦，vim 至少可以作为一个很不错的C语言的IDE”。～～</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>ctags工具其实可以认为是为C语言的文件添加索引的工具。C文件经过他的处理后会生成一个tags文件来保存文件中所有函数、变量、宏的索引，通过这个索引，就能非常方便的在后续的编辑过程中获取这些信息，从而达到自动补全、识别函数和变量等一系列的功能。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>ctags工具有他的官网可以下载，但是实际上我们并不需要手动安装。一般情况下ubuntu系统内会自带ctags工具，他的名字叫：exuberant-ctags（朝气蓬勃的C标签0.0）。可以通过<code>$ ctags --version </code>命令来查看版本。如果没有，则只需要<code>$ sudo apt-get install exuberant-ctags</code> 就可以直接下载使用了。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>首先，对我们需要索引的文件进行预处理：<code>$ctags foo.cpp</code>（当然，如果需要递归处理所有子文件夹的话可以加 -R 参数，如： <code>$ctags -R</code>）。</p>
+<p>预处理后，我们会发现在当前文件夹下出现了名叫tags的文件。比如，对于如下的cpp文件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FOO</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">fun</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> global;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">fun</span>();</span><br><span class="line">        FOO foo;</span><br><span class="line">        <span class="type">int</span> local;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成的tags文件是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">!_TAG_FILE_FORMAT       2       /extended format; --format=1 will not append ;&quot; to lines/</span><br><span class="line">!_TAG_FILE_SORTED       1       /0=unsorted, 1=sorted, 2=foldcase/</span><br><span class="line">!_TAG_PROGRAM_AUTHOR    Darren Hiebert  /dhiebert@users.sourceforge.net/</span><br><span class="line">!_TAG_PROGRAM_NAME      Exuberant Ctags //</span><br><span class="line">!_TAG_PROGRAM_URL       http://ctags.sourceforge.net    /official site/</span><br><span class="line">!_TAG_PROGRAM_VERSION   5.9~svn20110310 //</span><br><span class="line">FOO     a.cpp   /^struct FOO&#123;$/;&quot;       s       file:</span><br><span class="line">fun     a.cpp   /^void fun()&#123;$/;&quot;       f</span><br><span class="line">global  a.cpp   /^int global;$/;&quot;       v</span><br><span class="line">main    a.cpp   /^int main()&#123;$/;&quot;       f</span><br></pre></td></tr></table></figure>
+<p>大概解释一下他的文件格式就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">格式：&#123;tagname&#125; &#123;TAB&#125; &#123;tagfile&#125; &#123;TAB&#125; &#123;tagaddress&#125; &#123;term&#125; &#123;field&#125; ..</span><br><span class="line">• &#123;tagname&#125; - 标识符名字,例如函数名、类名、结构名、宏等。不能包含制表符。</span><br><span class="line">• &#123;tagfile&#125; - 包含 &#123;tagname&#125; 的文件。它不能包含制表符。</span><br><span class="line">• &#123;tagaddress&#125; - 可以定位到 &#123;tagname&#125;光标位置的 Ex 命令。通常只包含行号或搜索命令。出于安全的考虑,vim会限制其中某些命令的执行。</span><br><span class="line">• &#123;term&#125; - 设为 ;&quot; ,这是为了兼容Vi编辑器,使Vi忽略后面的&#123;field&#125;字段。</span><br><span class="line">• &#123;field&#125; .. - 此字段可选,通常用于表示此&#123;tagname&#125;的类型是函数、类、宏或是其它。</span><br><span class="line">!_TAG_FILE_SORTED&lt;Tab&gt;1&lt;Tab&gt;&#123;anything&#125;</span><br><span class="line">上面这个标记说明tag文件是经过排序的,并且排序时区分了大小写,对排序的tag,vim会使用二分法来进行查找,大大加快了查找速度;如果值为0,则表示tag文件未经排序;如果值为2,则表示tag文件是忽略大小写排序的。</span><br></pre></td></tr></table></figure>
+<p>其实就是规定一种保存结构体、函数名、和全局变量的索引了。</p>
+<p>经过这样的处理之后，我们就可以使用他带来的非常实用的操作了：</p>
+<ol>
+<li>对于已经建立索引的条目，我们可以用<code>Ctrl+]</code> 的快捷键来快速找到他的声明，即使是位于不同文件（就像很多IDE中的F12用来查看声明一样），查看完之后可以通过<code>Ctrl+t </code> 或<code>Ctrl+o</code> 来返回原来的地方。</li>
+<li>选中局部变量，按<code>gd</code> 可以搜索到该变量的声明。</li>
+<li>选中单词，按<code>*</code>可以转到该单词下一次出现的地方。</li>
+<li>选中单词，按<code>#</code>可以转到该单词上一次出现的地方。</li>
+<li>在行末模式下输入<code>:ta foo</code> 可以立刻找到foo函数的声明。</li>
+</ol>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>要使用tags文件，默认是必须要在当前含有tags文件的地方打开vim才能加载到tags文件，否则需要在行末模式下手动指定<code>:set tags=（你存放tags文件的路径，如果有多个路径的话中间用,隔开，而且貌似不支持*之类的通配符）</code> 或者在<code>/etc/vim/vimrc</code>里面加上这句话，或者在<code>~/.vimrc</code> 里面加上这句话。</p>
+<p>晓得了这个工具，就像是打开了vim 插件类工具的大门，强大的 vim 配置就要诞生了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/Vim/" rel="tag"># Vim</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/10/%E4%BF%9D%E6%8C%81SSH%E8%BF%9E%E6%8E%A5%E6%8C%81%E7%BB%AD%E4%B8%8D%E6%96%AD%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/" rel="next" title="保持SSH连接持续不断的配置方法">
+                <i class="fa fa-chevron-left"></i> 保持SSH连接持续不断的配置方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/12/C99%E6%98%BE%E7%A4%BA%E5%87%BD%E6%95%B0%E5%90%8D%E7%9A%84%E5%AE%8F__func__/" rel="prev" title="C99显示函数名的宏__func__">
+                C99显示函数名的宏__func__ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">4.</span> <span class="nav-text">注意</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

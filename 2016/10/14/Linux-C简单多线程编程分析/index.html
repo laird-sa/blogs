@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="C/C++," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="我们都知道多线程可以提高程序运行的速度，但是至于能够提高多少却一直没有一个直观的印象，下面就用Linux C的多线程编程技术，简要分析下多线程的运行效率。 测试代码下面就用1000*1000的矩阵之间的乘法来做一个实验，我们分别用单线程和多线程分别实现，算法都采用$O(n^3)$的朴素算法。测试代码如下： 1234567891011121314151617181920212223242526272">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux-C简单多线程编程分析">
+<meta property="og:url" content="https://www.resonanat.com/2016/10/14/Linux-C%E7%AE%80%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="我们都知道多线程可以提高程序运行的速度，但是至于能够提高多少却一直没有一个直观的印象，下面就用Linux C的多线程编程技术，简要分析下多线程的运行效率。 测试代码下面就用1000*1000的矩阵之间的乘法来做一个实验，我们分别用单线程和多线程分别实现，算法都采用$O(n^3)$的朴素算法。测试代码如下： 1234567891011121314151617181920212223242526272">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/10/14/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/10/14/1/2.png">
+<meta property="article:published_time" content="2016-10-14T09:39:39.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.043Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="C&#x2F;C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/10/14/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/10/14/Linux-C简单多线程编程分析/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Linux-C简单多线程编程分析 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/10/14/Linux-C%E7%AE%80%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux-C简单多线程编程分析</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-14T17:39:39+08:00">
+                2016-10-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>我们都知道多线程可以提高程序运行的速度，但是至于能够提高多少却一直没有一个直观的印象，下面就用Linux C的多线程编程技术，简要分析下多线程的运行效率。</p>
+<h2 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h2><p>下面就用1000*1000的矩阵之间的乘法来做一个实验，我们分别用单线程和多线程分别实现，算法都采用$O(n^3)$的朴素算法。测试代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LEN 1000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXNUM 1000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXTHREADNUM 16</span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> matrix1[LEN][LEN]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> matrix2[LEN][LEN]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> sum[MAXTHREADNUM]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> ans=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">getCurrentTime</span><span class="params">()</span></span>&#123;</span><br><span class="line">   <span class="keyword">struct</span> <span class="title class_">timeval</span> tv;</span><br><span class="line">   <span class="built_in">gettimeofday</span>(&amp;tv,<span class="literal">NULL</span>);</span><br><span class="line">   <span class="keyword">return</span> tv.tv\_sec * <span class="number">1000</span> + tv.tv\_usec / <span class="number">1000</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">genMatrix</span><span class="params">(<span class="type">char</span> *file)</span></span>&#123;</span><br><span class="line">    FILE *fp=<span class="built_in">fopen</span>(file,<span class="string">&quot;w&quot;</span>);</span><br><span class="line">    <span class="built_in">srand</span>(<span class="built_in">time</span>(<span class="literal">NULL</span>));</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;LEN;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;LEN;j++)&#123;</span><br><span class="line">            <span class="type">int</span> random=<span class="built_in">rand</span>()%MAXNUM;</span><br><span class="line">            <span class="built_in">fprintf</span>(fp,<span class="string">&quot;\t%d&quot;</span>,random);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">fprintf</span>(fp,<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fclose</span>(fp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">getMatrix</span><span class="params">(<span class="type">long</span> <span class="type">long</span> matrix[LEN][LEN],<span class="type">char</span> *file)</span></span>&#123;</span><br><span class="line">    FILE *fp=<span class="built_in">fopen</span>(file,<span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;LEN;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;LEN;j++)&#123;</span><br><span class="line">            <span class="built_in">fscanf</span>(fp,<span class="string">&quot;\t%lld&quot;</span>,&amp;matrix[i][j]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">char</span> tmp;</span><br><span class="line">        <span class="built_in">fscanf</span>(fp,<span class="string">&quot;%c&quot;</span>,&amp;tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fclose</span>(fp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> threadNum;</span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">runner</span><span class="params">(<span class="type">void</span> *p)</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> pid=*(<span class="type">int</span>*)p;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> sumT=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=pid;i&lt;LEN;i+=threadNum)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;LEN;j++)&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> k=<span class="number">0</span>;k&lt;LEN;k++)&#123;</span><br><span class="line">                sumT+=matrix1[i][k]*matrix2[k][j];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    sum[pid]=sumT;</span><br><span class="line">    <span class="built_in">free</span>((<span class="type">int</span> *)p);</span><br><span class="line">    <span class="built_in">pthread_exit</span>(<span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">multiThread</span><span class="params">(<span class="type">int</span> num)</span></span>&#123;</span><br><span class="line">    threadNum=num;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> clock1=<span class="built_in">clock</span>();</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> time1=<span class="built_in">getCurrentTime</span>();</span><br><span class="line">    <span class="type">pthread_t</span> id[MAXTHREADNUM];</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;threadNum;i++)&#123;</span><br><span class="line">        <span class="type">int</span> *p=(<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">        *p=i;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;id[i],<span class="literal">NULL</span>,runner,p);</span><br><span class="line">    &#125;</span><br><span class="line">    ans=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;threadNum;i++)&#123;</span><br><span class="line">        <span class="built_in">pthread_join</span>(id[i],<span class="literal">NULL</span>);</span><br><span class="line">        ans+=sum[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> clock2=<span class="built_in">clock</span>();</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> time2=<span class="built_in">getCurrentTime</span>();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Multi Thread %d:\n&quot;</span>,num);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Ans =\t%lld\nClock time =\t%lldms\nUnix time =\t%lldms\n\n&quot;</span>,ans,(clock2-clock1)/<span class="number">1000</span>,time2-time1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">char</span> name1[<span class="number">50</span>]=<span class="string">&quot;matrix1.txt&quot;</span>;</span><br><span class="line">    <span class="type">char</span> name2[<span class="number">50</span>]=<span class="string">&quot;matrix2.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">    FILE *fp=<span class="built_in">fopen</span>(name1,<span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(fp==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">genMatrix</span>(name1);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">fclose</span>(fp);</span><br><span class="line">    &#125;</span><br><span class="line">    fp=<span class="built_in">fopen</span>(name2,<span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(fp==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">genMatrix</span>(name2);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">fclose</span>(fp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">getMatrix</span>(matrix1,name1);</span><br><span class="line">    <span class="built_in">getMatrix</span>(matrix2,name2);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=<span class="number">16</span>;i++)&#123;</span><br><span class="line">        <span class="built_in">multiThread</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="程序简要分析"><a href="#程序简要分析" class="headerlink" title="程序简要分析"></a>程序简要分析</h2><p>注：为了方便验证结果的正确性，我计算了$\sum x_{ij}$来进行对比。</p>
+<p>单线程的部分自不必说，多线程的部分我采用的并不是通用的线程池，也不是对每一个任务都创建一个线程，而是根据行数模线程数的值来分配给不同的线程。这样总线程数一直不变，相对简化了线程创建的开销，以及代码量。</p>
+<p>关于pthread库的使用也是很讲究的。</p>
+<p>对于pthread_create 来说，为了保证能够兼容不同的回调函数，他在创建进程的时候将回调函数的参数和返回值都定义为void*。那么如果想传入自己的参数就要用一个指针来传入数据并强制转换为void *，然后在回调函数里强制类型转换为实际的类型。如果要传入多个参数，就要自己写一个结构体来传，还是非常麻烦的。而且这里还要注意一点，就是不能把临时变量的引用当做参数传给回调函数，因为临时变量是会在循环结束后立即被释放的，这样会导致回调函数得不到正确的值。正确的做法应该是malloc一块内存，并用指针把这块内存传给回调函数，回调函数在执行完任务逻辑后再自行释放。</p>
+<p>对于pthread_exit 和pthread_join 来说，我们要知道的是，pthread_exit才是真正传递回调函数返回值的地方。我们将需要返回的值传递给他，然后再用pthread_join 的第二个参数来接受这个参数。不过通常为了简单起见都会开一个全局数组来接受不同线程的计算结果。</p>
+<p>当然，多线程最怕的就是不同线程对同一数据的修改，如果必须修改，那么就得对这块代码块加锁。</p>
+<p>关于程序的逻辑，我们需要注意的就是计算结果可能会过大导致数据溢出，因此我们要小心控制下数据的大小。</p>
+<p>还有一个小细节，就是如何用Linux C来获取Unix 时间戳，一开始以为是clock()函数，不过后来才发现，clock()函数是cpu时间，不是真正的时间。比如说我的cpu有四个核，这四个核同时工作了1s，那么用clock()函数做差可以发现结果是接近4s。因此，正确的做法是重写一个getCurrentTime函数，这样就能得到真正的Unix时间戳。</p>
+<p>最后需要注意的就是程序在编译时需要加上-lpthread 参数。</p>
+<h2 id="运行结果分析"><a href="#运行结果分析" class="headerlink" title="运行结果分析"></a>运行结果分析</h2><p>对于一个四核的电脑，我们运行的结果是：<br><img src="/images/2016/10/14/1/1.png"></p>
+<p>对于一个九十六核的服务器，我们运行的结果是：<br><img src="/images/2016/10/14/1/2.png"></p>
+<p>我们可以发现，对于九十六核的服务器而言，UNIX时间*线程数近似等于CPU时间，而CPU时间近似保持不变，多线程的特性发挥的很完美。而对于四核的电脑来说，当线程数大于四的时候，我们就发现程序的执行时间就开始发生波动，执行效率并没有随着线程数增加而有所提高。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/C-C/" rel="tag"># C/C++</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/02/laikai-home/" rel="next" title="莱卡回家">
+                <i class="fa fa-chevron-left"></i> 莱卡回家
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/15/enable-hsts/" rel="prev" title="全站开启 HSTS">
+                全站开启 HSTS <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">程序简要分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">运行结果分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Lombok," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言这两天没什么重要的事情做，但是想着还要春招总觉得得学点什么才行，正巧想起来前几次面试的时候面试官总喜欢问一些框架的底层实现，但是我学东西比较倾向于用到啥学啥，因此在这些方面吃了很大的亏。而且其实很多框架也多而杂，代码起来费劲，无非就是几套设计模式套一套，用到的东西其实也就那么些，感觉没啥新意。刚这两天读”深入理解JVM”的时候突然想起来有个叫Lombok的东西以前一直不能理解他的实现原理，现在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lombok原理分析与功能实现">
+<meta property="og:url" content="https://www.resonanat.com/2017/12/19/Lombok%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E4%B8%8E%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言这两天没什么重要的事情做，但是想着还要春招总觉得得学点什么才行，正巧想起来前几次面试的时候面试官总喜欢问一些框架的底层实现，但是我学东西比较倾向于用到啥学啥，因此在这些方面吃了很大的亏。而且其实很多框架也多而杂，代码起来费劲，无非就是几套设计模式套一套，用到的东西其实也就那么些，感觉没啥新意。刚这两天读”深入理解JVM”的时候突然想起来有个叫Lombok的东西以前一直不能理解他的实现原理，现在">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-12-19T06:23:11.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.046Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Lombok">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/12/19/Lombok原理分析与功能实现/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Lombok原理分析与功能实现 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/12/19/Lombok%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E4%B8%8E%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Lombok原理分析与功能实现</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-19T14:23:11+08:00">
+                2017-12-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这两天没什么重要的事情做，但是想着还要春招总觉得得学点什么才行，正巧想起来前几次面试的时候面试官总喜欢问一些框架的底层实现，但是我学东西比较倾向于用到啥学啥，因此在这些方面吃了很大的亏。而且其实很多框架也多而杂，代码起来费劲，无非就是几套设计模式套一套，用到的东西其实也就那么些，感觉没啥新意。刚这两天读”深入理解JVM”的时候突然想起来有个叫Lombok的东西以前一直不能理解他的实现原理，现在正好趁着闲暇的时间研究研究。</p>
+<h2 id="Lombok"><a href="#Lombok" class="headerlink" title="Lombok"></a>Lombok</h2><h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>Lombok是一个开源项目，源代码托管在<a target="_blank" rel="noopener" href="https://github.com/rzwitserloot/lombok">GITHUB&#x2F;rzwitserloot</a>，如果需要在maven里引用，只需要添加下依赖:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.projectlombok<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lombok<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.16.8<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h3><p>那么Lombok是做什么的呢？其实很简单，一个最简单的例子就是它能够实现通过添加注解，能够自动生成一些方法。比如这样的类:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们用Lombok提供的@Getter来注解这个类，这个类在编译的时候就会变成:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String value;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getValue</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然Lombok也提供了很多其他的注解，这只是其中一个最典型的例子。其他的用法网上的资料已经很多了，这里就不啰嗦。<br>看上去是很方便的一个功能，尤其是在很多项目里有很多bean，每次都要手写或自动生成setter getter方法，搞得代码很长而且没有啥意义，因此这个对简化代码的强迫症们还是很有吸引力的。<br>但是，我们发现这个包跟一般的包有很大区别，绝大多数java包都工作在运行时，比如spring提供的那种注解，通过在运行时用反射来实现业务逻辑。Lombok这个东西工作却在编译期，在运行时是无法通过反射获取到这个注解的。<br>而且由于他相当于是在编译期对代码进行了修改，因此从直观上看，源代码甚至是语法有问题的。<br>一个更直接的体现就是，普通的包在引用之后一般的IDE都能够自动识别语法，但是Lombok的这些注解，一般的IDE都无法自动识别，比如我们上面的Test类，如果我们在其他地方这么调用了一下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Test test=<span class="keyword">new</span> <span class="title class_">Test</span>();</span><br><span class="line">test.getValue();</span><br></pre></td></tr></table></figure>
+<p>IDE的自动语法检查就会报错，说找不到这个getValue方法。因此如果要使用Lombok的话还需要配合安装相应的插件，防止IDE的自动检查报错。<br>因此，可以说这个东西的设计初衷比较美好，但是用起来比较麻烦，而且破坏了代码的完整性，很多项目组(包括我自己)都不高兴用。但是他的实现原理却还是比较好玩的，随便搜了搜发现网上最多也只提到了他修改了抽象语法树，虽说从感性上可以理解，但是还是想自己手敲一敲真正去实现一下。</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>翻了翻现有的资料，再加上自己的一些猜想，Lombok的基本流程应该基本是这样：</p>
+<ul>
+<li>定义编译期的注解</li>
+<li>利用JSR269 api(Pluggable Annotation Processing API )创建编译期的注解处理器</li>
+<li>利用tools.jar的javac api处理AST(抽象语法树)</li>
+<li>将功能注册进jar包</li>
+</ul>
+<p>看起来还是比较简单的，但是不得不说坑也不少，搞了两天才把流程搞通。。。<br>下面就根据这个流程自己实现一个有类似功能的Getter类。</p>
+<h2 id="手撸Getter"><a href="#手撸Getter" class="headerlink" title="手撸Getter"></a>手撸Getter</h2><p>实验的目的是自定义一个针对类的Getter注解，它能够读取该类的成员方法并自动生成getter方法。</p>
+<h3 id="项目依赖"><a href="#项目依赖" class="headerlink" title="项目依赖"></a>项目依赖</h3><p>由于比较习惯用maven，我这里就用maven构建一下项目，修改下当前的pom.xml文件如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.mythsman.test<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>getter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>test<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.sun<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tools<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;java.home&#125;/../lib/tools.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>主要定义了下项目名，除了默认依赖的junit之外(其实并没有用)，这里添加了tools.jar包。这个包实在jdk的lib下面，因此scope是system，由于${java.home}变量表示的是jre的位置，因此还要根据这个位置找到实际的tools.jar的路径并写在systemPath里。<br>由于防止在写代码的时候用到java8的一些语法，这里配置了下编译插件使其支持java8。</p>
+<h3 id="创建Getter注解"><a href="#创建Getter注解" class="headerlink" title="创建Getter注解"></a>创建Getter注解</h3><p>定义注解Getter.java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.ElementType;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Retention;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.RetentionPolicy;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Target;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Target(&#123;ElementType.TYPE&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Getter &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的Target我选择了ElementType.TYPE表示是对类的注解，Retention选择了RententionPolicy.SOURCE，表示这个注解只在编译期起作用，在运行时将不存在。这个比较简单，稍微复杂点的是对这个注解的处理机制。像spring那种注解是通过反射来获得注解对应的元素并实现业务逻辑，但是我们显然不希望在使用Lombok这种功能的时候还要编写其他的调用代码，况且用反射也获取不到编译期才存在的注解。<br>幸运的是Java早已支持了JSR269的规范，允许在编译时指定一个processor类来对编译阶段的注解进行干预，下面就来解决下这个处理器。</p>
+<h3 id="创建Getter注解的处理器"><a href="#创建Getter注解的处理器" class="headerlink" title="创建Getter注解的处理器"></a>创建Getter注解的处理器</h3><h4 id="基本框架"><a href="#基本框架" class="headerlink" title="基本框架"></a>基本框架</h4><p>自定义的处理器需要继承AbstractProcessor这个类，基本的框架大体应当如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.annotation.processing.*;</span><br><span class="line"><span class="keyword">import</span> javax.lang.model.SourceVersion;</span><br><span class="line"><span class="keyword">import</span> javax.lang.model.element.TypeElement;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SupportedAnnotationTypes(&quot;com.mythsman.test.Getter&quot;)</span></span><br><span class="line"><span class="meta">@SupportedSourceVersion(SourceVersion.RELEASE_8)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetterProcessor</span> <span class="keyword">extends</span> <span class="title class_">AbstractProcessor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(ProcessingEnvironment processingEnv)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.init(processingEnv);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">process</span><span class="params">(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要定义两个注解，一个表示该处理器需要处理的注解，另外一个表示该处理器支持的源码版本。然后需要着重实现两个方法，init跟process。init的主要用途是通过ProcessingEnvironment来获取编译阶段的一些环境信息;process主要是实现具体逻辑的地方，也就是对AST进行处理的地方。</p>
+<p>具体怎么做呢？</p>
+<h4 id="init方法"><a href="#init方法" class="headerlink" title="init方法"></a>init方法</h4><p>首先我们要重写下init方法，从环境里提取一些关键的类:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> Messager messager;</span><br><span class="line"><span class="keyword">private</span> JavacTrees trees;</span><br><span class="line"><span class="keyword">private</span> TreeMaker treeMaker;</span><br><span class="line"><span class="keyword">private</span> Names names;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(ProcessingEnvironment processingEnv)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>.init(processingEnv);</span><br><span class="line">    <span class="built_in">this</span>.messager = processingEnv.getMessager();</span><br><span class="line">    <span class="built_in">this</span>.trees = JavacTrees.instance(processingEnv);</span><br><span class="line">    <span class="type">Context</span> <span class="variable">context</span> <span class="operator">=</span> ((JavacProcessingEnvironment) processingEnv).getContext();</span><br><span class="line">    <span class="built_in">this</span>.treeMaker = TreeMaker.instance(context);</span><br><span class="line">    <span class="built_in">this</span>.names = Names.instance(context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们提取了四个主要的类:</p>
+<ul>
+<li>Messager主要是用来在编译期打log用的</li>
+<li>JavacTrees提供了待处理的抽象语法树</li>
+<li>TreeMaker封装了创建AST节点的一些方法</li>
+<li>Names提供了创建标识符的方法</li>
+</ul>
+<h4 id="process方法"><a href="#process方法" class="headerlink" title="process方法"></a>process方法</h4><p>process方法的逻辑比较简单，但是由于这里的api对于我们来说比较陌生，因此写起来还是费了不少劲的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="type">boolean</span> <span class="title function_">process</span><span class="params">(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv)</span> &#123;</span><br><span class="line">    Set&lt;? <span class="keyword">extends</span> <span class="title class_">Element</span>&gt; set = roundEnv.getElementsAnnotatedWith(Getter.class);</span><br><span class="line">    set.forEach(element -&gt; &#123;</span><br><span class="line">        <span class="type">JCTree</span> <span class="variable">jcTree</span> <span class="operator">=</span> trees.getTree(element);</span><br><span class="line">        jcTree.accept(<span class="keyword">new</span> <span class="title class_">TreeTranslator</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visitClassDef</span><span class="params">(JCTree.JCClassDecl jcClassDecl)</span> &#123;</span><br><span class="line">                List&lt;JCTree.JCVariableDecl&gt; jcVariableDeclList = List.nil();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (JCTree tree : jcClassDecl.defs) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (tree.getKind().equals(Tree.Kind.VARIABLE)) &#123;</span><br><span class="line">                        JCTree.<span class="type">JCVariableDecl</span> <span class="variable">jcVariableDecl</span> <span class="operator">=</span> (JCTree.JCVariableDecl) tree;</span><br><span class="line">                        jcVariableDeclList = jcVariableDeclList.append(jcVariableDecl);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                jcVariableDeclList.forEach(jcVariableDecl -&gt; &#123;</span><br><span class="line">                    messager.printMessage(Diagnostic.Kind.NOTE, jcVariableDecl.getName() + <span class="string">&quot; has been processed&quot;</span>);</span><br><span class="line">                    jcClassDecl.defs = jcClassDecl.defs.prepend(makeGetterMethodDecl(jcVariableDecl));</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="built_in">super</span>.visitClassDef(jcClassDecl);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>步骤大概是下面这样：</p>
+<ol>
+<li>利用roundEnv的getElementsAnnotatedWith方法过滤出被Getter这个注解标记的类，并存入set</li>
+<li>遍历这个set里的每一个元素，并生成jCTree这个语法树</li>
+<li>创建一个TreeTranslator，并重写其中的visitClassDef方法，这个方法处理遍历语法树得到的类定义部分jcClassDecl</li>
+<li>创建一个jcVariableDeclList保存类的成员变量</li>
+<li>遍历jcTree的所有成员(包括成员变量和成员函数和构造函数)，过滤出其中的成员变量，并添加进jcVariableDeclList</li>
+<li>将jcVariableDeclList的所有变量转换成需要添加的getter方法，并添加进jcClassDecl的成员中</li>
+<li>调用默认的遍历方法遍历处理后的jcClassDecl</li>
+<li>利用上面的TreeTranslator去处理jcTree</li>
+</ol>
+<p>接下来再实现makeGetterMethodDecl方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> JCTree.JCMethodDecl <span class="title function_">makeGetterMethodDecl</span><span class="params">(JCTree.JCVariableDecl jcVariableDecl)</span> &#123;</span><br><span class="line"></span><br><span class="line">    ListBuffer&lt;JCTree.JCStatement&gt; statements = <span class="keyword">new</span> <span class="title class_">ListBuffer</span>&lt;&gt;();</span><br><span class="line">    statements.append(treeMaker.Return(treeMaker.Select(treeMaker.Ident(names.fromString(<span class="string">&quot;this&quot;</span>)), jcVariableDecl.getName())));</span><br><span class="line">    JCTree.<span class="type">JCBlock</span> <span class="variable">body</span> <span class="operator">=</span> treeMaker.Block(<span class="number">0</span>, statements.toList());</span><br><span class="line">    <span class="keyword">return</span> treeMaker.MethodDef(treeMaker.Modifiers(Flags.PUBLIC), getNewMethodName(jcVariableDecl.getName()), jcVariableDecl.vartype, List.nil(), List.nil(), List.nil(), body, <span class="literal">null</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Name <span class="title function_">getNewMethodName</span><span class="params">(Name name)</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> name.toString();</span><br><span class="line">    <span class="keyword">return</span> names.fromString(<span class="string">&quot;get&quot;</span> + s.substring(<span class="number">0</span>, <span class="number">1</span>).toUpperCase() + s.substring(<span class="number">1</span>, name.length()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑就是读取变量的定义，并创建对应的Getter方法，并试图用驼峰命名法。</p>
+<p>整体上难点还是集中在api的使用上，还有一些细微的注意点:<br>首先，messager的printMessage方法在打印log的时候会自动过滤重复的log信息。<br>其次，这里的list并不是java.util里面的list，而是一个自定义的list，这个list的用法比较坑爹，他采用的是这样的方式:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.sun.tools.javac.util;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">List</span>&lt;A&gt; <span class="keyword">extends</span> <span class="title class_">AbstractCollection</span>&lt;A&gt; <span class="keyword">implements</span> <span class="title class_">java</span>.util.List&lt;A&gt; &#123;</span><br><span class="line">    <span class="keyword">public</span> A head;</span><br><span class="line">    <span class="keyword">public</span> List&lt;A&gt; tail;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    List(A var1, List&lt;A&gt; var2) &#123;</span><br><span class="line">        <span class="built_in">this</span>.tail = var2;</span><br><span class="line">        <span class="built_in">this</span>.head = var1;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> List&lt;A&gt; <span class="title function_">prepend</span><span class="params">(A var1)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">List</span>(var1, <span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;A&gt; List&lt;A&gt; <span class="title function_">of</span><span class="params">(A var0)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">List</span>(var0, nil());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> List&lt;A&gt; <span class="title function_">append</span><span class="params">(A var1)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> of(var1).prependList(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;A&gt; List&lt;A&gt; <span class="title function_">nil</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> EMPTY_LIST;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>挺有趣的，用这种叫cons而不是list的数据结构，添加元素的时候就把自己赋给自己的tail,新来的元素放进head。不过需要注意的是这个东西不支持链式调用，prepend之后还要将新值赋给自己。<br>而且这里在创建getter方法的时候还要把参数写全写对了，尤其是添加this指针的这种用法。</p>
+<h4 id="测试类"><a href="#测试类" class="headerlink" title="测试类"></a>测试类</h4><p>上面基本就是所有功能代码了，接下来我们要写一个类来测试一下(App.java)：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String value;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String value2;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">App</span><span class="params">(String value)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.value = value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">App</span> <span class="variable">app</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">App</span>(<span class="string">&quot;it works&quot;</span>);</span><br><span class="line">        System.out.println(app.getValue());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>不过，先不要急着构建，构建了肯定会失败，因为这原则上应该是两个项目。Getter.java是注解类没问题，但是GetterProcessor.java是处理器，App.java需要在编译期调用这个处理器，因此这两个东西是不能一起编译的，正确的编译方法应该是类似下面这样，写成compile.sh脚本就是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env bash</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ -d classes ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">rm</span> -rf classes;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="built_in">mkdir</span> classes</span><br><span class="line"></span><br><span class="line">javac -<span class="built_in">cp</span> <span class="variable">$JAVA_HOME</span>/lib/tools.jar com/mythsman/test/Getter* -d classes/</span><br><span class="line"></span><br><span class="line">javac -<span class="built_in">cp</span> classes -d classes -processor com.mythsman.test.GetterProcessor com/mythsman/test/App.java</span><br><span class="line"></span><br><span class="line">javap -p classes com/mythsman/test/App.class</span><br><span class="line"></span><br><span class="line">java -<span class="built_in">cp</span> classes com.mythsman.test.App</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>其实是五个步骤:</p>
+<ol>
+<li>创建保存class文件的文件夹</li>
+<li>导入tools.jar，编译processor并输出</li>
+<li>编译App.java，并使用javac的-processor参数指定编译阶段的处理器GetterProcessor</li>
+<li>用javap显示编译后的App.class文件(非必须，方便看结果)</li>
+<li>执行测试类</li>
+</ol>
+<p>好了，进入项目的根目录，当前的目录结构应该是这样的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">├── src</span><br><span class="line">│   ├── main</span><br><span class="line">│   │   ├── java</span><br><span class="line">│   │   │   ├── com</span><br><span class="line">│   │   │   │   └── mythsman</span><br><span class="line">│   │   │   │       └── test</span><br><span class="line">│   │   │   │           ├── App.java</span><br><span class="line">│   │   │   │           ├── Getter.java</span><br><span class="line">│   │   │   │           └── GetterProcessor.java</span><br><span class="line">│   │   │   └── compile.sh</span><br></pre></td></tr></table></figure>
+<p>调用compile.sh，输出如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Note: value has been processed</span><br><span class="line">Note: value2 has been processed</span><br><span class="line">Compiled from &quot;App.java&quot;</span><br><span class="line">public class com.mythsman.test.App &#123;</span><br><span class="line">  private java.lang.String value;</span><br><span class="line">  private java.lang.String value2;</span><br><span class="line">  public java.lang.String getValue2();</span><br><span class="line">  public java.lang.String getValue();</span><br><span class="line">  public com.mythsman.test.App(java.lang.String);</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">&#125;</span><br><span class="line">it works</span><br></pre></td></tr></table></figure>
+<p>Note行就是在GetterProcessor类里通过messager打印的log，中间的是javap反编译的结果，最后一行表示测试调用成功。</p>
+<h4 id="Maven构建并打包"><a href="#Maven构建并打包" class="headerlink" title="Maven构建并打包"></a>Maven构建并打包</h4><p>上面的测试部分其实是为了测试而测试，其实这应当是两个项目，一个是processor项目，这个项目应当被打成一个jar包，供调用者使用；另一个项目是app项目，这个项目是专门使用jar包的，他并不希望添加任何额外编译参数，就跟lombok的用法一样。<br>简单来说，就是我们希望把processor打成一个包，并且在使用时不需要添加额外参数。<br>那么如何在调用的时候不用加参数呢，其实我们知道java在编译的时候会去资源文件夹下读一个META-INF文件夹，这个文件夹下面除了MANIFEST.MF文件之外，还可以添加一个services文件夹，我们可以在这个文件夹下创建一个文件，文件名是javax.annotation.processing.Processor，文件内容是com.mythsman.test.GetterProcessor。<br>我们知道maven在编译前会先拷贝资源文件夹，然后当他在编译时候发现了资源文件夹下的META-INF&#x2F;serivces文件夹时，他就会读取里面的文件，并将文件名所代表的接口用文件内容表示的类来实现。这就相当于做了-processor参数该做的事了。<br>当然这个文件我们并不希望调用者去写，而是希望在processor项目里集成，调用的时候能直接继承META-INF。</p>
+<p>好了，我们先删除App.java和compile.sh，添加下META-INF文件夹，当前目录结构应该是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">├── src</span><br><span class="line">│   └── main</span><br><span class="line">│       ├── java</span><br><span class="line">│       │   └── com</span><br><span class="line">│       │       └── mythsman</span><br><span class="line">│       │           └── test</span><br><span class="line">│       │               ├── Getter.java</span><br><span class="line">│       │               └── GetterProcessor.java</span><br><span class="line">│       └── resources</span><br><span class="line">│           └── META-INF</span><br><span class="line">│               └── services</span><br><span class="line">│                   └── javax.annotation.processing.Processor</span><br></pre></td></tr></table></figure>
+<p>当然，我们还不能编译，因为processor项目并不需要把自己添加为processor(况且自己还没编译呢怎么调用自己)。。。完了，好像死循环了，自己在编译的时候不能添加services文件夹，但是又需要打的包里有services文件夹，这该怎么搞呢？<br>其实很简单，配置一下maven的插件就行，打开pom.xml,在project&#x2F;build&#x2F;标签里添加下面的配置:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">excludes</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">exclude</span>&gt;</span>META-INF/**/*<span class="tag">&lt;/<span class="name">exclude</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">excludes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-resources-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">id</span>&gt;</span>process-META<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">phase</span>&gt;</span>prepare-package<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">goal</span>&gt;</span>copy-resources<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">outputDirectory</span>&gt;</span>target/classes<span class="tag">&lt;/<span class="name">outputDirectory</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">                            <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">                                <span class="tag">&lt;<span class="name">directory</span>&gt;</span>$&#123;basedir&#125;/src/main/resources/<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">                                <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">                                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">                                <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">                            <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">        ...</span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>我们知道maven构建的第一步就是调用maven-resources-plugin插件的resources命令，将resources文件夹复制到target&#x2F;classes中，那么我们配置一下resources标签，过滤掉META-INF文件夹，这样在编译的时候就不会找到services的配置了。然后我们在打包前(prepare-package生命周期)再利用maven-resources-plugin插件的copy-resources命令把services文件夹重新拷贝过来不就好了么。<br>这样配置好了，就可以直接执行<code>mvn clean install</code>打包提交到本地私服:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">myths@pc:~/Desktop/test$ mvn clean install</span><br><span class="line">[INFO] Scanning for projects...</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Building test 1.0-SNAPSHOT</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ getter ---</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ getter ---</span><br><span class="line">[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered resources.</span><br><span class="line">[INFO] Copying 0 resource</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ getter ---</span><br><span class="line">[INFO] Changes detected - recompiling the module!</span><br><span class="line">[INFO] Compiling 2 source files to /home/myths/Desktop/test/target/classes</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ getter ---</span><br><span class="line">[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered resources.</span><br><span class="line">[INFO] skip non existing resourceDirectory /home/myths/Desktop/test/src/test/resources</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ getter ---</span><br><span class="line">[INFO] No sources to compile</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ getter ---</span><br><span class="line">[INFO] No tests to run.</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-resources-plugin:2.6:copy-resources (process-META) @ getter ---</span><br><span class="line">[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered resources.</span><br><span class="line">[INFO] Copying 1 resource</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ getter ---</span><br><span class="line">[INFO] Building jar: /home/myths/Desktop/test/target/getter-1.0-SNAPSHOT.jar</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] --- maven-install-plugin:2.4:install (default-install) @ getter ---</span><br><span class="line">[INFO] Installing /home/myths/Desktop/test/target/getter-1.0-SNAPSHOT.jar to /home/myths/.m2/repository/com/mythsman/test/getter/1.0-SNAPSHOT/getter-1.0-SNAPSHOT.jar</span><br><span class="line">[INFO] Installing /home/myths/Desktop/test/pom.xml to /home/myths/.m2/repository/com/mythsman/test/getter/1.0-SNAPSHOT/getter-1.0-SNAPSHOT.pom</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time: 3.017 s</span><br><span class="line">[INFO] Finished at: 2017-12-19T19:57:04+08:00</span><br><span class="line">[INFO] Final Memory: 16M/201M</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>可以看到这里的process-META作用生效。</p>
+<h4 id="调用jar包测试"><a href="#调用jar包测试" class="headerlink" title="调用jar包测试"></a>调用jar包测试</h4><p>重新创建一个测试项目app：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        └── java</span><br><span class="line">            └── com</span><br><span class="line">                └── mythsman</span><br><span class="line">                    └── test</span><br><span class="line">                        └── App.java</span><br></pre></td></tr></table></figure>
+<p>pom.xml:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.mythsman.test<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>app<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>main<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://maven.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.mythsman.test<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>getter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>App.java:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">package com.mythsman.test;</span><br><span class="line"></span><br><span class="line">@Getter</span><br><span class="line">public class App &#123;</span><br><span class="line">    private String value;</span><br><span class="line"></span><br><span class="line">    private String value2;</span><br><span class="line"></span><br><span class="line">    public App(String value) &#123;</span><br><span class="line">        this.value = value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        App app = new App(&quot;it works&quot;);</span><br><span class="line">        System.out.println(app.getValue());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译并执行:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean compile &amp;&amp; java -<span class="built_in">cp</span> target/classes com.mythsman.test.App</span><br></pre></td></tr></table></figure>
+<p>最后就会在构建成功后打印”it works”。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://github.com/rzwitserloot/lombok">GITHUB&#x2F;lombok</a><br><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000005133786">使用 lombok 简化 Java 代码</a><br><a target="_blank" rel="noopener" href="https://blog.zenfery.cc/archives/78.html">Java注解(3)-注解处理器</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/6107197/how-does-lombok-work">stackoverflow&#x2F;How does lombok work?</a><br><a target="_blank" rel="noopener" href="https://my.oschina.net/superpdm/blog/129715">【翻译】Javac骇客指南</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wade-luffy/p/6050331.html">Javac早期(编译期)</a><br><a target="_blank" rel="noopener" href="http://xigua366.iteye.com/blog/2080668">利用maven中resources插件的copy-resources目标进行资源copy和过滤</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Lombok/" rel="tag"># Lombok</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/17/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%8E%9F%E7%90%86%E4%B8%8EClassLoader%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/" rel="next" title="Java类加载原理与ClassLoader使用总结">
+                <i class="fa fa-chevron-left"></i> Java类加载原理与ClassLoader使用总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/21/%E5%8E%9F%E7%94%9FAspectJ%E7%94%A8%E6%B3%95%E5%88%86%E6%9E%90%E4%BB%A5%E5%8F%8Aspring-aop%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" rel="prev" title="原生AspectJ用法分析以及spring-aop原理分析">
+                原生AspectJ用法分析以及spring-aop原理分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lombok"><span class="nav-number">2.</span> <span class="nav-text">Lombok</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">2.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD"><span class="nav-number">2.2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%8B%E6%92%B8Getter"><span class="nav-number">3.</span> <span class="nav-text">手撸Getter</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E4%BE%9D%E8%B5%96"><span class="nav-number">3.1.</span> <span class="nav-text">项目依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAGetter%E6%B3%A8%E8%A7%A3"><span class="nav-number">3.2.</span> <span class="nav-text">创建Getter注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAGetter%E6%B3%A8%E8%A7%A3%E7%9A%84%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-number">3.3.</span> <span class="nav-text">创建Getter注解的处理器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A1%86%E6%9E%B6"><span class="nav-number">3.3.1.</span> <span class="nav-text">基本框架</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#init%E6%96%B9%E6%B3%95"><span class="nav-number">3.3.2.</span> <span class="nav-text">init方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#process%E6%96%B9%E6%B3%95"><span class="nav-number">3.3.3.</span> <span class="nav-text">process方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%B1%BB"><span class="nav-number">3.3.4.</span> <span class="nav-text">测试类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Maven%E6%9E%84%E5%BB%BA%E5%B9%B6%E6%89%93%E5%8C%85"><span class="nav-number">3.3.5.</span> <span class="nav-text">Maven构建并打包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E7%94%A8jar%E5%8C%85%E6%B5%8B%E8%AF%95"><span class="nav-number">3.3.6.</span> <span class="nav-text">调用jar包测试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

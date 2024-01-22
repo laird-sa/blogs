@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简介在平时使用Linux的时候，经常需要配置一些环境变量，这时候一般都是网上随便搜搜就有人介绍经验的。不过问题在于他们的方法各不相同，有人说配置在&#x2F;etc&#x2F;profile里，有人说配置在&#x2F;etc&#x2F;environment，有人说配置在~&#x2F;.bash_profile里，有人说配置在~&#x2F;.bashrc里，有人说配置在~&#x2F;.bash_login里，还有人说配置在~&#x2F;.profile里。。。这真是公说公有理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux的环境变量配置详解">
+<meta property="og:url" content="https://www.resonanat.com/2017/03/28/Linux%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="简介在平时使用Linux的时候，经常需要配置一些环境变量，这时候一般都是网上随便搜搜就有人介绍经验的。不过问题在于他们的方法各不相同，有人说配置在&#x2F;etc&#x2F;profile里，有人说配置在&#x2F;etc&#x2F;environment，有人说配置在~&#x2F;.bash_profile里，有人说配置在~&#x2F;.bashrc里，有人说配置在~&#x2F;.bash_login里，还有人说配置在~&#x2F;.profile里。。。这真是公说公有理">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/28/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/28/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/28/1/3.png">
+<meta property="article:published_time" content="2017-03-28T15:27:33.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.046Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2017/03/28/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/03/28/Linux的环境变量配置详解/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Linux的环境变量配置详解 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/28/Linux%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux的环境变量配置详解</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-28T23:27:33+08:00">
+                2017-03-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>在平时使用Linux的时候，经常需要配置一些环境变量，这时候一般都是网上随便搜搜就有人介绍经验的。不过问题在于他们的方法各不相同，有人说配置在<code>/etc/profile</code>里，有人说配置在<code>/etc/environment</code>，有人说配置在<code>~/.bash_profile</code>里，有人说配置在<code>~/.bashrc</code>里，有人说配置在<code>~/.bash_login</code>里，还有人说配置在<code>~/.profile</code>里。。。这真是公说公有理。。。那么问题来了，Linux到底是怎么读取配置文件的呢，依据又是什么呢？</p>
+<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2><p>我一向讨厌那种说结论不说出处的行为，这会给人一种“我凭什么相信你”的感觉。而且事实上没有出处就随便议论得出的结论也基本上是人云亦云的。事实上，与其去问别人，不如去问文档。<br>找了一会，发现关于环境变量配置的相关文档其实是在<code>bash</code>命令的<code>man</code>文档里，毕竟我们常用的就是这个shell。<br>在<code>$man bash</code>里，我发现了下面的一段文字：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">INVOCATION</span><br><span class="line">       A login shell is one whose first character of argument zero is a -,  or</span><br><span class="line">       one started with the --login option.</span><br><span class="line"></span><br><span class="line">       An  interactive  shell  is one started without non-option arguments and</span><br><span class="line">       without the -c option whose standard input and error are both connected</span><br><span class="line">       to  terminals  (as determined by isatty(3)), or one started with the -i</span><br><span class="line">       option.  PS1 is set and $- includes i if bash is interactive,  allowing</span><br><span class="line">       a shell script or a startup file to test this state.</span><br><span class="line"></span><br><span class="line">       The  following paragraphs describe how bash executes its startup files.</span><br><span class="line">       If any of the files exist but cannot be read, bash  reports  an  error.</span><br><span class="line">       Tildes  are expanded in filenames as described below under Tilde Expan‐</span><br><span class="line">       sion in the EXPANSION section.</span><br><span class="line"></span><br><span class="line">       When bash is invoked as an interactive login shell, or as a  non-inter‐</span><br><span class="line">       active  shell with the --login option, it first reads and executes com‐</span><br><span class="line">       mands from the file /etc/profile, if that file exists.   After  reading</span><br><span class="line">       that file, it looks for ~/.bash_profile, ~/.bash_login, and ~/.profile,</span><br><span class="line">       in that order, and reads and executes commands from the first one  that</span><br><span class="line">       exists  and  is  readable.  The --noprofile option may be used when the</span><br><span class="line">       shell is started to inhibit this behavior.</span><br><span class="line"></span><br><span class="line">       When a login shell exits, bash reads and  executes  commands  from  the</span><br><span class="line">       file ~/.bash_logout, if it exists.</span><br><span class="line"></span><br><span class="line">       When  an  interactive  shell that is not a login shell is started, bash</span><br><span class="line">       reads and executes commands from  /etc/bash.bashrc  and  ~/.bashrc,  if</span><br><span class="line">       these  files  exist.  This may be inhibited by using the --norc option.</span><br><span class="line">       The --rcfile file option will force bash to read and  execute  commands</span><br><span class="line">       from file instead of /etc/bash.bashrc and ~/.bashrc.</span><br><span class="line"></span><br><span class="line">       When  bash  is  started  non-interactively,  to run a shell script, for</span><br><span class="line">       example, it looks for the variable BASH_ENV in the environment, expands</span><br><span class="line">       its  value if it appears there, and uses the expanded value as the name</span><br><span class="line">       of a file to read and execute.  Bash behaves as if the  following  com‐</span><br><span class="line">       mand were executed:</span><br><span class="line">              if [ -n &quot;$BASH_ENV&quot; ]; then . &quot;$BASH_ENV&quot;; fi</span><br><span class="line">       but  the value of the PATH variable is not used to search for the file‐</span><br><span class="line">       name.</span><br></pre></td></tr></table></figure>
+<p>通过这段文字，我们发现其实所谓的环境变量配置文件，就是在shell登陆的时候自动加载的那些文件。不过他所定义的登陆却分为两种：</p>
+<ol>
+<li>login shell登陆。</li>
+<li>interactive shell登陆。</li>
+</ol>
+<h3 id="login-shell-登陆"><a href="#login-shell-登陆" class="headerlink" title="login shell 登陆"></a>login shell 登陆</h3><p>所谓的login shell登陆，实际上就是指需要输入密码的登陆。具体的说，包括开机登陆、ssh登陆，或者是输入<code>bash --login</code>这种“假装自己输入密码登陆”的方式。<br>在这种登陆方式下，系统会先读取<code>/etc/profile</code>文件，然后，系统会依次搜索<code>~/.bash_profile</code>、<code>~/.bash_login</code>、<code>~/.profile</code> 这三个文件，并运行<strong>只</strong>其中第一个存在的文件。<br>尤其要注意到后三个文件的“逻辑或”的关系。很多情况下我们会发现，明明已经修改了<code>~/.profile</code>文件为什么重新登陆后配置不生效呢？这是因为我们的系统可能存在了前面两个文件中的一个，导致不会继续读取剩下的文件。<br>下面的三张图很好的说明了这个问题：</p>
+<p><img src="/images/2017/03/28/1/1.png"><br><img src="/images/2017/03/28/1/2.png"><br><img src="/images/2017/03/28/1/3.png"></p>
+<h3 id="interactive-shell-登陆"><a href="#interactive-shell-登陆" class="headerlink" title="interactive shell 登陆"></a>interactive shell 登陆</h3><p>所谓的interactive shell登陆，其实就是相对于login shell登陆而言的。我们平时在登陆后右键打开终端、或者CTRL+ALT+T打开终端都是interactive shell登陆。<br>在这种登陆方式下，系统会依次读取<code>/etc/bash.bashrc</code>和<code>~/.bashrc</code>，并加以执行。<br>通常情况下，<code>~/.bashrc</code>文件里会默认记录一些常量和一些别名，尤其是<code>$PS1</code>变量，这个变量决定着bash提示符的格式、样式以及颜色等。</p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>需要注意的是，这两种登陆方式读取的是不同的配置文件，而且互相之间没有交集，因此当我们需要配置环境变量时，我们要根据自己的登陆方式将需要的变量配置到不同的文件里。<br>例如下面这个经典的问题。</p>
+<h2 id="典型问题"><a href="#典型问题" class="headerlink" title="典型问题"></a>典型问题</h2><p>环境配置文件配置异常的例子是，当我用ssh登录服务器的时候，发现提示符是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash-4.3$</span><br></pre></td></tr></table></figure>
+<p>没错，就像上面第三张图片里的那个bash一样，提示符非常奇怪，而且当输入ls时文件和文件夹的颜色也没有区分。<br>这个问题显然是由于<code>$PS1</code>这个环境变量没有配置，导致他用了默认值，虽然查看<code>.bashrc</code>文件时发现有<code>$PS1</code>这个变量的定义。，但是由于ssh属于login shell，因此他在登陆时读入的配置文件是<code>/etc/profile</code>一类的文件，并没有读入<code>.bashrc</code>。<br>导致这个问题的原因通常是我们误删除了<code>/etc/profile</code>里默认的配置文件，因此解决的办法也很简单。。。把<code>.bashrc</code>里的部分文件复制到<code>/etc/profile</code>里就行了。</p>
+<p>这个问题给我们的启示是，当我们为服务器配置变量时，尽量配置到<code>/etc/profile</code>里或者<code>~/.bash_profile</code>里，因为用ssh登录服务器是基本上用不到<code>.bashrc</code>文件的；当我们给自己的电脑配置环境变量时，尽量配置到<code>.bashrc</code>里，因为这样我们只要打开终端就会读入这个文件，这样就可以不用注销就能应用配置了（只有注销重新登录才会应用<code>/etc/profile</code>一类的配置文件）。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/27/mongodb-ues/" rel="next" title="MongoDB学习笔记">
+                <i class="fa fa-chevron-left"></i> MongoDB学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/31/%E7%BD%91%E6%98%932017%E6%98%A5%E6%8B%9B%E7%AC%94%E8%AF%95%E7%9C%9F%E9%A2%98%E7%BC%96%E7%A8%8B%E9%A2%98%E9%9B%86%E5%90%88%E9%A2%98%E8%A7%A3/" rel="prev" title="网易2017春招笔试真题编程题集合题解">
+                网易2017春招笔试真题编程题集合题解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%A1%A3"><span class="nav-number">2.</span> <span class="nav-text">文档</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#login-shell-%E7%99%BB%E9%99%86"><span class="nav-number">2.1.</span> <span class="nav-text">login shell 登陆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#interactive-shell-%E7%99%BB%E9%99%86"><span class="nav-number">2.2.</span> <span class="nav-text">interactive shell 登陆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">2.3.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">典型问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

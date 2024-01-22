@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,Apache," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="搭建apache2其实并不难，只是网上的资料有很多都过时了，之前被误导过好几次，走了很多弯路。趁着这次在本地搭建网站的时机重新捋一下思路，也方便以后有需求的时候查阅。 首先当然是下载包包： 1myths@myths-X450LD:~$ sudo apt-get install apache2 装完后就可以用了，在地址栏输入本地回送地址127.0.0.1或者localhost就可以进入到默认的界面了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="apache2服务器的搭建与配置">
+<meta property="og:url" content="https://www.resonanat.com/2015/11/04/apache2%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="搭建apache2其实并不难，只是网上的资料有很多都过时了，之前被误导过好几次，走了很多弯路。趁着这次在本地搭建网站的时机重新捋一下思路，也方便以后有需求的时候查阅。 首先当然是下载包包： 1myths@myths-X450LD:~$ sudo apt-get install apache2 装完后就可以用了，在地址栏输入本地回送地址127.0.0.1或者localhost就可以进入到默认的界面了">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-04T10:31:21.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.065Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Apache">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/11/04/apache2服务器的搭建与配置/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>apache2服务器的搭建与配置 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/04/apache2%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">apache2服务器的搭建与配置</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-04T18:31:21+08:00">
+                2015-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Apache/" itemprop="url" rel="index">
+                    <span itemprop="name">Apache</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>搭建apache2其实并不难，只是网上的资料有很多都过时了，之前被误导过好几次，走了很多弯路。趁着这次在本地搭建网站的时机重新捋一下思路，也方便以后有需求的时候查阅。</p>
+<p>首先当然是下载包包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ sudo apt-get install apache2</span><br></pre></td></tr></table></figure>
+<p>装完后就可以用了，在地址栏输入本地回送地址127.0.0.1或者localhost就可以进入到默认的界面了。</p>
+<p>默认的界面当然就是apache2的说明界面了。其实很多情况下并不需要在网上寻找帮助文档，几乎所有的软件都会自带使用说明，只是略长，我们一般都懒得看。但是其实很多重要的东西就在这当中，比如apache2的默认界面里：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu Logo Apache2 Ubuntu Default Page</span><br><span class="line">It works!</span><br><span class="line">This is the default welcome page used to test the correct operation of the Apache2 server after installation on Ubuntu systems. It is based on the equivalent page on Debian, from which the Ubuntu Apache packaging is derived. If you can read this page, it means that the Apache HTTP server installed at this site is working properly. You should replace this file (located at /var/www/html/index.html) before continuing to operate your HTTP server.</span><br><span class="line">If you are a normal user of this web site and don&#x27;t know what this page is about, this probably means that the site is currently unavailable due to maintenance. If the problem persists, please contact the site&#x27;s administrator.</span><br><span class="line">Configuration Overview</span><br><span class="line">Ubuntu&#x27;s Apache2 default configuration is different from the upstream default configuration, and split into several files optimized for interaction with Ubuntu tools. The configuration system is fully documented in /usr/share/doc/apache2/README.Debian.gz. Refer to this for the full documentation. Documentation for the web server itself can be found by accessing the manual if the apache2-doc package was installed on this server.</span><br><span class="line">The configuration layout for an Apache2 web server installation on Ubuntu systems is as follows:</span><br><span class="line">/etc/apache2/</span><br><span class="line">|-- apache2.conf</span><br><span class="line">|       `--  ports.conf</span><br><span class="line">|-- mods-enabled</span><br><span class="line">|       |-- *.load</span><br><span class="line">|       `-- *.conf</span><br><span class="line">|-- conf-enabled</span><br><span class="line">|       `-- *.conf</span><br><span class="line">|-- sites-enabled</span><br><span class="line">|       `-- *.conf</span><br><span class="line"></span><br><span class="line">apache2.conf is the main configuration file. It puts the pieces together by including all remaining configuration files when starting up the web server.</span><br><span class="line">ports.conf is always included from the main configuration file. It is used to determine the listening ports for incoming connections, and this file can be customized anytime.</span><br><span class="line">Configuration files in the mods-enabled/, conf-enabled/ and sites-enabled/ directories contain particular configuration snippets which manage modules, global configuration fragments, or virtual host configurations, respectively.</span><br><span class="line">They are activated by symlinking available configuration files from their respective *-available/ counterparts. These should be managed by using our helpers a2enmod, a2dismod, a2ensite, a2dissite, and a2enconf, a2disconf . See their respective man pages for detailed information.</span><br><span class="line">The binary is called apache2\. Due to the use of environment variables, in the default configuration, apache2 needs to be started/stopped with /etc/init.d/apache2 or apache2ctl. Calling /usr/bin/apache2 directly will not work with the default configuration.</span><br><span class="line">Document Roots</span><br><span class="line">By default, Ubuntu does not allow access through the web browser to any file apart of those located in /var/www, public_html directories (when enabled) and /usr/share (for web applications). If your site is using a web document root located elsewhere (such as in /srv) you may need to whitelist your document root directory in /etc/apache2/apache2.conf.</span><br><span class="line">The default Ubuntu document root is /var/www/html. You can make your own virtual hosts under /var/www. This is different to previous releases which provides better security out of the box.</span><br><span class="line">Reporting Problems</span><br><span class="line">Please use the ubuntu-bug tool to report bugs in the Apache2 package with Ubuntu. However, check existing bug reports before reporting a new bug.</span><br><span class="line">Please report bugs specific to modules (such as PHP and others) to respective packages, not to the web server itself.</span><br><span class="line">Valid XHTML 1.0 Transitional</span><br></pre></td></tr></table></figure>
+<p>仅仅从这个文件中，我们就可以至少得到以下的重要信息：</p>
+<ol>
+<li>当访问本机的时候，默认进入的页面是&#x2F;var&#x2F;www&#x2F;html&#x2F;index.html。</li>
+<li>配置系统的说明在&#x2F;usr&#x2F;share&#x2F;doc&#x2F;apache2&#x2F;README.Debian.gz中。</li>
+<li>完整使用手册可以通过安装apache2-doc 进行下载。</li>
+<li>主配置文件为&#x2F;etc&#x2F;apache2&#x2F;apache2.conf。</li>
+<li>启动和关闭apache2服务可以通过执行命令&#x2F;etc&#x2F;init.d&#x2F;apache2 start（stop &#x2F; restart）当然也可以是 service apache2 start (stop &#x2F; restart)。这里一定要注意记得！记得！加root权限！这里不加root权限并没有明显的提示（好坑），当遇到问题的时候很难让人想到是这里出的错，所以一定要记得！记得！加root权限！</li>
+<li>默认情况下apache2拒绝访问除&#x2F;var&#x2F;www 和&#x2F;usr&#x2F;share文件夹外的其他文件，这种权限是通过apache2.conf文件来控制的.</li>
+</ol>
+<p>默认的apache2.conf为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br></pre></td><td class="code"><pre><span class="line"># This is the main Apache server configuration file.  It contains the</span><br><span class="line"># configuration directives that give the server its instructions.</span><br><span class="line"># See http://httpd.apache.org/docs/2.4/ for detailed information about</span><br><span class="line"># the directives and /usr/share/doc/apache2/README.Debian about Debian specific</span><br><span class="line"># hints.</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"># Summary of how the Apache 2 configuration works in Debian:</span><br><span class="line"># The Apache 2 web server configuration in Debian is quite different to</span><br><span class="line"># upstream&#x27;s suggested way to configure the web server. This is because Debian&#x27;s</span><br><span class="line"># default Apache2 installation attempts to make adding and removing modules,</span><br><span class="line"># virtual hosts, and extra configuration directives as flexible as possible, in</span><br><span class="line"># order to make automating the changes and administering the server as easy as</span><br><span class="line"># possible.</span><br><span class="line"></span><br><span class="line"># It is split into several files forming the configuration hierarchy outlined</span><br><span class="line"># below, all located in the /etc/apache2/ directory:</span><br><span class="line">#</span><br><span class="line">#	/etc/apache2/</span><br><span class="line">#	|-- apache2.conf</span><br><span class="line">#	|	`--  ports.conf</span><br><span class="line">#	|-- mods-enabled</span><br><span class="line">#	|	|-- *.load</span><br><span class="line">#	|	`-- *.conf</span><br><span class="line">#	|-- conf-enabled</span><br><span class="line">#	|	`-- *.conf</span><br><span class="line"># 	`-- sites-enabled</span><br><span class="line">#	 	`-- *.conf</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"># * apache2.conf is the main configuration file (this file). It puts the pieces</span><br><span class="line">#   together by including all remaining configuration files when starting up the</span><br><span class="line">#   web server.</span><br><span class="line">#</span><br><span class="line"># * ports.conf is always included from the main configuration file. It is</span><br><span class="line">#   supposed to determine listening ports for incoming connections which can be</span><br><span class="line">#   customized anytime.</span><br><span class="line">#</span><br><span class="line"># * Configuration files in the mods-enabled/, conf-enabled/ and sites-enabled/</span><br><span class="line">#   directories contain particular configuration snippets which manage modules,</span><br><span class="line">#   global configuration fragments, or virtual host configurations,</span><br><span class="line">#   respectively.</span><br><span class="line">#</span><br><span class="line">#   They are activated by symlinking available configuration files from their</span><br><span class="line">#   respective *-available/ counterparts. These should be managed by using our</span><br><span class="line">#   helpers a2enmod/a2dismod, a2ensite/a2dissite and a2enconf/a2disconf. See</span><br><span class="line">#   their respective man pages for detailed information.</span><br><span class="line">#</span><br><span class="line"># * The binary is called apache2\. Due to the use of environment variables, in</span><br><span class="line">#   the default configuration, apache2 needs to be started/stopped with</span><br><span class="line">#   /etc/init.d/apache2 or apache2ctl. Calling /usr/bin/apache2 directly will not</span><br><span class="line">#   work with the default configuration.</span><br><span class="line"></span><br><span class="line"># Global configuration</span><br><span class="line">#</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># ServerRoot: The top of the directory tree under which the server&#x27;s</span><br><span class="line"># configuration, error, and log files are kept.</span><br><span class="line">#</span><br><span class="line"># NOTE!  If you intend to place this on an NFS (or otherwise network)</span><br><span class="line"># mounted filesystem then please read the Mutex documentation (available</span><br><span class="line"># at &lt;URL:http://httpd.apache.org/docs/2.4/mod/core.html#mutex&gt;);</span><br><span class="line"># you will save yourself a lot of trouble.</span><br><span class="line">#</span><br><span class="line"># Do NOT add a slash at the end of the directory path.</span><br><span class="line">#</span><br><span class="line">#ServerRoot &quot;/etc/apache2&quot;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The accept serialization lock file MUST BE STORED ON A LOCAL DISK.</span><br><span class="line">#</span><br><span class="line">Mutex file:$&#123;APACHE_LOCK_DIR&#125; default</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># PidFile: The file in which the server should record its process</span><br><span class="line"># identification number when it starts.</span><br><span class="line"># This needs to be set in /etc/apache2/envvars</span><br><span class="line">#</span><br><span class="line">PidFile $&#123;APACHE_PID_FILE&#125;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># Timeout: The number of seconds before receives and sends time out.</span><br><span class="line">#</span><br><span class="line">Timeout 300</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># KeepAlive: Whether or not to allow persistent connections (more than</span><br><span class="line"># one request per connection). Set to &quot;Off&quot; to deactivate.</span><br><span class="line">#</span><br><span class="line">KeepAlive On</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># MaxKeepAliveRequests: The maximum number of requests to allow</span><br><span class="line"># during a persistent connection. Set to 0 to allow an unlimited amount.</span><br><span class="line"># We recommend you leave this number high, for maximum performance.</span><br><span class="line">#</span><br><span class="line">MaxKeepAliveRequests 100</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># KeepAliveTimeout: Number of seconds to wait for the next request from the</span><br><span class="line"># same client on the same connection.</span><br><span class="line">#</span><br><span class="line">KeepAliveTimeout 5</span><br><span class="line"></span><br><span class="line"># These need to be set in /etc/apache2/envvars</span><br><span class="line">User $&#123;APACHE_RUN_USER&#125;</span><br><span class="line">Group $&#123;APACHE_RUN_GROUP&#125;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># HostnameLookups: Log the names of clients or just their IP addresses</span><br><span class="line"># e.g., www.apache.org (on) or 204.62.129.132 (off).</span><br><span class="line"># The default is off because it&#x27;d be overall better for the net if people</span><br><span class="line"># had to knowingly turn this feature on, since enabling it means that</span><br><span class="line"># each client request will result in AT LEAST one lookup request to the</span><br><span class="line"># nameserver.</span><br><span class="line">#</span><br><span class="line">HostnameLookups Off</span><br><span class="line"></span><br><span class="line"># ErrorLog: The location of the error log file.</span><br><span class="line"># If you do not specify an ErrorLog directive within a &lt;VirtualHost&gt;</span><br><span class="line"># container, error messages relating to that virtual host will be</span><br><span class="line"># logged here.  If you *do* define an error logfile for a &lt;VirtualHost&gt;</span><br><span class="line"># container, that host&#x27;s errors will be logged there and not here.</span><br><span class="line">#</span><br><span class="line">ErrorLog $&#123;APACHE_LOG_DIR&#125;/error.log</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># LogLevel: Control the severity of messages logged to the error_log.</span><br><span class="line"># Available values: trace8, ..., trace1, debug, info, notice, warn,</span><br><span class="line"># error, crit, alert, emerg.</span><br><span class="line"># It is also possible to configure the log level for particular modules, e.g.</span><br><span class="line"># &quot;LogLevel info ssl:warn&quot;</span><br><span class="line">#</span><br><span class="line">LogLevel warn</span><br><span class="line"></span><br><span class="line"># Include module configuration:</span><br><span class="line">IncludeOptional mods-enabled/*.load</span><br><span class="line">IncludeOptional mods-enabled/*.conf</span><br><span class="line"></span><br><span class="line"># Include list of ports to listen on</span><br><span class="line">Include ports.conf</span><br><span class="line"></span><br><span class="line"># Sets the default security model of the Apache2 HTTPD server. It does</span><br><span class="line"># not allow access to the root filesystem outside of /usr/share and /var/www.</span><br><span class="line"># The former is used by web applications packaged in Debian,</span><br><span class="line"># the latter may be used for local directories served by the web server. If</span><br><span class="line"># your system is serving content from a sub-directory in /srv you must allow</span><br><span class="line"># access here, or in any related virtual host.</span><br><span class="line">&lt;Directory /&gt;</span><br><span class="line">	Options FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all denied</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /usr/share&gt;</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /var/www/&gt;</span><br><span class="line">	Options Indexes FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">#&lt;Directory /srv/&gt;</span><br><span class="line">#	Options Indexes FollowSymLinks</span><br><span class="line">#	AllowOverride None</span><br><span class="line">#	Require all granted</span><br><span class="line">#&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line"># AccessFileName: The name of the file to look for in each directory</span><br><span class="line"># for additional configuration directives.  See also the AllowOverride</span><br><span class="line"># directive.</span><br><span class="line">#</span><br><span class="line">AccessFileName .htaccess</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The following lines prevent .htaccess and .htpasswd files from being</span><br><span class="line"># viewed by Web clients.</span><br><span class="line">#</span><br><span class="line">&lt;FilesMatch &quot;^.ht&quot;&gt;</span><br><span class="line">	Require all denied</span><br><span class="line">&lt;/FilesMatch&gt;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The following directives define some format nicknames for use with</span><br><span class="line"># a CustomLog directive.</span><br><span class="line">#</span><br><span class="line"># These deviate from the Common Log Format definitions in that they use %O</span><br><span class="line"># (the actual bytes sent including headers) instead of %b (the size of the</span><br><span class="line"># requested file), because the latter makes it impossible to detect partial</span><br><span class="line"># requests.</span><br><span class="line">#</span><br><span class="line"># Note that the use of %&#123;X-Forwarded-For&#125;i instead of %h is not recommended.</span><br><span class="line"># Use mod_remoteip instead.</span><br><span class="line">#</span><br><span class="line">LogFormat &quot;%v:%p %h %l %u %t &quot;%r&quot; %&gt;s %O &quot;%&#123;Referer&#125;i&quot; &quot;%&#123;User-Agent&#125;i&quot;&quot; vhost_combined</span><br><span class="line">LogFormat &quot;%h %l %u %t &quot;%r&quot; %&gt;s %O &quot;%&#123;Referer&#125;i&quot; &quot;%&#123;User-Agent&#125;i&quot;&quot; combined</span><br><span class="line">LogFormat &quot;%h %l %u %t &quot;%r&quot; %&gt;s %O&quot; common</span><br><span class="line">LogFormat &quot;%&#123;Referer&#125;i -&gt; %U&quot; referer</span><br><span class="line">LogFormat &quot;%&#123;User-agent&#125;i&quot; agent</span><br><span class="line"></span><br><span class="line"># Include of directories ignores editors&#x27; and dpkg&#x27;s backup files,</span><br><span class="line"># see README.Debian for details.</span><br><span class="line"></span><br><span class="line"># Include generic snippets of statements</span><br><span class="line">IncludeOptional conf-enabled/*.conf</span><br><span class="line"></span><br><span class="line"># Include the virtual host configurations:</span><br><span class="line">IncludeOptional sites-enabled/*.conf</span><br><span class="line"></span><br><span class="line"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span><br></pre></td></tr></table></figure>
+<p>注意这当中的一段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;Directory /&gt;</span><br><span class="line">	Options FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all denied</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /usr/share&gt;</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /var/www/&gt;</span><br><span class="line">	Options Indexes FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br></pre></td></tr></table></figure>
+<p>由这段可以很容易的知道apache2到底为哪些文件夹赋予了打开的权限了。以后就可以通过修改这里达到各种不可告人的目的了。</p>
+<p>最后还有一个重要的配置，就是默认目录的更改。默认的目录其实是记录在:&#x2F;etc&#x2F;apache2&#x2F;sites-available&#x2F;000-default.conf 文件当中（在&#x2F;etc&#x2F;apache2&#x2F;sites-enable&#x2F;中也有一个指向他的链接）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:/etc/apache2/sites-available$ cat 000-default.conf </span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">	# The ServerName directive sets the request scheme, hostname and port that</span><br><span class="line">	# the server uses to identify itself. This is used when creating</span><br><span class="line">	# redirection URLs. In the context of virtual hosts, the ServerName</span><br><span class="line">	# specifies what hostname must appear in the request&#x27;s Host: header to</span><br><span class="line">	# match this virtual host. For the default virtual host (this file) this</span><br><span class="line">	# value is not decisive as it is used as a last resort host regardless.</span><br><span class="line">	# However, you must set it for any further virtual host explicitly.</span><br><span class="line">	#ServerName www.example.com</span><br><span class="line"></span><br><span class="line">	ServerAdmin webmaster@localhost</span><br><span class="line">	DocumentRoot /var/www/html</span><br><span class="line"></span><br><span class="line">	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,</span><br><span class="line">	# error, crit, alert, emerg.</span><br><span class="line">	# It is also possible to configure the loglevel for particular</span><br><span class="line">	# modules, e.g.</span><br><span class="line">	#LogLevel info ssl:warn</span><br><span class="line"></span><br><span class="line">	ErrorLog $&#123;APACHE_LOG_DIR&#125;/error.log</span><br><span class="line">	CustomLog $&#123;APACHE_LOG_DIR&#125;/access.log combined</span><br><span class="line"></span><br><span class="line">	# For most configuration files from conf-available/, which are</span><br><span class="line">	# enabled or disabled at a global level, it is possible to</span><br><span class="line">	# include a line for only one particular virtual host. For example the</span><br><span class="line">	# following line enables the CGI configuration for this host only</span><br><span class="line">	# after it has been globally disabled with &quot;a2disconf&quot;.</span><br><span class="line">	#Include conf-available/serve-cgi-bin.conf</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line"></span><br><span class="line"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span><br></pre></td></tr></table></figure>
+<p>当中的“DocumentRoot ”键对应的值就是默认的目录了，可以任由我们修改了。</p>
+<p>apache2的简单配置基本就是这些，不需要百度，我们也是完全可以自己弄清楚的。</p>
+<p>注：</p>
+<ol>
+<li>修改完配置文件后记得重启服务</li>
+<li>可以顺手吧&#x2F;var&#x2F;www的权限设置为777方便修改网页</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/Apache/" rel="tag"># Apache</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/03/Linux%E4%B8%ADln%E5%91%BD%E4%BB%A4%E7%9A%84%E7%94%A8%E6%B3%95%E4%BB%A5%E5%8F%8A%E5%88%86%E6%9E%90/" rel="next" title="Linux中ln命令的用法以及分析">
+                <i class="fa fa-chevron-left"></i> Linux中ln命令的用法以及分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/04/php5-mysql-phpmyadmin%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/" rel="prev" title="php5-mysql-phpmyadmin安装和配置">
+                php5-mysql-phpmyadmin安装和配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

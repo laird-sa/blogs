@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Apache," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言很明显apache原生是不支持https的，无论是用https访问自身的站点，还是代理来自其他网站的https的站点。毕竟人家https走的端口是443，都不是默认的80。 那么如何让apache支持https呢，其实只要添加下ssl模块再修改下配置就好了。 准备工作首先要导入apache的ssl模块，即$sudo a2enmod ssl ，保证&#x2F;etc&#x2F;apache2&#x2F;mods-enable">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache配置ssl支持https">
+<meta property="og:url" content="https://www.resonanat.com/2016/08/27/Apache%E9%85%8D%E7%BD%AEssl%E6%94%AF%E6%8C%81https/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言很明显apache原生是不支持https的，无论是用https访问自身的站点，还是代理来自其他网站的https的站点。毕竟人家https走的端口是443，都不是默认的80。 那么如何让apache支持https呢，其实只要添加下ssl模块再修改下配置就好了。 准备工作首先要导入apache的ssl模块，即$sudo a2enmod ssl ，保证&#x2F;etc&#x2F;apache2&#x2F;mods-enable">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-08-27T13:38:01.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.034Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Apache">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/08/27/Apache配置ssl支持https/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Apache配置ssl支持https | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/27/Apache%E9%85%8D%E7%BD%AEssl%E6%94%AF%E6%8C%81https/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Apache配置ssl支持https</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-27T21:38:01+08:00">
+                2016-08-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Apache/" itemprop="url" rel="index">
+                    <span itemprop="name">Apache</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>很明显apache原生是不支持https的，无论是用https访问自身的站点，还是代理来自其他网站的https的站点。毕竟人家https走的端口是443，都不是默认的80。</p>
+<p>那么如何让apache支持https呢，其实只要添加下ssl模块再修改下配置就好了。</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>首先要导入apache的ssl模块，即<code>$sudo a2enmod ssl</code> ，保证<code>/etc/apache2/mods-enabled/</code> 目录下有对应的ssl模块文件。</p>
+<p>然后利用openssl命令，生成必要的密钥文件等：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">【生成一个自签名证书】</span><br><span class="line">$ openssl genrsa -out ca.key 2048</span><br><span class="line"></span><br><span class="line">【生成证书签名请求(CSR)】</span><br><span class="line">$ openssl req -new -key ca.key -out ca.csr</span><br><span class="line"></span><br><span class="line">【生成X509自签名证书】</span><br><span class="line">$ openssl x509 -req -days 365 -in ca.csr -signkey ca.key -out ca.crt</span><br></pre></td></tr></table></figure>
+<p>三条命令各生成三个文件，把这三个文件保存好，这里我把他全部放在了<code>/etc/apache2/key</code>文件夹下了。</p>
+<h2 id="配置https正向代理"><a href="#配置https正向代理" class="headerlink" title="配置https正向代理"></a>配置https正向代理</h2><p>对于https的正向代理，在<a href="/2016/08/26/1/">http的正向代理配置</a>的基础上，只要额外添加下面的配置即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SSLProxyEngine on</span><br><span class="line">SSLCertificateFile /etc/apache2/key/ca.crt</span><br><span class="line">SSLCertificateKeyFile /etc/apache2/key/ca.key</span><br></pre></td></tr></table></figure>
+<p>文件路径分别对应上面的密钥文件。</p>
+<p>重启服务器即可代理https协议了。</p>
+<h2 id="配置https站点"><a href="#配置https站点" class="headerlink" title="配置https站点"></a>配置https站点</h2><p>我们知道对于通常的http站点，他的配置路径是在<code>/etc/apache2/sites-enabled/000-default.conf</code>上，但是我发现如果直接在这里配置https站点则会不起效果。一番捣鼓之后发现，其实为了区分http和https站点并加以分别配置，apache2还特地给了另外一份配置文件，这份配置文件的模板需要我们用下面的命令得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo a2ensite</span><br><span class="line">Your choices are: 000-default default-ssl</span><br><span class="line">Which site(s) do you want to enable (wildcards ok)?</span><br><span class="line">default-ssl</span><br></pre></td></tr></table></figure>
+<p>之后我们就会发现，出现了一个<code>/etc/apache2/sites-enabled/default-ssl.conf</code>文件，没错，我们就可以在这里配置对应的站点了。<br>在这个配置文件里，主要是要修改四项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DocumentRoot /var/www/html/wordpress</span><br><span class="line">SSLEngine on</span><br><span class="line">SSLCertificateFile  /etc/apache2/ssl/cert_chain.crt</span><br><span class="line">SSLCertificateKeyFile /etc/apache2/ssl/private.key</span><br></pre></td></tr></table></figure>
+<p>修改好后，重启服务即可。<br>最后我们可以将利用htaccess文件将80端口的请求转发到443端口，这样更加漂亮。</p>
+<h2 id="关于证书"><a href="#关于证书" class="headerlink" title="关于证书"></a>关于证书</h2><p>当然，我们自己生成的证书是不被浏览器认可的，通常访问的用户都会被告知这是一个不安全的链接，尤其是chrome，那个红色背景格外的吓人，因此如果是真的想让自己的网站能用https，要么去花钱买证书，要么去用人家免费的，我这里用的是<a target="_blank" rel="noopener" href="https://www.sslforfree.com/">sslforfree</a>的证书，不过麻烦的是这个东西得每隔三个月更换一次。。。<br>具体的使用方法可以参考<a target="_blank" rel="noopener" href="https://itjh.net/2016/11/03/free-ssl/">这篇文章</a>。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://freessl.wosign.com/centos-https.html">CentOS中Apache服务器HTTPS配置方法</a><br><a target="_blank" rel="noopener" href="https://ttt.tt/9/">Apache + WordPress + SSL 完全指南</a><br><a target="_blank" rel="noopener" href="https://itjh.net/2016/11/03/free-ssl/">申请免费的SSL证书</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Apache/" rel="tag"># Apache</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/26/Apache%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="next" title="Apache配置代理服务器">
+                <i class="fa fa-chevron-left"></i> Apache配置代理服务器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/08/28/MySQL%E9%85%8D%E7%BD%AE%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE/" rel="prev" title="MySQL配置远程访问">
+                MySQL配置远程访问 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEhttps%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">配置https正向代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEhttps%E7%AB%99%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">配置https站点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E8%AF%81%E4%B9%A6"><span class="nav-number">5.</span> <span class="nav-text">关于证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

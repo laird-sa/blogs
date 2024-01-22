@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="C/C++," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="std::function std::bind我们知道在C里面有函数指针这么回事，我们用函数指针的目的就是将仿函数作为参数，传递给另外一个函数，并供他调用。但是显然，函数指针那种写法还是相当恶心的，比如： 12345678910#include&lt;iostream&gt;int callback(int x)&#123;    std::cout&lt;&lt;x&lt;&lt;std::en">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++11学习笔记2">
+<meta property="og:url" content="https://www.resonanat.com/2017/04/30/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="std::function std::bind我们知道在C里面有函数指针这么回事，我们用函数指针的目的就是将仿函数作为参数，传递给另外一个函数，并供他调用。但是显然，函数指针那种写法还是相当恶心的，比如： 12345678910#include&lt;iostream&gt;int callback(int x)&#123;    std::cout&lt;&lt;x&lt;&lt;std::en">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-04-30T14:12:26.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.035Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="C&#x2F;C++">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/04/30/C++11学习笔记2/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>C++11学习笔记2 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/30/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">C++11学习笔记2</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-30T22:12:26+08:00">
+                2017-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="std-function-std-bind"><a href="#std-function-std-bind" class="headerlink" title="std::function std::bind"></a>std::function std::bind</h3><p>我们知道在C里面有函数指针这么回事，我们用函数指针的目的就是将仿函数作为参数，传递给另外一个函数，并供他调用。但是显然，函数指针那种写法还是相当恶心的，比如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">callback</span><span class="params">(<span class="type">int</span> x)</span></span>&#123;</span><br><span class="line">    std::cout&lt;&lt;x&lt;&lt;std::endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">(<span class="type">int</span>(*f)(<span class="type">int</span>))</span></span>&#123;</span><br><span class="line">    <span class="built_in">f</span>(<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">func</span>(callback);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而C++11里提供了std::function这个工具来封装函数指针，上面的写法就可以变成下面的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">callback</span><span class="params">(<span class="type">int</span> x)</span></span>&#123;</span><br><span class="line">    std::cout&lt;&lt;x&lt;&lt;std::endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">(std::function&lt;<span class="type">int</span>(<span class="type">int</span>)&gt;f)</span></span>&#123;</span><br><span class="line">    <span class="built_in">f</span>(<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">func</span>(callback);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用函数模板来体现作为参数的函数类型，看起来更优雅方便。</p>
+<p>但是有时候，我们可能希望这个function能够绑定一些参数，那么就需要用到std::bind这个工具来封装旧的function，并返回新的function:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">callback</span><span class="params">(<span class="type">int</span> x1,<span class="type">int</span> x2)</span></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::function&lt;<span class="type">int</span>(<span class="type">int</span>)&gt; binded=std::<span class="built_in">bind</span>(callback,<span class="number">1</span>０,std::placeholders::_1);</span><br><span class="line">    <span class="built_in">binded</span>(<span class="number">3</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的意思是将int(int,int)这个函数封装成了int(10,int)这个函数并起名为binded，std::placeholders::_1表示的就是在调用时传入的第一个参数（这里是3）。非常好理解。</p>
+<p>使用std::function和std::bind可以非常装逼的组合多个函数，非常具有模块化的思想，比如下面的函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> low=<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> high=<span class="number">10</span>;</span><br><span class="line">    std::function&lt;<span class="type">bool</span>(<span class="type">int</span>)&gt; judge=std::<span class="built_in">bind</span>(</span><br><span class="line">        std::<span class="built_in">logical_and</span>&lt;<span class="type">bool</span>&gt;(),</span><br><span class="line">        std::<span class="built_in">bind</span>(std::<span class="built_in">greater_equal</span>&lt;<span class="type">int</span>&gt;(),std::placeholders::_1,low),</span><br><span class="line">        std::<span class="built_in">bind</span>(std::<span class="built_in">greater_equal</span>&lt;<span class="type">int</span>&gt;(),high,std::placeholders::_1)</span><br><span class="line">    );</span><br><span class="line">    std::vector&lt;<span class="type">int</span>&gt;v=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">9</span>,<span class="number">10</span>,<span class="number">11</span>&#125;;</span><br><span class="line">    <span class="type">int</span> count = std::<span class="built_in">count_if</span>(v.<span class="built_in">begin</span>(),v.<span class="built_in">end</span>(),judge);</span><br><span class="line">    std::cout&lt;&lt;count&lt;&lt;std::endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实就是实现了统计[low,high]之间的数字个数的功能。。。</p>
+<h3 id="lambda表达式"><a href="#lambda表达式" class="headerlink" title="lambda表达式"></a>lambda表达式</h3><p>lambda表达式我认为说白了就是一种匿名函数的简写形式，是一种仿函数的语法糖，可以看成是一个std::function对象，没什么稀奇的。</p>
+<p><strong>基本写法</strong><br>基本写法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[capture] (params) opt -&gt; ret &#123;body;&#125;;</span><br></pre></td></tr></table></figure>
+<p>比如下面的函数fun1、fun2就是等价的:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">callback</span><span class="params">(<span class="type">int</span> x,<span class="type">int</span> y)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x+y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::function&lt;<span class="type">int</span>(<span class="type">int</span>,<span class="type">int</span>)&gt; fun1=callback;</span><br><span class="line">    std::function&lt;<span class="type">int</span>(<span class="type">int</span>,<span class="type">int</span>)&gt; fun2=[](<span class="type">int</span> x,<span class="type">int</span> y)-&gt;<span class="type">int</span>&#123;<span class="keyword">return</span> x+y;&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>捕获外部变量</strong><br>为了保证良好的封装性，lambda并不能随意访问非参数外的其他变量，这些变量的访问权限交由<code>[]</code>来控制，具体用法如下：</p>
+<ul>
+<li><code>[]</code>不捕获任何变量</li>
+<li><code>[&amp;]</code>按引用捕获所有变量</li>
+<li><code>[=]</code>按值捕获所有变量</li>
+<li><code>[=,&amp;foo]</code>按值捕获所有变量，并按引用捕获foo变量</li>
+<li><code>[foo]</code>按值捕获foo变量，不捕获其他变量</li>
+<li><code>[this]</code>捕获当前类中的this指针</li>
+</ul>
+<p>比如下面的例子就是按值捕获了外部变量x，如果使用<code>[]</code>，那么编译会报错。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> x=<span class="number">10</span>;</span><br><span class="line">    <span class="keyword">auto</span> f=[=]()&#123;std::cout&lt;&lt;x;&#125;;</span><br><span class="line">    <span class="built_in">f</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，捕获的过程是在函数定义的时候就发生的，在捕获时就会复制一个新的变量，因此我们注意到下面的例子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> x=<span class="number">10</span>;</span><br><span class="line">    <span class="keyword">auto</span> f=[x]()&#123;std::cout&lt;&lt;x;&#125;;</span><br><span class="line">    x=<span class="number">9</span>;</span><br><span class="line">    <span class="built_in">f</span>();  <span class="comment">//the output is 10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们需要即时的捕获外部变量，我们就需要按引用捕获。</p>
+<p><strong>mutable选项</strong><br>由于C++的规定，lambda表达式的operator()是const的，也就是说我们按值捕获的值默认是const的，因此我们对按值捕获的值是无法修改的，这就很蛋疼了？这时候就用到了mutable选项来取消const的限制了:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> x=<span class="number">10</span>;</span><br><span class="line">    <span class="keyword">auto</span> f1=[x]()<span class="keyword">mutable</span>&#123;x++;&#125;;<span class="comment">//编译正确</span></span><br><span class="line">    <span class="keyword">auto</span> f2=[x]()&#123;x++;&#125;;<span class="comment">//编译错误</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>简单应用</strong><br>有了lambda函数，很多事情就变的简单了，比如之前的统计一定范围内数字个数的程序就可以修改成下面这样：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> low=<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> high=<span class="number">10</span>;</span><br><span class="line">    std::vector&lt;<span class="type">int</span>&gt;v=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">9</span>,<span class="number">10</span>,<span class="number">11</span>&#125;;</span><br><span class="line">    <span class="type">int</span> count = std::<span class="built_in">count_if</span>(v.<span class="built_in">begin</span>(),v.<span class="built_in">end</span>(),[low,high](<span class="type">int</span> x)&#123;<span class="keyword">return</span> x&gt;=low&amp;&amp;x&lt;=high;&#125;);</span><br><span class="line">    std::cout&lt;&lt;count&lt;&lt;std::endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="tuple元组"><a href="#tuple元组" class="headerlink" title="tuple元组"></a>tuple元组</h3><p>没想到C++里面竟然也有元组，元组这个东西其实就是一个简化的结构体，方便我们将不同的数据进行打包，跟python中的用法类似:<br><strong>创建元组</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;tuple&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">std::tuple&lt;std::string,<span class="type">int</span>&gt; <span class="title">t1</span><span class="params">(<span class="string">&quot;df&quot;</span>,<span class="number">324</span>)</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> t2=std::<span class="built_in">make_tuple</span>(<span class="number">3432</span>,<span class="string">&quot;dsf&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两种方法，一种是构造函数，一种是make_tuple函数。</p>
+<p><strong>提取元素</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;tuple&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">std::tuple&lt;std::string,<span class="type">int</span>&gt; <span class="title">t1</span><span class="params">(<span class="string">&quot;df&quot;</span>,<span class="number">324</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">    std::cout&lt;&lt;std::<span class="built_in">get</span>&lt;<span class="number">1</span>&gt;(t1)&lt;&lt;std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> d;</span><br><span class="line">    std::<span class="built_in">tie</span>(std::ignore,d)=t1;</span><br><span class="line">    std::cout&lt;&lt;d&lt;&lt;std::endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两种方法，一种是get函数，可以指定提取的元素位置，另一种是std::tie方法，可以一次提取所有的元素也可以提取某一个元素，其他位置用std::ignore占位。<br>如果忘记了tuple的大小，我们可以使用tuple_size来获得tuple的大小:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;tuple&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">std::tuple&lt;<span class="type">int</span>,<span class="type">int</span>&gt; <span class="title">t</span><span class="params">(<span class="number">23</span>,<span class="number">43</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">    std::cout&lt;&lt;std::tuple_size&lt;<span class="keyword">decltype</span>(t)&gt;::value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>元组连接</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;tuple&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">std::tuple&lt;std::string,<span class="type">int</span>&gt; <span class="title">t1</span><span class="params">(<span class="string">&quot;df&quot;</span>,<span class="number">324</span>)</span></span>;</span><br><span class="line">    <span class="function">std::tuple&lt;<span class="type">int</span>,<span class="type">int</span>&gt; <span class="title">t2</span><span class="params">(<span class="number">23</span>,<span class="number">43</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> t3=std::<span class="built_in">tuple_cat</span>(t1,t2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过tuple_cat来连接两个tuple。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/26419368/">深入应用c++11</a><br><a target="_blank" rel="noopener" href="http://www.stroustrup.com/C++11FAQ.html">C++FAQ</a><br><a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/utility/tuple">cppreference–tuple</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/C-C/" rel="tag"># C/C++</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/29/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/" rel="next" title="C++11学习笔记1">
+                <i class="fa fa-chevron-left"></i> C++11学习笔记1
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/01/use-hexo-at-any-time-any-place/" rel="prev" title="随时随地 Hexo——我是如何使用 Hexo 的">
+                随时随地 Hexo——我是如何使用 Hexo 的 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#std-function-std-bind"><span class="nav-number">1.</span> <span class="nav-text">std::function std::bind</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">lambda表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tuple%E5%85%83%E7%BB%84"><span class="nav-number">3.</span> <span class="nav-text">tuple元组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

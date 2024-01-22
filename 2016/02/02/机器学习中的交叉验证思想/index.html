@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Machine Learning," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简述在使用训练集对参数进行训练的时候，经常会发现人们通常会将一整个训练集分为三个部分（比如mnist手写训练集）。一般分为：训练集（train_set），评估集（valid_set），测试集（test_set）这三个部分。这其实是为了保证训练效果而特意设置的。其中测试集很好理解，其实就是完全不参与训练的数据，仅仅用来观测测试效果的数据。而训练集和评估集则牵涉到下面的知识了。 因为在实际的训练中，训">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习中的交叉验证思想">
+<meta property="og:url" content="https://www.resonanat.com/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="简述在使用训练集对参数进行训练的时候，经常会发现人们通常会将一整个训练集分为三个部分（比如mnist手写训练集）。一般分为：训练集（train_set），评估集（valid_set），测试集（test_set）这三个部分。这其实是为了保证训练效果而特意设置的。其中测试集很好理解，其实就是完全不参与训练的数据，仅仅用来观测测试效果的数据。而训练集和评估集则牵涉到下面的知识了。 因为在实际的训练中，训">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-02-02T15:34:28.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.095Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/02/02/机器学习中的交叉验证思想/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>机器学习中的交叉验证思想 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">机器学习中的交叉验证思想</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-02T23:34:28+08:00">
+                2016-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>在使用训练集对参数进行训练的时候，经常会发现人们通常会将一整个训练集分为三个部分（比如<a href="/2016/01/25/1/">mnist手写训练集</a>）。一般分为：<strong>训练集（train_set）</strong>，<strong>评估集（valid_set）</strong>，<strong>测试集（test_set）</strong>这三个部分。这其实是为了保证训练效果而特意设置的。其中<strong>测试集</strong>很好理解，其实就是完全不参与训练的数据，仅仅用来观测测试效果的数据。而<strong>训练集</strong>和<strong>评估集</strong>则牵涉到下面的知识了。</p>
+<p>因为在实际的训练中，训练的结果对于训练集的拟合程度通常还是挺好的（初试条件敏感），但是对于训练集之外的数据的拟合程度通常就不那么令人满意了。因此我们通常并不会把所有的数据集都拿来训练，而是分出一部分来（这一部分不参加训练）对训练集生成的参数进行测试，相对客观的判断这些参数对训练集之外的数据的符合程度。这种思想就称为<strong>交叉验证（Cross Validation）。</strong></p>
+<p>通常我们使用的交叉验证方法有下面几种：</p>
+<h2 id="简单交叉验证（simple-cross-validation）"><a href="#简单交叉验证（simple-cross-validation）" class="headerlink" title="简单交叉验证（simple cross validation）"></a>简单交叉验证（simple cross validation）</h2><p>简单交叉验证当然很简单了，就是把整个训练集随机分为两部分（通常是70%的训练集，30%的评估集）。</p>
+<p>1、首先我们用训练集建立模型，这时候我们需要尝试多种的参数来得到一些不同的模型；</p>
+<p>2、对于每一个模型，调用评估集来进行测试，计算出训练误差（通常是以类似损失函数的形式）；</p>
+<p>3、取训练误差最小的那个模型作为最后的结果；</p>
+<p>这个方法当然会存在一些训练数据的浪费，毕竟有大量的数据没有参与真正的训练而是仅仅作为评估。所以这个方法只能在数据非常易得的情况下使用，如果数据比较珍贵，显然这种方法就不适用了。</p>
+<p>有时候这个方法好像也被称为<strong>HoldOut验证</strong>（Hold-Out Method）。其实这也不算是交叉验证了，因为他的训练集并没有交叉。</p>
+<p>通常情况下我们是直接选取前70%为训练集，但是如果训练数据是按照一定规律排放的，那么选取数据的时候就要先打乱顺序，或者按照一定的随机方法选取数据。否则训练集就不一定具有一般性了。</p>
+<h2 id="K-折交叉验证（S-fold-Cross-Validation）"><a href="#K-折交叉验证（S-fold-Cross-Validation）" class="headerlink" title="K-折交叉验证（S-fold Cross Validation）"></a>K-折交叉验证（S-fold Cross Validation）</h2><p>这个据说是最常用的验证方法了，步骤如下：</p>
+<p>1、将数据集均分为K份</p>
+<p>2、从K份中取一份作为评估集，另外K-1份作为训练集，生成K个模型以及这K个模型对于评估集的训练误差；</p>
+<p>3、取训练误差最小的那个模型作为最后的结果；</p>
+<p>经大量实验验证，据说我们取<strong>K&#x3D;10</strong>的时候效果最好。</p>
+<p>这个方法一方面保证了数据充分被使用训练了，避免了数据的浪费；另一方面也互相进行了验证，达到了交叉验证的效果，不过计算代价还是有点高。</p>
+<h2 id="留p交叉验证（Leave-p-out-Cross-Validation"><a href="#留p交叉验证（Leave-p-out-Cross-Validation" class="headerlink" title="留p交叉验证（Leave-p-out Cross Validation)"></a>留p交叉验证（Leave-p-out Cross Validation)</h2><p>从名字大概就可以看出来了，所谓留p，就是每一次训练都会留下p个数据作为评估集，剩下的n-p个数据作为训练集，分别进行建模测试，取出效果最好的模型。这里我们会发现这p个数据可以有$C_n^p$组可能，所以计算的复杂度还是挺高的。</p>
+<p>当然，有时候我们会取p&#x3D;1，这导致了每一个数据都会独立作为测试集。这种方法又被叫做**留一交叉验证（Leave-One-Out Cross Validation)**，当数据极为匮乏的时候才会使用。</p>
+<p>事实上，交叉验证的方法不仅能够提高数据的利用率，更重要的是他也能够在一定程度上解决过拟合（Overfitting）问题，因为过拟合只能很好的拟合训练集中的数据而并不能拟合评估集中的数据。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/28/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/" rel="next" title="逻辑回归算法">
+                <i class="fa fa-chevron-left"></i> 逻辑回归算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F1-4/" rel="prev" title="自制正方软件系统验证码的识别程序（1/4）">
+                自制正方软件系统验证码的识别程序（1/4） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%EF%BC%88simple-cross-validation%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">简单交叉验证（simple cross validation）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#K-%E6%8A%98%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%EF%BC%88S-fold-Cross-Validation%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">K-折交叉验证（S-fold Cross Validation）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%99p%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%EF%BC%88Leave-p-out-Cross-Validation"><span class="nav-number">4.</span> <span class="nav-text">留p交叉验证（Leave-p-out Cross Validation)</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

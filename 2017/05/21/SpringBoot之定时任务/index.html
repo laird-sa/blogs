@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="任务需求最近在用SpringBoot写一个关于定时项目的时候遇到一个问题，就是客户端访问服务器的结果实际上是每个一段时间发生一次变化，并且在服务器在每天的某个固定的时间点都要触发一次事件。我们当然可以在遇到每一个请求时都重新计算结果，但是为了提高效率，我们显然可以让服务器每隔一段时间计算一次结果，并且把这个结果进行保存，对在下一个时间段内的每个请求都直接返回计算后的结果。这样就能较好的提高了服务器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot之定时任务">
+<meta property="og:url" content="https://www.resonanat.com/2017/05/21/SpringBoot%E4%B9%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="任务需求最近在用SpringBoot写一个关于定时项目的时候遇到一个问题，就是客户端访问服务器的结果实际上是每个一段时间发生一次变化，并且在服务器在每天的某个固定的时间点都要触发一次事件。我们当然可以在遇到每一个请求时都重新计算结果，但是为了提高效率，我们显然可以让服务器每隔一段时间计算一次结果，并且把这个结果进行保存，对在下一个时间段内的每个请求都直接返回计算后的结果。这样就能较好的提高了服务器">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-05-21T09:07:35.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.057Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/05/21/SpringBoot之定时任务/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>SpringBoot之定时任务 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/21/SpringBoot%E4%B9%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">SpringBoot之定时任务</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-21T17:07:35+08:00">
+                2017-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="任务需求"><a href="#任务需求" class="headerlink" title="任务需求"></a>任务需求</h2><p>最近在用SpringBoot写一个关于定时项目的时候遇到一个问题，就是客户端访问服务器的结果实际上是每个一段时间发生一次变化，并且在服务器在每天的某个固定的时间点都要触发一次事件。<br>我们当然可以在遇到每一个请求时都重新计算结果，但是为了提高效率，我们显然可以让服务器每隔一段时间计算一次结果，并且把这个结果进行保存，对在下一个时间段内的每个请求都直接返回计算后的结果。这样就能较好的提高了服务器的性能。<br>那么问题就在于如何处理定时任务。其实SpringBoot早就提供了非常方便的接口，但是网上的介绍还是有点乱的，我就记录下具体操作的注意点方便以后查找。</p>
+<h2 id="创建定时服务"><a href="#创建定时服务" class="headerlink" title="创建定时服务"></a>创建定时服务</h2><p>一般来说定时服务会写在一个Component里，方便管理。对于定时任务，我们其实只要在需要定时执行的函数前加上<code>@Scheduled</code>注解，比如下面这样:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ScheduledTask</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Scheduled(fixedRate = 5000)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">scheduledTask</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">//do sth...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>与此同时，我们还要在项目的启动文件里配置上<code>@EnableScheduling</code>注解，告诉项目我们是支持定时任务的:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LotteryApplication</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		SpringApplication.run(LotteryApplication.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们的函数就能定时执行了。</p>
+<h2 id="Scheduled参数"><a href="#Scheduled参数" class="headerlink" title="Scheduled参数"></a>Scheduled参数</h2><p>Scheduled主要支持<code>fixRate</code>,<code>fixDelay</code>,<code>cron</code>,<code>initialDelay</code>这些参数，下面做简要说明。</p>
+<h3 id="fixRate和fixDelay"><a href="#fixRate和fixDelay" class="headerlink" title="fixRate和fixDelay"></a>fixRate和fixDelay</h3><p>fixRate和fixDelay参数都指定了函数每隔某个毫秒数执行一次，但是他们之间也有细小的差别。<br><strong>fixRate</strong><br>fixRate的计时是相对于系统时间的，也就是一定相隔会固定时间执行。<br><strong>fixDelay</strong><br>fixDelay的计时是相对于上一次调用的时间的，因此他受其他程序调用的影响，如果该函数在其他地方被手动调用，那么这个计时器就会重新计时。</p>
+<h3 id="initialDelay参数"><a href="#initialDelay参数" class="headerlink" title="initialDelay参数"></a>initialDelay参数</h3><p>initialDelay参数是个额外参数，比较简单，就是指定从项目开始运行到该函数首次被调用的执行时间，以毫秒计。<br>如果不指定这个参数，这个值就是-1，也就是程序开始时不执行。<br>在不知到initialDelay这个参数的时候为了让程序启动时立即调用该函数，我让这个定时类继承了<code>InitializingBean</code>并在重写的<code>afterPropertiesSet</code>方法中手动调用了这个函数。。。现在看起来还真是愚蠢。。。</p>
+<h3 id="cron"><a href="#cron" class="headerlink" title="cron"></a>cron</h3><p>这个Cron是最复杂也是高度自定义化的定时工具，在Linux系统里也有类似的crontab命令。他其实是更加细致的定义了定时任务，以一个字符串的形式进行表示。<br>在SpringBoot中，一个cron字符串是由六个部分以空格组成的字符串，文档中的例子是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&quot;0 0 * * * *&quot; = the top of every hour of every day.</span><br><span class="line">&quot;*/10 * * * * *&quot; = every ten seconds.</span><br><span class="line">&quot;0 0 8-10 * * *&quot; = 8, 9 and 10 o&#x27;clock of every day.</span><br><span class="line">&quot;0 0 6,19 * * *&quot; = 6:00 AM and 7:00 PM every day.</span><br><span class="line">&quot;0 0/30 8-10 * * *&quot; = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</span><br><span class="line">&quot;0 0 9-17 * * MON-FRI&quot; = on the hour nine-to-five weekdays</span><br><span class="line">&quot;0 0 0 25 12 ?&quot; = every Christmas Day at midnight</span><br></pre></td></tr></table></figure>
+<p>六个部分分别表示秒、分、时、日、月、周。<br>他支持’-‘表示范围，’*’表示通配，’&#x2F;‘表示在左边的时间匹配后间隔右边的时间，’?’一般表示周的通配。<br>具体的使用方法还要参考相关文档。<br>网上有很多类似<a target="_blank" rel="noopener" href="http://cron.qqe2.com/">Cron表达式测试工具</a>这样的测试工具，方便我们测试自己写的Cron表达式。<br>下面一个例子表示每隔五分钟执行一次:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Scheduled(cron = &quot;0 0/5 * * * ?&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">fiveMinutes</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">//do sth.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h3><p>在实际使用Scheduled注解时，我们一定要指定且仅仅指定fixRate、fixDelay、cron当中的一个，否则肯定会导致错误。当然，我们可以任意指定initialDelay参数。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://spring.io/guides/gs/scheduling-tasks/">SpringBoot Guides</a><br><a target="_blank" rel="noopener" href="http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/support/CronSequenceGenerator.html">Spring CronSequenceGenerator</a><br><a target="_blank" rel="noopener" href="http://www.manpagez.com/man/5/crontab/">Cron expression</a><br><a target="_blank" rel="noopener" href="http://jingyan.baidu.com/article/7f41ecec0d0724593d095c19.html">Cron表达式详解</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/20/SpringBoot%E4%B9%8B%E7%AE%80%E5%8D%95%E9%83%A8%E7%BD%B2/" rel="next" title="SpringBoot之简单部署">
+                <i class="fa fa-chevron-left"></i> SpringBoot之简单部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/21/SpringBoot%E4%B9%8B%E6%8B%A6%E6%88%AA%E5%99%A8%E7%94%A8%E6%B3%95/" rel="prev" title="SpringBoot之拦截器用法">
+                SpringBoot之拦截器用法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E9%9C%80%E6%B1%82"><span class="nav-number">1.</span> <span class="nav-text">任务需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%AE%9A%E6%97%B6%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">创建定时服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduled%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">Scheduled参数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fixRate%E5%92%8CfixDelay"><span class="nav-number">3.1.</span> <span class="nav-text">fixRate和fixDelay</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#initialDelay%E5%8F%82%E6%95%B0"><span class="nav-number">3.2.</span> <span class="nav-text">initialDelay参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cron"><span class="nav-number">3.3.</span> <span class="nav-text">cron</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">3.4.</span> <span class="nav-text">注意点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

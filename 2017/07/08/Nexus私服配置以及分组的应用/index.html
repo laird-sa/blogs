@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Maven,Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言阴差阳错的实习部门分到了Agile Controller Campus的运维(或许吧)部门，部门主要任务大概是控制构建自动化测试的流水线，控制项目各个模块的项目进展以及维护版本一致等。本来指望能进来敲敲代码的，结果发现在这里基本不用写代码，主要是使用内部软件做好项目的配置工作，这倒是我之前一直没有接触过的工作，接触了两天，感觉还是挺有意思的，能从项目的上层了解到整个项目的架构，从整体上理解一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nexus私服配置以及分组的应用">
+<meta property="og:url" content="https://www.resonanat.com/2017/07/08/Nexus%E7%A7%81%E6%9C%8D%E9%85%8D%E7%BD%AE%E4%BB%A5%E5%8F%8A%E5%88%86%E7%BB%84%E7%9A%84%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言阴差阳错的实习部门分到了Agile Controller Campus的运维(或许吧)部门，部门主要任务大概是控制构建自动化测试的流水线，控制项目各个模块的项目进展以及维护版本一致等。本来指望能进来敲敲代码的，结果发现在这里基本不用写代码，主要是使用内部软件做好项目的配置工作，这倒是我之前一直没有接触过的工作，接触了两天，感觉还是挺有意思的，能从项目的上层了解到整个项目的架构，从整体上理解一个">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-07-08T08:45:46.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.049Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Maven">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/07/08/Nexus私服配置以及分组的应用/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Nexus私服配置以及分组的应用 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/08/Nexus%E7%A7%81%E6%9C%8D%E9%85%8D%E7%BD%AE%E4%BB%A5%E5%8F%8A%E5%88%86%E7%BB%84%E7%9A%84%E5%BA%94%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Nexus私服配置以及分组的应用</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-08T16:45:46+08:00">
+                2017-07-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>阴差阳错的实习部门分到了Agile Controller Campus的运维(或许吧)部门，部门主要任务大概是控制构建自动化测试的流水线，控制项目各个模块的项目进展以及维护版本一致等。本来指望能进来敲敲代码的，结果发现在这里基本不用写代码，主要是使用内部软件做好项目的配置工作，这倒是我之前一直没有接触过的工作，接触了两天，感觉还是挺有意思的，能从项目的上层了解到整个项目的架构，从整体上理解一个大型团队的工作方式，这里面的学问不比码代码少。<br>我接到的第一个任务就是一个实际中出现的问题。</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>我们知道在大型的Java项目中，经常是一个小组负责一个模块，一个项目由好几个模块组成。如果各个模块之间有着某种依赖关系，那么在互相调用的时候，一定是要调用其他模块的稳定版本(即上一次测试通过的版本)，在自己调试的时候，测试和发布的是自己的不稳定版本。显然，这就要求各个模块在开发的时候需要相互隔离，最简单的做法就是对每一个小组开一个nexus私服用来托管其他模块的包以及自己开发的包，每此集成测试时都从各个私服中取出最新的模块，测试通过后再同步更新给各个私服。<br>显然，这样的话每一个小组都得维护一个自己的私服，每次集成时也要从各个私服去取，既浪费资源，而且脚本写起来比较非常麻烦。</p>
+<h1 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h1><p>事实上，Nexus作为”世界第一也是唯一的免费通用仓库管理解决方案”，对这类问题有着非常好的解决方式。当然首先，我们得理清楚maven的版本控制层次。<br>在maven的世界里，原则上所有的包都由他的三维唯一确定:groupId,artifactId,version。但是，其实还有另外一个维度，那就是repository。这也很好理解，毕竟并不是所有的包都发布在全球统一的仓库，还有各个组织或个人私自搭建的仓库，用来托管自己的包。只要我们指定从不同的仓库里获取包，我们就可以做到即使是相同的三维，也有可能获取到不同的代码。</p>
+<p>在Nexus里，至少提供了四种不同类型的仓库:</p>
+<p><strong>宿主类型(hosted)</strong><br>hosted类型表示这是我们自己搭建的仓库，我们可以向这个仓库里添加自己需要的包，就像是搭建一个属于自己的中心仓库一样。</p>
+<p><strong>代理类型(proxy)</strong><br>proxy类型存在的意义在于，在使用自己的私服时，如果仍需要从maven中心仓库去获取公开的包的时候，我们可以不需要额外指定中心仓库，而是使用这个代理类型的仓库，并且让这个仓库去指向那个中心仓库。默认配置的中心仓库名是central，指向远程的中心仓库”<a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/%22%E3%80%82%E8%BF%99%E4%B8%AA%E7%B1%BB%E5%9E%8B%E7%9A%84%E4%BB%93%E5%BA%93%E5%8E%9F%E5%88%99%E4%B8%8A%E4%B8%8D%E8%83%BD%E9%85%8D%E7%BD%AE%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8C%85%EF%BC%8C%E4%BB%96%E5%8F%AA%E8%83%BD%E4%BD%9C%E4%B8%BA%E8%AE%BF%E9%97%AE%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E7%9A%84%E4%BB%A3%E7%90%86%E6%9D%A5%E4%BD%BF%E7%94%A8%E3%80%82">https://repo1.maven.org/maven2/&quot;。这个类型的仓库原则上不能配置自己的包，他只能作为访问远程仓库的代理来使用。</a></p>
+<p><strong>虚拟类型(virtual)</strong><br>这个类型的仓库一般不怎么用到，他主要是为了保证不同类型仓库之间的兼容。比如我们可以用它将一个maven2类型的仓库转成maven1类型的仓库。</p>
+<p><strong>组类型(group)</strong><br>这是最能体现Nexus灵活性的一个配置。上面的这些类型的仓库，无论哪一种，其实都是实实在在的仓库，他们分别都能很好的独立使用，但是如果我们需要配置一个仓库，这个仓库里包含不同类型的仓库，那么我们就需要配置一个组，用这个组来包含不同类型的仓库。而这个组类型本身保存的并不是实实在在的仓库，而是对这些仓库的引用。<br>需要注意的是，组类型可以嵌套，但是他们不存在层级关系。也就是说如果group1包含了repo1,repo2,group2，那么实际上group1就直接包含了repo1,repo2和group2里的所有包，而且并没有这些中间的层级。</p>
+<p>那么我们要做的事情就很简单了，我们只要在同一个私服上，对每一个模块开发小组新建不同的组类型的仓库，每一个小组的仓库里包含的都是自己模块的不稳定版以及其他模块的稳定版本。这样当每一次集成测试时，从每个小组的仓库组里获得最新的版本作为一个新组，对他进行测试并且通过后再用这个新组里的每个模块(稳定版本)去更新旧的模块即可。</p>
+<h1 id="maven配置"><a href="#maven配置" class="headerlink" title="maven配置"></a>maven配置</h1><p>这里顺便记分析下maven的配置。<br>maven的配置文件就是settings.xml了，这个文件的基础配置大概是这样的:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">settings</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0</span></span></span><br><span class="line"><span class="string"><span class="tag">                      https://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">localRepository</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">interactiveMode</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">usePluginRegistry</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">offline</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">pluginGroups</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servers</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mirrors</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">proxies</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">profiles</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">activeProfiles</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">settings</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>各个标签的具体用法可以参考官方文档，下面大体解释下一些重要配置。</p>
+<h2 id="localRepository"><a href="#localRepository" class="headerlink" title="localRepository"></a>localRepository</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">localRepository</span>&gt;</span>/path/to/local/repo<span class="tag">&lt;/<span class="name">localRepository</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个配置指明了本地maven库的包的地址。由于我们在使用maven时，可能会经常使用一些相同的包，为了提高提取效率以及减少中心库的压力，maven在第一次从远程下载某个包的时候就会将它放在本地的库中，方便以后直接取用。需要注意的是，在某些情况下，我们需要手动删除这里的包来保证我们使用的是最新版本的包。这个配置的默认值是在用户家目录下的.m2文件夹中，非常好找。</p>
+<h2 id="servers"><a href="#servers" class="headerlink" title="servers"></a>servers</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servers</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">server</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span>admin123<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">server</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servers</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这个配置的目的在于，当我们要向私服中去deploy自己的包的时候，显然我们至少得有写入的权限，这里就定义了已知server的用户名和密码，以及这个server的唯一ID。当我们在项目的pom.xml里添加发布的配置时,只要指定正确仓库的id就可以定位到相同id的server，并从中获取用户名和密码。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">distributionManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Nexus Release Repository<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://localhost:8081/nexus/content/repositories/test/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">distributionManagement</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="profiles"><a href="#profiles" class="headerlink" title="profiles"></a>profiles</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">profiles</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">profile</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">activation</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">jdk</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">jdk</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">activation</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Repository for JDK 1.8 builds<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://localhost:8081/nexus/content/groups/test-group<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layout</span>&gt;</span>default<span class="tag">&lt;/<span class="name">layout</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">snapshotPolicy</span>&gt;</span>always<span class="tag">&lt;/<span class="name">snapshotPolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">profile</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">profiles</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>profiles里指定了我们的maven获取包的远程仓库的地址，每一个仓库都有一个唯一的ID以及相应的url。我们可以保存不同的profile配置，每一个配置方案也有一个唯一的ID，我们只要在后面添加下面的配置就能够选择激活的profile配置。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activeProfiles</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">activeProfile</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">activeProfile</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">activeProfiles</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>同时，我们也要注意着里面的repository标签，这个标签指定的是我们需要额外查找的仓库。比如我在搭建opendaylight环境时，maven需要查找他对应的包，但是maven中心库里默认没有opendaylight的库，那么我们就需要把这个库的地址加入这个repository标签里。这样每次搜索包的时候就可以顺便搜索opendaylight自己的repository。<br>还需要注意一点，就是我们只能从repositories标签里下载普通的包，不能下载插件。如果我们需要从一个仓库里下载插件，我们就需要用<code>pluginRepositories</code>的标签。具体用法可以参见官方文档。</p>
+<h2 id="mirrors"><a href="#mirrors" class="headerlink" title="mirrors"></a>mirrors</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">mirrors</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mirror</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>mirrorId<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mirrorOf</span>&gt;</span>repositoryId<span class="tag">&lt;/<span class="name">mirrorOf</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>Human Readable Name for this Mirror.<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://mirrorURL/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">mirror</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mirrors</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>mirrors配置的意义在于，我们有时候在获取中心库的包的时候，由于网络的原因会导致下载太慢，这时候我们就想使用一些网络较好的镜像来代替那个中心库。这里的mirrorOf参数配置的就是我们希望替代的repositoryId(支持多选，反选等等)。将镜像地址保存在url里。<br>特别配置mirror的时候尤其需要小心，那就是我们使用了mirror之后很有可能覆盖了我们不想覆盖的repository，因此我们尤其要注意这个mirrorOf标签的值。</p>
+<h2 id="proxies"><a href="#proxies" class="headerlink" title="proxies"></a>proxies</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">proxies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">proxy</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>optional<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">active</span>&gt;</span>true<span class="tag">&lt;/<span class="name">active</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">protocol</span>&gt;</span>http<span class="tag">&lt;/<span class="name">protocol</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span>proxyuser<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span>proxypass<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>proxy.host.net<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>80<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">nonProxyHosts</span>&gt;</span>local.net|some.host.com<span class="tag">&lt;/<span class="name">nonProxyHosts</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">proxy</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">proxies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>proxies配置主要是用来在某些情况下通过配置用户密码，做到使用代理访问远程仓库。主要用到的场景大概就是远程仓库库被GFW墙了或者本机没有外网权限，等需要使用代理的地方。</p>
+<h1 id="Nexus脚本思路"><a href="#Nexus脚本思路" class="headerlink" title="Nexus脚本思路"></a>Nexus脚本思路</h1><p>有时候，我们可能需要一次行建大量的仓，或者需要重复这样的操作。每次都手动点击确认的话，不仅效率地下，而且容易出错，很不Unix。其实说白了这个Nexus的界面只是一个壳，我们点击操作的背后其实是修改Nexus的配置文件。这个配置文件通常是在<code>$NEXUS_HOME/sonatype-work/nexus/conf/nexus.xml</code>这里。<br>大概看一看:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">nexusConfiguration</span>&gt;</span></span><br><span class="line"> ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">...</span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">id</span>&gt;</span>public<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">name</span>&gt;</span>Public Repositories<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerRole</span>&gt;</span>org.sonatype.nexus.proxy.repository.GroupRepository<span class="tag">&lt;/<span class="name">providerRole</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerHint</span>&gt;</span>maven2<span class="tag">&lt;/<span class="name">providerHint</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStatus</span>&gt;</span>IN_SERVICE<span class="tag">&lt;/<span class="name">localStatus</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">notFoundCacheTTL</span>&gt;</span>15<span class="tag">&lt;/<span class="name">notFoundCacheTTL</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">userManaged</span>&gt;</span>true<span class="tag">&lt;/<span class="name">userManaged</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">exposed</span>&gt;</span>true<span class="tag">&lt;/<span class="name">exposed</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">browseable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">browseable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">writePolicy</span>&gt;</span>READ_ONLY<span class="tag">&lt;/<span class="name">writePolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">indexable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">indexable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStorage</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">provider</span>&gt;</span>file<span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">localStorage</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mergeMetadata</span>&gt;</span>true<span class="tag">&lt;/<span class="name">mergeMetadata</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">memberRepositories</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>snapshots<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>thirdparty<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>central<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">memberRepositories</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">id</span>&gt;</span>test<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">name</span>&gt;</span>Test<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerRole</span>&gt;</span>org.sonatype.nexus.proxy.repository.Repository<span class="tag">&lt;/<span class="name">providerRole</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerHint</span>&gt;</span>maven2<span class="tag">&lt;/<span class="name">providerHint</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStatus</span>&gt;</span>IN_SERVICE<span class="tag">&lt;/<span class="name">localStatus</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">notFoundCacheTTL</span>&gt;</span>1440<span class="tag">&lt;/<span class="name">notFoundCacheTTL</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">userManaged</span>&gt;</span>true<span class="tag">&lt;/<span class="name">userManaged</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">exposed</span>&gt;</span>true<span class="tag">&lt;/<span class="name">exposed</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">browseable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">browseable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">writePolicy</span>&gt;</span>ALLOW_WRITE<span class="tag">&lt;/<span class="name">writePolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">indexable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">indexable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">searchable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">searchable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStorage</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">provider</span>&gt;</span>file<span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">localStorage</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">repositoryPolicy</span>&gt;</span>SNAPSHOT<span class="tag">&lt;/<span class="name">repositoryPolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    ...</span><br><span class="line">  <span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="tag">&lt;/<span class="name">nexusConfiguration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样一看就很清楚了，我们所有的手动操作其实都是映射到这个文件中。只是需要注意当我们手动修改了这个配置文件之后，我们得重启Nexus服务。。。<br>于此同时，我们也要注意到，<code>$NEXUS_HOME/sonatype-work/nexus/storage</code>文件夹里存放了各个仓库的包，我们也可以将我们需要的包手动添加进来。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://books.sonatype.com/nexus-book/reference/confignx-sect-manage-repo.html">Nexus Document</a></p>
+<p><a target="_blank" rel="noopener" href="http://maven.apache.org/guides/">Maven Document</a></p>
+<p><a target="_blank" rel="noopener" href="http://blog.csdn.net/woshixuye/article/details/8132780">Maven学习五之Nexus中各repository介绍</a></p>
+<p><a target="_blank" rel="noopener" href="http://blog.csdn.net/liujiahan629629/article/details/39272321">Nexus私服使Maven更加强大</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Maven/" rel="tag"># Maven</a>
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/06/comment_ru_he_xuan_ze/" rel="next" title="继多说、网易关停之后该何去何从(网易云跟帖宣布2017年8月1日停止服务)">
+                <i class="fa fa-chevron-left"></i> 继多说、网易关停之后该何去何从(网易云跟帖宣布2017年8月1日停止服务)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/10/public-static-cdn-service/" rel="prev" title="常用免费前端公共库 CDN 服务收集">
+                常用免费前端公共库 CDN 服务收集 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">解决思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#maven%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">maven配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#localRepository"><span class="nav-number">4.1.</span> <span class="nav-text">localRepository</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#servers"><span class="nav-number">4.2.</span> <span class="nav-text">servers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#profiles"><span class="nav-number">4.3.</span> <span class="nav-text">profiles</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mirrors"><span class="nav-number">4.4.</span> <span class="nav-text">mirrors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#proxies"><span class="nav-number">4.5.</span> <span class="nav-text">proxies</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Nexus%E8%84%9A%E6%9C%AC%E6%80%9D%E8%B7%AF"><span class="nav-number">5.</span> <span class="nav-text">Nexus脚本思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

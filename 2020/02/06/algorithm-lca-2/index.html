@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据结构,LCA,Tarjan," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="流程前置操作分为以下几步:  使用 $\texttt{DFS}$ 遍历整棵树 当一个节点被访问过时, 将其标记为1 当一个节点及其子树(或其本身就是叶子节点)都被访问过时, 将该点标记为2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Algorithm Notes】LCA Tarjan求法">
+<meta property="og:url" content="https://www.resonanat.com/2020/02/06/algorithm-lca-2/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="流程前置操作分为以下几步:  使用 $\texttt{DFS}$ 遍历整棵树 当一个节点被访问过时, 将其标记为1 当一个节点及其子树(或其本身就是叶子节点)都被访问过时, 将该点标记为2">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:34.109Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="LCA">
+<meta property="article:tag" content="Tarjan">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2020/02/06/algorithm-lca-2/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>【Algorithm Notes】LCA Tarjan求法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/02/06/algorithm-lca-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">【Algorithm Notes】LCA Tarjan求法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-06T00:00:00+08:00">
+                2020-02-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OI/" itemprop="url" rel="index">
+                    <span itemprop="name">OI</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OI/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>前置操作分为以下几步:</p>
+<ol>
+<li>使用 $\texttt{DFS}$ 遍历整棵树</li>
+<li>当一个节点被访问过时, 将其标记为<code>1</code></li>
+<li>当一个节点<strong>及其子树</strong>(或其本身就是<strong>叶子节点</strong>)都被访问过时, 将该点标记为<code>2</code></li>
+</ol>
+<span id="more"></span>
+
+<p>这样, 在任意一次操作过后, 都会出现如下情况:</p>
+<p>所有的标记为<code>2</code>的节点, 共同构成<strong>一棵子树</strong></p>
+<p>且该子树总是在整棵树的<strong>左下处</strong></p>
+<p>从动态的角度来看, 就是一棵全为<code>2</code>的子树, 从左下角的那个叶子节点处缓缓地”长”了出来</p>
+<p>这样有什么好处呢</p>
+<p>这个性质可以帮助我们很好地离线解决$\texttt{LCA}$问题</p>
+<h2 id="Solve"><a href="#Solve" class="headerlink" title="Solve"></a>Solve</h2><p>建立一个<strong>并查集</strong>: <code>father[]</code></p>
+<p>在搜索的<strong>返回</strong>过程中, 将已经变成<code>2</code>的那个节点的<code>father</code>设为它的父亲节点(相当于把该节点”缩”到了其父亲节点上)</p>
+<p>在搜索的返回前, 即遍历完该节点的子树后, 判断该节点$u$有没有被”提问”过</p>
+<p>如果有, 假设提问为$lca(u, v)$, 则标记答案为<code>getfather(v)</code>, 其中<code>getfather()</code>函数为并查集自带的查找祖先节点的函数</p>
+<ul>
+<li>为什么?</li>
+</ul>
+<p>根据上边的结论, 此时的<code>getfather(v)</code>即为那棵全为<code>2</code>的子树的根节点$root’$,  $\because u$和$v$<strong>均在这棵子树上</strong>, $\therefore root’$为$u$和$v$的<strong>公共祖先</strong></p>
+<p>考虑$\texttt{DFS}$序, $\because \texttt{DFS}$访问完一个节点不会马上往上走, 而是会去<strong>遍历其它节点</strong>, $\therefore root’$以下没有一个$root’’$满足是$u$和$v$的<strong>公共祖先</strong> $\therefore lca(u, v) &#x3D; root’$</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight cpp"><figcaption><span>Code</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> SIZE = <span class="number">5e6</span> + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">edge</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> to_node, id;</span><br><span class="line">    <span class="built_in">edge</span>(<span class="type">int</span> t, <span class="type">int</span> i): <span class="built_in">to_node</span>(t), <span class="built_in">id</span>(i) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">edge</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">vector&lt;<span class="type">int</span>&gt; edges[SIZE];</span><br><span class="line">vector&lt;edge&gt; querys[SIZE];</span><br><span class="line"><span class="type">int</span> father[SIZE], mark[SIZE], ans[SIZE];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> n, m, s;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">getfa</span><span class="params">(<span class="type">int</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (father[x] == x)</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> father[x] = <span class="built_in">getfa</span>(father[x]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">tarjan</span><span class="params">(<span class="type">int</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    mark[x] = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> i = edges[x].<span class="built_in">begin</span>(); i != edges[x].<span class="built_in">end</span>(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (mark[*i])</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="built_in">tarjan</span>(*i);</span><br><span class="line">        father[*i] = x;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> i = querys[x].<span class="built_in">begin</span>(); i != querys[x].<span class="built_in">end</span>(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> y = (*i).to_node, id = (*i).id;</span><br><span class="line">        <span class="keyword">if</span> (mark[y] == <span class="number">2</span>)</span><br><span class="line">            ans[id] = <span class="built_in">getfa</span>(y);</span><br><span class="line">    &#125;</span><br><span class="line">    mark[x] = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> u, v;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d%d%d&quot;</span>, &amp;n, &amp;m, &amp;s);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        father[i] = i;</span><br><span class="line">        mark[i] = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;u, &amp;v);</span><br><span class="line">        edges[u].<span class="built_in">emplace_back</span>(v);</span><br><span class="line">        edges[v].<span class="built_in">emplace_back</span>(u);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> x, y;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;x, &amp;y);</span><br><span class="line">        <span class="keyword">if</span> (x == y)</span><br><span class="line">            ans[i] = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            querys[x].<span class="built_in">emplace_back</span>(<span class="built_in">edge</span>(y, i));</span><br><span class="line">            querys[y].<span class="built_in">emplace_back</span>(<span class="built_in">edge</span>(x, i));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">tarjan</span>(s);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, ans[i]);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h2><p>$$ \Theta{(n + m)} $$</p>
+<p>搜索过程是$\Theta{(n)}$的, 而其中的求解过程可以单独<strong>拆出来看</strong>, 它就是一个$\Theta{(m)}$</p>
+<p>用一张表来分析分析求$\texttt{LCA}$的各种算法的优劣之处:</p>
+<table>
+<thead>
+<tr>
+<th align="center">算法</th>
+<th align="center">优劣</th>
+<th align="center">时间复杂度</th>
+<th align="center">评测结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">朴素</td>
+<td align="center">比较好想2333</td>
+<td align="center">$\Theta{(nm)}$</td>
+<td align="center"><red>TLE</red></td>
+</tr>
+<tr>
+<td align="center">倍增优化</td>
+<td align="center">也比较好想, 但是较容易敲挂</td>
+<td align="center">$\Theta{((n + m)logn)}$</td>
+<td align="center"><green>AC</green></td>
+</tr>
+<tr>
+<td align="center">Tarjan</td>
+<td align="center">比较精妙, 也不太好写</td>
+<td align="center">$\Theta{(n + m)}$</td>
+<td align="center"><green>AC</green></td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+          
+            <a href="/tags/LCA/" rel="tag"># LCA</a>
+          
+            <a href="/tags/Tarjan/" rel="tag"># Tarjan</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/28/algorithm-lca/" rel="next" title="【Algorithm Notes】LCA倍增求法">
+                <i class="fa fa-chevron-left"></i> 【Algorithm Notes】LCA倍增求法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/02/07/authenticate-shiro-vue/" rel="prev" title="「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇)">
+                「安全认证」基于Shiro前后端分离的认证与授权(三.前端篇) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Solve"><span class="nav-number">2.</span> <span class="nav-text">Solve</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">4.</span> <span class="nav-text">时间复杂度</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

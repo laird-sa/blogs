@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Apache," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="学apache 就必须要学下htaccess。这个在网站比较小的情况下看不出来，但是当网站结构复杂的时候，我们就需要对访问进来的域名进行分类处理了，比如构建二级域名、设置301重定向、404禁止访问的显示界面，设置权限、防止盗链等一系列工作，都需要有.htaccess文件的处理。 概述.htaccess文件(或者”分布式配置文件”（hypertext access））提供了针对目录改变配置的方法，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="apache中的htaccess文件格式简析">
+<meta property="og:url" content="https://www.resonanat.com/2016/01/14/apache%E4%B8%AD%E7%9A%84htaccess%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E7%AE%80%E6%9E%90/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="学apache 就必须要学下htaccess。这个在网站比较小的情况下看不出来，但是当网站结构复杂的时候，我们就需要对访问进来的域名进行分类处理了，比如构建二级域名、设置301重定向、404禁止访问的显示界面，设置权限、防止盗链等一系列工作，都需要有.htaccess文件的处理。 概述.htaccess文件(或者”分布式配置文件”（hypertext access））提供了针对目录改变配置的方法，">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-01-14T07:55:56.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.065Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Apache">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/01/14/apache中的htaccess文件格式简析/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>apache中的htaccess文件格式简析 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/14/apache%E4%B8%AD%E7%9A%84htaccess%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">apache中的htaccess文件格式简析</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-14T15:55:56+08:00">
+                2016-01-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Apache/" itemprop="url" rel="index">
+                    <span itemprop="name">Apache</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>学apache 就必须要学下htaccess。这个在网站比较小的情况下看不出来，但是当网站结构复杂的时候，我们就需要对访问进来的域名进行分类处理了，比如构建二级域名、设置301重定向、404禁止访问的显示界面，设置权限、防止盗链等一系列工作，都需要有.htaccess文件的处理。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>.htaccess文件(或者”分布式配置文件”（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/.htaccess">hypertext access</a>））提供了针对目录改变配置的方法， 即，在一个特定的文档目录中放置一个包含一个或多个指令的文件， 以作用于此目录及其所有子目录。</p>
+<h2 id="位置"><a href="#位置" class="headerlink" title="位置"></a>位置</h2><p>理论上讲，.htaccess应该存在于站点能访问到的所有文件夹下，但是这样显然可能造成性能和安全上的问题。所以有时候不推荐直接以.htaccess文件的形式保存，而是将他写在apache的总配置文件中（<Directory> </Directory>标签内）。不过，为了稳定性，一般也不想随便修改配置文件，所以这里还是用.htaccess文件来设置。我就直接把.htaccess文件放在我网站的根目录下了(&#x2F;var&#x2F;www&#x2F;html&#x2F;.htaccess)，这样也方便以后的修改。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>首先需要给apache2引入rewrite模块，这个默认是没有开启的。输入<code>$sudo a2enmod</code> ，然后他会提示输入模块名，输入<code>rewrite</code> 即可。</p>
+<p>然后还要做一个配置，就是在apache2的配置文件（&#x2F;etc&#x2F;apache2&#x2F;apache2.conf）中先设置下，就是将<Directory>中的<code> AllowOverride None</code> 设置为<code>AllowOverride All</code> 。这也很好理解，因为.htaccess在某种程度上就是配置文件的扩展喽，所以要允许他来覆盖配置文件。</p>
+<p>偶然见看下配置文件后面的内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># AccessFileName: The name of the file to look for in each directory</span><br><span class="line"># for additional configuration directives.  See also the AllowOverride</span><br><span class="line"># directive.</span><br><span class="line">#</span><br><span class="line">AccessFileName .htaccess</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The following lines prevent .htaccess and .htpasswd files from being</span><br><span class="line"># viewed by Web clients.</span><br><span class="line">#</span><br><span class="line">&lt;FilesMatch &quot;^\.ht&quot;&gt;</span><br><span class="line">        Require all denied</span><br><span class="line">&lt;/FilesMatch&gt;</span><br></pre></td></tr></table></figure>
+<p>以前没有注意过，现在一看才发现，这都是套路啊。凭什么这个文件非得叫.htaccess文件呢？原来他是写在了apache2.conf中了！那么我是不是也可以把这个名字改一下呢～～</p>
+<p>而且，为了保证这个文件不被非法访问到，他也预先设置了禁止访问的权限～～想的也是挺周到的。</p>
+<p>OK，接下来来看看.htaccess的语法了（其实就是apache2配置文件的语法了）。</p>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><p>举个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">RewriteEngine On                                   #这句话是方便我们开启下面的部分，可以设置为On 或 Off　这样就不用一句一句注释了。</span><br><span class="line">RewriteBase /　　　　　　　　　                       #这句话是把当前的目录看成是网站的根，方便下面的书写。</span><br><span class="line">RewriteCond %&#123;HTTP_HOST&#125; ^(www\.)?xxx\.com$ [NC]   #过滤主机名符合后面正则表达式的网址，满足后执行下一步。NC表示忽略大小写。</span><br><span class="line">RewriteCond %&#123;REQUEST_URI&#125; !^/blog/                #过滤URI满足正则表达是的地址，满足后执行下一步。</span><br><span class="line">RewriteCond %&#123;REQUEST_FILENAME&#125; !-f                #测试访问的文件是否存在，存在则执行下一步。</span><br><span class="line">RewriteCond %&#123;REQUEST_FILENAME&#125; !-d                #测试访问的目录是否存在，存在则执行下一步。</span><br><span class="line">RewriteRule ^(.*)$ blog/$1 [L]                     #将请求的地址改为blog/(原地址)　(301重定向),　L 表示条件终止。</span><br></pre></td></tr></table></figure>
+<p>从上面的解释也大概也应该晓得的差不多了，就是命令后面一般接两个参数或者再接一个用中括号引用的标签，其中第二个参数多是用正则写的,正则忘了看<a href="/2015/11/24/1">这里</a>，最多加一个　!　表示否定。</p>
+<p>这当中用到了一些类似%{HTTP_HOST}之类的貌似全局变量的东西，这些东西被称为CGI变量。</p>
+<p>！！！这里还要注意一点，就是$1匹配的是RewriteRule里捕获的值，如果想要捕获RewriteCond里捕获的值就得用%1。。。。。。好坑。。。</p>
+<p>下面着重讲解下RewriteCond的一些标签：</p>
+<table>
+<thead>
+<tr>
+<th>标记</th>
+<th>含义</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>R</td>
+<td>Redirect</td>
+<td>发出一个HTTP重定向</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Forbidden</td>
+<td>禁止对URL地址的存取</td>
+</tr>
+<tr>
+<td>G</td>
+<td>Gone</td>
+<td>标记URL地址不存在</td>
+</tr>
+<tr>
+<td>P</td>
+<td>Proxy</td>
+<td>将URL地址传递给mod_proxy</td>
+</tr>
+<tr>
+<td>L</td>
+<td>Last</td>
+<td>停止处理接下来的规则</td>
+</tr>
+<tr>
+<td>N</td>
+<td>Next</td>
+<td>再次重第一个规则开始处理，但是使用当前重写后的URL地址</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Chain</td>
+<td>将当前的规则和紧随其后的规则链接起来</td>
+</tr>
+<tr>
+<td>T</td>
+<td>Type</td>
+<td>强制执行指明的MIME类</td>
+</tr>
+<tr>
+<td>NS</td>
+<td>Nosubreq</td>
+<td>只在没有任何内部子请求执行时运行本脚本</td>
+</tr>
+<tr>
+<td>NC</td>
+<td>Nocase</td>
+<td>URL地址匹配对大小写不敏感</td>
+</tr>
+<tr>
+<td>QSA</td>
+<td>Qsappend</td>
+<td>在新的URL地址后附加查询字符串部分，而不是替代</td>
+</tr>
+<tr>
+<td>PT</td>
+<td>Passthrough</td>
+<td>将重写后的URL地址传递给另一个Apache模块进行进一步处理</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Skip</td>
+<td>忽略之后的规则</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Env</td>
+<td>设置环境变量</td>
+</tr>
+</tbody></table>
+<p>这些参数是写在每行后面，用中括号扩起来，如果有多个，则中间用逗号隔开。</p>
+<p>下面是RewriteCond的一些参数：</p>
+<p>|参数|含义|解释|<br>|-|-|<br>|-d|目录|将TestString视为一个路径名并测试它是否为一个存在的目录。|<br>|-f|常规文件|将TestString视为一个路径名并测试它是否为一个存在的常规文件。|<br>|-s|非空的常规文件|将TestString视为一个路径名并测试它是否为一个存在的、尺寸大于0的常规文件。|<br>|-l|符号连接|将TestString视为一个路径名并测试它是否为一个存在的符号连接。|<br>|-x|可执行|将TestString视为一个路径名并测试它是否为一个存在的、具有可执行权限的文件。该权限由操作系统检测。|<br>|-F|对子请求存在的文件|检查TestString是否为一个有效的文件，而且可以在服务器当前的访问控制配置下被访问。它使用一个内部子请求来做检查，由于会降低服务器的性能，所以请谨慎使用！|<br>|-U|对子请求存在的URL|检查TestString是否为一个有效的URL，而且可以在服务器当前的访问控制配置下被访问。它使用一个内部子请求来做检查，由于会降低服务器的性能，所以请谨慎使用！|</p>
+<p>以上就是常用的一些语法，当然，htaccess文件可以写的东西远不止这些。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Apache/" rel="tag"># Apache</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/13/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Btaglist%E6%8F%92%E4%BB%B6/" rel="next" title="vim高级用法之taglist插件">
+                <i class="fa fa-chevron-left"></i> vim高级用法之taglist插件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/16/%E9%85%8D%E7%BD%AEapache%E6%8A%8A%E5%AD%90%E7%9B%AE%E5%BD%95%E8%AE%BE%E7%BD%AE%E4%B8%BA%E4%BA%8C%E7%BA%A7%E7%AB%99%E7%82%B9/" rel="prev" title="配置apache把子目录设置为二级站点">
+                配置apache把子目录设置为二级站点 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">语法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

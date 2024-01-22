@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="C/C++," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="右值引用分类在古老的标准里，C++中的变量分为左值(lvalue)与右值(rvalue)这两种，左值就是能够用&amp;获得地址的值，可以对他进行修改，右值就是不能用&amp;获得地址的值，通常只是临时变量，不能进行修改。而在C++11中，变量不再仅仅分为左值与右值了，他引入了另一种值叫将亡值(expire value,xvalue)。从此，变量类型分为了三种:  lvalue  :left va">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++11学习笔记3">
+<meta property="og:url" content="https://www.resonanat.com/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="右值引用分类在古老的标准里，C++中的变量分为左值(lvalue)与右值(rvalue)这两种，左值就是能够用&amp;获得地址的值，可以对他进行修改，右值就是不能用&amp;获得地址的值，通常只是临时变量，不能进行修改。而在C++11中，变量不再仅仅分为左值与右值了，他引入了另一种值叫将亡值(expire value,xvalue)。从此，变量类型分为了三种:  lvalue  :left va">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-05-01T14:43:21.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.035Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="C&#x2F;C++">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/05/01/C++11学习笔记3/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>C++11学习笔记3 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">C++11学习笔记3</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-01T22:43:21+08:00">
+                2017-05-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="右值引用"><a href="#右值引用" class="headerlink" title="右值引用"></a>右值引用</h3><h4 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h4><p>在古老的标准里，C++中的变量分为左值(lvalue)与右值(rvalue)这两种，左值就是能够用&amp;获得地址的值，可以对他进行修改，右值就是不能用&amp;获得地址的值，通常只是临时变量，不能进行修改。而在C++11中，变量不再仅仅分为左值与右值了，他引入了另一种值叫将亡值(expire value,xvalue)。从此，变量类型分为了三种:</p>
+<ul>
+<li>lvalue  :left value 就是传统意义上的左值</li>
+<li>xvalue  :expire value 就是将亡值</li>
+<li>prvalue :pure right value 就是传统意义上的右值</li>
+</ul>
+<p>而且，xvalue+prvalue又称为rvalue，lvalue+xvalue又称为glvalue。</p>
+<h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>那么什么是xvalue呢，什么又是右值引用呢？<br>xvalue其实就是对右值的引用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> &amp;&amp;x=<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>这个x跟传统的左值引用肯定是不一样的，毕竟左值引用是不能引用右值的。<br>这个x跟左值变量也是不一样的，虽然看上去没啥区别，但是实际上这个x并没有进行构造，而是像左值引用一样，对右值10进行了引用，使得这个右值的内存不被立即释放。这样我们就可以像使用左值一样的使用这个右值了。<br>那么现在就应该清楚了，右值引用就是通过对右值进行引用使得我们能够保存这个右值的生命周期，并像使用左值一样的使用右值的方法。（自己的定义）</p>
+<h4 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h4><p>这么费劲心机定义一个右值引用有啥意义呢？其实主要是为了提高变量传递的效率。虽然很多情况下，我们的编译器会做一些优化，但是不同编译器不同，因此下面基于g++的测试我开启了<code>-fno-elide-constructors</code>参数防止其优化。<br>比如下面的这个过程:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Test</span>()&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(<span class="type">const</span> Test &amp;test)&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;copy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Test</span>()&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;destroy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看上去没什么额外开销，而事实上，这个过程的执行结果是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p>也就是说他执行了一次构造，一次拷贝构造。而事实上，这个拷贝构造是浪费额外开销的，而且这个拷贝其实是对一个右值的拷贝，在拷贝后这个右值就被析构了，我们完全可以不执行析构而让新的值就用这个右值的引用。<br>旧的做法是使用常量引用来做这件事:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">const</span> Test&amp; t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这避免了额外的拷贝，但是后果是这个值只能是常量，无法被修改。<br>如果使用了右值引用，那么这个问题就简单多了:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test&amp;&amp; t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p>这个右值引用既没有对结果进行拷贝，也能够让我们像使用一个左值一样的使用他。</p>
+<h4 id="移动拷贝构造"><a href="#移动拷贝构造" class="headerlink" title="移动拷贝构造"></a>移动拷贝构造</h4><p>为什么引入移动拷贝构造，这是因为我们考虑到了以下问题：<br>我们知道，构造函数分为深拷贝和浅拷贝，默认的是浅拷贝，浅拷贝导致的结果就是拷贝出来的对象跟拷贝前的对象拥有相同的堆内元素，如果我们析构了拷贝前的对象，那么拷贝后的对象就无法使用了，因此浅拷贝不适合做赋值的移动操作；而深拷贝呢，又太浪费空间了，完全没有必要生成一个一模一样的对象然后把原先的再删除。因此就引入了拷贝构造这个东西。<br>比如下面的例子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> *ptr;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Test</span>():<span class="built_in">ptr</span>(<span class="keyword">new</span> <span class="built_in">int</span>(<span class="number">0</span>))&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(<span class="type">const</span> Test &amp;test):<span class="built_in">ptr</span>(<span class="keyword">new</span> <span class="built_in">int</span>(*test.ptr))&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;copy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(Test &amp;&amp;test):<span class="built_in">ptr</span>(test.ptr)&#123;</span><br><span class="line">        test.ptr=<span class="literal">nullptr</span>;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;move&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Test</span>()&#123;</span><br><span class="line">        <span class="keyword">delete</span> ptr;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;destroy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p>移动构造的参数就是一个右值引用，他做的事是将移动源的所有堆内元素指针断开，并连上移动目的地的指针。这样移动源就可以安心的析构而不影响移动目的地的堆内元素。同时也省去了不必要的拷贝开销，效率非常的高。</p>
+<h3 id="std-move"><a href="#std-move" class="headerlink" title="std::move"></a>std::move</h3><p>移动构造有一个问题，就是他的参数必须是右值，这就带来一个问题，如果上面的main函数变成这样:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t1;</span><br><span class="line">    Test t2=t1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p>由于t1是个左值，那么他会去执行拷贝构造而不会执行移动构造，这显然不是我们像看到的。<br>为了使左值的移动能够使用移动构造，我们就有了std::move这个东西，他的作用很简单，就是把左值变成右值引用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t1;</span><br><span class="line">    Test t2=std::<span class="built_in">move</span>(t1);</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p>如我所愿。<br>注意一点就是在使用std::move()之后的对象t1这时候的堆内元素就已经无效了。</p>
+<p>std::move()这么好用，显然c++中的模板都支持这个move语义。</p>
+<h3 id="std-emplace-back"><a href="#std-emplace-back" class="headerlink" title="std::emplace_back"></a>std::emplace_back</h3><p>我们知道了对象的构造，拷贝、移动都是要付出一些代价的，那我们很容易就会想到，当我们使用容器的时候，如果使用拷贝构造，显然效率很低；如果使用移动构造，那么还是会有一些移动的开销，需要执行移动构造函数，能不能有一种方法，直接在容器里执行构造函数，这样就既不用拷贝，也不用移动了呢？答案是当然有，这就是std::emplace_back方法。我们可以比较下面的三种方法：</p>
+<p><strong>拷贝插入</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    Test t;</span><br><span class="line">    v.<span class="built_in">push_back</span>(t);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p><strong>移动插入</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    v.<span class="built_in">push_back</span>(<span class="built_in">Test</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+
+<p><strong>emplace_back</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    v.<span class="built_in">emplace_back</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
+<p>显然，这个emplace_back的效率是最高的。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/26419368/">深入应用c++11</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/C-C/" rel="tag"># C/C++</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/01/use-hexo-at-any-time-any-place/" rel="next" title="随时随地 Hexo——我是如何使用 Hexo 的">
+                <i class="fa fa-chevron-left"></i> 随时随地 Hexo——我是如何使用 Hexo 的
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/05/java-io/" rel="prev" title="「Java教程」IO机制">
+                「Java教程」IO机制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">右值引用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">1.1.</span> <span class="nav-text">分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E9%80%94"><span class="nav-number">1.3.</span> <span class="nav-text">用途</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E6%8B%B7%E8%B4%9D%E6%9E%84%E9%80%A0"><span class="nav-number">1.4.</span> <span class="nav-text">移动拷贝构造</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#std-move"><span class="nav-number">2.</span> <span class="nav-text">std::move</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#std-emplace-back"><span class="nav-number">3.</span> <span class="nav-text">std::emplace_back</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

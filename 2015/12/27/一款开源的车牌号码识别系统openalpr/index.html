@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Computer Vision," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="关于车牌号码的识别，其实研究也很多了。但是对于普通的开发者而言，本身不想去研究这些算法层面的东西，只是想能够直接应用来做我们自己需要的事情。虽然很多网站提供了Api接口，但是毫无疑问这是要money的。之前看到国人发的一片博客介绍他自己写的开源车牌识别系统叫Easypr，我自己也下载下来研究了一下。然而使用的时候发现错误有很多，而且没有正规的接口文档，做的也特别粗糙，显然不太适合直接使用。百度不到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一款开源的车牌号码识别系统openalpr">
+<meta property="og:url" content="https://www.resonanat.com/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="关于车牌号码的识别，其实研究也很多了。但是对于普通的开发者而言，本身不想去研究这些算法层面的东西，只是想能够直接应用来做我们自己需要的事情。虽然很多网站提供了Api接口，但是毫无疑问这是要money的。之前看到国人发的一片博客介绍他自己写的开源车牌识别系统叫Easypr，我自己也下载下来研究了一下。然而使用的时候发现错误有很多，而且没有正规的接口文档，做的也特别粗糙，显然不太适合直接使用。百度不到">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2015/12/27/1/1.jpg">
+<meta property="article:published_time" content="2015-12-27T15:56:49.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.078Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Computer Vision">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2015/12/27/1/1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/12/27/一款开源的车牌号码识别系统openalpr/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>一款开源的车牌号码识别系统openalpr | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">一款开源的车牌号码识别系统openalpr</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-27T23:56:49+08:00">
+                2015-12-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>关于车牌号码的识别，其实研究也很多了。但是对于普通的开发者而言，本身不想去研究这些算法层面的东西，只是想能够直接应用来做我们自己需要的事情。虽然很多网站提供了Api接口，但是毫无疑问这是要money的。之前看到国人发的一片博客介绍他自己写的开源车牌识别系统叫Easypr，我自己也下载下来研究了一下。然而使用的时候发现错误有很多，而且没有正规的接口文档，做的也特别粗糙，显然不太适合直接使用。百度不到我就直接去google，果然还是发现了老外写的一款开源的识别软件–openalpr(Open Automatic License Plate Recognition 开源自动车牌识别)，发布在<a target="_blank" rel="noopener" href="https://github.com/openalpr/openalpr">github</a>上。拿过来测试之后发现效果还挺好的，而且文档清楚，虽然不能识别中文，但是对字母和数字的识别准确性还是挺好的。不管怎么说，先记下来以防以后用到。</p>
+<p>这个程序有很多版本，有各种语言的接口，也有Linux下的二进制文件。鉴于现在不需要用来开发，我们直接用他编译成的二进制命令即可。当然如果有需要，也可以去下载他的源码，调用他的函数库。如果有闲工夫的话也可以尝试这改一改。。。。让他能识别中文，造福国人。</p>
+<p>安装：</p>
+<p>使用github上提供的最简单的方法–</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget -O - http://deb.openalpr.com/openalpr.gpg.key | sudo apt-key add -</span><br><span class="line">echo &quot;deb http://deb.openalpr.com/master/ openalpr main&quot; | sudo tee /etc/apt/sources.list.d/openalpr.list</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install openalpr openalpr-daemon openalpr-utils libopenalpr-dev</span><br></pre></td></tr></table></figure>
+<p>帮助：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">alpr  [-c &lt;country_code&gt;] [--config &lt;config_file&gt;] [-n &lt;topN&gt;] [--seek</span><br><span class="line">         &lt;integer_ms&gt;] [-p &lt;pattern code&gt;] [--clock] [-d] [-j] [--]</span><br><span class="line">         [--version] [-h] &lt;image_file_path&gt;</span><br><span class="line"></span><br><span class="line">Where: </span><br><span class="line"></span><br><span class="line">   -c &lt;country_code&gt;,  --country &lt;country_code&gt;</span><br><span class="line">     Country code to identify (either us for USA or eu for Europe). </span><br><span class="line">     Default=us</span><br><span class="line"></span><br><span class="line">   --config &lt;config_file&gt;</span><br><span class="line">     Path to the openalpr.conf file</span><br><span class="line"></span><br><span class="line">   -n &lt;topN&gt;,  --topn &lt;topN&gt;</span><br><span class="line">     Max number of possible plate numbers to return.  Default=10</span><br><span class="line"></span><br><span class="line">   --seek &lt;integer_ms&gt;</span><br><span class="line">     Seek to the specified millisecond in a video file. Default=0</span><br><span class="line"></span><br><span class="line">   -p &lt;pattern code&gt;,  --pattern &lt;pattern code&gt;</span><br><span class="line">     Attempt to match the plate number against a plate pattern (e.g., md</span><br><span class="line">     for Maryland, ca for California)</span><br><span class="line"></span><br><span class="line">   --clock</span><br><span class="line">     Measure/print the total time to process image and all plates. </span><br><span class="line">     Default=off</span><br><span class="line"></span><br><span class="line">   -d,  --detect_region</span><br><span class="line">     Attempt to detect the region of the plate image.  [Experimental] </span><br><span class="line">     Default=off</span><br><span class="line"></span><br><span class="line">   -j,  --json</span><br><span class="line">     Output recognition results in JSON format.  Default=off</span><br><span class="line"></span><br><span class="line">   --,  --ignore_rest</span><br><span class="line">     Ignores the rest of the labeled arguments following this flag.</span><br><span class="line"></span><br><span class="line">   --version</span><br><span class="line">     Displays version information and exits.</span><br><span class="line"></span><br><span class="line">   -h,  --help</span><br><span class="line">     Displays usage information and exits.</span><br><span class="line"></span><br><span class="line">   &lt;image_file_path&gt;</span><br><span class="line">     Image containing license plates</span><br><span class="line"></span><br><span class="line">   OpenAlpr Command Line Utility</span><br></pre></td></tr></table></figure>
+<p>效果：</p>
+<p><img src="/images/2015/12/27/1/1.jpg"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/Download$ alpr a.jpg</span><br><span class="line">plate0: 10 results</span><br><span class="line">    - EHL5747	 confidence: 90.5541</span><br><span class="line">    - EHL577	 confidence: 83.4746</span><br><span class="line">    - EHLS747	 confidence: 82.0519</span><br><span class="line">    - EH5747	 confidence: 80.6372</span><br><span class="line">    - EHLB747	 confidence: 78.9456</span><br><span class="line">    - EHE5747	 confidence: 78.337</span><br><span class="line">    - EHC5747	 confidence: 77.903</span><br><span class="line">    - EHL747	 confidence: 77.4477</span><br><span class="line">    - EBL5747	 confidence: 76.8316</span><br><span class="line">    - EL5747	 confidence: 75.6551</span><br></pre></td></tr></table></figure>
+<p>对于正面的牌照识别的效果还是很好的，但是对于中国的车牌来说识别的效果就很差了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Computer-Vision/" rel="tag"># Computer Vision</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/12/26/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C3-3/" rel="next" title="苏大Mooc系统的刷课脚本的制作（3/3）">
+                <i class="fa fa-chevron-left"></i> 苏大Mooc系统的刷课脚本的制作（3/3）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/12/28/%E7%94%A8autogen.sh%E5%AE%89%E8%A3%85%E6%BA%90%E7%A0%81%E6%97%B6%E7%9A%84%E9%87%8D%E8%A6%81%E7%BB%84%E4%BB%B6aclocal/" rel="prev" title="用autogen.sh安装源码时的重要组件aclocal">
+                用autogen.sh安装源码时的重要组件aclocal <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

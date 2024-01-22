@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Qt," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="学习编程个人觉得还是得从代码谈起，一方面有利于加深理解，另一方面也方便使（摘）用（抄）。 这一节只要是理解简单的对话框的编写框架和一些基本的标准对话框的使用方法。一些具体的说明将在源码中分析。 Dialog.pro（Qt的基本文件）1234567891011121314151617#-------------------------------------------------## Projec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Qt标准对话框的使用">
+<meta property="og:url" content="https://www.resonanat.com/2015/10/24/Qt%E6%A0%87%E5%87%86%E5%AF%B9%E8%AF%9D%E6%A1%86%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="学习编程个人觉得还是得从代码谈起，一方面有利于加深理解，另一方面也方便使（摘）用（抄）。 这一节只要是理解简单的对话框的编写框架和一些基本的标准对话框的使用方法。一些具体的说明将在源码中分析。 Dialog.pro（Qt的基本文件）1234567891011121314151617#-------------------------------------------------## Projec">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-10-24T13:58:05.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.054Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Qt">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/10/24/Qt标准对话框的使用/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Qt标准对话框的使用 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/24/Qt%E6%A0%87%E5%87%86%E5%AF%B9%E8%AF%9D%E6%A1%86%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Qt标准对话框的使用</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-24T21:58:05+08:00">
+                2015-10-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Qt/" itemprop="url" rel="index">
+                    <span itemprop="name">Qt</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>学习编程个人觉得还是得从代码谈起，一方面有利于加深理解，另一方面也方便使（摘）用（抄）。</p>
+<p>这一节只要是理解简单的对话框的编写框架和一些基本的标准对话框的使用方法。一些具体的说明将在源码中分析。</p>
+<h2 id="Dialog-pro（Qt的基本文件）"><a href="#Dialog-pro（Qt的基本文件）" class="headerlink" title="Dialog.pro（Qt的基本文件）"></a>Dialog.pro（Qt的基本文件）</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#-------------------------------------------------</span><br><span class="line">#</span><br><span class="line"># Project created by QtCreator <span class="number">2015</span><span class="number">-10</span><span class="number">-24</span>T17:<span class="number">38</span>:<span class="number">36</span></span><br><span class="line">#</span><br><span class="line">#-------------------------------------------------</span><br><span class="line"></span><br><span class="line">QT       += core gui</span><br><span class="line"></span><br><span class="line"><span class="built_in">greaterThan</span>(QT_MAJOR_VERSION, <span class="number">4</span>): QT += widgets</span><br><span class="line"></span><br><span class="line">TARGET = DIalog</span><br><span class="line">TEMPLATE = app</span><br><span class="line"></span><br><span class="line">SOURCES += main.cpp</span><br><span class="line">        dialog.cpp</span><br><span class="line"></span><br><span class="line">HEADERS  += dialog.h</span><br></pre></td></tr></table></figure>
+<h2 id="dialog-h（对话框类的声明）"><a href="#dialog-h（对话框类的声明）" class="headerlink" title="dialog.h（对话框类的声明）"></a>dialog.h（对话框类的声明）</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> DIALOG_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DIALOG_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QApplication&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QGridLayout&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QPushButton&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QLineEdit&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFrame&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QString&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFileDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QColor&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QColorDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFont&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFontDialog&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dialog</span> : <span class="keyword">public</span> QDialog</span><br><span class="line">&#123;</span><br><span class="line">    Q_OBJECT</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Dialog</span>(QWidget *parent = <span class="number">0</span>);</span><br><span class="line">    ~<span class="built_in">Dialog</span>();</span><br><span class="line"><span class="keyword">public</span>:<span class="comment">//以下是使用到的控件的声明</span></span><br><span class="line">    QGridLayout *layout;</span><br><span class="line">    QPushButton *filePushButton,*colorPushButton,*fontPushButton;</span><br><span class="line">    QLineEdit *fileLineEdit,*fontLineEdit;</span><br><span class="line">    QFrame *colorFrame;</span><br><span class="line"><span class="keyword">private</span> slots:<span class="comment">//以下是用到的槽，各对应一个信号（事件）</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotOpenFileDlg</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotOpenColorDlg</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotOpenFontDlg</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// DIALOG_H</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="dialog-cpp（类的实现－－－重要－－－）"><a href="#dialog-cpp（类的实现－－－重要－－－）" class="headerlink" title="dialog.cpp（类的实现－－－重要－－－）"></a>dialog.cpp（类的实现－－－重要－－－）</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;dialog.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">Dialog::<span class="built_in">Dialog</span>(QWidget *parent)</span><br><span class="line">    : <span class="built_in">QDialog</span>(parent)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">setWindowTitle</span>(<span class="built_in">tr</span>(<span class="string">&quot;This is the title.&quot;</span>));<span class="comment">//设置对话框标题,这里有个tr()函数，用途好像是为了实现国际化的一个翻译函数。。。不太懂，不过目测问题挺多的，小规模的程序感觉没什么必要用，以后就不用这个了。</span></span><br><span class="line"></span><br><span class="line">    layout=<span class="keyword">new</span> <span class="built_in">QGridLayout</span>(<span class="keyword">this</span>);<span class="comment">//这句是把当前的布局交给layout来表示</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建按钮控件并设置Text属性</span></span><br><span class="line">    filePushButton =<span class="keyword">new</span> QPushButton;</span><br><span class="line">    filePushButton-&gt;<span class="built_in">setText</span>(<span class="string">&quot;File Dialog&quot;</span>);</span><br><span class="line">    colorPushButton=<span class="keyword">new</span> QPushButton;</span><br><span class="line">    colorPushButton-&gt;<span class="built_in">setText</span>(<span class="string">&quot;Color Dialog&quot;</span>);</span><br><span class="line">    fontPushButton=<span class="keyword">new</span> QPushButton;</span><br><span class="line">    fontPushButton-&gt;<span class="built_in">setText</span>(<span class="string">&quot;Font Dialog&quot;</span>);</span><br><span class="line"></span><br><span class="line">    fileLineEdit =<span class="keyword">new</span> QLineEdit; <span class="comment">//QLineEdit类代表编辑框，它可以让用户输入一个单行文本。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//QFrame 类，这个姑且用来显示当前选择的颜色</span></span><br><span class="line">    colorFrame=<span class="keyword">new</span> QFrame;</span><br><span class="line">    colorFrame-&gt;<span class="built_in">setFrameShape</span>(QFrame::Box);<span class="comment">//设置来自框架风格的框架外形值,一般就这个。</span></span><br><span class="line">    colorFrame-&gt;<span class="built_in">setAutoFillBackground</span>(<span class="literal">true</span>);<span class="comment">//是否自动刷新填充色，这里我们需要设为true</span></span><br><span class="line"></span><br><span class="line">　　 <span class="comment">//文本编辑框，用来显示样例字体</span></span><br><span class="line">    fontLineEdit=<span class="keyword">new</span> QLineEdit;</span><br><span class="line">    fontLineEdit-&gt;<span class="built_in">setText</span>(<span class="string">&quot;Hello world.&quot;</span>);</span><br><span class="line"></span><br><span class="line">　　 <span class="comment">//设置布局，这里是GridLayout,用addWidget方法设置控件的相对位置</span></span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(filePushButton,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(fileLineEdit,<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(colorPushButton,<span class="number">1</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(colorFrame,<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(fontPushButton,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(fontLineEdit,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">setMargin</span>(<span class="number">15</span>);<span class="comment">//设置到上下左右边界的距离</span></span><br><span class="line">    layout-&gt;<span class="built_in">setSpacing</span>(<span class="number">10</span>);<span class="comment">//设置各个控件之间的空隙</span></span><br><span class="line"></span><br><span class="line">　　 <span class="comment">//信号和槽的连接，连接各个按钮的点击事件</span></span><br><span class="line">    <span class="built_in">connect</span>(filePushButton,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotOpenFileDlg</span>()));</span><br><span class="line">    <span class="built_in">connect</span>(colorPushButton,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotOpenColorDlg</span>()));</span><br><span class="line">    <span class="built_in">connect</span>(fontPushButton,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotOpenFontDlg</span>()));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Dialog::~<span class="built_in">Dialog</span>()</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开标准文件选择对话框</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotOpenFileDlg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//传入句柄，标题，默认目录，文件类型(多种文件的话用;;分开)，返回选择的文件名，或者一个空串</span></span><br><span class="line">    QString s=QFileDialog::<span class="built_in">getOpenFileName</span>(<span class="keyword">this</span>,<span class="string">&quot;open file dialog&quot;</span>,<span class="string">&quot;/&quot;</span>,<span class="string">&quot;C++ files(*.cpp);;C files(*.c)&quot;</span>);</span><br><span class="line">    fileLineEdit-&gt;<span class="built_in">setText</span>(s);<span class="comment">//将文件名交给编辑框</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开标准颜色选择对话框</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotOpenColorDlg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//getColor方法会打开一个颜色选择对话框，传入默认的颜色，返回选择的颜色。</span></span><br><span class="line">    QColor color=QColorDialog::<span class="built_in">getColor</span>(Qt::blue);</span><br><span class="line">    <span class="keyword">if</span>(color.<span class="built_in">isValid</span>())&#123;<span class="comment">//判断颜色是否合法</span></span><br><span class="line">        colorFrame-&gt;<span class="built_in">setPalette</span>(<span class="built_in">QPalette</span>(color));<span class="comment">//将Frame的背景色设置为选择的颜色</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开标准字体对话框</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotOpenFontDlg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">bool</span> ok;</span><br><span class="line">　　 <span class="comment">//getFont方法打开一个字体选择对话框，返回选择的字体，同时以引用的方式返回字体是否合法。</span></span><br><span class="line">    QFont font=QFontDialog::<span class="built_in">getFont</span>(&amp;ok);</span><br><span class="line">    <span class="keyword">if</span>(ok)&#123;<span class="comment">//判断字体是否合法</span></span><br><span class="line">        fontLineEdit-&gt;<span class="built_in">setFont</span>(font);<span class="comment">//设置编辑框的字体</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Qt/" rel="tag"># Qt</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/23/vsftp%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E9%85%8D%E7%BD%AE2-2/" rel="next" title="vsftp服务的搭建和配置(2/2)">
+                <i class="fa fa-chevron-left"></i> vsftp服务的搭建和配置(2/2)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/24/Qt%E5%90%84%E7%B1%BB%E4%BD%8D%E7%BD%AE%E4%BF%A1%E6%81%AF%E5%87%BD%E6%95%B0/" rel="prev" title="Qt各类位置信息函数">
+                Qt各类位置信息函数 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Dialog-pro%EF%BC%88Qt%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%96%87%E4%BB%B6%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Dialog.pro（Qt的基本文件）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dialog-h%EF%BC%88%E5%AF%B9%E8%AF%9D%E6%A1%86%E7%B1%BB%E7%9A%84%E5%A3%B0%E6%98%8E%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">dialog.h（对话框类的声明）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dialog-cpp%EF%BC%88%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%8D%EF%BC%8D%EF%BC%8D%E9%87%8D%E8%A6%81%EF%BC%8D%EF%BC%8D%EF%BC%8D%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">dialog.cpp（类的实现－－－重要－－－）</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

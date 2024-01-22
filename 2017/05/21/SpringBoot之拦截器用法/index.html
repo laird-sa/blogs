@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Web," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="拦截器我们知道做Web开发最知名的一个编程思路叫AOP–面向切面的编程。第一次接触到这个名词以为是跟面向对象编程一样是套很复杂的流程。然而实际接触下来才发现，这其实是一个非常简单的思想，能够解决非常现实的问题，比如登录问题。 我们知道很多网站在访问时是需要登录的，也就是说服务器在处理每一个访问之前，必须都要做一件事情，就是登录用户的身份确认。我们很容易想到一个解决方法，就是定义一个类，专门处理这个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot之拦截器用法">
+<meta property="og:url" content="https://www.resonanat.com/2017/05/21/SpringBoot%E4%B9%8B%E6%8B%A6%E6%88%AA%E5%99%A8%E7%94%A8%E6%B3%95/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="拦截器我们知道做Web开发最知名的一个编程思路叫AOP–面向切面的编程。第一次接触到这个名词以为是跟面向对象编程一样是套很复杂的流程。然而实际接触下来才发现，这其实是一个非常简单的思想，能够解决非常现实的问题，比如登录问题。 我们知道很多网站在访问时是需要登录的，也就是说服务器在处理每一个访问之前，必须都要做一件事情，就是登录用户的身份确认。我们很容易想到一个解决方法，就是定义一个类，专门处理这个">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-05-21T14:32:53.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.058Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Web">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/05/21/SpringBoot之拦截器用法/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>SpringBoot之拦截器用法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/21/SpringBoot%E4%B9%8B%E6%8B%A6%E6%88%AA%E5%99%A8%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">SpringBoot之拦截器用法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-21T22:32:53+08:00">
+                2017-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="拦截器"><a href="#拦截器" class="headerlink" title="拦截器"></a>拦截器</h2><p>我们知道做Web开发最知名的一个编程思路叫AOP–面向切面的编程。第一次接触到这个名词以为是跟面向对象编程一样是套很复杂的流程。然而实际接触下来才发现，这其实是一个非常简单的思想，能够解决非常现实的问题，比如登录问题。</p>
+<p>我们知道很多网站在访问时是需要登录的，也就是说服务器在处理每一个访问之前，必须都要做一件事情，就是登录用户的身份确认。我们很容易想到一个解决方法，就是定义一个类，专门处理这个登录问题。但是这也是比较麻烦的事情，在每一个请求处理前都要写一些一模一样的代码来调用这个类，显然维护起来比较难受。那怎么办呢？这时候我们很容易想到在Web请求处理的生命周期里横插一刀，在对请求进行处理之前统一加上一个函数，做一些必须做的事情。那么这个函数就叫做切面，这个方法就叫做面向切面的编程。</p>
+<p>不过事实上，切面也分种类，我们可以在通过请求的URL来进行过滤，也可以指定Controller的名字来进行过滤。有时候我们会通过Controller的名字来进行拦截，不过这需要添加一些额外的包，比如<code>spring-boot-starter-aop</code>。通常情况下我们使用的是对URL进行过滤，这就要用到我们SpringBoot自带的Interceptor机制了。</p>
+<h2 id="定义拦截器"><a href="#定义拦截器" class="headerlink" title="定义拦截器"></a>定义拦截器</h2><p>为了定义一个拦截器，我们只需要定义一个Component，让他实现HandlerInterceptor接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppInterceptor</span> <span class="keyword">implements</span> <span class="title class_">HandlerInterceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">preHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>事实上，HandlerInterceptor这个接口有三个重载方法，我们可以打开源码来看看:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">HandlerInterceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Intercept the execution of a handler. Called after HandlerMapping determined</span></span><br><span class="line"><span class="comment">	 * an appropriate handler object, but before HandlerAdapter invokes the handler.</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;DispatcherServlet processes a handler in an execution chain, consisting</span></span><br><span class="line"><span class="comment">	 * of any number of interceptors, with the handler itself at the end.</span></span><br><span class="line"><span class="comment">	 * With this method, each interceptor can decide to abort the execution chain,</span></span><br><span class="line"><span class="comment">	 * typically sending a HTTP error or writing a custom response.</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; special considerations apply for asynchronous</span></span><br><span class="line"><span class="comment">	 * request processing. For more details see</span></span><br><span class="line"><span class="comment">	 * &#123;<span class="doctag">@link</span> org.springframework.web.servlet.AsyncHandlerInterceptor&#125;.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> request current HTTP request</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> response current HTTP response</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> handler chosen handler to execute, for type and/or instance evaluation</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> true&#125; if the execution chain should proceed with the</span></span><br><span class="line"><span class="comment">	 * next interceptor or the handler itself. Else, DispatcherServlet assumes</span></span><br><span class="line"><span class="comment">	 * that this interceptor has already dealt with the response itself.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception in case of errors</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="type">boolean</span> <span class="title function_">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span></span><br><span class="line">			<span class="keyword">throws</span> Exception;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Intercept the execution of a handler. Called after HandlerAdapter actually</span></span><br><span class="line"><span class="comment">	 * invoked the handler, but before the DispatcherServlet renders the view.</span></span><br><span class="line"><span class="comment">	 * Can expose additional model objects to the view via the given ModelAndView.</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;DispatcherServlet processes a handler in an execution chain, consisting</span></span><br><span class="line"><span class="comment">	 * of any number of interceptors, with the handler itself at the end.</span></span><br><span class="line"><span class="comment">	 * With this method, each interceptor can post-process an execution,</span></span><br><span class="line"><span class="comment">	 * getting applied in inverse order of the execution chain.</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; special considerations apply for asynchronous</span></span><br><span class="line"><span class="comment">	 * request processing. For more details see</span></span><br><span class="line"><span class="comment">	 * &#123;<span class="doctag">@link</span> org.springframework.web.servlet.AsyncHandlerInterceptor&#125;.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> request current HTTP request</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> response current HTTP response</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> handler handler (or &#123;<span class="doctag">@link</span> HandlerMethod&#125;) that started asynchronous</span></span><br><span class="line"><span class="comment">	 * execution, for type and/or instance examination</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> modelAndView the &#123;<span class="doctag">@code</span> ModelAndView&#125; that the handler returned</span></span><br><span class="line"><span class="comment">	 * (can also be &#123;<span class="doctag">@code</span> null&#125;)</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception in case of errors</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">postHandle</span><span class="params">(</span></span><br><span class="line"><span class="params">			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)</span></span><br><span class="line">			<span class="keyword">throws</span> Exception;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Callback after completion of request processing, that is, after rendering</span></span><br><span class="line"><span class="comment">	 * the view. Will be called on any outcome of handler execution, thus allows</span></span><br><span class="line"><span class="comment">	 * for proper resource cleanup.</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;Note: Will only be called if this interceptor&#x27;s &#123;<span class="doctag">@code</span> preHandle&#125;</span></span><br><span class="line"><span class="comment">	 * method has successfully completed and returned &#123;<span class="doctag">@code</span> true&#125;!</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;As with the &#123;<span class="doctag">@code</span> postHandle&#125; method, the method will be invoked on each</span></span><br><span class="line"><span class="comment">	 * interceptor in the chain in reverse order, so the first interceptor will be</span></span><br><span class="line"><span class="comment">	 * the last to be invoked.</span></span><br><span class="line"><span class="comment">	 * &lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; special considerations apply for asynchronous</span></span><br><span class="line"><span class="comment">	 * request processing. For more details see</span></span><br><span class="line"><span class="comment">	 * &#123;<span class="doctag">@link</span> org.springframework.web.servlet.AsyncHandlerInterceptor&#125;.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> request current HTTP request</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> response current HTTP response</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> handler handler (or &#123;<span class="doctag">@link</span> HandlerMethod&#125;) that started asynchronous</span></span><br><span class="line"><span class="comment">	 * execution, for type and/or instance examination</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> ex exception thrown on handler execution, if any</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception in case of errors</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">void</span> <span class="title function_">afterCompletion</span><span class="params">(</span></span><br><span class="line"><span class="params">			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)</span></span><br><span class="line">			<span class="keyword">throws</span> Exception;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这三个函数就像三把刀，横着插进了服务端接受并处理请求的整个生命周期。</p>
+<h3 id="preHandle"><a href="#preHandle" class="headerlink" title="preHandle"></a>preHandle</h3><p>preHandle作用的地方是请求已经被<code>RequestMapping</code>分配到了不同的<code>Controller</code>里，但是还并未被<code>Controller</code>进行处理。<br>如果我们的目的是对登陆进行验证的话，那么这里就是我们主要的工作地点了。在这个过程里，我们可以验证用户的Cookie：</p>
+<ul>
+<li>如果成功，则可以记录下当前User的信息，并且将这个信息保存到一个ThreadLocal的UserComponent里，方便以后的调用，并且将请求放行。</li>
+<li>如果失败，则可以将请求通过response的sendRedirect函数重定向到登陆页面。<br>这里的返回值就是是否放行，如果不放行，那么客户端就收不到任何消息。显然我们一般都会放行。</li>
+</ul>
+<h3 id="postHandle"><a href="#postHandle" class="headerlink" title="postHandle"></a>postHandle</h3><p>postHandle作用的地方是请求已经被<code>Controller</code>处理了，但是还并未传递到网页模板进行渲染。因此我们可以看到postHandle的参数比preHandle多了一个ModelAndView这个参数。这个参数其实就包括了<code>Controller</code>处理后需要传递给模板的那个Model参数。<br>如果我们的目的是将拦截器得到的User信息统一渲染到模板上，那么我们只要在这个步骤做这件事就不会错了:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">if</span> (modelAndView != <span class="literal">null</span>) &#123;</span><br><span class="line">        modelAndView.addObject(<span class="string">&quot;user&quot;</span>, userComponent.getUser());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="afterCompletion"><a href="#afterCompletion" class="headerlink" title="afterCompletion"></a>afterCompletion</h3><p>afterCompletion显然就是处理一些收尾工作了，他作用的地方就是在页面被渲染之后即将返回给用户的时候。这里通常是清除一些局部变量，比如清除掉在前面保存的ThreadLocal的本地信息:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    userComponent.clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置拦截器"><a href="#配置拦截器" class="headerlink" title="配置拦截器"></a>配置拦截器</h2><p>当然，上面写了半天代码，我们并没有定义我们的拦截器的拦截规则，也没有在SpringBoot里做任何配置。下面我们就来进行相应的配置。<br>我们需要新建一个继承了<code>WebMvcConfigurerAdapter</code>的配置类，或者在原有配置类上进行修改。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppWebConfiguration</span> <span class="keyword">extends</span> <span class="title class_">WebMvcConfigurerAdapter</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    AppInterceptor appInterceptor;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addInterceptors</span><span class="params">(InterceptorRegistry registry)</span> &#123;</span><br><span class="line">        registry.addInterceptor(appInterceptor).addPathPatterns(<span class="string">&quot;/app/**&quot;</span>);</span><br><span class="line">        <span class="built_in">super</span>.addInterceptors(registry);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个WebMvcConfigurerAdapter管理了很多的配置信息，就包括了拦截器的配置。<br>我们需要做的就是在这里通过依赖注入导入我们想注册的拦截器，然后通过重写<code>addInterceptors</code>方法来进行配置。<br>如果需要对拦截器进行过滤，我们只需要对<code>addInterceptors</code>返回的<code>InterceptorRegistration</code>对象进行处理。<br>这个<code>InterceptorRegistration</code>对象通常有两个方法<code>addPathPatterns</code>和<code>excludePathPatterns</code>，并且支持链式调用。<br>显然，这两个函数应该会接受一个用来进行匹配的字符串，跟普通的正则匹配的规则不同，这类规则我们通常称为<code>Ant path style</code>。</p>
+<h2 id="Ant-Path-Style"><a href="#Ant-Path-Style" class="headerlink" title="Ant Path Style"></a>Ant Path Style</h2><p>这个规范的设计在<code>org.springframework.util.AntPathMatcher</code>里，基本上包括了下面的规则：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">? matches one character</span><br><span class="line">* matches zero or more characters</span><br><span class="line">** matches zero or more directories in a path</span><br><span class="line">&#123;spring:[a-z]+&#125; matches the regexp [a-z]+ as a path variable named &quot;spring&quot;</span><br></pre></td></tr></table></figure>
+
+<p>具体可以参照下面的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">com/t?st.jsp — matches com/test.jsp but also com/tast.jsp or com/txst.jsp</span><br><span class="line">com/*.jsp — matches all .jsp files in the com directory</span><br><span class="line">com/**/test.jsp — matches all test.jsp files underneath the com path</span><br><span class="line">org/springframework/**/*.jsp — matches all .jsp files underneath the org/springframework path</span><br><span class="line">org/**/servlet/bla.jsp — matches org/springframework/servlet/bla.jsp but also org/springframework/testing/servlet/bla.jsp and org/servlet/bla.jsp</span><br><span class="line">com/&#123;filename:\\w+&#125;.jsp will match com/test.jsp and assign the value test to the filename variable</span><br></pre></td></tr></table></figure>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>通过上述步骤，我们就成功配置了一个拦截器。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/2952196/learning-ant-path-style">learning-ant-path-style</a><br><a target="_blank" rel="noopener" href="http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html">Spring doc–AntPathMatcher</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Web/" rel="tag"># Web</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/21/SpringBoot%E4%B9%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/" rel="next" title="SpringBoot之定时任务">
+                <i class="fa fa-chevron-left"></i> SpringBoot之定时任务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/22/java-net/" rel="prev" title="「Java教程」网络编程基础">
+                「Java教程」网络编程基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">拦截器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">定义拦截器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#preHandle"><span class="nav-number">2.1.</span> <span class="nav-text">preHandle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#postHandle"><span class="nav-number">2.2.</span> <span class="nav-text">postHandle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#afterCompletion"><span class="nav-number">2.3.</span> <span class="nav-text">afterCompletion</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">配置拦截器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ant-Path-Style"><span class="nav-number">4.</span> <span class="nav-text">Ant Path Style</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

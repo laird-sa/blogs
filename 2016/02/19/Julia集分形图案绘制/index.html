@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="从去年就开始窥东大的C++教学群，当时就被李骏扬老师讲的分形图案给吸引了，简直美赞了。他们的期末作业就是制作一个分形图案的视频，我们这种学校显然不会有这种东西。于是就想着能不能自己研究着画下，然而并不知道这种图案怎么画，度娘上找来的基本没用。搁置了一年，偶然间翻到了一篇论文，终于找到了画图的方法了，加上之前正好有用python绘图的工具，总算把这个东西搞通了一点。其实这个玩意的水还是非常深的，牵涉">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Julia集分形图案绘制">
+<meta property="og:url" content="https://www.resonanat.com/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="从去年就开始窥东大的C++教学群，当时就被李骏扬老师讲的分形图案给吸引了，简直美赞了。他们的期末作业就是制作一个分形图案的视频，我们这种学校显然不会有这种东西。于是就想着能不能自己研究着画下，然而并不知道这种图案怎么画，度娘上找来的基本没用。搁置了一年，偶然间翻到了一篇论文，终于找到了画图的方法了，加上之前正好有用python绘图的工具，总算把这个东西搞通了一点。其实这个玩意的水还是非常深的，牵涉">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/19/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/19/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/19/1/3.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/19/1/4.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/19/1/5.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/02/19/1/6.gif">
+<meta property="article:published_time" content="2016-02-19T11:22:37.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.041Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/02/19/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/02/19/Julia集分形图案绘制/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Julia集分形图案绘制 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Julia集分形图案绘制</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-19T19:22:37+08:00">
+                2016-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从去年就开始窥东大的C++教学群，当时就被李骏扬老师讲的分形图案给吸引了，简直美赞了。他们的期末作业就是制作一个分形图案的视频，我们这种学校显然不会有这种东西。于是就想着能不能自己研究着画下，然而并不知道这种图案怎么画，度娘上找来的基本没用。搁置了一年，偶然间翻到了一篇论文，终于找到了画图的方法了，加上之前正好有用python绘图的工具，总算把这个东西搞通了一点。其实这个玩意的水还是非常深的，牵涉到了复分析，分形，甚至是混沌理论，据说从上古贝壳的图案，到如今麦田怪圈的图案，都和Julia集有关，说来也是玄乎。</p>
+<h2 id="Julia集"><a href="#Julia集" class="headerlink" title="Julia集"></a>Julia集</h2><p>简单的讲，_Julia_集就是复平面上的一些点$z$，对于一个固定的复数$c$，$z$点在经过无限次$z\gets z^2+c$的迭代之后最终都收敛到一个固定的值上，那么复平面上所有这样的z点构成的集合就是_julia_集。（如果固定初始值而将$c$当做变量则生成的是mandelbrot集）</p>
+<p>当然，这个迭代公式也有他的变种，比如多重julia集或者指数julia集等。</p>
+<p>讲的不太清楚，具体的介绍可以参见_<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Julia_set">wiki pedia</a><em>以及</em><a target="_blank" rel="noopener" href="http://www.matrix67.com/blog/archives/4570">matrix67</a>_的博客(对度娘表示无语)，这里就不班门弄斧了。_wiki_里面主要介绍的是一些数学定义和推导以及他的一些典型图形，而_matrix67_写的则更加容易理解，他通过一步一步迭代过程的展现十分生动的描述了图像的产生过程。不过事实上，matrix67在之前的博客里虽然提供了绘图的代码，但是并没有介绍图像生成的算法。干看代码还是有点恶心的。而市面上又没怎么提及绘图的算法。事实上，他用的算法也非常的简单普遍，我们叫他“逃逸时间算法”。</p>
+<h2 id="逃逸时间算法（Escape-Time-Algorithm）"><a href="#逃逸时间算法（Escape-Time-Algorithm）" class="headerlink" title="逃逸时间算法（Escape Time Algorithm）"></a>逃逸时间算法（Escape Time Algorithm）</h2><p>曾经纳闷了很长时间，上面那个简单的迭代式究竟是怎样生成那些纷繁复杂的分形图案的。最后终于在知网上找到了这个算法。</p>
+<ol>
+<li>设定逃逸半径R，最高迭代次数N；</li>
+<li>将初始的点z进行迭代，如果在N次迭代之内z的模超过了R，那么就认为z“逃逸出去”了，逃逸出去时的迭代次数n就是”逃逸时间“；</li>
+<li>如果经过N次迭代，z的模仍然未到达R，那么就认为z是收敛集内的点；</li>
+<li>将所有的逃逸点按照不同的逃逸时间进行染色就得到了美丽的“逃逸时间图”。</li>
+</ol>
+<p>其实逃逸时间图显示的并不是真正意义上的_julia_集，而是不属于_julia_集合的点。</p>
+<p>当然，还有一种常用的_julia_集绘图算法–外部距离估计算法，这里不做过多介绍。</p>
+<h2 id="静态实现"><a href="#静态实现" class="headerlink" title="静态实现"></a>静态实现</h2><p>用python+matplotlib模拟逃逸时间算法进行简单绘图：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">c_real=-<span class="number">1.621</span></span><br><span class="line">c_imag=-<span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>(<span class="params">a</span>):</span><br><span class="line">	c=np.<span class="built_in">complex</span>(c_real,c_imag)</span><br><span class="line">	<span class="keyword">return</span> np.exp(a*a*a)+c+a*a-a</span><br><span class="line"></span><br><span class="line">R=<span class="number">50</span></span><br><span class="line">density=<span class="number">400</span></span><br><span class="line">N=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">x=[]</span><br><span class="line">y=[]</span><br><span class="line">c=[]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(density):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> xrange(density):</span><br><span class="line">		real=(i-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		imag=(j-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		now=np.<span class="built_in">complex</span>(real,imag)</span><br><span class="line">		<span class="keyword">for</span> n <span class="keyword">in</span> xrange(N):</span><br><span class="line">			now=func(now)</span><br><span class="line">			<span class="keyword">if</span> np.<span class="built_in">abs</span>(now)&gt;R:</span><br><span class="line">				x.append(real)</span><br><span class="line">				y.append(imag)</span><br><span class="line">				c.append(n+<span class="number">1</span>)</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">plt.scatter(x,y,s=<span class="number">2</span>,c=c,edgecolors=<span class="string">&#x27;face&#x27;</span>)</span><br><span class="line">plt.xticks([])</span><br><span class="line">plt.yticks([])</span><br><span class="line">plt.xlim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plt.ylim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plt.savefig(<span class="built_in">str</span>(const_real)+<span class="string">&#x27;+&#x27;</span>+<span class="built_in">str</span>(const_imag)+<span class="string">&#x27;i.png&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>参数c由c_real和c_imag确定，迭代公式由func函数确定，描点时注意去掉边界以及标尺。</p>
+<p>通过这个模板可以非常轻松的绘出下面这几张图：</p>
+<p><img src="/images/2016/02/19/1/1.png" alt="c=-0.74543+0.11301i"></p>
+<p><img src="/images/2016/02/19/1/2.png" alt="c=-0.8+0.156i"></p>
+<p><img src="/images/2016/02/19/1/3.png" alt="c=-0.4+0.6i"></p>
+<p><img src="/images/2016/02/19/1/4.png" alt="c=-0.621+0i,func=exp(z*z*z)+c"></p>
+<p><img src="/images/2016/02/19/1/5.png" alt="c=0.285+0.01i"></p>
+<h2 id="动态实现"><a href="#动态实现" class="headerlink" title="动态实现"></a>动态实现</h2><p>既然我们可以直接绘出迭代N次之后的图像，那么我们当然也可以画出每一次的图像组合成动图，这样看起来效果也更明显。</p>
+<p><strong>图像生成：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>(<span class="params">a</span>):</span><br><span class="line">	c=np.<span class="built_in">complex</span>(-<span class="number">0.74543</span>,<span class="number">0.11301</span>)</span><br><span class="line">	<span class="keyword">return</span> a*a+c</span><br><span class="line"></span><br><span class="line">R=<span class="number">10</span></span><br><span class="line">density=<span class="number">400</span></span><br><span class="line">N=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">time1=time.time()</span><br><span class="line"></span><br><span class="line">mat=[]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(density):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> xrange(density):</span><br><span class="line">		real=(i-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		imag=(j-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		now=np.<span class="built_in">complex</span>(real,imag)</span><br><span class="line">		<span class="keyword">for</span> n <span class="keyword">in</span> xrange(N):</span><br><span class="line">			now=func(now)</span><br><span class="line">			<span class="keyword">if</span> np.<span class="built_in">abs</span>(now)&gt;R:</span><br><span class="line">				mat.append((real,imag,n+<span class="number">1</span>))</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">time2=time.time()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;calculating costs &#x27;</span>+<span class="built_in">str</span>(time2-time1)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line">mat.sort(<span class="keyword">lambda</span> x,y:cmp(x[<span class="number">2</span>],y[<span class="number">2</span>]))</span><br><span class="line"></span><br><span class="line">time3=time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;sorting costs &#x27;</span>+<span class="built_in">str</span>(time3-time2)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line">real=[]</span><br><span class="line">imag=[]</span><br><span class="line">color=[]</span><br><span class="line"></span><br><span class="line">cnt=<span class="number">1</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(mat)-<span class="number">1</span>):</span><br><span class="line">	real.append(mat[i][<span class="number">0</span>])</span><br><span class="line">	imag.append(mat[i][<span class="number">1</span>])</span><br><span class="line">	color.append(mat[i][<span class="number">2</span>])</span><br><span class="line">	<span class="keyword">if</span> i==<span class="built_in">len</span>(mat)-<span class="number">2</span> <span class="keyword">or</span> (<span class="keyword">not</span> mat[i][<span class="number">2</span>]==mat[i+<span class="number">1</span>][<span class="number">2</span>]):</span><br><span class="line">		plt.scatter(real,imag,s=<span class="number">2</span>,c=color,alpha=<span class="number">1</span>,edgecolors=<span class="string">&#x27;face&#x27;</span>)</span><br><span class="line">                plt.xticks([])</span><br><span class="line">                plt.yticks([])</span><br><span class="line">		plt.xlim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">		plt.ylim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">		plt.savefig(<span class="string">&#x27;%02d&#x27;</span> % cnt)</span><br><span class="line">		<span class="built_in">print</span> <span class="string">&#x27;pic&#x27;</span>+(<span class="string">&#x27;%02d&#x27;</span> % cnt)+<span class="string">&#x27; OK.&#x27;</span></span><br><span class="line">		cnt+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">time4=time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;generating costs &#x27;</span>+<span class="built_in">str</span>(time4-time3)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;total costs &#x27;</span>+<span class="built_in">str</span>(time4-time3)+<span class="string">&#x27; s.&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>生成图像的过程比较缓慢，相比而言计算所耗费的时间就不算太多了。</p>
+<p><strong>gif组合：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$convert *.png -resize 320x240 out.gif</span><br></pre></td></tr></table></figure>
+<p>我们用ImageMagick工具来生成gif，这里如果用-layer来压缩会导致图像失真，因此用改变图像大小的方式来适当压缩文件。</p>
+<p>最后就可以生成动图：</p>
+<p><img src="/images/2016/02/19/1/6.gif"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/11/Ubuntu%E4%B8%8BOpencv%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%E7%AE%80%E8%BF%B0/" rel="next" title="Ubuntu下Opencv安装使用简述">
+                <i class="fa fa-chevron-left"></i> Ubuntu下Opencv安装使用简述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/" rel="prev" title="边缘检测">
+                边缘检测 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Julia%E9%9B%86"><span class="nav-number">1.</span> <span class="nav-text">Julia集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E6%97%B6%E9%97%B4%E7%AE%97%E6%B3%95%EF%BC%88Escape-Time-Algorithm%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">逃逸时间算法（Escape Time Algorithm）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">静态实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">动态实现</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

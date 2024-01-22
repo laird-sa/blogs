@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,Machine Learning,Computer Vision," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这是段简单的代码，目的是处理旋转验证码的问题，主要思想就是通过将字符以45°到135°的角度投影下来，得到一系列的投影范围，然后得到这当中投影长度最小的一个角度。这个角度我们就可以简单的把他看成是字符的偏转角。然后用这个角度通过仿射变换得到矫正后的字符。 代码1234567891011121314151617181920212223242526272829303132333435363738394">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用投影法矫正字符旋转">
+<meta property="og:url" content="https://www.resonanat.com/2016/04/16/%E7%94%A8%E6%8A%95%E5%BD%B1%E6%B3%95%E7%9F%AB%E6%AD%A3%E5%AD%97%E7%AC%A6%E6%97%8B%E8%BD%AC/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="这是段简单的代码，目的是处理旋转验证码的问题，主要思想就是通过将字符以45°到135°的角度投影下来，得到一系列的投影范围，然后得到这当中投影长度最小的一个角度。这个角度我们就可以简单的把他看成是字符的偏转角。然后用这个角度通过仿射变换得到矫正后的字符。 代码1234567891011121314151617181920212223242526272829303132333435363738394">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/16/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/16/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/16/1/3.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/16/1/4.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/16/1/5.png">
+<meta property="article:published_time" content="2016-04-15T16:35:02.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.097Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Computer Vision">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/04/16/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/04/16/用投影法矫正字符旋转/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>用投影法矫正字符旋转 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/16/%E7%94%A8%E6%8A%95%E5%BD%B1%E6%B3%95%E7%9F%AB%E6%AD%A3%E5%AD%97%E7%AC%A6%E6%97%8B%E8%BD%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">用投影法矫正字符旋转</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-16T00:35:02+08:00">
+                2016-04-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是段简单的代码，目的是处理旋转验证码的问题，主要思想就是通过将字符以45°到135°的角度投影下来，得到一系列的投影范围，然后得到这当中投影长度最小的一个角度。这个角度我们就可以简单的把他看成是字符的偏转角。然后用这个角度通过仿射变换得到矫正后的字符。</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2,os,sys,Image,math</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getBinary</span>(<span class="params">path</span>):<span class="comment">#传入图片名，返回二值化的图片</span></span><br><span class="line"> im=cv2.imread(path,<span class="number">0</span>)</span><br><span class="line"> thresh,im=cv2.threshold(<span class="number">255</span>-im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line"> <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadow</span>(<span class="params">im,angel</span>):<span class="comment">#传入图像im以及角度(角度制)angle，返回图像在该角度下的投影长度</span></span><br><span class="line">    x=[]</span><br><span class="line">    height , width = im.shape</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                x.append(j-<span class="number">1.0</span>*i/math.tan(math.radians(angel)))</span><br><span class="line">    x=np.array(x)</span><br><span class="line">    <span class="keyword">return</span> x.<span class="built_in">max</span>()-x.<span class="built_in">min</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadowTest</span>():<span class="comment">#测试shadow函数,需要weibo文件夹下的图片</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">10</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> shadow(im,<span class="number">50</span>)</span><br><span class="line">        figure()</span><br><span class="line">        gray()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngle</span>(<span class="params">im</span>):<span class="comment">#传入图片，返回使他投影最小的角度</span></span><br><span class="line">    minShadow=<span class="number">500</span></span><br><span class="line">    ans=<span class="number">90</span></span><br><span class="line">    <span class="keyword">for</span> angle <span class="keyword">in</span> np.linspace(<span class="number">45</span>,<span class="number">135</span>,<span class="number">91</span>):<span class="comment">#我这里范围设置的是45到135度，分度值是１度</span></span><br><span class="line">        thisShadow=shadow(im,angle)</span><br><span class="line">        <span class="keyword">if</span> minShadow&gt;thisShadow:</span><br><span class="line">            ans=angle</span><br><span class="line">            minShadow=thisShadow</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngleTest</span>():<span class="comment">#测试getAngle函数</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">5</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> getAngle(im)</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affine</span>(<span class="params">im</span>):<span class="comment">#将结合上面的函数，输入图片，输出矫正后的图片</span></span><br><span class="line"> height,width=im.shape</span><br><span class="line"> angle=getAngle(im)</span><br><span class="line"> <span class="comment">#下面是仿射变换，通过确定三点的原值和新值来确定变换的过程，这里我们选取的三点是中心点，顶部中心点，和左部中心点。</span></span><br><span class="line"> pts1=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>,<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line"> pts2=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>+height/<span class="number">2</span>/math.tan(math.radians(angle)),<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line"> M=cv2.getAffineTransform(pts1,pts2)</span><br><span class="line"> dst=cv2.warpAffine(im,M,(width,height))</span><br><span class="line"></span><br><span class="line"> <span class="keyword">return</span> dst</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affineTest</span>():<span class="comment">#测试affine函数</span></span><br><span class="line"> directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line"> pics=os.listdir(directory)</span><br><span class="line"> <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">1</span>]:</span><br><span class="line"> im=getBinary(os.path.join(directory,pic))</span><br><span class="line"> dst=affine(im)</span><br><span class="line"> gray()</span><br><span class="line"> figure()</span><br><span class="line"> imshow(np.hstack([im,dst]))</span><br><span class="line"> axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">affineTest()<span class="comment">#测试效果</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="/images/2016/04/16/1/1.png"><br><img src="/images/2016/04/16/1/2.png"><br><img src="/images/2016/04/16/1/3.png"><br><img src="/images/2016/04/16/1/4.png"><br><img src="/images/2016/04/16/1/5.png"></p>
+<p>可以发现这个方法还是有点效果的。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/Computer-Vision/" rel="tag"># Computer Vision</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/15/%E5%85%B3%E4%BA%8EWordPress%E4%B8%AD%E5%AD%97%E4%BD%93%E5%8A%A0%E8%BD%BD%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" rel="next" title="关于WordPress中字体加载慢的问题解决方案">
+                <i class="fa fa-chevron-left"></i> 关于WordPress中字体加载慢的问题解决方案
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/" rel="prev" title="结合连通块平均分割以及投影矫正的验证码分割算法">
+                结合连通块平均分割以及投影矫正的验证码分割算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%88%E6%9E%9C%E5%9B%BE"><span class="nav-number">2.</span> <span class="nav-text">效果图</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

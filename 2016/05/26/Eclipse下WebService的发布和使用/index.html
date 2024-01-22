@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言书上和网上有很多介绍WebService、WSDL、SOAP、UDDI概念的内容，大都说的云里雾里。尤其是书上介绍了WSDL、SOAP、UDDI的写法规范，写的天花乱坠，更是让人光看看就不想去了解这个东西了。我觉得这种东西还得实践一下才能知道WebService真正的意义以及WSDL等规范的存在价值。 OK，下面就是本人参照网上各种版本的教程捣鼓出来的WebService的编写和使用方法，不过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Eclipse下WebService的发布和使用">
+<meta property="og:url" content="https://www.resonanat.com/2016/05/26/Eclipse%E4%B8%8BWebService%E7%9A%84%E5%8F%91%E5%B8%83%E5%92%8C%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言书上和网上有很多介绍WebService、WSDL、SOAP、UDDI概念的内容，大都说的云里雾里。尤其是书上介绍了WSDL、SOAP、UDDI的写法规范，写的天花乱坠，更是让人光看看就不想去了解这个东西了。我觉得这种东西还得实践一下才能知道WebService真正的意义以及WSDL等规范的存在价值。 OK，下面就是本人参照网上各种版本的教程捣鼓出来的WebService的编写和使用方法，不过">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/3.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/4.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/5.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/6.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/7.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/05/26/1/8.png">
+<meta property="article:published_time" content="2016-05-26T14:47:37.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.038Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/05/26/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/05/26/Eclipse下WebService的发布和使用/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Eclipse下WebService的发布和使用 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/26/Eclipse%E4%B8%8BWebService%E7%9A%84%E5%8F%91%E5%B8%83%E5%92%8C%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Eclipse下WebService的发布和使用</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-26T22:47:37+08:00">
+                2016-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>书上和网上有很多介绍WebService、WSDL、SOAP、UDDI概念的内容，大都说的云里雾里。尤其是书上介绍了WSDL、SOAP、UDDI的写法规范，写的天花乱坠，更是让人光看看就不想去了解这个东西了。我觉得这种东西还得实践一下才能知道WebService真正的意义以及WSDL等规范的存在价值。</p>
+<p>OK，下面就是本人参照网上各种版本的教程捣鼓出来的WebService的编写和使用方法，不过由于我服务器上没有配置Tomcat、本机又没有域名，所以就没有在UDDI中进行注册。</p>
+<h2 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h2><p>JDK1.8、Tomcat v8.0、Eclipse J2EE  Mars.2</p>
+<h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><p>WebService的服务端其实就是一个普通的Java程序，不过需要注意的是新建项目的时候一定要选择Dynamic Web Project，文档树如下图所示：</p>
+<p><img src="/images/2016/05/26/1/1.png"></p>
+<p>我新建的项目名叫MyService，只有一个类，写了如下内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.text.SimpleDateFormat;</span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyService</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getTime</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SimpleDateFormat</span>(<span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>).format(<span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		MyService ms=<span class="keyword">new</span> <span class="title class_">MyService</span>();</span><br><span class="line">		System.out.println(ms.getTime());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：<code>2016-05-25 21:47:49</code></p>
+<p>应作业要求我就写了一个显示本机时间的方法，这都不重要了。</p>
+<p>到现在，整个项目就是一个简单的网页项目，下面我们就要用他来生成WebService。</p>
+<p>新建项目，找到WebService：<br><img src="/images/2016/05/26/1/2.png"></p>
+<p>点击Next弹出下面的选框：</p>
+<p><img src="/images/2016/05/26/1/3.png"></p>
+<p>注意左边这两个滚动条，第一个滑动条表示我要启动这个服务；第二个滑动条表示我要顺便生成一个与他对应的客户端（当然也可以暂时不生成而是等会用WSDL文件来生成）。然后在上面的Service Implementation里选择想要发布的类的名称，我这里就用上面的那个MyService类，最后下面勾上public the Web Service的选框表示我要用UDDI把它发布出去。</p>
+<p>然后一路Next，最后选择Start Server。最后他就会弹出UDDI的注册界面让我们来注册这个服务：</p>
+<p><img src="/images/2016/05/26/1/4.png"></p>
+<p>先不管了，反正知道有这么个东西，等部署到服务器上的时候再来弄。</p>
+<p>这样子我们的服务端的配置就算搞定了，那么问题来了，其他人该怎么来调用我写的这个类呢？</p>
+<p>其实在上一步配置完WebService后，我们可以看到在WEB-INF目录下会生成一个子目录叫wsdl&#x2F;，这个文件夹下有一个文件叫MyService.wsdl。没错，这个就是WSDL。用Eclipse打开会默认在Design界面显示成类似UML的东西（不知道是不是）:</p>
+<p><img src="/images/2016/05/26/1/5.png"><br>当然也可以在Source界面显示成xml代码的形式：</p>
+<p><img src="/images/2016/05/26/1/6.png"></p>
+<p>没错，这个就是书上介绍的恶心的WSDL文档，其实这东西完全不用自己写，都是可以由eclipse 帮我们生成。</p>
+<p>最后，我们也可以中浏览器中打开这个文件：”<a target="_blank" rel="noopener" href="http://localhost:8080/MyService/services/MyService?wsdl%22%E3%80%82%E8%BF%99%E5%B0%B1%E6%84%8F%E5%91%B3%E8%BF%99%E5%8F%AA%E8%A6%81%E6%9C%AC%E6%9C%BA%E8%83%BD%E4%BD%9C%E4%B8%BA%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%8C%E9%82%A3%E4%B9%88%E5%9B%A0%E7%89%B9%E7%BD%91%E4%B8%8A%E7%9A%84%E4%BB%BB%E4%BD%95%E4%B8%80%E5%8F%B0%E4%B8%BB%E6%9C%BA%E9%83%BD%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AE%E8%BF%99%E4%B8%AAurl%EF%BC%8C%E5%B9%B6%E4%B8%94%E5%88%A9%E7%94%A8%E8%BF%99%E4%B8%AA%E5%86%85%E5%AE%B9%E8%B0%83%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%AD%E7%9A%84%E6%9C%8D%E5%8A%A1%E3%80%82">http://localhost:8080/MyService/services/MyService?wsdl&quot;。这就意味这只要本机能作为服务器，那么因特网上的任何一台主机都可以访问这个url，并且利用这个内容调用服务器中的服务。</a></p>
+<p>下面就来介绍怎么远程调用这个服务。</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>新建项目，选择Web Service Client项目：</p>
+<p><img src="/images/2016/05/26/1/7.png"></p>
+<p>在框框中输入需要调用的WSDL文件。我这里调用的就是上面生成的那个URL。</p>
+<p>不过需要注意的是我们需要新建一个Dynamic web project，并用他来替换箭头中指向的项目，即把客户端安装到这个项目中。</p>
+<p>一路next就可以在目标项目中生成下面的一堆文件：<br><img src="/images/2016/05/26/1/8.png"></p>
+<p>这就是我们获得的客户端文件了，打开看看才知道，这些东西其实是用RMI写的。。。。。。</p>
+<p>然后我们在这个项目中新建一个测试类Test：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> test;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> DefaultNamespace.MyService;</span><br><span class="line"><span class="keyword">import</span> DefaultNamespace.MyServiceProxy;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">		MyService ms=<span class="keyword">new</span> <span class="title class_">MyServiceProxy</span>();</span><br><span class="line">		System.out.println(ms.getTime());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样就可以像在本机调用MyService类一样的调用那个getTime函数了，最终也返回了正确的结果。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://blog.csdn.net/guo_rui22/article/details/6253745">使用eclipse开发webService很简单</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/yisheng163/p/4524808.html?utm_source=tuicool">Java WebService 简单实例</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/25/Julia%E9%9B%86%E7%9A%84win32+GDI%E6%BC%94%E7%A4%BA/" rel="next" title="Julia集的win32+GDI演示">
+                <i class="fa fa-chevron-left"></i> Julia集的win32+GDI演示
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/01/%E5%9F%BA%E4%BA%8ESwing%E7%9A%84FontChooser%E5%AF%B9%E8%AF%9D%E6%A1%86/" rel="prev" title="基于Swing的FontChooser对话框">
+                基于Swing的FontChooser对话框 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">开发环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="nav-number">3.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">4.</span> <span class="nav-text">客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

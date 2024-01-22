@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Machine Learning,Computer Vision," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="util.py这个文件里主要提供了5个函数，提供给package.py使用，特别是对特征值的计算。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自制正方软件系统验证码的识别程序（3&#x2F;4）">
+<meta property="og:url" content="https://www.resonanat.com/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F3-4/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="util.py这个文件里主要提供了5个函数，提供给package.py使用，特别是对特征值的计算。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-02-05T11:14:31.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.100Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Computer Vision">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/02/05/自制正方软件系统验证码的识别程序3-4/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>自制正方软件系统验证码的识别程序（3/4） | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F3-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">自制正方软件系统验证码的识别程序（3/4）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-05T19:14:31+08:00">
+                2016-02-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="util-py"><a href="#util-py" class="headerlink" title="util.py"></a>util.py</h2><p>这个文件里主要提供了5个函数，提供给package.py使用，特别是对特征值的计算。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image,os,ImageFilter</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">table1=[]</span><br><span class="line">table2=[]</span><br><span class="line">threshold1=<span class="number">18</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">256</span>):</span><br><span class="line">	<span class="keyword">if</span> i&lt;threshold1:</span><br><span class="line">		table1.append(<span class="number">0</span>)</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		table1.append(<span class="number">1</span>)</span><br><span class="line">threshold2=<span class="number">240</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">256</span>):</span><br><span class="line">	<span class="keyword">if</span> i&lt;threshold2:</span><br><span class="line">		table2.append(<span class="number">0</span>)</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		table2.append(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">blur1</span>(<span class="params">im</span>):</span><br><span class="line">	im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">	im=im.point(table1,<span class="string">&#x27;1&#x27;</span>)</span><br><span class="line">	<span class="keyword">return</span> im</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">blur2</span>(<span class="params">im</span>):</span><br><span class="line">	im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">	im=im.<span class="built_in">filter</span>(ImageFilter.GaussianBlur(<span class="number">1.5</span>))</span><br><span class="line">	im=im.point(table2,<span class="string">&#x27;1&#x27;</span>)</span><br><span class="line">	<span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seed_fill</span>(<span class="params">im</span>):</span><br><span class="line">	arr=np.array(im.convert(<span class="string">&#x27;L&#x27;</span>)).astype(<span class="string">&#x27;bool&#x27;</span>).astype(<span class="string">&#x27;int&#x27;</span>)</span><br><span class="line">	height,width=arr.shape</span><br><span class="line">	arr=arr.tolist()</span><br><span class="line"></span><br><span class="line">	output=[]</span><br><span class="line">	output.append(np.ones(width+<span class="number">2</span>,).astype(<span class="string">&#x27;int&#x27;</span>).tolist())</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height):</span><br><span class="line">		tmp=[]</span><br><span class="line">		tmp.append(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width):</span><br><span class="line">			tmp.append(arr[i][j])</span><br><span class="line">		tmp.append(<span class="number">1</span>)</span><br><span class="line">		output.append(tmp)</span><br><span class="line">	output.append(np.ones(width+<span class="number">2</span>,).astype(<span class="string">&#x27;int&#x27;</span>).tolist())</span><br><span class="line">	arr=output</span><br><span class="line">	height+=<span class="number">2</span></span><br><span class="line">	width+=<span class="number">2</span></span><br><span class="line">	<span class="keyword">def</span> <span class="title function_">dfs</span>(<span class="params">i,j</span>):</span><br><span class="line">		<span class="keyword">if</span>(arr[i][j]==<span class="number">0</span>):</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">		arr[i][j]=<span class="number">0</span></span><br><span class="line">		<span class="keyword">if</span>(i&gt;<span class="number">0</span>):</span><br><span class="line">			dfs(i-<span class="number">1</span>,j)</span><br><span class="line">		<span class="keyword">if</span>(i&lt;height-<span class="number">1</span>):</span><br><span class="line">			dfs(i+<span class="number">1</span>,j)</span><br><span class="line">		<span class="keyword">if</span>(j&gt;<span class="number">0</span>):</span><br><span class="line">			dfs(i,j-<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">if</span>(j&lt;width-<span class="number">1</span>):</span><br><span class="line">			dfs(i,j+<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">	cnt=<span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height):</span><br><span class="line">		<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width):</span><br><span class="line">			cnt+=dfs(i,j)</span><br><span class="line">	<span class="keyword">return</span> cnt</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">count_border</span>(<span class="params">im</span>):</span><br><span class="line">	arr=np.array(im.convert(<span class="string">&#x27;L&#x27;</span>)).astype(<span class="string">&#x27;bool&#x27;</span>).astype(<span class="string">&#x27;int&#x27;</span>)</span><br><span class="line">	height,width=arr.shape</span><br><span class="line">	cnt=<span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height):</span><br><span class="line">		<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width):</span><br><span class="line">			<span class="keyword">if</span> arr[i][j]==<span class="number">1</span>:</span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			<span class="keyword">if</span> i==<span class="number">0</span> <span class="keyword">or</span> i==height-<span class="number">1</span> <span class="keyword">or</span> j==<span class="number">0</span> <span class="keyword">or</span> j==width-<span class="number">1</span> :</span><br><span class="line">				cnt+=<span class="number">1</span></span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			<span class="keyword">if</span> arr[i-<span class="number">1</span>][j]==<span class="number">1</span> <span class="keyword">or</span> arr[i+<span class="number">1</span>][j]==<span class="number">1</span> <span class="keyword">or</span> arr[i][j-<span class="number">1</span>]==<span class="number">1</span> <span class="keyword">or</span> arr[i][j+<span class="number">1</span>]==<span class="number">1</span>:</span><br><span class="line">				cnt+=<span class="number">1</span></span><br><span class="line">	<span class="keyword">return</span> cnt</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">count_fill</span>(<span class="params">im</span>):</span><br><span class="line">	arr=np.array(im.convert(<span class="string">&#x27;L&#x27;</span>)).astype(<span class="string">&#x27;bool&#x27;</span>).astype(<span class="string">&#x27;int&#x27;</span>)</span><br><span class="line">	height,width=arr.shape</span><br><span class="line">	cnt=<span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height):</span><br><span class="line">		<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width):</span><br><span class="line">			<span class="keyword">if</span> arr[i][j]==<span class="number">0</span>:</span><br><span class="line">				cnt+=<span class="number">1</span></span><br><span class="line">	<span class="keyword">return</span> cnt</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>blur1函数实现的是对图片先进行灰度化，再进行二值化，结合table1数组的使用，将亮度大于某一较低阈值的统统设为纯白，否则为纯黑。这样就只保留了字符的骨架，生成的图片十分便于特征值的测量与计算，而且极大消除了噪声的影响。</li>
+<li>blur2函数实现的是对图片的模糊化再二值化，为的是将图片变“粗”一点，便于后续的学习(这也是后来偶然发现的提高学习准确性的方法)。注意模糊参数的调节。</li>
+<li>seed_fill函数实现种子填充，即返回空白联通块的个数，比如8返回3，0返回2等等。当然，首先得在外围加一圈虚拟的白圈防止边界的阻隔。</li>
+<li>count_border和count_fill函数实现的是边界黑点的计数，以及黑点数目的计数。这只是我开脑洞想到的特征，好像也有点用的。</li>
+</ul>
+<h2 id="logistic-sgd-py"><a href="#logistic-sgd-py" class="headerlink" title="logistic_sgd.py"></a>logistic_sgd.py</h2><p>这是官网上的学习的核心算法，我只是稍微修改了下参数还有predict函数，有些实现细节还没有彻底搞懂（话说theano还真不怎么好理解）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">This tutorial introduces logistic regression using Theano and stochastic</span></span><br><span class="line"><span class="string">gradient descent.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Logistic regression is a probabilistic, linear classifier. It is parametrized</span></span><br><span class="line"><span class="string">by a weight matrix :math:`W` and a bias vector :math:`b`. Classification is</span></span><br><span class="line"><span class="string">done by projecting data points onto a set of hyperplanes, the distance to</span></span><br><span class="line"><span class="string">which is used to determine a class membership probability.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Mathematically, this can be written as:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">.. math::</span></span><br><span class="line"><span class="string">  P(Y=i|x, W,b) &amp;= softmax_i(W x + b) \\</span></span><br><span class="line"><span class="string">                &amp;= \frac &#123;e^&#123;W_i x + b_i&#125;&#125; &#123;\sum_j e^&#123;W_j x + b_j&#125;&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">The output of the model or prediction is then done by taking the argmax of</span></span><br><span class="line"><span class="string">the vector whose i&#x27;th element is P(Y=i|x).</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">.. math::</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  y_&#123;pred&#125; = argmax_i P(Y=i|x,W,b)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">This tutorial presents a stochastic gradient descent optimization method</span></span><br><span class="line"><span class="string">suitable for large datasets.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">References:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    - textbooks: &quot;Pattern Recognition and Machine Learning&quot; -</span></span><br><span class="line"><span class="string">                 Christopher M. Bishop, section 4.3.2</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line">__docformat__ = <span class="string">&#x27;restructedtext en&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> gzip</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> timeit</span><br><span class="line"><span class="keyword">import</span> numpy</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> theano</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LogisticRegression</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Multi-class Logistic Regression Class</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    The logistic regression is fully described by a weight matrix :math:`W`</span></span><br><span class="line"><span class="string">    and bias vector :math:`b`. Classification is done by projecting data</span></span><br><span class="line"><span class="string">    points onto a set of hyperplanes, the distance to which is used to</span></span><br><span class="line"><span class="string">    determine a class membership probability.</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, <span class="built_in">input</span>, n_in, n_out</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot; Initialize the parameters of the logistic regression</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :type input: theano.tensor.TensorType</span></span><br><span class="line"><span class="string">        :param input: symbolic variable that describes the input of the</span></span><br><span class="line"><span class="string">                      architecture (one minibatch)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :type n_in: int</span></span><br><span class="line"><span class="string">        :param n_in: number of input units, the dimension of the space in</span></span><br><span class="line"><span class="string">                     which the datapoints lie</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :type n_out: int</span></span><br><span class="line"><span class="string">        :param n_out: number of output units, the dimension of the space in</span></span><br><span class="line"><span class="string">                      which the labels lie</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># start-snippet-1</span></span><br><span class="line">        <span class="comment"># initialize with 0 the weights W as a matrix of shape (n_in, n_out)</span></span><br><span class="line">        self.W = theano.shared(</span><br><span class="line">            value=numpy.zeros(</span><br><span class="line">                (n_in, n_out),</span><br><span class="line">                dtype=theano.config.floatX</span><br><span class="line">            ),</span><br><span class="line">            name=<span class="string">&#x27;W&#x27;</span>,</span><br><span class="line">            borrow=<span class="literal">True</span></span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># initialize the biases b as a vector of n_out 0s</span></span><br><span class="line">        self.b = theano.shared(</span><br><span class="line">            value=numpy.zeros(</span><br><span class="line">                (n_out,),</span><br><span class="line">                dtype=theano.config.floatX</span><br><span class="line">            ),</span><br><span class="line">            name=<span class="string">&#x27;b&#x27;</span>,</span><br><span class="line">            borrow=<span class="literal">True</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># symbolic expression for computing the matrix of class-membership</span></span><br><span class="line">        <span class="comment"># probabilities</span></span><br><span class="line">        <span class="comment"># Where:</span></span><br><span class="line">        <span class="comment"># W is a matrix where column-k represent the separation hyperplane for</span></span><br><span class="line">        <span class="comment"># class-k</span></span><br><span class="line">        <span class="comment"># x is a matrix where row-j  represents input training sample-j</span></span><br><span class="line">        <span class="comment"># b is a vector where element-k represent the free parameter of</span></span><br><span class="line">        <span class="comment"># hyperplane-k</span></span><br><span class="line">        self.p_y_given_x = T.nnet.softmax(T.dot(<span class="built_in">input</span>, self.W) + self.b)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># symbolic description of how to compute prediction as class whose</span></span><br><span class="line">        <span class="comment"># probability is maximal</span></span><br><span class="line">        self.y_pred = T.argmax(self.p_y_given_x, axis=<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># end-snippet-1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># parameters of the model</span></span><br><span class="line">        self.params = [self.W, self.b]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># keep track of model input</span></span><br><span class="line">        self.<span class="built_in">input</span> = <span class="built_in">input</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negative_log_likelihood</span>(<span class="params">self, y</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Return the mean of the negative log-likelihood of the prediction</span></span><br><span class="line"><span class="string">        of this model under a given target distribution.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        .. math::</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">            \frac&#123;1&#125;&#123;|\mathcal&#123;D&#125;|&#125; \mathcal&#123;L&#125; (\theta=\&#123;W,b\&#125;, \mathcal&#123;D&#125;) =</span></span><br><span class="line"><span class="string">            \frac&#123;1&#125;&#123;|\mathcal&#123;D&#125;|&#125; \sum_&#123;i=0&#125;^&#123;|\mathcal&#123;D&#125;|&#125;</span></span><br><span class="line"><span class="string">                \log(P(Y=y^&#123;(i)&#125;|x^&#123;(i)&#125;, W,b)) \\</span></span><br><span class="line"><span class="string">            \ell (\theta=\&#123;W,b\&#125;, \mathcal&#123;D&#125;)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :type y: theano.tensor.TensorType</span></span><br><span class="line"><span class="string">        :param y: corresponds to a vector that gives for each example the</span></span><br><span class="line"><span class="string">                  correct label</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Note: we use the mean instead of the sum so that</span></span><br><span class="line"><span class="string">              the learning rate is less dependent on the batch size</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># start-snippet-2</span></span><br><span class="line">        <span class="comment"># y.shape[0] is (symbolically) the number of rows in y, i.e.,</span></span><br><span class="line">        <span class="comment"># number of examples (call it n) in the minibatch</span></span><br><span class="line">        <span class="comment"># T.arange(y.shape[0]) is a symbolic vector which will contain</span></span><br><span class="line">        <span class="comment"># [0,1,2,... n-1] T.log(self.p_y_given_x) is a matrix of</span></span><br><span class="line">        <span class="comment"># Log-Probabilities (call it LP) with one row per example and</span></span><br><span class="line">        <span class="comment"># one column per class LP[T.arange(y.shape[0]),y] is a vector</span></span><br><span class="line">        <span class="comment"># v containing [LP[0,y[0]], LP[1,y[1]], LP[2,y[2]], ...,</span></span><br><span class="line">        <span class="comment"># LP[n-1,y[n-1]]] and T.mean(LP[T.arange(y.shape[0]),y]) is</span></span><br><span class="line">        <span class="comment"># the mean (across minibatch examples) of the elements in v,</span></span><br><span class="line">        <span class="comment"># i.e., the mean log-likelihood across the minibatch.</span></span><br><span class="line">        <span class="keyword">return</span> -T.mean(T.log(self.p_y_given_x)[T.arange(y.shape[<span class="number">0</span>]), y])</span><br><span class="line">        <span class="comment"># end-snippet-2</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">errors</span>(<span class="params">self, y</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Return a float representing the number of errors in the minibatch</span></span><br><span class="line"><span class="string">        over the total number of examples of the minibatch ; zero one</span></span><br><span class="line"><span class="string">        loss over the size of the minibatch</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :type y: theano.tensor.TensorType</span></span><br><span class="line"><span class="string">        :param y: corresponds to a vector that gives for each example the</span></span><br><span class="line"><span class="string">                  correct label</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># check if y has same dimension of y_pred</span></span><br><span class="line">        <span class="keyword">if</span> y.ndim != self.y_pred.ndim:</span><br><span class="line">            <span class="keyword">raise</span> TypeError(</span><br><span class="line">                <span class="string">&#x27;y should have the same shape as self.y_pred&#x27;</span>,</span><br><span class="line">                (<span class="string">&#x27;y&#x27;</span>, y.<span class="built_in">type</span>, <span class="string">&#x27;y_pred&#x27;</span>, self.y_pred.<span class="built_in">type</span>)</span><br><span class="line">            )</span><br><span class="line">        <span class="comment"># check if y is of the correct datatype</span></span><br><span class="line">        <span class="keyword">if</span> y.dtype.startswith(<span class="string">&#x27;int&#x27;</span>):</span><br><span class="line">            <span class="comment"># the T.neq operator returns a vector of 0s and 1s, where 1</span></span><br><span class="line">            <span class="comment"># represents a mistake in prediction</span></span><br><span class="line">            <span class="keyword">return</span> T.mean(T.neq(self.y_pred, y))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> NotImplementedError()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load_data</span>(<span class="params">dataset</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27; Loads the dataset</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :type dataset: string</span></span><br><span class="line"><span class="string">    :param dataset: the path to the dataset (here MNIST)</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#############</span></span><br><span class="line">    <span class="comment"># LOAD DATA #</span></span><br><span class="line">    <span class="comment">#############</span></span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    # Download the MNIST dataset if it is not present</span></span><br><span class="line"><span class="string">    data_dir, data_file = os.path.split(dataset)</span></span><br><span class="line"><span class="string">    if data_dir == &quot;&quot; and not os.path.isfile(dataset):</span></span><br><span class="line"><span class="string">        # Check if dataset is in the data directory.</span></span><br><span class="line"><span class="string">        new_path = os.path.join(</span></span><br><span class="line"><span class="string">            os.path.split(__file__)[0],</span></span><br><span class="line"><span class="string">            &quot;..&quot;,</span></span><br><span class="line"><span class="string">            &quot;data&quot;,</span></span><br><span class="line"><span class="string">            dataset</span></span><br><span class="line"><span class="string">        )</span></span><br><span class="line"><span class="string">        if os.path.isfile(new_path) or data_file == &#x27;mnist.pkl.gz&#x27;:</span></span><br><span class="line"><span class="string">            dataset = new_path</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    if (not os.path.isfile(dataset)) and data_file == &#x27;mnist.pkl.gz&#x27;:</span></span><br><span class="line"><span class="string">        import urllib</span></span><br><span class="line"><span class="string">        origin = (</span></span><br><span class="line"><span class="string">            &#x27;http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz&#x27;</span></span><br><span class="line"><span class="string">        )</span></span><br><span class="line"><span class="string">        print &#x27;Downloading data from %s&#x27; % origin</span></span><br><span class="line"><span class="string">        urllib.urlretrieve(origin, dataset)</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;... loading data&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Load the dataset</span></span><br><span class="line">    f = gzip.<span class="built_in">open</span>(dataset, <span class="string">&#x27;rb&#x27;</span>)</span><br><span class="line">    train_set, valid_set, test_set = cPickle.load(f)</span><br><span class="line">    f.close()</span><br><span class="line">    <span class="comment">#train_set, valid_set, test_set format: tuple(input, target)</span></span><br><span class="line">    <span class="comment">#input is an numpy.ndarray of 2 dimensions (a matrix)</span></span><br><span class="line">    <span class="comment">#witch row&#x27;s correspond to an example. target is a</span></span><br><span class="line">    <span class="comment">#numpy.ndarray of 1 dimensions (vector)) that have the same length as</span></span><br><span class="line">    <span class="comment">#the number of rows in the input. It should give the target</span></span><br><span class="line">    <span class="comment">#target to the example with the same index in the input.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">shared_dataset</span>(<span class="params">data_xy, borrow=<span class="literal">True</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot; Function that loads the dataset into shared variables</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        The reason we store our dataset in shared variables is to allow</span></span><br><span class="line"><span class="string">        Theano to copy it into the GPU memory (when code is run on GPU).</span></span><br><span class="line"><span class="string">        Since copying data into the GPU is slow, copying a minibatch everytime</span></span><br><span class="line"><span class="string">        is needed (the default behaviour if the data is not in a shared</span></span><br><span class="line"><span class="string">        variable) would lead to a large decrease in performance.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        data_x, data_y = data_xy</span><br><span class="line">        shared_x = theano.shared(numpy.asarray(data_x,</span><br><span class="line">                                               dtype=theano.config.floatX),</span><br><span class="line">                                 borrow=borrow)</span><br><span class="line">        shared_y = theano.shared(numpy.asarray(data_y,</span><br><span class="line">                                               dtype=theano.config.floatX),</span><br><span class="line">                                 borrow=borrow)</span><br><span class="line">        <span class="comment"># When storing data on the GPU it has to be stored as floats</span></span><br><span class="line">        <span class="comment"># therefore we will store the labels as ``floatX`` as well</span></span><br><span class="line">        <span class="comment"># (``shared_y`` does exactly that). But during our computations</span></span><br><span class="line">        <span class="comment"># we need them as ints (we use labels as index, and if they are</span></span><br><span class="line">        <span class="comment"># floats it doesn&#x27;t make sense) therefore instead of returning</span></span><br><span class="line">        <span class="comment"># ``shared_y`` we will have to cast it to int. This little hack</span></span><br><span class="line">        <span class="comment"># lets ous get around this issue</span></span><br><span class="line">        <span class="keyword">return</span> shared_x, T.cast(shared_y, <span class="string">&#x27;int32&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    test_set_x, test_set_y = shared_dataset(test_set)</span><br><span class="line">    valid_set_x, valid_set_y = shared_dataset(valid_set)</span><br><span class="line">    train_set_x, train_set_y = shared_dataset(train_set)</span><br><span class="line"></span><br><span class="line">    rval = [(train_set_x, train_set_y), (valid_set_x, valid_set_y),</span><br><span class="line">            (test_set_x, test_set_y)]</span><br><span class="line">    <span class="keyword">return</span> rval</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sgd_optimization_mnist</span>(<span class="params">learning_rate=<span class="number">0.1</span>, n_epochs=<span class="number">10000</span>,</span></span><br><span class="line"><span class="params">                           dataset=<span class="string">&#x27;vericode.pkl.gz&#x27;</span>,</span></span><br><span class="line"><span class="params">                           batch_size=<span class="number">100</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Demonstrate stochastic gradient descent optimization of a log-linear</span></span><br><span class="line"><span class="string">    model</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    This is demonstrated on MNIST.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :type learning_rate: float</span></span><br><span class="line"><span class="string">    :param learning_rate: learning rate used (factor for the stochastic</span></span><br><span class="line"><span class="string">                          gradient)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :type n_epochs: int</span></span><br><span class="line"><span class="string">    :param n_epochs: maximal number of epochs to run the optimizer</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :type dataset: string</span></span><br><span class="line"><span class="string">    :param dataset: the path of the MNIST dataset file from</span></span><br><span class="line"><span class="string">                 http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    datasets = load_data(dataset)</span><br><span class="line"></span><br><span class="line">    train_set_x, train_set_y = datasets[<span class="number">0</span>]</span><br><span class="line">    valid_set_x, valid_set_y = datasets[<span class="number">1</span>]</span><br><span class="line">    test_set_x, test_set_y = datasets[<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute number of minibatches for training, validation and testing</span></span><br><span class="line">    n_train_batches = train_set_x.get_value(borrow=<span class="literal">True</span>).shape[<span class="number">0</span>] / batch_size</span><br><span class="line">    n_valid_batches = valid_set_x.get_value(borrow=<span class="literal">True</span>).shape[<span class="number">0</span>] / batch_size</span><br><span class="line">    n_test_batches = test_set_x.get_value(borrow=<span class="literal">True</span>).shape[<span class="number">0</span>] / batch_size</span><br><span class="line"></span><br><span class="line">    <span class="comment">######################</span></span><br><span class="line">    <span class="comment"># BUILD ACTUAL MODEL #</span></span><br><span class="line">    <span class="comment">######################</span></span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;... building the model&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># allocate symbolic variables for the data</span></span><br><span class="line">    index = T.lscalar()  <span class="comment"># index to a [mini]batch</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># generate symbolic variables for input (x and y represent a</span></span><br><span class="line">    <span class="comment"># minibatch)</span></span><br><span class="line">    x = T.matrix(<span class="string">&#x27;x&#x27;</span>)  <span class="comment"># data, presented as rasterized images</span></span><br><span class="line">    y = T.ivector(<span class="string">&#x27;y&#x27;</span>)  <span class="comment"># labels, presented as 1D vector of [int] labels</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># construct the logistic regression class</span></span><br><span class="line">    classifier = LogisticRegression(<span class="built_in">input</span>=x, n_in=<span class="number">12</span> * <span class="number">18</span>+<span class="number">3</span>, n_out=<span class="number">36</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># the cost we minimize during training is the negative log likelihood of</span></span><br><span class="line">    <span class="comment"># the model in symbolic format</span></span><br><span class="line">    cost = classifier.negative_log_likelihood(y)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compiling a Theano function that computes the mistakes that are made by</span></span><br><span class="line">    <span class="comment"># the model on a minibatch</span></span><br><span class="line">    test_model = theano.function(</span><br><span class="line">        inputs=[index],</span><br><span class="line">        outputs=classifier.errors(y),</span><br><span class="line">        givens=&#123;</span><br><span class="line">            x: test_set_x[index * batch_size: (index + <span class="number">1</span>) * batch_size],</span><br><span class="line">            y: test_set_y[index * batch_size: (index + <span class="number">1</span>) * batch_size]</span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    validate_model = theano.function(</span><br><span class="line">        inputs=[index],</span><br><span class="line">        outputs=classifier.errors(y),</span><br><span class="line">        givens=&#123;</span><br><span class="line">            x: valid_set_x[index * batch_size: (index + <span class="number">1</span>) * batch_size],</span><br><span class="line">            y: valid_set_y[index * batch_size: (index + <span class="number">1</span>) * batch_size]</span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute the gradient of cost with respect to theta = (W,b)</span></span><br><span class="line">    g_W = T.grad(cost=cost, wrt=classifier.W)</span><br><span class="line">    g_b = T.grad(cost=cost, wrt=classifier.b)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># start-snippet-3</span></span><br><span class="line">    <span class="comment"># specify how to update the parameters of the model as a list of</span></span><br><span class="line">    <span class="comment"># (variable, update expression) pairs.</span></span><br><span class="line">    updates = [(classifier.W, classifier.W - learning_rate * g_W),</span><br><span class="line">               (classifier.b, classifier.b - learning_rate * g_b)]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compiling a Theano function `train_model` that returns the cost, but in</span></span><br><span class="line">    <span class="comment"># the same time updates the parameter of the model based on the rules</span></span><br><span class="line">    <span class="comment"># defined in `updates`</span></span><br><span class="line">    train_model = theano.function(</span><br><span class="line">        inputs=[index],</span><br><span class="line">        outputs=cost,</span><br><span class="line">        updates=updates,</span><br><span class="line">        givens=&#123;</span><br><span class="line">            x: train_set_x[index * batch_size: (index + <span class="number">1</span>) * batch_size],</span><br><span class="line">            y: train_set_y[index * batch_size: (index + <span class="number">1</span>) * batch_size]</span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br><span class="line">    <span class="comment"># end-snippet-3</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">###############</span></span><br><span class="line">    <span class="comment"># TRAIN MODEL #</span></span><br><span class="line">    <span class="comment">###############</span></span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;... training the model&#x27;</span></span><br><span class="line">    <span class="comment"># early-stopping parameters</span></span><br><span class="line">    patience = <span class="number">5000</span>  <span class="comment"># look as this many examples regardless</span></span><br><span class="line">    patience_increase = <span class="number">2</span>  <span class="comment"># wait this much longer when a new best is</span></span><br><span class="line">                                  <span class="comment"># found</span></span><br><span class="line">    improvement_threshold = <span class="number">0.995</span>  <span class="comment"># a relative improvement of this much is</span></span><br><span class="line">                                  <span class="comment"># considered significant</span></span><br><span class="line">    validation_frequency = <span class="built_in">min</span>(n_train_batches, patience / <span class="number">2</span>)</span><br><span class="line">                                  <span class="comment"># go through this many</span></span><br><span class="line">                                  <span class="comment"># minibatche before checking the network</span></span><br><span class="line">                                  <span class="comment"># on the validation set; in this case we</span></span><br><span class="line">                                  <span class="comment"># check every epoch</span></span><br><span class="line"></span><br><span class="line">    best_validation_loss = numpy.inf</span><br><span class="line">    test_score = <span class="number">0.</span></span><br><span class="line">    start_time = timeit.default_timer()</span><br><span class="line"></span><br><span class="line">    done_looping = <span class="literal">False</span></span><br><span class="line">    epoch = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> (epoch &lt; n_epochs) <span class="keyword">and</span> (<span class="keyword">not</span> done_looping):</span><br><span class="line">        epoch = epoch + <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> minibatch_index <span class="keyword">in</span> xrange(n_train_batches):</span><br><span class="line">            minibatch_avg_cost = train_model(minibatch_index)</span><br><span class="line">            <span class="comment"># iteration number</span></span><br><span class="line">            <span class="built_in">iter</span> = (epoch - <span class="number">1</span>) * n_train_batches + minibatch_index</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">iter</span> + <span class="number">1</span>) % validation_frequency == <span class="number">0</span>:</span><br><span class="line">                <span class="comment"># compute zero-one loss on validation set</span></span><br><span class="line">                validation_losses = [validate_model(i)</span><br><span class="line">                                     <span class="keyword">for</span> i <span class="keyword">in</span> xrange(n_valid_batches)]</span><br><span class="line">                this_validation_loss = numpy.mean(validation_losses)</span><br><span class="line"></span><br><span class="line">                <span class="built_in">print</span>(</span><br><span class="line">                    <span class="string">&#x27;epoch %i, minibatch %i/%i, validation error %f %%&#x27;</span> %</span><br><span class="line">                    (</span><br><span class="line">                        epoch,</span><br><span class="line">                        minibatch_index + <span class="number">1</span>,</span><br><span class="line">                        n_train_batches,</span><br><span class="line">                        this_validation_loss * <span class="number">100.</span></span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line"></span><br><span class="line">                <span class="comment"># if we got the best validation score until now</span></span><br><span class="line">                <span class="keyword">if</span> this_validation_loss &lt; best_validation_loss:</span><br><span class="line">                    <span class="comment">#improve patience if loss improvement is good enough</span></span><br><span class="line">                    <span class="keyword">if</span> this_validation_loss &lt; best_validation_loss *  \</span><br><span class="line">                       improvement_threshold:</span><br><span class="line">                        patience = <span class="built_in">max</span>(patience, <span class="built_in">iter</span> * patience_increase)</span><br><span class="line"></span><br><span class="line">                    best_validation_loss = this_validation_loss</span><br><span class="line">                    <span class="comment"># test it on the test set</span></span><br><span class="line"></span><br><span class="line">                    test_losses = [test_model(i)</span><br><span class="line">                                   <span class="keyword">for</span> i <span class="keyword">in</span> xrange(n_test_batches)]</span><br><span class="line">                    test_score = numpy.mean(test_losses)</span><br><span class="line"></span><br><span class="line">                    <span class="built_in">print</span>(</span><br><span class="line">                        (</span><br><span class="line">                            <span class="string">&#x27;     epoch %i, minibatch %i/%i, test error of&#x27;</span></span><br><span class="line">                            <span class="string">&#x27; best model %f %%&#x27;</span></span><br><span class="line">                        ) %</span><br><span class="line">                        (</span><br><span class="line">                            epoch,</span><br><span class="line">                            minibatch_index + <span class="number">1</span>,</span><br><span class="line">                            n_train_batches,</span><br><span class="line">                            test_score * <span class="number">100.</span></span><br><span class="line">                        )</span><br><span class="line">                    )</span><br><span class="line"></span><br><span class="line">                    <span class="comment"># save the best model</span></span><br><span class="line">                    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;best_model.pkl&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">                        cPickle.dump(classifier, f)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> patience &lt;= <span class="built_in">iter</span>:</span><br><span class="line">                done_looping = <span class="literal">True</span></span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    end_time = timeit.default_timer()</span><br><span class="line">    <span class="built_in">print</span>(</span><br><span class="line">        (</span><br><span class="line">            <span class="string">&#x27;Optimization complete with best validation score of %f %%,&#x27;</span></span><br><span class="line">            <span class="string">&#x27;with test performance %f %%&#x27;</span></span><br><span class="line">        )</span><br><span class="line">        % (best_validation_loss * <span class="number">100.</span>, test_score * <span class="number">100.</span>)</span><br><span class="line">    )</span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;The code run for %d epochs, with %f epochs/sec&#x27;</span> % (</span><br><span class="line">        epoch, <span class="number">1</span>\. * epoch / (end_time - start_time))</span><br><span class="line">    <span class="built_in">print</span> &gt;&gt; sys.stderr, (<span class="string">&#x27;The code for file &#x27;</span> +</span><br><span class="line">                          os.path.split(__file__)[<span class="number">1</span>] +</span><br><span class="line">                          <span class="string">&#x27; ran for %.1fs&#x27;</span> % ((end_time - start_time)))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">predict</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    An example of how to load a trained model and use it</span></span><br><span class="line"><span class="string">    to predict labels.</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># load the saved model</span></span><br><span class="line">    classifier = cPickle.load(<span class="built_in">open</span>(<span class="string">&#x27;best_model.pkl&#x27;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compile a predictor function</span></span><br><span class="line">    predict_model = theano.function(</span><br><span class="line">        inputs=[classifier.<span class="built_in">input</span>],</span><br><span class="line">        outputs=classifier.y_pred)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># We can test it on some examples from test test</span></span><br><span class="line">    dataset=<span class="string">&#x27;vericode.pkl.gz&#x27;</span></span><br><span class="line">    datasets = cPickle.load(gzip.<span class="built_in">open</span>(dataset))</span><br><span class="line">    test_set_x, test_set_y = datasets[<span class="number">2</span>]</span><br><span class="line">    predicted_values = predict_model(test_set_x[:<span class="number">10</span>])</span><br><span class="line">    test_set_y=test_set_y[:<span class="number">10</span>].astype(<span class="string">&#x27;int&#x27;</span>)</span><br><span class="line">    <span class="built_in">dict</span>=<span class="string">&#x27;012345678abcdefghijklmnpqrstuvwxy&#x27;</span></span><br><span class="line">    pred=[]</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(predicted_values)):</span><br><span class="line">        pred.append(<span class="built_in">dict</span>[predicted_values[i]])</span><br><span class="line">        ans.append(<span class="built_in">dict</span>[test_set_y[i]]) </span><br><span class="line">    <span class="built_in">print</span> (<span class="string">&quot;Predicted values for the first 10 examples in test set:&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span> pred</span><br><span class="line">    <span class="built_in">print</span> (<span class="string">&quot;Correct values for the first 10 examples in test set:&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    sgd_optimization_mnist()</span><br><span class="line">    predict()</span><br></pre></td></tr></table></figure>
+<p>主要需要关注的就是 sgd_optimization_mnist 函数的传参，比如学习因子$\alpha$还有分组的大小。迭代的次数反倒不用管他，调到最高也成。</p>
+<h2 id="train-py"><a href="#train-py" class="headerlink" title="train.py"></a>train.py</h2><p>训练接口，很简单0.0，只是为了方便操作而已。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.system(<span class="string">&#x27;python split.py&#x27;</span>)</span><br><span class="line">os.system(<span class="string">&#x27;python util.py&#x27;</span>)</span><br><span class="line">os.system(<span class="string">&#x27;python package.py&#x27;</span>)</span><br><span class="line">os.system(<span class="string">&#x27;python logistic_sgd.py&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>运行之前所有的程序，然后直接训练。<strong>split.py</strong>会生成名叫number&#x2F;的文件加，<strong>package.py</strong>会生成名叫<strong>vericode.pkl.gz</strong>的数据集，而<strong>logistic_sgd.py</strong>会直接进行训练，并把最好的结果输出到** best_model.pkl** 中加以保存，并在命令行中打印类似下面的信息：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">... </span>spliting</span><br><span class="line"><span class="meta">... </span>packaging</span><br><span class="line"><span class="meta">... </span>loading data</span><br><span class="line"><span class="meta">... </span>building the model</span><br><span class="line"><span class="meta">... </span>training the model</span><br><span class="line">epoch <span class="number">1</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">71.200000</span> %</span><br><span class="line">     epoch <span class="number">1</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, test error of best model <span class="number">70.800000</span> %</span><br><span class="line">epoch <span class="number">2</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">56.800000</span> %</span><br><span class="line">     epoch <span class="number">2</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, test error of best model <span class="number">57.600000</span> %</span><br><span class="line">epoch <span class="number">3</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">49.600000</span> %</span><br><span class="line">     epoch <span class="number">3</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, test error of best model <span class="number">50.200000</span> %</span><br><span class="line">epoch <span class="number">4</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">44.200000</span> %</span><br><span class="line">     epoch <span class="number">4</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, test error of best model <span class="number">43.000000</span> %</span><br><span class="line">epoch <span class="number">5</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">38.800000</span> %</span><br><span class="line">     epoch <span class="number">5</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, test error of best model <span class="number">40.000000</span> %</span><br><span class="line">epoch <span class="number">6</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">36.400000</span> %</span><br><span class="line">......</span><br><span class="line">epoch <span class="number">678</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">10.000000</span> %</span><br><span class="line">epoch <span class="number">679</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">10.000000</span> %</span><br><span class="line">epoch <span class="number">680</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">10.200000</span> %</span><br><span class="line">epoch <span class="number">681</span>, minibatch <span class="number">16</span>/<span class="number">16</span>, validation error <span class="number">10.200000</span> %</span><br><span class="line">Optimization complete <span class="keyword">with</span> best validation score of <span class="number">9.600000</span> %,<span class="keyword">with</span> test performance <span class="number">11.400000</span> %</span><br><span class="line">The code run <span class="keyword">for</span> <span class="number">682</span> epochs, <span class="keyword">with</span> <span class="number">60.733475</span> epochs/sec</span><br><span class="line">Predicted values <span class="keyword">for</span> the first <span class="number">10</span> examples <span class="keyword">in</span> test <span class="built_in">set</span>:</span><br><span class="line">[<span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;j&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;q&#x27;</span>, <span class="string">&#x27;3&#x27;</span>, <span class="string">&#x27;6&#x27;</span>, <span class="string">&#x27;3&#x27;</span>, <span class="string">&#x27;7&#x27;</span>, <span class="string">&#x27;p&#x27;</span>]</span><br><span class="line">Correct values <span class="keyword">for</span> the first <span class="number">10</span> examples <span class="keyword">in</span> test <span class="built_in">set</span>:</span><br><span class="line">[<span class="string">&#x27;l&#x27;</span>, <span class="string">&#x27;j&#x27;</span>, <span class="string">&#x27;r&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;q&#x27;</span>, <span class="string">&#x27;3&#x27;</span>, <span class="string">&#x27;6&#x27;</span>, <span class="string">&#x27;3&#x27;</span>, <span class="string">&#x27;7&#x27;</span>, <span class="string">&#x27;p&#x27;</span>]</span><br></pre></td></tr></table></figure>
+<p>细致的显示了训练集的训练结果。</p>
+<h2 id="check-py"><a href="#check-py" class="headerlink" title="check.py"></a>check.py</h2><p>这个文件封装了调用训练成果进行识别的接口。由于懒得优化之前的代码结构，这里没有实现代码重用而是相当于重新写了一边之前的图片处理的过程。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle,os,Image,ImageFilter,theano,sys,time</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> logistic_sgd <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">from</span> util <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">recognize</span>(<span class="params">pic=<span class="string">&#x27;test&#x27;</span></span>):</span><br><span class="line">	im=Image.<span class="built_in">open</span>(pic)</span><br><span class="line"></span><br><span class="line">	<span class="comment">#split</span></span><br><span class="line">	image=[]</span><br><span class="line">	image.append(im.crop((<span class="number">5</span>,<span class="number">2</span>,<span class="number">17</span>,<span class="number">20</span>)))</span><br><span class="line">	image.append(im.crop((<span class="number">17</span>,<span class="number">2</span>,<span class="number">29</span>,<span class="number">20</span>)))</span><br><span class="line">	image.append(im.crop((<span class="number">29</span>,<span class="number">2</span>,<span class="number">41</span>,<span class="number">20</span>)))</span><br><span class="line">	image.append(im.crop((<span class="number">41</span>,<span class="number">2</span>,<span class="number">53</span>,<span class="number">20</span>)))</span><br><span class="line"></span><br><span class="line">	<span class="comment">#package</span></span><br><span class="line">	arr=[]</span><br><span class="line">	<span class="keyword">for</span> img <span class="keyword">in</span> image:</span><br><span class="line">		img=blur1(img)</span><br><span class="line">		cnt1=seed_fill(img)</span><br><span class="line">		cnt2=count_fill(img)</span><br><span class="line">		cnt2=(cnt2-<span class="number">50</span>)/<span class="number">50</span></span><br><span class="line">		cnt3=count_border(img)</span><br><span class="line">		cnt3=(cnt3-<span class="number">50</span>)/<span class="number">50</span></span><br><span class="line">		img=blur2(img)</span><br><span class="line">		array=np.array(img)</span><br><span class="line">		array=array.reshape(<span class="number">12</span>*<span class="number">18</span>).astype(<span class="string">&#x27;int&#x27;</span>).astype(<span class="string">&#x27;bool&#x27;</span>).astype(<span class="string">&#x27;float32&#x27;</span>)</span><br><span class="line">		array=array.tolist()</span><br><span class="line">		array.append(cnt1)</span><br><span class="line">		array.append(cnt2)</span><br><span class="line">		array.append(cnt3)</span><br><span class="line">		array=np.array(array).astype(<span class="string">&#x27;float32&#x27;</span>)</span><br><span class="line">		arr.append(array)</span><br><span class="line"></span><br><span class="line">	arr=np.array(arr)</span><br><span class="line"></span><br><span class="line">	<span class="comment">#predict</span></span><br><span class="line">	classifier = cPickle.load(<span class="built_in">open</span>(<span class="string">&#x27;best_model.pkl&#x27;</span>))</span><br><span class="line">	predict_model = theano.function(inputs=[classifier.<span class="built_in">input</span>],outputs=classifier.y_pred)</span><br><span class="line">	predicted_values = predict_model(arr)</span><br><span class="line">	<span class="built_in">dict</span>=<span class="string">&#x27;012345678abcdefghijklmnpqrstuvwxy&#x27;</span></span><br><span class="line">	pred=[]</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(predicted_values)):</span><br><span class="line">		pred.append(<span class="built_in">dict</span>[predicted_values[i]])</span><br><span class="line">	<span class="keyword">return</span> pred[<span class="number">0</span>]+pred[<span class="number">1</span>]+pred[<span class="number">2</span>]+pred[<span class="number">3</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">recur_recognize</span>(<span class="params">path</span>):</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> path[-<span class="number">1</span>]==<span class="string">&#x27;/&#x27;</span>:</span><br><span class="line">		path.join(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">	files=os.listdir(path)</span><br><span class="line">	cost=time.time()</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> files:</span><br><span class="line">		<span class="comment">#print &#x27;.&#x27;,	</span></span><br><span class="line">		<span class="comment">#sys.stdout.flush()</span></span><br><span class="line">		old_name=path+<span class="built_in">str</span>(i)</span><br><span class="line">		name=recognize(old_name)</span><br><span class="line">		new_name=path+<span class="built_in">str</span>(name)</span><br><span class="line">		os.rename(old_name,new_name)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> time.time()-cost,<span class="built_in">len</span>(files)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) &lt;<span class="number">2</span>:</span><br><span class="line">		<span class="built_in">print</span> <span class="string">&#x27;Please enter the file&#x27;</span></span><br><span class="line">	<span class="keyword">else</span>:	</span><br><span class="line">		<span class="keyword">if</span> os.path.isdir(sys.argv[<span class="number">1</span>]):</span><br><span class="line">			cost,size= recur_recognize(sys.argv[<span class="number">1</span>])</span><br><span class="line">			<span class="built_in">print</span> <span class="string">&#x27;\nRecognized &#x27;</span>+<span class="built_in">str</span>(size)+<span class="string">&#x27; pictures , in &#x27;</span>+<span class="built_in">str</span>(cost)+<span class="string">&#x27; s\n&#x27;</span></span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="built_in">print</span> recognize(sys.argv[<span class="number">1</span>])</span><br></pre></td></tr></table></figure>
+<p>这里实现了对单个文件的识别以及文件夹下所有文件的批量识别。可以如下使用：</p>
+<p><code>$python check.py test.png</code> 以及<code>$python check.py png/</code></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/Computer-Vision/" rel="tag"># Computer Vision</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F2-4/" rel="next" title="自制正方软件系统验证码的识别程序（2/4）">
+                <i class="fa fa-chevron-left"></i> 自制正方软件系统验证码的识别程序（2/4）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F4-4/" rel="prev" title="自制正方软件系统验证码的识别程序（4/4）">
+                自制正方软件系统验证码的识别程序（4/4） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#util-py"><span class="nav-number">1.</span> <span class="nav-text">util.py</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#logistic-sgd-py"><span class="nav-number">2.</span> <span class="nav-text">logistic_sgd.py</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#train-py"><span class="nav-number">3.</span> <span class="nav-text">train.py</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#check-py"><span class="nav-number">4.</span> <span class="nav-text">check.py</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

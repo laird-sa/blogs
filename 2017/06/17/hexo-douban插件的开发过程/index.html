@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Web,Nodejs," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景前几天在逛博客的时候发现两个用hexo的很厉害的博客:yikun,raysmond，发现他们不仅内容牛x，而且他们都有一个读书页面，能够同步自己在豆瓣的账户，将自己的阅读经历放在博客中。我觉得这个idea非常有意思，原来博客不仅可以分享技术、分享感悟，还可以当作读书笔记，更加方便的记录自己的学习历程。于是我就想了，反正最近临近期末考试，闲着也是闲着，不如捣鼓捣鼓这个玩意，顺便学学Nodejs。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hexo-douban插件的开发过程">
+<meta property="og:url" content="https://www.resonanat.com/2017/06/17/hexo-douban%E6%8F%92%E4%BB%B6%E7%9A%84%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="背景前几天在逛博客的时候发现两个用hexo的很厉害的博客:yikun,raysmond，发现他们不仅内容牛x，而且他们都有一个读书页面，能够同步自己在豆瓣的账户，将自己的阅读经历放在博客中。我觉得这个idea非常有意思，原来博客不仅可以分享技术、分享感悟，还可以当作读书笔记，更加方便的记录自己的学习历程。于是我就想了，反正最近临近期末考试，闲着也是闲着，不如捣鼓捣鼓这个玩意，顺便学学Nodejs。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/06/17/1/1.png">
+<meta property="article:published_time" content="2017-06-17T11:12:50.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.066Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Web">
+<meta property="article:tag" content="Nodejs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2017/06/17/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/06/17/hexo-douban插件的开发过程/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>hexo-douban插件的开发过程 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/06/17/hexo-douban%E6%8F%92%E4%BB%B6%E7%9A%84%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">hexo-douban插件的开发过程</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-06-17T19:12:50+08:00">
+                2017-06-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>前几天在逛博客的时候发现两个用hexo的很厉害的博客:<a target="_blank" rel="noopener" href="http://yikun.github.io/douban/">yikun</a>,<a target="_blank" rel="noopener" href="http://raysmond.com/">raysmond</a>，发现他们不仅内容牛x，而且他们都有一个读书页面，能够同步自己在豆瓣的账户，将自己的阅读经历放在博客中。我觉得这个idea非常有意思，原来博客不仅可以分享技术、分享感悟，还可以当作读书笔记，更加方便的记录自己的学习历程。<br>于是我就想了，反正最近临近期末考试，闲着也是闲着，不如捣鼓捣鼓这个玩意，顺便学学Nodejs。本来打算花几个小时搞一搞的，结果摊子铺的有点大，搞了两三天搞出了个能同步豆瓣读书跟电影的hexo插件，也算是个意外收获吧。</p>
+<h2 id="踩坑"><a href="#踩坑" class="headerlink" title="踩坑"></a>踩坑</h2><h3 id="第一坑"><a href="#第一坑" class="headerlink" title="第一坑"></a>第一坑</h3><p>我参考了<a target="_blank" rel="noopener" href="http://raysmond.com/">raysmond</a>的网页源码，发现其实他做的事情很简单，就是用xhr调用<a target="_blank" rel="noopener" href="https://developers.douban.com/wiki/?title=book_v2">豆瓣API</a>，然后把结果渲染给页面。于是我就新建了一个page，将源码改了改放了进去，发现并不能用，因为很多浏览器禁止xhr的跨域访问，raysmond的博客使用的是七牛云的cdn，所以不存在这个问题。而我没搞这个cdn，所以在我的chrome里报了错，加载失败。</p>
+<h3 id="第二坑"><a href="#第二坑" class="headerlink" title="第二坑"></a>第二坑</h3><p>既然不允许跨域请求，那我干脆就在部署前用python脚本手动调用api，先把返回的结果存在服务器，然后再用xhr访问这个不跨域的本地数据。显然，这会导致数据不是实时更新，需要自己手动去同步，不过好处就是这样可以解决之前的问题，同时也不会受豆瓣API的调用限制的影响，况且由于这些数据本身就不常更新，手动调用api也不难，因此不太影响体验。<br>搞完之后发现基本能用，正当我打算完工的时候突然发现在github上有一个插件叫<a target="_blank" rel="noopener" href="https://github.com/Yikun/hexo-generator-douban">hexo-generator-douban</a>，没错，这个插件就是yikun弄的。我试了试的确能用，不过布局没有raysmond的好看。于是我就想着要不我也搞个插件吧，毕竟直接在page中写html代码实在是太丑了，不方便身边的同学重用，也不方便自己搬运，倒不如写成个插件用起来方便。。。</p>
+<h3 id="第三坑"><a href="#第三坑" class="headerlink" title="第三坑"></a>第三坑</h3><p>于是我就端起了hexo-generator-douban的源码开始研究，研究hexo的api,学着创建npm帐号，创建npmjs项目,发布npm项目。。。不过当我想把代码按照套路填在里面的时候，我发现在插件中是不能直接用script和style标签来引用其他文件的，因为我们引用的使用所采用的相对路径与调用的时候的路由是完全不一样的。也就是说我不能在代码中写入运行时的路径，只能写入编译时的路径。这样我只能直接把js和css写进nodejs文件里了。。。可这也太丑了吧。。。</p>
+<h3 id="第四坑"><a href="#第四坑" class="headerlink" title="第四坑"></a>第四坑</h3><p>研究了一会发现其实我应该可以ejs这样的模板引擎，毕竟这是编译时就处理的，于是我就倒腾了一会ejs，搞了搞发现成，终于可以把html(ejs)文件与控制(nodejs)文件分开搞了，代码好看了很多，调理也清楚了。<br>忽然，我想既然我们可以同步读书，那么为什么不同步电影呢？？？翻了翻豆瓣的api，发现他竟然没有提供“获取用户喜欢的电影”这类的接口。。。不知道他们是怎么想的，不过看了看豆瓣自己的网页都报了一堆error，我感觉这也正常。。。</p>
+<h3 id="第五坑"><a href="#第五坑" class="headerlink" title="第五坑"></a>第五坑</h3><p>既然不能掉用api，那有没有其他方法获得这个信息呢？忽然我灵机一动，发现自己豆瓣主页的rss能够提供读书跟电影的信息。不错，就拿这个搞了。<br>于是我捣鼓了半天的xpath，xmldom来解析这个rss，照着之前的html模板写了半天，终于搞定了电影的获取。正当我写完打算庆功的时候，突然发现我忘记了rss只能获取最近的信息，当我收藏新的电影时，旧的就会被顶走。。。这特么就很坑了。。。</p>
+<h3 id="第六坑"><a href="#第六坑" class="headerlink" title="第六坑"></a>第六坑</h3><p>好吧，既然这样也不行，那我就只能手动写个爬虫了。。。于是我就照着豆瓣的源码，写了半天的爬虫，总算是成功获取到了数据，放到之前的代码中，成功显示。<br>正当我又以为成功的时候，突然发现了一个bug，我在读书页面中使用yilia的smart menu的时候，发现返回的时候页面就消失不见了。。。难道是兼容性问题？？？那我还要去看yilia的源码喽？？？想想就蛋疼。。。</p>
+<h3 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h3><p>这个bug找了一个晚上，忽然发现竟然是我自己写的一个叫<code>hide</code>的样式跟yilia的样式重名了。。。这下我总算意识到了名空间的重要性，于是我在所有我自己定义的样式前面加了<code>hexo-douban-</code>前缀，成功debug。。。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>项目托管在了我的<a target="_blank" rel="noopener" href="https://github.com/mythsman/hexo-douban">github</a>上，同时注册在了<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/hexo-douban">npmjs</a>里，而且发布在了<a target="_blank" rel="noopener" href="https://hexo.io/plugins/">hexo.io</a>的插件列表里。并且以我自己的<a target="_blank" rel="noopener" href="https://blog.mythsman.com/books/">读书页面</a>跟<a target="_blank" rel="noopener" href="https://blog.mythsman.com/movies/">电影页面</a>作为在线demo，算是对开源界作出了一点点小贡献吧。<br>整个项目到目前前前后后花了半个礼拜时间，版本一改再改，现在改到了0.1.７了，就先告一段落吧，以后什么分页啊排序啊什么的有空再搞吧，开始期末复(预)习喽。</p>
+<p>ps:为防止以后页面失效，先存个截图：<br><img src="/images/2017/06/17/1/1.png" alt="hexo-douban"></p>
+<p>pss:有什么问题欢迎在github上题<a target="_blank" rel="noopener" href="https://github.com/mythsman/hexo-douban/issues">issue</a>，加QQ什么的比较麻烦啊。。。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Web/" rel="tag"># Web</a>
+          
+            <a href="/tags/Nodejs/" rel="tag"># Nodejs</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/11/collection-of-image-hosting/" rel="next" title="收集常见的公共图床">
+                <i class="fa fa-chevron-left"></i> 收集常见的公共图床
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/18/google-analytics-optimize/" rel="prev" title="Google Analytics 异步优化方案">
+                Google Analytics 异步优化方案 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B8%A9%E5%9D%91"><span class="nav-number">2.</span> <span class="nav-text">踩坑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%9D%91"><span class="nav-number">2.1.</span> <span class="nav-text">第一坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%9D%91"><span class="nav-number">2.2.</span> <span class="nav-text">第二坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%9D%91"><span class="nav-number">2.3.</span> <span class="nav-text">第三坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%9D%91"><span class="nav-number">2.4.</span> <span class="nav-text">第四坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E5%9D%91"><span class="nav-number">2.5.</span> <span class="nav-text">第五坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%85%AD%E5%9D%91"><span class="nav-number">2.6.</span> <span class="nav-text">第六坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AA%E5%AE%8C%E5%BE%85%E7%BB%AD"><span class="nav-number">2.7.</span> <span class="nav-text">未完待续</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

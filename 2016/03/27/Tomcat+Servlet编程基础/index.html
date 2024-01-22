@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="之前一直使用的是Apache服务器，对于Tomcat的工作方式反而不那么习惯。给我一个Java web程序源码我都不晓得他应该怎么连接到Tomcat上。于是趁着无聊的时候看了个J2EE的Servlet教程，终于对怎么把java部署到Tomcat上、以及Tomcat的基本工作流程有了简要的认识。当然，这里仅仅指的是简单的Servlet程序的部署方法，不过这点方法从理论上讲已经具备了写一个简单web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat Servlet编程基础">
+<meta property="og:url" content="https://www.resonanat.com/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="之前一直使用的是Apache服务器，对于Tomcat的工作方式反而不那么习惯。给我一个Java web程序源码我都不晓得他应该怎么连接到Tomcat上。于是趁着无聊的时候看了个J2EE的Servlet教程，终于对怎么把java部署到Tomcat上、以及Tomcat的基本工作流程有了简要的认识。当然，这里仅仅指的是简单的Servlet程序的部署方法，不过这点方法从理论上讲已经具备了写一个简单web">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-03-27T15:51:24.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.059Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="ubuntu linux java elasitesearch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/03/27/Tomcat+Servlet编程基础/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Tomcat Servlet编程基础 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Tomcat Servlet编程基础</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-27T23:51:24+08:00">
+                2016-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前一直使用的是Apache服务器，对于Tomcat的工作方式反而不那么习惯。给我一个Java web程序源码我都不晓得他应该怎么连接到Tomcat上。于是趁着无聊的时候看了个J2EE的Servlet教程，终于对怎么把java部署到Tomcat上、以及Tomcat的基本工作流程有了简要的认识。当然，这里仅仅指的是简单的Servlet程序的部署方法，不过这点方法从理论上讲已经具备了写一个简单web 应用的能力了。</p>
+<h2 id="Tomcat基本配置"><a href="#Tomcat基本配置" class="headerlink" title="Tomcat基本配置"></a>Tomcat基本配置</h2><p>Tomcat的配置文件是%TOMCAT_HOME%&#x2F;conf&#x2F;server.xml，这里配置了Tomcat的基本信息，最重要的是下面这两个：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;</span><br><span class="line">               connectionTimeout=&quot;20000&quot;</span><br><span class="line">               redirectPort=&quot;8443&quot; /&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;localhost&quot;  appBase=&quot;webapps&quot;</span><br><span class="line">            unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br></pre></td></tr></table></figure>
+<p>第一个指定了Tomcat监听的端口，默认是8080，如果和其他应用冲突了可以在这里修改。</p>
+<p>第二个指定了Tomcat映射的根目录，就像apache中的&#x2F;var&#x2F;www&#x2F;html&#x2F;的作用一样，但又不完全一样。因为这下面放的都应该是一套完整的应用而不是单一的html文件。</p>
+<h2 id="HttpServlet类基本用法"><a href="#HttpServlet类基本用法" class="headerlink" title="HttpServlet类基本用法"></a>HttpServlet类基本用法</h2><p>Servlet程序就是服务器小程序，现在我们的目的是编写web服务器，那么自然就用到了HttpServlet类来实现一个Http服务器应用。它的基本框架是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebServlet(&quot;/MyServlet&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> <span class="number">1L</span>;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		response.getWriter().append(<span class="string">&quot;&lt;a href=&#x27;http://www.baidu.com&#x27;&gt;baidu&lt;/a&gt;&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		doGet(request, response);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里最常用的就是重载它的doGet和doPost方法，每个方法都传入Request和Response方法，可以从Request中读入用户传过来的数据，并且将需要显示的内容写在Response中，这样就可以达到简单的动态显示网页的效果了。（注意加@WebServlet标注）</p>
+<h2 id="Webapps下项目基本配置"><a href="#Webapps下项目基本配置" class="headerlink" title="Webapps下项目基本配置"></a>Webapps下项目基本配置</h2><p>这个是Tomcat和Apache非常不同的东西，也是我花了半天才理清楚的。</p>
+<p>把Servlet应用放在Webapps文件夹下必须要有web.xml配置文件，这个文件应该放在 项目根目录&#x2F;WEB-INF&#x2F; 下，这是用来配置整个项目的配置文件。他一定要有如下格式：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;ISO-8859-1&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee</span></span></span><br><span class="line"><span class="string"><span class="tag">                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">metadata-complete</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>实际上就是把<code>%TOMCAT_HOME%/conf/web.xml</code>文件的中间部分去掉，留下了外壳，以后需要在这里面慢慢添加配置文件。</p>
+<p>当然， 为了让他能访问到一个特定的Servlet程序，我们还要的对他进行注册:</p>
+<p>首先，我们要把编译过的MyServlet.class文件放在WEB-INF&#x2F;下的classes&#x2F;文件夹下；</p>
+<p>然后，在上面的web.xml中间写入这样的内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">      &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">      &lt;servlet-class&gt;MyServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;/servlet&gt;</span><br><span class="line"></span><br><span class="line">    &lt;servlet-mapping&gt;</span><br><span class="line">        &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">        &lt;url-pattern&gt;/MyServlet&lt;/url-pattern&gt;</span><br><span class="line">    &lt;/servlet-mapping&gt;</span><br></pre></td></tr></table></figure>
+<p>意思很清楚，就是对这个Servlet起个名字，然后把他映射到项目根目录下的MyServlet上，这样就能够通过浏览器访问到了。（事实上，上面的操作的目的就是之前那个类文件中的<code>@WebServlet(&quot;/MyServlet&quot;)</code> 。</p>
+<p>上面是比较基础的操作方法，如果是用Eclipse的话就简单的很了，什么配置web.xml啊，新建文件夹啊都不用操心，只要新建动态网页应用，写个Servlet类，然后直接就能跑起来。不过有一个要注意的就是在用Eclipse查看浏览页面的时候是不用手动开启Tomcat服务器的，如果手动开了的话还会报错。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" rel="next" title="Python面向对象编程基础">
+                <i class="fa fa-chevron-left"></i> Python面向对象编程基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/" rel="prev" title="OpenCV计算图像的梯度特征">
+                OpenCV计算图像的梯度特征 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tomcat%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">Tomcat基本配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HttpServlet%E7%B1%BB%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">HttpServlet类基本用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webapps%E4%B8%8B%E9%A1%B9%E7%9B%AE%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">Webapps下项目基本配置</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

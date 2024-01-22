@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,Machine Learning," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="由于有关caffe的开发资料实在太少，单单是这个问题就困扰了我半天。最后终于找到了一个大腿—-beenfrog，也是一个正在学习caffe框架的研究人员。博客mark下，以后有问题可以去这里找。 本文代码部分主要参考于此文。 简述lmdb是一种轻量级的数据库，caffe中主要就是使用lmdb模块来进行图像数据集的保存。据说是因为lmdb有读取速度快，支持多线程、多进程并发，等这样那样的优点（具体见">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用caffe与lmdb读写图像数据">
+<meta property="og:url" content="https://www.resonanat.com/2016/03/03/%E5%88%A9%E7%94%A8caffe%E4%B8%8Elmdb%E8%AF%BB%E5%86%99%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="由于有关caffe的开发资料实在太少，单单是这个问题就困扰了我半天。最后终于找到了一个大腿—-beenfrog，也是一个正在学习caffe框架的研究人员。博客mark下，以后有问题可以去这里找。 本文代码部分主要参考于此文。 简述lmdb是一种轻量级的数据库，caffe中主要就是使用lmdb模块来进行图像数据集的保存。据说是因为lmdb有读取速度快，支持多线程、多进程并发，等这样那样的优点（具体见">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-03-03T15:34:15.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.084Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/03/03/利用caffe与lmdb读写图像数据/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>利用caffe与lmdb读写图像数据 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/03/%E5%88%A9%E7%94%A8caffe%E4%B8%8Elmdb%E8%AF%BB%E5%86%99%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">利用caffe与lmdb读写图像数据</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-03T23:34:15+08:00">
+                2016-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>由于有关caffe的开发资料实在太少，单单是这个问题就困扰了我半天。最后终于找到了一个大腿—-<a target="_blank" rel="noopener" href="http://research.beenfrog.com/">beenfrog</a>，也是一个正在学习caffe框架的研究人员。博客mark下，以后有问题可以去这里找。</p>
+<p>本文代码部分主要参考于<a target="_blank" rel="noopener" href="http://research.beenfrog.com/code/2015/12/30/write-read-lmdb-example.html">此文</a>。</p>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>lmdb是一种轻量级的数据库，caffe中主要就是使用lmdb模块来进行图像数据集的保存。据说是因为lmdb有读取速度快，支持多线程、多进程并发，等这样那样的优点（具体见<a target="_blank" rel="noopener" href="http://lmdb.readthedocs.org/en/release/">官网</a>，虽然我暂时没有看出来，据我所知网上查找lmdb文档的人大都仅仅是为了使用caffe的），注意到这个数据库其实并没有任何压缩处理的作用，他的目的只是为了快速的索引和存取。他的数据都会带着一定的数据结构从而使的体积略微增大。</p>
+<p>事实上如果仅仅看lmdb的用法是无法直接应用于图像文件的处理的。由于caffe是将图像以他自带的数据类型的形式传入lmdb中的，因此我们必须结合caffe的数据类型才能完成读取和使用。</p>
+<h2 id="lmdb的安装"><a href="#lmdb的安装" class="headerlink" title="lmdb的安装"></a>lmdb的安装</h2><p>参考官方文档，安装如下依赖即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">udo apt-get install cython</span><br><span class="line">sudo apt-get install libffi-dev python-dev build-essential</span><br><span class="line">sudo apt-get install python-cffi</span><br><span class="line">sudo easy_install lmdb</span><br></pre></td></tr></table></figure>
+<p>实践再次映证了用easy_install 安装要比pip好的多(在版本跟的上的情况下)。</p>
+<h2 id="生成数据文件"><a href="#生成数据文件" class="headerlink" title="生成数据文件"></a>生成数据文件</h2><p>这里以zhengfang&#x2F;文件夹下的1.png至1000.png为例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> lmdb</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> caffe</span><br><span class="line"><span class="keyword">from</span> caffe.proto <span class="keyword">import</span> caffe_pb2</span><br><span class="line"></span><br><span class="line"><span class="comment">#basic setting</span></span><br><span class="line">lmdb_file = <span class="string">&#x27;lmdb_data&#x27;</span><span class="comment">#期望生成的数据文件</span></span><br><span class="line">batch_size = <span class="number">200</span>       <span class="comment">#lmdb对于数据进行的是先缓存后一次性写入从而提高效率，因此定义一个batch_size控制每次写入的量。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># create the leveldb file</span></span><br><span class="line">lmdb_env = lmdb.<span class="built_in">open</span>(lmdb_file, map_size=<span class="built_in">int</span>(<span class="number">1e12</span>))<span class="comment">#生成一个数据文件，定义最大空间</span></span><br><span class="line">lmdb_txn = lmdb_env.begin(write=<span class="literal">True</span>)              <span class="comment">#打开数据库的句柄</span></span><br><span class="line">datum = caffe_pb2.Datum()                          <span class="comment">#这是caffe中定义数据的重要类型</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    x+=<span class="number">1</span></span><br><span class="line">    img=cv2.imread(<span class="string">&#x27;zhengfang/&#x27;</span>+<span class="built_in">str</span>(x)+<span class="string">&#x27;.png&#x27;</span>).convert(<span class="string">&#x27;RGB&#x27;</span>)     <span class="comment">#从zhengfang/文件夹中依次读取图像</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># save in datum</span></span><br><span class="line">    data = img.astype(<span class="string">&#x27;int&#x27;</span>).transpose(<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>)      <span class="comment">#图像矩阵，注意需要调节维度</span></span><br><span class="line">    <span class="comment">#data = np.array([img.convert(&#x27;L&#x27;).astype(&#x27;int&#x27;)]) #或者这样增加维度</span></span><br><span class="line">    label = x                                      <span class="comment">#图像的标签，为了方便存储，这个必须是整数。</span></span><br><span class="line">    datum = caffe.io.array_to_datum(data, label)   <span class="comment">#将数据以及标签整合为一个数据项</span></span><br><span class="line"></span><br><span class="line">    keystr = <span class="string">&#x27;&#123;:0&gt;8d&#125;&#x27;</span>.<span class="built_in">format</span>(x-<span class="number">1</span>)                 <span class="comment">#lmdb的每一个数据都是由键值对构成的，因此生成一个用递增顺序排列的定长唯一的key</span></span><br><span class="line">    lmdb_txn.put( keystr, datum.SerializeToString())<span class="comment">#调用句柄，写入内存。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># write batch</span></span><br><span class="line">    <span class="keyword">if</span> x % batch_size == <span class="number">0</span>:                        <span class="comment">#每当累计到一定的数据量，便用commit方法写入硬盘。</span></span><br><span class="line">        lmdb_txn.commit()</span><br><span class="line">        lmdb_txn = lmdb_env.begin(write=<span class="literal">True</span>)      <span class="comment">#commit之后，之前的txn就不能用了，必须重新开一个。</span></span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;batch &#123;&#125; writen&#x27;</span>.<span class="built_in">format</span>(x)</span><br><span class="line"></span><br><span class="line">lmdb_env.close()                                   <span class="comment">#结束后记住释放资源，否则下次用的时候打不开。。。</span></span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">batch 200 writen</span><br><span class="line">batch 400 writen</span><br><span class="line">batch 600 writen</span><br><span class="line">batch 800 writen</span><br><span class="line">batch 1000 writen</span><br></pre></td></tr></table></figure>
+
+
+<p>照着注释，很好理解了。值得一提的是，生成的文件是以文件夹的形式保存的，内部由data.mdb lock.mdb组成，不用管他。</p>
+<p>这里需要强烈注意的一点是，datum里的图像是需要有长宽高三个维度的，而且第一个维度默认是通道数，而我们平常的图像格式是第三位是通道。因此我们需要在读入普通图像的时候将他转置一下存入datum中，或者在外面增加一层。</p>
+<h2 id="读取数据文件"><a href="#读取数据文件" class="headerlink" title="读取数据文件"></a>读取数据文件</h2><p>读取上面生成的数据文件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> caffe</span><br><span class="line"><span class="keyword">import</span> lmdb</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">from</span> caffe.proto <span class="keyword">import</span> caffe_pb2</span><br><span class="line"></span><br><span class="line">lmdb_env = lmdb.<span class="built_in">open</span>(<span class="string">&#x27;lmdb_data&#x27;</span>)<span class="comment">#打开数据文件</span></span><br><span class="line">lmdb_txn = lmdb_env.begin()      <span class="comment">#生成句柄</span></span><br><span class="line">lmdb_cursor = lmdb_txn.cursor()  <span class="comment">#生成迭代器指针</span></span><br><span class="line">datum = caffe_pb2.Datum()        <span class="comment">#caffe定义的数据类型</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> key, value <span class="keyword">in</span> lmdb_cursor:   <span class="comment">#循环获取数据</span></span><br><span class="line">    datum.ParseFromString(value) <span class="comment">#从value中读取datum数据</span></span><br><span class="line"></span><br><span class="line">    label = datum.label          <span class="comment">#获取标签以及图像数据</span></span><br><span class="line">    data = caffe.io.datum_to_array(datum)</span><br><span class="line">    <span class="built_in">print</span> data.shape</span><br><span class="line">    <span class="built_in">print</span> datum.channels</span><br><span class="line">    image =data.transpose(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>)</span><br><span class="line">    cv2.imshow(<span class="string">&#x27;cv2.png&#x27;</span>, image) <span class="comment">#显示</span></span><br><span class="line">    cv2.waitKey(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">cv2.destroyAllWindows()</span><br><span class="line">lmdb_env.close()</span><br></pre></td></tr></table></figure>
+<p>输出：（图像略）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(3, 27, 72)</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+<p>基本是和写入程序一一相对，很好理解。同样需要注意的是如需要显示图像，则需要将数据转置回来。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/03/Python%E4%B8%AD%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84format%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8/" rel="next" title="Python中字符串的format函数使用">
+                <i class="fa fa-chevron-left"></i> Python中字符串的format函数使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/06/Python%E5%9C%A8%E7%BA%BF%E7%BC%96%E5%86%99%E4%BB%A5%E5%8F%8A%E6%96%87%E6%A1%A3%E6%9F%A5%E7%9C%8B%E5%B7%A5%E5%85%B7jupyter/" rel="prev" title="Python在线编写以及文档查看工具jupyter">
+                Python在线编写以及文档查看工具jupyter <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lmdb%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">lmdb的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">生成数据文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">读取数据文件</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

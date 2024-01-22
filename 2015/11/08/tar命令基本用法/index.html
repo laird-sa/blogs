@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Linux里文件压缩解压打包神马的还是很有用的，比如要向服务器上传一堆小东西（特别像网站的移植），挨个上传的话会特别特别的慢。这时候用一个打包命令来处理就尤为重要了。实际上这类的命令有很多（比如 cpio命令，lzma命令，gunzip命令，bunzip命令等等），但是最常用的还是今天介绍的tar命令。 首先介绍一些比较常见的用法，就是什么打包，解包，压缩，解压缩这些的一般晓得这些用法就够用了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tar命令基本用法">
+<meta property="og:url" content="https://www.resonanat.com/2015/11/08/tar%E5%91%BD%E4%BB%A4%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="Linux里文件压缩解压打包神马的还是很有用的，比如要向服务器上传一堆小东西（特别像网站的移植），挨个上传的话会特别特别的慢。这时候用一个打包命令来处理就尤为重要了。实际上这类的命令有很多（比如 cpio命令，lzma命令，gunzip命令，bunzip命令等等），但是最常用的还是今天介绍的tar命令。 首先介绍一些比较常见的用法，就是什么打包，解包，压缩，解压缩这些的一般晓得这些用法就够用了。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-08T15:08:05.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.076Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/11/08/tar命令基本用法/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>tar命令基本用法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/08/tar%E5%91%BD%E4%BB%A4%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">tar命令基本用法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-08T23:08:05+08:00">
+                2015-11-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Linux里文件压缩解压打包神马的还是很有用的，比如要向服务器上传一堆小东西（特别像网站的移植），挨个上传的话会特别特别的慢。这时候用一个打包命令来处理就尤为重要了。实际上这类的命令有很多（比如 cpio命令，lzma命令，gunzip命令，bunzip命令等等），但是最常用的还是今天介绍的tar命令。</p>
+<p>首先介绍一些比较常见的用法，就是什么打包，解包，压缩，解压缩这些的一般晓得这些用法就够用了。</p>
+<h2 id="打包命令"><a href="#打包命令" class="headerlink" title="打包命令"></a>打包命令</h2><p><code>tar -cvf [生成的文件] [需打包的文件1] [需打包的文件2] [需打包的文件3]...</code></p>
+<p>需要说明的是这里的生成文件一般.tar结尾以让人分辨出这是个包包（特殊目的除外）。</p>
+<p>很自然的问题是，这里带了一个-cvf参数，这是什么呢？</p>
+<p>其实-cvf并不是一个参数，而是三个参数：</p>
+<p>-c [–create]   表示创建新的归档文件（很明显这是很必要的，要不然电脑怎么知道你是要打包还是要解包呢？）</p>
+<p>-v [–verbose] 显示命令的执行过程（实际上就显示下包里的文件，不是特别必要，但习惯还是写了）</p>
+<p>-f [–file&#x3D;]  指定备份文件名或设备（当然是必须的，否则怎么知道打包到哪里，这里需要注意的是，f参数后面一定是紧跟这生成的文件名的，即他必须是所有选项的最后一个）</p>
+<p>打包基本就是这样了。</p>
+<h2 id="压缩命令"><a href="#压缩命令" class="headerlink" title="压缩命令"></a>压缩命令</h2><p>需要注意的是，用tar命令打包生成的文件其实只是一个包，数据并没有得到压缩。真正的压缩文件应该是需要一个压缩参数的：</p>
+<ul>
+<li><p>用gzip压缩格式进行压缩：<br><code>tar -zcvf [生成的文件] [需打包的文件1] [需打包的文件2] [需打包的文件3]...</code><br>-z [–gzip, –gunzip, –ungzip]  使用gzip命令处理备份文件（这时候需要注意的就是生成文件最好要以.tar.gz结尾，让人晓得你这是用啥压缩的，人家好用相应的命令解压）</p>
+</li>
+<li><p>用bzip压缩格式进行压缩：<br><code>tar -jcvf [生成的文件] [需打包的文件1] [需打包的文件2] [需打包的文件3]...</code><br>-j [–I –bzip ]  使用bzip2命令处理备份文件（通常以.tar.bz2结尾）</p>
+</li>
+</ul>
+<h2 id="解包命令"><a href="#解包命令" class="headerlink" title="解包命令"></a>解包命令</h2><p><code>tar -xvf [生成的文件] [包包] </code></p>
+<p>我们把打包命令的-c参数换成-x参数就可以了。</p>
+<p>-x [–extract, –get] 从归档文件中解析文件（用法和-c一致）</p>
+<h2 id="解压命令"><a href="#解压命令" class="headerlink" title="解压命令"></a>解压命令</h2><p>与两种压缩方式对应的就是两种解压方式喽～</p>
+<p><code>tar -zxvf [生成的文件] [包包] </code></p>
+<p><code>tar -jxvf [生成的文件] [包包] </code></p>
+<h2 id="查看包包的命令"><a href="#查看包包的命令" class="headerlink" title="查看包包的命令"></a>查看包包的命令</h2><p>当我们想看看包里有啥却不想解压包包的时候我们可以用-t参数：</p>
+<p><code>tar -tvf [你的包包] </code></p>
+<p>-t [–list] 列出归档文件内容目录（-t 参数和-c 以及-x 参数是互斥的，前面也可以搭配-z -j之类的压缩参数，这一点视情况而定）</p>
+<h2 id="指定解压文件夹"><a href="#指定解压文件夹" class="headerlink" title="指定解压文件夹"></a>指定解压文件夹</h2><p>tar命令的解压地址实际上是按照相对路径来的，如果非得用绝对路径的话，需要加上-C参数来指定绝对路径：</p>
+<p><code>tar -zxvf /tmp/etc.tar.gz -C /tmp </code></p>
+<hr>
+<p>以上就是tar命令的基础用法，当然，tar命令还有很多高级用法，不过一般用的比较少了，这里就不详细说了，以后需要用到就去翻文档吧。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/06/%E5%B7%A6%E5%81%8F%E6%A0%91%E7%AE%80%E8%BF%B0/" rel="next" title="左偏树简述">
+                <i class="fa fa-chevron-left"></i> 左偏树简述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/09/%E4%B8%80%E4%B8%AA%E6%89%B9%E9%87%8F%E6%94%B9%E4%BD%9C%E4%B8%9A%E7%9A%84shell%E8%84%9A%E6%9C%AC/" rel="prev" title="一个批量改作业的shell脚本">
+                一个批量改作业的shell脚本 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E5%8C%85%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">打包命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">压缩命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%8C%85%E5%91%BD%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">解包命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8B%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">解压命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%8C%85%E5%8C%85%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="nav-number">5.</span> <span class="nav-text">查看包包的命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%A7%A3%E5%8E%8B%E6%96%87%E4%BB%B6%E5%A4%B9"><span class="nav-number">6.</span> <span class="nav-text">指定解压文件夹</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言很多情况下，当我们通过别的渠道安装了程序包之后，发现dash中并没有收录这个程序，想使用的话还得通过输命令或者执行脚本，显得很麻烦。其实，Linux  KDE 或者Linux GNOME下这种东西完全可以自己配置，而且弄得比windows下还要漂亮。我们用到的工具就是Desktop Entry文件系统。 文件样例一般情况下我们都吧*.desktop文件放在&#x2F;usr&#x2F;shar">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu中Desktop Entry文件剖析">
+<meta property="og:url" content="https://www.resonanat.com/2015/10/04/Ubuntu%E4%B8%ADDesktop-Entry%E6%96%87%E4%BB%B6%E5%89%96%E6%9E%90/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言很多情况下，当我们通过别的渠道安装了程序包之后，发现dash中并没有收录这个程序，想使用的话还得通过输命令或者执行脚本，显得很麻烦。其实，Linux  KDE 或者Linux GNOME下这种东西完全可以自己配置，而且弄得比windows下还要漂亮。我们用到的工具就是Desktop Entry文件系统。 文件样例一般情况下我们都吧*.desktop文件放在&#x2F;usr&#x2F;shar">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-10-04T12:40:58.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.061Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/10/04/Ubuntu中Desktop-Entry文件剖析/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Ubuntu中Desktop Entry文件剖析 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Ubuntu%E4%B8%ADDesktop-Entry%E6%96%87%E4%BB%B6%E5%89%96%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Ubuntu中Desktop Entry文件剖析</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T20:40:58+08:00">
+                2015-10-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>很多情况下，当我们通过别的渠道安装了程序包之后，发现dash中并没有收录这个程序，想使用的话还得通过输命令或者执行脚本，显得很麻烦。其实，Linux  KDE 或者Linux GNOME下这种东西完全可以自己配置，而且弄得比windows下还要漂亮。我们用到的工具就是Desktop Entry文件系统。</p>
+<h2 id="文件样例"><a href="#文件样例" class="headerlink" title="文件样例"></a>文件样例</h2><p>一般情况下我们都吧*.desktop文件放在&#x2F;usr&#x2F;share&#x2F;applications&#x2F;目录下，文件夹下的每一个文件就对应这dash菜单内的一个程序，我们任意打开一个文件来看一看这里面都写了啥：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:/usr/share/applications$ cat libreoffice-writer.desktop[Desktop Entry]</span><br><span class="line">Version=1.0</span><br><span class="line">Encoding = UTF-8</span><br><span class="line">Name=LibreOffice Writer</span><br><span class="line">GenericName[zh_CN]=字处理器</span><br><span class="line">Comment[zh_CN]=使用 Writer 创建并编辑信函、报表、文档和网页中的文本和图形。</span><br><span class="line">Type=Application</span><br><span class="line">Exec=libreoffice --writer %U</span><br><span class="line">Icon=libreoffice-writer</span><br><span class="line">Terminal=false</span><br><span class="line">Categories=Office;WordProcessor;X-Red-Hat-Base;X-MandrivaLinux-Office-Wordprocessors;</span><br><span class="line">MimeType=application/vnd.oasis.opendocument.text;...;application/vnd.palm;application/clarisworks;</span><br><span class="line">StartupNotify=true</span><br><span class="line">Keywords=Text;Letter;Fax;Document;OpenDocument Text;Microsoft Word;Microsoft Works;Lotus WordPro;OpenOffice Writer;CV;odt;doc;docx;rtf;</span><br><span class="line">InitialPreference=5</span><br><span class="line">StartupWMClass=libreoffice-writer</span><br><span class="line">X-KDE-Protocols=file,http,smb,ftp,webdav</span><br><span class="line">Actions=NewDocument;</span><br><span class="line">[Desktop Action NewDocument]</span><br><span class="line">Name=New Document</span><br><span class="line">Exec=libreoffice --writer</span><br><span class="line">OnlyShowIn=Unity;</span><br></pre></td></tr></table></figure>
+<p>（中间的MimeType有点长，我给用…代替了，而且Comment和GenericName本来支持多种语言的，这里就给精简了0.0）</p>
+<p>下面我们就来正式的看一下这写的究竟是啥。</p>
+<h2 id="简要分析"><a href="#简要分析" class="headerlink" title="简要分析"></a>简要分析</h2><p>首先一般是以[Desktop Entry]开头，表明格式。剩下的就是以键值对的形式指明各种属性值。Desktop Entry 文件标准定义了一系列标准关键字。标准关键字分为必选和可选两种：必选标准关键字必须在 .desktop 文件中被定义；而可选关键字则不必。以下是对重点关键字的解析：</p>
+<ul>
+<li><p>关键字”Version“：[可选]该数值指定了当前 Desktop Entry 文件所遵循的 Desktop Entry 文件标准版本。</p>
+</li>
+<li><p>关键字”Encoding”：[可选]1.0 版本不推荐使用 该数值指定了当前 Desktop Entry 文件中特定字符串所使用的编码方式。尽管Desktop Entry 文件标准 1.0 不再推荐使用该关键字，但由于历史原因该关键字仍然广泛出现在现有的 Desktop Entry 文件中。</p>
+</li>
+<li><p>关键字”Name”：[必选]该数值指定了相关应用程序的名称。打开dash，显示的名字就是了。</p>
+</li>
+<li><p>关键字”GenericName”：[可选]该数值指定了相关应用程序的通用名称。</p>
+</li>
+<li><p>关键字”Comment”：[可选]该数值是对当前Desktop Entry的简单描述。就是dash中右键出来的评论。</p>
+</li>
+<li><p>关键字”Type”：[必选]关键字”Type”定义了Desktop Entry文件的类型。常见的”Type”数值是”Application”和”Link”。”Type &#x3D; Application”表示当前Desktop Entry文件指向了一个应用程序；而”Type &#x3D; Link”表示当前Desktop Entry文件指向了一个URL (Uniform Resource Locator)。</p>
+</li>
+<li><p>关键字”Exec”：[可选]关键字”Exec”只有在”Type”类型是”Application”时才有意义。”Exec”的数值定义了启动指定应用程序所要执行的命令，在此命令是可以带参数的。通常就是在命令行执行程序或者脚本的命令，比如我的mc配置的就是</p>
+</li>
+</ul>
+<p><code>Exec=/home/myths/Download/Minecraft/minecraft.sh。</code></p>
+<ul>
+<li><p>关键字”URL”：[可选]关键字”URL”只有在”Type”类型是”Link”时才有意义。”URL”的数值定义了该Desktop Entry文件指向的URL。</p>
+</li>
+<li><p>关键字”Icon”：[可选]该数值定义了当前Desktop Entry文件在应用程序浏览器或是在文件浏览器中所显示的图标。一般关键字”Icon”的数值是以绝对路径的格式给出（其实是不知道系统给的相对路径是啥0.0），那么其数值所指定图标文件将被使用。</p>
+</li>
+<li><p>关键字”Terminal”：[可选]该关键字的数值是布尔值，并且该关键字只有在”Type”类型是”Application”时才有意义。其数值指出了相关应用程序（即关键字”Exec”的数值）是否需要在终端窗口中运行。</p>
+</li>
+<li><p>关键字”Categories”：[可选]关键字”Categories”只有在”Type”类型是”Application”时才有意义。”Categories”的数值指出了相关应用程序在菜单中显示的类别。具体菜单分类由规范”Desktop Specification Menu”具体定义。（一般没必要写）</p>
+</li>
+</ul>
+<p>基本上常见的就是这些属性，毕竟自己搞的玩意也没有必要多标准，凑合用就行啦。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/04/Linux%E4%B8%BA%E7%94%A8%E6%88%B7%E6%B7%BB%E5%8A%A0sudo%E6%9D%83%E9%99%90/" rel="next" title="Linux为用户添加sudo权限">
+                <i class="fa fa-chevron-left"></i> Linux为用户添加sudo权限
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/05/Linux%E4%B8%AD%E5%BF%98%E8%AE%B0root%E5%AF%86%E7%A0%81%E6%80%8E%E4%B9%88%E5%8A%9E/" rel="prev" title="Linux中忘记root密码怎么办">
+                Linux中忘记root密码怎么办 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%A0%B7%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">文件样例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">简要分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

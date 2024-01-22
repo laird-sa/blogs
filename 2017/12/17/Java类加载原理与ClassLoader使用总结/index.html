@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Jvm," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言说来好笑，不知道怎么我就来搞Java了。虽说大学也码了三年多的代码，但是七七八八乱糟糟的东西搞得有点多，对Java的理解也只能算是hello world，这让我感觉非常慌，尤其是看到招聘网上的一堆JD都要求深入理解JVM，再对比下自己真是自惭形秽。这一两个月没什么事情，感觉是时候要补充点知识了。。。 双亲委派模型类加载这个概念应该算是Java语言的一种创新，目的是为了将类的加载过程与虚拟机解耦">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java类加载原理与ClassLoader使用总结">
+<meta property="og:url" content="https://www.resonanat.com/2017/12/17/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%8E%9F%E7%90%86%E4%B8%8EClassLoader%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言说来好笑，不知道怎么我就来搞Java了。虽说大学也码了三年多的代码，但是七七八八乱糟糟的东西搞得有点多，对Java的理解也只能算是hello world，这让我感觉非常慌，尤其是看到招聘网上的一堆JD都要求深入理解JVM，再对比下自己真是自惭形秽。这一两个月没什么事情，感觉是时候要补充点知识了。。。 双亲委派模型类加载这个概念应该算是Java语言的一种创新，目的是为了将类的加载过程与虚拟机解耦">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/12/17/1/1.png">
+<meta property="article:published_time" content="2017-12-17T13:34:38.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.040Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Jvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2017/12/17/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/12/17/Java类加载原理与ClassLoader使用总结/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Java类加载原理与ClassLoader使用总结 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/12/17/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%8E%9F%E7%90%86%E4%B8%8EClassLoader%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Java类加载原理与ClassLoader使用总结</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T21:34:38+08:00">
+                2017-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>说来好笑，不知道怎么我就来搞Java了。虽说大学也码了三年多的代码，但是七七八八乱糟糟的东西搞得有点多，对Java的理解也只能算是hello world，这让我感觉非常慌，尤其是看到招聘网上的一堆JD都要求深入理解JVM，再对比下自己真是自惭形秽。这一两个月没什么事情，感觉是时候要补充点知识了。。。</p>
+<h2 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h2><p>类加载这个概念应该算是Java语言的一种创新，目的是为了将类的加载过程与虚拟机解耦，达到”通过类的全限定名来获取描述此类的二进制字节流“的目的。实现这个功能的代码模块就是类加载器。类加载器的基本模型就是大名鼎鼎的双亲委派模型(Parents Delegation Model)。听上去很牛掰，其实逻辑很简单，在需要加载一个类的时候，我们首先判断该类是否已被加载，如果没有就判断是否已被父加载器加载，如果还没有再调用自己的findClass方法尝试加载。基本的模型就是这样(盗图侵删)：<br><img src="/images/2017/12/17/1/1.png"></p>
+<p>实现起来也很简单，重点就是ClassLoader类的loadClass方法，源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="type">boolean</span> resolve)</span><br><span class="line">    <span class="keyword">throws</span> ClassNotFoundException</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (getClassLoadingLock(name)) &#123;</span><br><span class="line">        <span class="comment">// First, check if the class has already been loaded</span></span><br><span class="line">        Class&lt;?&gt; c = findLoadedClass(name);</span><br><span class="line">        <span class="keyword">if</span> (c == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="type">long</span> <span class="variable">t0</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (parent != <span class="literal">null</span>) &#123;</span><br><span class="line">                    c = parent.loadClass(name, <span class="literal">false</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    c = findBootstrapClassOrNull(name);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">                <span class="comment">// ClassNotFoundException thrown if class not found</span></span><br><span class="line">                <span class="comment">// from the non-null parent class loader</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (c == <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="comment">// If still not found, then invoke findClass in order</span></span><br><span class="line">                <span class="comment">// to find the class.</span></span><br><span class="line">                <span class="type">long</span> <span class="variable">t1</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">                c = findClass(name);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// this is the defining class loader; record the stats</span></span><br><span class="line">                sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);</span><br><span class="line">                sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);</span><br><span class="line">                sun.misc.PerfCounter.getFindClasses().increment();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (resolve) &#123;</span><br><span class="line">            </span><br><span class="line">            Class(c);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>闲来无事再看一下findClass方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; findClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>突然感觉被逗了，怎么默认直接就抛了异常呢？其实是因为ClassLoader这个类是一个抽象类，实际在使用时候会写个子类，这个方法会按照需要被重写，来完成业务需要的加载过程。</p>
+<h2 id="自定义ClassLoader"><a href="#自定义ClassLoader" class="headerlink" title="自定义ClassLoader"></a>自定义ClassLoader</h2><p>在自定义ClassLoader的子类时候，我们常见的会有两种做法，一种是重写loadClass方法，另一种是重写findClass方法。其实这两种方法本质上差不多，毕竟loadClass也会调用findClass，但是从逻辑上讲我们最好不要直接修改loadClass的内部逻辑。<br>个人认为比较好的做法其实是只在findClass里重写自定义类的加载方法。<br>为啥说这种比较好呢，因为前面我也说道，loadClass这个方法是实现双亲委托模型逻辑的地方，擅自修改这个方法会导致模型被破坏，容易造成问题。因此我们最好是在双亲委托模型框架内进行小范围的改动，不破坏原有的稳定结构。同时，也避免了自己重写loadClass方法的过程中必须写双亲委托的重复代码，从代码的复用性来看，不直接修改这个方法始终是比较好的选择。<br>当然，如果是刻意要破坏双亲委托模型就另说。</p>
+<h2 id="破坏双亲委托模型"><a href="#破坏双亲委托模型" class="headerlink" title="破坏双亲委托模型"></a>破坏双亲委托模型</h2><p>为什么要破坏双亲委托模型呢？<br>其实在某些情况下，我们可能需要加载两个不同的类，但是不巧的是这两个类的名字完全一样，这时候双亲委托模型就无法满足我们的要求了，我们就要重写loadClass方法破坏双亲委托模型，让同一个类名加载多次。当然，这里说的破坏只是局部意义上的破坏。<br>但是类名相同了，jvm怎么区别这两个类呢？显然，这并不会造成什么世界观的崩塌，其实类在jvm里并不仅是通过类名来限定的，他还属于加载他的ClassLoader。由不同ClassLoader加载的类其实是互不影响的。<br>做一个实验。<br>我们先写两个类:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hello</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;This is from Hello v1&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hello</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;This is from Hello v2&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>两个类名字一样，唯一的区别是方法的实现不一样。我们先分别编译，然后把生成的class文件重命名为Hello.class.1和Hello.class.2。<br>我们的目的是希望能在测试类里分别创建这两个类的实例。<br>接着我们新建一个测试类com.mythsman.test.Main，在主函数里创建两个自定义的ClassLoader：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">ClassLoader classLoader1=<span class="keyword">new</span> <span class="title class_">ClassLoader</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Class&lt;?&gt; loadClass(String s) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (s.equals(<span class="string">&quot;com.mythsman.test.Hello&quot;</span>)) &#123;</span><br><span class="line">                <span class="type">byte</span>[] classBytes = Files.readAllBytes(Paths.get(<span class="string">&quot;/home/myths/Desktop/test/Hello.class.1&quot;</span>));</span><br><span class="line">                <span class="keyword">return</span> defineClass(s, classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">super</span>.loadClass(s);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(s);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">ClassLoader classLoader2=<span class="keyword">new</span> <span class="title class_">ClassLoader</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Class&lt;?&gt; loadClass(String s) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (s.equals(<span class="string">&quot;com.mythsman.test.Hello&quot;</span>)) &#123;</span><br><span class="line">                <span class="type">byte</span>[] classBytes = Files.readAllBytes(Paths.get(<span class="string">&quot;/home/myths/Desktop/test/Hello.class.2&quot;</span>));</span><br><span class="line">                <span class="keyword">return</span> defineClass(s, classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">super</span>.loadClass(s);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(s);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这两个ClassLoader的用途就是分别关联Hello类的两种不同字节码，我们需要读取字节码文件并通过defineClass方法加载成class。注意我们重载的是loadClass方法，如果是重载findClass方法那么由于loadClass方法的双亲委托处理机制，第二个ClassLoader的findClass方法其实并不会被调用。<br>那我们怎么生成实例呢？显然我们不能直接用类名来引用(名称冲突)，那就只能用反射了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Object helloV1=classLoader1.loadClass(<span class="string">&quot;com.mythsman.test.Hello&quot;</span>).newInstance();</span><br><span class="line">Object helloV2=classLoader2.loadClass(<span class="string">&quot;com.mythsman.test.Hello&quot;</span>).newInstance();</span><br><span class="line">helloV1.getClass().getMethod(<span class="string">&quot;say&quot;</span>).invoke(helloV1);</span><br><span class="line">helloV2.getClass().getMethod(<span class="string">&quot;say&quot;</span>).invoke(helloV2);</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">This is from Hello v1</span><br><span class="line">This is from Hello v2</span><br></pre></td></tr></table></figure>
+<p>OK，这样就算是完成了两次加载，但是还有几个注意点需要关注下。</p>
+<h3 id="两个类的关系是什么"><a href="#两个类的关系是什么" class="headerlink" title="两个类的关系是什么"></a>两个类的关系是什么</h3><p>显然这两个类并不是同一个类，但是他们的名字一样，那么类似isinstance of之类的操作符结果是什么样的呢：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">&quot;class:&quot;</span>+helloV1.getClass());</span><br><span class="line">System.out.println(<span class="string">&quot;class:&quot;</span>+helloV2.getClass());</span><br><span class="line">System.out.println(<span class="string">&quot;hashCode:&quot;</span>+helloV1.getClass().hashCode());</span><br><span class="line">System.out.println(<span class="string">&quot;hashCode:&quot;</span>+helloV2.getClass().hashCode());</span><br><span class="line">System.out.println(<span class="string">&quot;classLoader:&quot;</span>+helloV1.getClass().getClassLoader());</span><br><span class="line">System.out.println(<span class="string">&quot;classLoader:&quot;</span>+helloV2.getClass().getClassLoader());</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">class:class com.mythsman.test.Hello</span><br><span class="line">class:class com.mythsman.test.Hello</span><br><span class="line">hashCode:1581781576</span><br><span class="line">hashCode:1725154839</span><br><span class="line">classLoader:com.mythsman.test.Main$1@5e2de80c</span><br><span class="line">classLoader:com.mythsman.test.Main$2@266474c2</span><br></pre></td></tr></table></figure>
+<p>他们的类名的确是一样的，但是类的hashcode不一样，也就意味着这两个本质不是一个类，而且他们的类加载器也不同(其实就是Main的两个内部类)。</p>
+<h3 id="这两个类加载器跟系统的三层类加载器是什么关系"><a href="#这两个类加载器跟系统的三层类加载器是什么关系" class="headerlink" title="这两个类加载器跟系统的三层类加载器是什么关系"></a>这两个类加载器跟系统的三层类加载器是什么关系</h3><p>以第一个自定义的类加载器为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(classLoader1.getParent().getParent().getParent());</span><br><span class="line">System.out.println(classLoader1.getParent().getParent());</span><br><span class="line">System.out.println(classLoader1.getParent());</span><br><span class="line">System.out.println(classLoader1 );</span><br><span class="line">System.out.println(ClassLoader.getSystemClassLoader());</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">null</span><br><span class="line">sun.misc.Launcher$ExtClassLoader@60e53b93</span><br><span class="line">sun.misc.Launcher$AppClassLoader@18b4aac2</span><br><span class="line">com.mythsman.test.Main$1@5e2de80c</span><br><span class="line">sun.misc.Launcher$AppClassLoader@18b4aac2</span><br></pre></td></tr></table></figure>
+<p>我们可以看到，第四行就是这个自定义的ClassLoader，他的父亲是AppClassLoader，爷爷是ExtClassLoader，太爷爷是null，其实就是用C写的BootStrapClassLoader。而当前系统的ClassLoader就是这个AppClassLoader。<br>当然，这里说的父子关系并不是继承关系，而是组合关系，子ClassLoader保存了父ClassLoader的一个引用(parent)。</p>
+<h3 id="有没有不用反射的更优雅的调用方法"><a href="#有没有不用反射的更优雅的调用方法" class="headerlink" title="有没有不用反射的更优雅的调用方法"></a>有没有不用反射的更优雅的调用方法</h3><p>显然，每次都用反射来调用还是太蠢了，难道就没有更方便的类似用类名引用的方法么？当然是有的，前面之所以不能直接用类名引用是因为原生类的类加载器是systemClassLoader，而从class文件创建的类的类加载器是自定义的classLoader，这两个类本质不一样，因此才不能互相强制转换，如果硬要强制转换就会报ClassCastException。那么，如果我们提取一个父类，父类由systemClassLoader加载，而子类由自定义classLoader加载，然后强制转换的时候转换成父类不就好了么？<br>做个试验，创建一个父类Father，其实就是提取了个抽象方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">Father</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后修改一下Hello类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Hello</span> <span class="keyword">extends</span> <span class="title class_">Father</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;say outside&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后将Hello类手动编译，并把class文件放到其他地方。重新修改这个类，将”say outside”改成”say inside”。<br>再修改下主函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException, IllegalAccessException, InstantiationException &#123;</span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">classLoader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassLoader</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> Class&lt;?&gt; loadClass(String s) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (s.equals(<span class="string">&quot;com.mythsman.test.Hello&quot;</span>)) &#123;</span><br><span class="line">                        <span class="type">byte</span>[] classBytes = Files.readAllBytes(Paths.get(<span class="string">&quot;/home/myths/Desktop/test/Hello.class&quot;</span>));</span><br><span class="line">                        <span class="keyword">return</span> defineClass(s, classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="built_in">super</span>.loadClass(s);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(s);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">Father</span> <span class="variable">outside</span> <span class="operator">=</span> (Father) classLoader.loadClass(<span class="string">&quot;com.mythsman.test.Hello&quot;</span>).newInstance();</span><br><span class="line">        <span class="type">Hello</span> <span class="variable">inside</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Hello</span>();</span><br><span class="line">        outside.say();</span><br><span class="line">        inside.say();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们就可以看到输出是:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">say outside</span><br><span class="line">say inside</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Jvm/" rel="tag"># Jvm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/29/javascript-getGverify/" rel="next" title="JAVASCRIPT生成图形验证码">
+                <i class="fa fa-chevron-left"></i> JAVASCRIPT生成图形验证码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/19/Lombok%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E4%B8%8E%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/" rel="prev" title="Lombok原理分析与功能实现">
+                Lombok原理分析与功能实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">双亲委派模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89ClassLoader"><span class="nav-number">3.</span> <span class="nav-text">自定义ClassLoader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%B4%E5%9D%8F%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%89%98%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">破坏双亲委托模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E4%B8%AA%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">4.1.</span> <span class="nav-text">两个类的关系是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%99%E4%B8%A4%E4%B8%AA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E8%B7%9F%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%B8%89%E5%B1%82%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E6%98%AF%E4%BB%80%E4%B9%88%E5%85%B3%E7%B3%BB"><span class="nav-number">4.2.</span> <span class="nav-text">这两个类加载器跟系统的三层类加载器是什么关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E6%B2%A1%E6%9C%89%E4%B8%8D%E7%94%A8%E5%8F%8D%E5%B0%84%E7%9A%84%E6%9B%B4%E4%BC%98%E9%9B%85%E7%9A%84%E8%B0%83%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">有没有不用反射的更优雅的调用方法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

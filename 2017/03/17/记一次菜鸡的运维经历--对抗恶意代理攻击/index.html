@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Apache," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="事情的起因这是一个悲伤的故事。2017年3月15号，当我开开心心的起床吃中饭的时候，突然发现收到了阿里云的一条邮件：  我就纳闷了，阿里每个月都会送10块钱的流量代金券，1G流量也就8毛钱，为啥才月半就全没了，我的小网站有这么受欢迎？本来想缓缓搞得，不过果然没过多久，服务器就强行被关停了，不得已冲了2块钱，上去研究研究到底是什么鬼。打开阿里云的流量监控器，一脸蒙ｂ：  最左边是前几天正常情况下的流">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次菜鸡的运维经历--对抗恶意代理攻击">
+<meta property="og:url" content="https://www.resonanat.com/2017/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%8F%9C%E9%B8%A1%E7%9A%84%E8%BF%90%E7%BB%B4%E7%BB%8F%E5%8E%86--%E5%AF%B9%E6%8A%97%E6%81%B6%E6%84%8F%E4%BB%A3%E7%90%86%E6%94%BB%E5%87%BB/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="事情的起因这是一个悲伤的故事。2017年3月15号，当我开开心心的起床吃中饭的时候，突然发现收到了阿里云的一条邮件：  我就纳闷了，阿里每个月都会送10块钱的流量代金券，1G流量也就8毛钱，为啥才月半就全没了，我的小网站有这么受欢迎？本来想缓缓搞得，不过果然没过多久，服务器就强行被关停了，不得已冲了2块钱，上去研究研究到底是什么鬼。打开阿里云的流量监控器，一脸蒙ｂ：  最左边是前几天正常情况下的流">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/17/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/17/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/17/3.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/17/4.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2017/03/17/5.png">
+<meta property="article:published_time" content="2017-03-17T15:24:31.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.102Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Apache">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2017/03/17/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/03/17/记一次菜鸡的运维经历--对抗恶意代理攻击/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>记一次菜鸡的运维经历--对抗恶意代理攻击 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%8F%9C%E9%B8%A1%E7%9A%84%E8%BF%90%E7%BB%B4%E7%BB%8F%E5%8E%86--%E5%AF%B9%E6%8A%97%E6%81%B6%E6%84%8F%E4%BB%A3%E7%90%86%E6%94%BB%E5%87%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">记一次菜鸡的运维经历--对抗恶意代理攻击</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-17T23:24:31+08:00">
+                2017-03-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Apache/" itemprop="url" rel="index">
+                    <span itemprop="name">Apache</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="事情的起因"><a href="#事情的起因" class="headerlink" title="事情的起因"></a>事情的起因</h2><p>这是一个悲伤的故事。2017年3月15号，当我开开心心的起床吃中饭的时候，突然发现收到了阿里云的一条邮件：</p>
+<p><img src="/images/2017/03/17/1.png"></p>
+<p>我就纳闷了，阿里每个月都会送10块钱的流量代金券，1G流量也就8毛钱，为啥才月半就全没了，我的小网站有这么受欢迎？本来想缓缓搞得，不过果然没过多久，服务器就强行被关停了，不得已冲了2块钱，上去研究研究到底是什么鬼。打开阿里云的流量监控器，一脸蒙ｂ：</p>
+<p><img src="/images/2017/03/17/2.png"></p>
+<p>最左边是前几天正常情况下的流量，3月12号到13号那会的流量基本是0-10kbps的上下行，到了15号12点居然达到了3Mbps的上行,4Mbps的下行。。。难怪瞬间我的流量就被耗光了，照这么下去的话2块钱的流量钱全烧掉也是指日可待。没办法，只有学着去排查原因。</p>
+<h2 id="Log分析"><a href="#Log分析" class="headerlink" title="Log分析"></a>Log分析</h2><p>首先我想到的肯定是apache的问题，毕竟我在服务器上基本也就开了这一个对外服务。<br>打开apache的log,查看了下<code>/var/log/apache2/access.log</code>，发现了很多奇怪的请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">107.151.148.193 - - [12/Mar/2017:23:36:22 +0800] &quot;POST http://www.proxyjudge.info/azenv.php HTTP/1.1&quot; 502 696 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line">107.151.148.193 - - [13/Mar/2017:02:34:20 +0800] &quot;GET http://proxyjudge.us/ HTTP/1.1&quot; 200 976 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line">107.151.148.193 - - [13/Mar/2017:02:34:24 +0800] &quot;POST http://www.sbjudge2.com/azenv.php HTTP/1.1&quot; 200 832 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line">107.151.148.193 - - [13/Mar/2017:04:04:44 +0800] &quot;GET http://www.proxyjudge.info/azenv.php HTTP/1.1&quot; 200 936 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line">107.151.148.193 - - [13/Mar/2017:04:04:45 +0800] &quot;POST http://www.proxyjudge.info/azenv.php HTTP/1.1&quot; 200 937 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line">107.151.148.193 - - [13/Mar/2017:04:05:01 +0800] &quot;GET http://proxyjudge.us/ HTTP/1.1&quot; 200 976 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line">107.151.148.193 - - [13/Mar/2017:04:44:48 +0800] &quot;GET http://www.sbjudge1.com/azenv.php HTTP/1.1&quot; 200 859 &quot;-&quot; &quot;Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; Trident/5.0)&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>proxyjudge? 什么鬼？这域名名字起的也太嚣张了吧，这不是大张旗鼓搜寻肉鸡的节奏么，竟然还搜到了我的头上了。。。这请求啥意思啊，用我的服务器做代理去访问他的那个proxyjudge，蛋疼的是我的服务器居然还老老实实的返回了正确的结果(200)。写过爬虫的人都知道，我的服务器这会就变成了一个彻彻底底的代理服务器，使用者的所有http请求都会经由我的服务器以我的名义发起。更有甚者竟然用<code>sbjudge</code>这个名字。。。<br>越想越气，于是抱着好奇的想法，我试了试用浏览器访<code>proxyjudge.info</code>这个网站，发现他好像只是一个提供一个返回请求信息的公益网站(虽然当我试图查他的whois的时候发现他申请了隐私保护。。。)，并没有什么恶意，而且他还善意的提醒了我们什么是http头，以及如果出现了类似上述场景意味着什么：</p>
+<p><img src="/images/2017/03/17/3.png"><br><img src="/images/2017/03/17/4.png"></p>
+<p>原来，这类网站只是被一些恶意的人用来探测网络上的主机是不是开启了正向代理，如果开了就会利用这些主机作为自己的免费代理。正常情况下，显然是404，这对被探测的机子来说并没有什么影响。这就像一个小偷挨家挨户的敲门，如果门是闭着的，那小偷就会去试下一家，如果发现门是开的，那小偷就不客气了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">60.10.115.59 - - [13/Mar/2017:04:03:30 +0800] &quot;GET http://reg.163.com/services/checkUsername?username=m53427233031@163.com&amp;product=urs HTTP/1.1&quot; 200 390 &quot;http://reg.163.com/reg/reg.jsp?product=urs&quot; &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36 QIHU 360SE&quot;</span><br><span class="line">60.10.115.59 - - [13/Mar/2017:04:03:30 +0800] &quot;GET http://reg.163.com/services/checkUsername?username=w4711662071@163.com&amp;product=urs HTTP/1.1&quot; 200 390 &quot;http://reg.163.com/reg/reg.jsp?product=urs&quot; &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36 QIHU 360SE&quot;</span><br><span class="line">60.10.115.59 - - [13/Mar/2017:04:03:30 +0800] &quot;GET http://reg.163.com/services/checkUsername?username=jia03142011@163.com&amp;product=urs HTTP/1.1&quot; 200 390 &quot;http://reg.163.com/reg/reg.jsp?product=urs&quot; &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36 QIHU 360SE&quot;</span><br><span class="line">60.10.115.59 - - [13/Mar/2017:04:03:30 +0800] &quot;GET http://reg.163.com/services/checkUsername?username=xueangang20081@163.com&amp;product=urs HTTP/1.1&quot; 200 390 &quot;http://reg.163.com/reg/reg.jsp?product=urs&quot; &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36 QIHU 360SE</span><br></pre></td></tr></table></figure>
+<p>我甚至都能猜到这家伙在做啥，估计是想注册163邮箱的什么东西。。。<br>然而，这只是在最近两三天产生的高达2G的log文件的一部分。。。上面的真的只是冰山一角，可以想见，连log都这么大了，他们爬的东西肯定不少。。。</p>
+<p>于此同时，我还发现了一个搞笑的事情，我在log中还发现了一堆这样的请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">27.148.156.159 - - [16/Mar/2017:18:08:01 +0800] &quot;GET http://103.198.73.117:9207/ HTTP/1.1&quot; 200 639 &quot;http://103.198.73.117:9207&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">183.131.83.81 - - [16/Mar/2017:18:08:01 +0800] &quot;GET http://138.201.200.253:443/ HTTP/1.1&quot; 200 637 &quot;http://138.201.200.253:443&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">27.148.156.67 - - [16/Mar/2017:18:08:02 +0800] &quot;GET http://66hfw.jxxsjled.cn/ HTTP/1.1&quot; 200 641 &quot;http://66hfw.jxxsjled.cn&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">27.148.156.159 - - [16/Mar/2017:18:08:02 +0800] &quot;GET http://103.198.73.117:9207/ HTTP/1.1&quot; 200 639 &quot;http://103.198.73.117:9207&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">27.148.156.67 - - [16/Mar/2017:18:08:02 +0800] &quot;GET http://66hfw.jxxsjled.cn/ HTTP/1.1&quot; 200 641 &quot;http://66hfw.jxxsjled.cn&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br></pre></td></tr></table></figure>
+<p>咦？乍一看referer好像是baidu的爬虫啊，得好好招待，不过仔细一看，他怎么不好好请求正常的页面，还是把我的服务器当成代理一样在用。好奇的我看了看baidu的spider页面，发现了这样的东西：</p>
+<p><img src="/images/2017/03/17/5.png"></p>
+<p>用他介绍的方法一试，果然露出了马脚:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@pc:~$ host 27.148.156.159</span><br><span class="line">Host 159.156.148.27.in-addr.arpa. not found: 3(NXDOMAIN)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>再来看看人家正常的BaiduSpider干的事：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">123.125.71.107 - - [18/Mar/2017:00:46:07 +0800] &quot;GET /page/3/ HTTP/1.1&quot; 200 11633 &quot;-&quot; &quot;Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>人家请求的可是正经的网站子页面，再用反向dns一查，果然是靠谱的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@pc:~$ host 123.125.71.107</span><br><span class="line">107.71.125.123.in-addr.arpa domain name pointer baiduspider-123-125-71-107.crawl.baidu.com.</span><br></pre></td></tr></table></figure>
+<p>做这种事情的人不仅是小偷，而且诚信也有问题。。。不过回头想想，为啥人家要假扮成baiduSpider呢？我想这是因为有很多的服务器都会设置User-agent的过滤，对于一般的UA警惕性比较高，而对于baiduSpider的警惕性可能会降低，因此他们才会这样设置。</p>
+<h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><p>既然找到了问题所在，那解决起来也就很”简单”了，显然这是我不小心给apache配置了未加限制的正向代理导致的，那么修改下apache2的代理配置就好了。打开<code>/etc/apache2/mods-enabled/proxy.conf</code>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># If you want to use apache2 as a forward proxy, uncomment the</span><br><span class="line"># &#x27;ProxyRequests On&#x27; line and the &lt;Proxy *&gt; block below.</span><br><span class="line"># WARNING: Be careful to restrict access inside the &lt;Proxy *&gt; block.</span><br><span class="line"># Open proxy servers are dangerous both to your network and to the</span><br><span class="line"># Internet at large.</span><br><span class="line">#</span><br><span class="line"># If you only want to use apache2 as a reverse proxy/gateway in</span><br><span class="line"># front of some web application server, you DON&#x27;T need</span><br><span class="line"># &#x27;ProxyRequests On&#x27;.</span><br><span class="line"></span><br><span class="line">#ProxyRequests On</span><br><span class="line">&lt;Proxy *&gt;</span><br><span class="line">    Order allow,deny</span><br><span class="line">    Allow from all</span><br><span class="line">    Deny from 123.57.149.196</span><br><span class="line">&lt;/Proxy&gt;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注意把<code>ProxyRequests On</code>給注释掉就好了，原因也在注释里说的很清楚。</p>
+<h2 id="还没完"><a href="#还没完" class="headerlink" title="还没完"></a>还没完</h2><p>不过修改完配置并且重启了之后还是发现了有很多恶意请求。由于我关闭了正向代理，所以返回的基本都是404，但是发现下面对于这种请求竟然我还是返回了200:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:04 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:06 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:08 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:10 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:14 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:23 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:43:28 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 200 635 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br></pre></td></tr></table></figure>
+<p>不知道是因为什么原因，如果请求方想以我为代理访问他自己，返回的结果都是200。这就很尴尬了，虽然不知道他这么做的目的是什么，但是他这种方式的确成功的影响了我的服务器性能，得赶快阻止。<br>研究了半天终于想到了一个算是方法的方法。<br>我现在对服务器的需求是，开启80端口和443端口，其中443端口访问的是我的博客，同时80端口也要将合理的http请求重定向到443端口的https上。于此同时，我要保证80端口不会响应恶意请求，尤其是上面这种类型。因此，我将80端口对应的DocumentRoot下的.htaccess修改如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">RewriteEngine on</span><br><span class="line">RewriteBase /</span><br><span class="line"></span><br><span class="line">RewriteCond %&#123;HTTP_HOST&#125; mythsman.com$ [NC]</span><br><span class="line">RewriteRule ^(.*)$ https://blog.mythsman.com/$1 [L,R=301]</span><br><span class="line"></span><br><span class="line">RewriteCond %&#123;HTTP_HOST&#125; blog.ythsman.com$ [NC]</span><br><span class="line">RewriteRule ^(.*)$ https://blog.mythsman.com/$1 [L,R=301]</span><br><span class="line"></span><br><span class="line">RewriteCond %&#123;HTTP_HOST&#125; www.mythsman.com$ [NC]</span><br><span class="line">RewriteRule ^(.*)$ https://blog.mythsman.com/$1 [L,R=301]</span><br><span class="line"></span><br><span class="line">RewriteRule ^(.*)$ - [F]</span><br></pre></td></tr></table></figure>
+<p>其中前三个转移就是将正常的请求转发到443端口，最后一个请求就是将剩余的所有非法请求都返回403Forbidden。经过这样的处理后，对于之前的请求就会产生下面的log:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">192.187.101.50 - - [19/Mar/2017:14:50:07 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:50:16 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:50:29 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:50:39 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:50:57 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:51:07 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:51:07 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:51:12 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.html)&quot;</span><br><span class="line">192.187.101.50 - - [19/Mar/2017:14:51:17 +0800] &quot;GET http://29099b.com/ HTTP/1.1&quot; 403 414 &quot;http://29099b.com&quot; &quot;Mozilla/5.0+(compatible;+Baiduspider/2.0;++http://www.baidu.com/search/spider.h</span><br></pre></td></tr></table></figure>
+<p>成功识别了这种恶意访问请求。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>虽然上面的配置合理的识别的恶意代理攻击，但是也并不能阻止人家不停的发送请求，只能是一种被动的防御。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Apache/" rel="tag"># Apache</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/16/shadowsocks-install/" rel="next" title="科学上网之shadowsocks 服务端安装">
+                <i class="fa fa-chevron-left"></i> 科学上网之shadowsocks 服务端安装
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/20/%E5%88%A9%E7%94%A8CSF%E9%98%B2%E7%81%AB%E5%A2%99%E5%B1%8F%E8%94%BD%E6%81%B6%E6%84%8F%E8%AF%B7%E6%B1%82/" rel="prev" title="利用CSF防火墙屏蔽恶意请求">
+                利用CSF防火墙屏蔽恶意请求 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E6%83%85%E7%9A%84%E8%B5%B7%E5%9B%A0"><span class="nav-number">1.</span> <span class="nav-text">事情的起因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Log%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">Log分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="nav-number">3.</span> <span class="nav-text">问题解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E6%B2%A1%E5%AE%8C"><span class="nav-number">4.</span> <span class="nav-text">还没完</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

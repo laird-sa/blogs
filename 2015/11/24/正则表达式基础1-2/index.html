@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="正则表达式这东西真的特别常用，在搜索文本啊，写爬虫什么的都得用到。而且现如今各种语言，都会支持正则表达式。之前也零零碎碎的看过，但是很多细节都记不清，这里姑且把一些知识要点记录下来，供日后查找使用。 通用的正则表达式由于正则表达式有很多种实现方式，所以各种方式之间有一些区别。但是以下的一些条件，则是在任何语言的正则中都适用的规律：    符号 匹配    ^ 匹配输入字符串开始的位置。   $ 匹">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则表达式基础（1）">
+<meta property="og:url" content="https://www.resonanat.com/2015/11/24/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%801-2/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="正则表达式这东西真的特别常用，在搜索文本啊，写爬虫什么的都得用到。而且现如今各种语言，都会支持正则表达式。之前也零零碎碎的看过，但是很多细节都记不清，这里姑且把一些知识要点记录下来，供日后查找使用。 通用的正则表达式由于正则表达式有很多种实现方式，所以各种方式之间有一些区别。但是以下的一些条件，则是在任何语言的正则中都适用的规律：    符号 匹配    ^ 匹配输入字符串开始的位置。   $ 匹">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-24T15:32:54.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.096Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="ubuntu linux java elasitesearch">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/11/24/正则表达式基础1-2/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>正则表达式基础（1） | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/24/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%801-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">正则表达式基础（1）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-24T23:32:54+08:00">
+                2015-11-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>正则表达式这东西真的特别常用，在搜索文本啊，写爬虫什么的都得用到。而且现如今各种语言，都会支持正则表达式。之前也零零碎碎的看过，但是很多细节都记不清，这里姑且把一些知识要点记录下来，供日后查找使用。</p>
+<h2 id="通用的正则表达式"><a href="#通用的正则表达式" class="headerlink" title="通用的正则表达式"></a>通用的正则表达式</h2><p>由于正则表达式有很多种实现方式，所以各种方式之间有一些区别。但是以下的一些条件，则是在任何语言的正则中都适用的规律：</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>匹配</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>^</td>
+<td>匹配输入字符串开始的位置。</td>
+</tr>
+<tr>
+<td>$</td>
+<td>匹配输入字符串结尾的位置。</td>
+</tr>
+<tr>
+<td>*</td>
+<td>零次或多次匹配前面的字符或子表达式。例如，zo* 匹配“z”和“zoo”。* 等效于 {0,}。</td>
+</tr>
+<tr>
+<td>+</td>
+<td>一次或多次匹配前面的字符或子表达式。例如，“zo+”与“zo”和“zoo”匹配，但与“z”不匹配。+ 等效于 {1,}。</td>
+</tr>
+<tr>
+<td>?</td>
+<td>零次或一次匹配前面的字符或子表达式。例如，“do(es)?”匹配“do”或“does”中的“do”。? 等效于 {0,1}。</td>
+</tr>
+<tr>
+<td>{<em>n</em>}</td>
+<td>_n _是非负整数。正好匹配 <em>n</em> 次。例如，“o{2}”与“Bob”中的“o”不匹配，但与“food”中的两个“o”匹配。</td>
+</tr>
+<tr>
+<td>{<em>n</em>,}</td>
+<td>_n _是非负整数。至少匹配 _n _次。例如，“o{2,}”不匹配“Bob”中的“o”，而匹配“foooood”中的所有 o。“o{1,}”等效于“o+”。“o{0,}”等效于“o*”。</td>
+</tr>
+<tr>
+<td>{<em>n</em>,<em>m</em>}</td>
+<td><em>M</em> 和 <em>n</em> 是非负整数，其中 <em>n</em> &lt;&#x3D; _m_。匹配至少 <em>n</em> 次，至多 <em>m</em> 次。例如，“o{1,3}”匹配“fooooood”中的头三个 o。’o{0,1}’ 等效于 ‘o?’。注意：您不能将空格插入逗号和数字之间。</td>
+</tr>
+<tr>
+<td>?</td>
+<td>当此字符紧随任何其他限定符（*、+、?、{<em>n</em>}、{<em>n</em>,}、{<em>n</em>,<em>m</em>}）之后时，匹配模式是“非贪心的”。“非贪心的”模式匹配搜索到的、尽可能短的字符串，而默认的“贪心的”模式匹配搜索到的、尽可能长的字符串。例如，在字符串“oooo”中，“o+?”只匹配单个“o”，而“o+”匹配所有“o”。</td>
+</tr>
+<tr>
+<td>.</td>
+<td>匹配除“n”之外的任何单个字符。若要匹配包括“n”在内的任意字符，请使用诸如“[sS]”之类的模式。</td>
+</tr>
+<tr>
+<td><em>x</em>&vert; <em>y</em></td>
+<td>匹配 <em>x</em> 或 _y_。例如，’z&vert;food’ 匹配“z”或“food”。’(z&vert; f)ood’ 匹配“zood”或“food”。</td>
+</tr>
+<tr>
+<td>[<em>xyz</em>]</td>
+<td>字符集。匹配包含的任一字符。例如，“[abc]”匹配“plain”中的“a”。</td>
+</tr>
+<tr>
+<td>[^<em>xyz</em>]</td>
+<td>反向字符集。匹配未包含的任何字符。例如，“[^abc]”匹配“plain”中的“p”。</td>
+</tr>
+<tr>
+<td>[<em>a-z</em>]</td>
+<td>字符范围。匹配指定范围内的任何字符。例如，“[a-z]”匹配“a”到“z”范围内的任何小写字母。</td>
+</tr>
+<tr>
+<td>[^<em>a-z</em>]</td>
+<td>反向范围字符。匹配不在指定的范围内的任何字符。例如，“[^a-z]”匹配任何不在“a”到“z”范围内的任何字符。</td>
+</tr>
+</tbody></table>
+<p>这里是正则最基础的用法了，熟记这张表，平时就够用了。</p>
+<p>当然，我们平时也会看到其他一些符号，比如下面这些类似的符号。</p>
+<h2 id="其他元字符"><a href="#其他元字符" class="headerlink" title="其他元字符"></a>其他元字符</h2><table>
+<thead>
+<tr>
+<th>符号</th>
+<th>匹配</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>b</td>
+<td>匹配一个字边界，即字与空格间的位置。例如，“erb”匹配“never”中的“er”，但不匹配“verb”中的“er”。</td>
+</tr>
+<tr>
+<td>B</td>
+<td>非字边界匹配。“erB”匹配“verb”中的“er”，但不匹配“never”中的“er”。</td>
+</tr>
+<tr>
+<td>c_x_</td>
+<td>匹配 <em>x</em> 指示的控制字符。例如，cM 匹配 Control-M 或回车符。<em>x</em> 的值必须在 A-Z 或 a-z 之间。如果不是这样，则假定 c 就是“c”字符本身。</td>
+</tr>
+<tr>
+<td>d</td>
+<td>数字字符匹配。等效于 [0-9]。</td>
+</tr>
+<tr>
+<td>D</td>
+<td>非数字字符匹配。等效于 [^0-9]。</td>
+</tr>
+<tr>
+<td>f</td>
+<td>换页符匹配。等效于 x0c 和 cL。</td>
+</tr>
+<tr>
+<td>n</td>
+<td>换行符匹配。等效于 x0a 和 cJ。</td>
+</tr>
+<tr>
+<td>r</td>
+<td>匹配一个回车符。等效于 x0d 和 cM。</td>
+</tr>
+<tr>
+<td>s</td>
+<td>匹配任何空白字符，包括空格、制表符、换页符等。与 [ fnrtv] 等效。</td>
+</tr>
+<tr>
+<td>S</td>
+<td>匹配任何非空白字符。与 [^ fnrtv] 等效。</td>
+</tr>
+<tr>
+<td>t</td>
+<td>制表符匹配。与 x09 和 cI 等效。</td>
+</tr>
+<tr>
+<td>v</td>
+<td>垂直制表符匹配。与 x0b 和 cK 等效。</td>
+</tr>
+<tr>
+<td>w</td>
+<td>匹配任何字类字符，包括下划线。与“[A-Za-z0-9_]”等效。</td>
+</tr>
+<tr>
+<td>W</td>
+<td>与任何非单词字符匹配。与“[^A-Za-z0-9_]”等效。</td>
+</tr>
+</tbody></table>
+<p>这些元字符也非常普遍，我之所以将他跟上面的通用字符分开，是因为这种类似Perl风格的正则表达式并不能被所有的工具识别。比如Linux下的egrep就无法识别这种表示方法。这就引入了下面的POSIX字符类。</p>
+<h2 id="POSIX字符类"><a href="#POSIX字符类" class="headerlink" title="POSIX字符类"></a>POSIX字符类</h2><table>
+<thead>
+<tr>
+<th>符号</th>
+<th>匹配</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>[:alnum:]</td>
+<td>字母字符和数字字符；在ASCII码中，与[A-Za-z0-9]等效</td>
+</tr>
+<tr>
+<td>[:word:]</td>
+<td>基本与[:alnum:]一样，只是多了一个下划线字符(_)</td>
+</tr>
+<tr>
+<td>[:alpha:]</td>
+<td>字母字符；在ASCII中，等效于[A-Za-z]</td>
+</tr>
+<tr>
+<td>[:blank:]</td>
+<td>包括空格和制表符</td>
+</tr>
+<tr>
+<td>[:cntrl:]</td>
+<td>ASCII控制码；包括ASCII字符0~31以及127</td>
+</tr>
+<tr>
+<td>[:digit:]</td>
+<td>数字0~9</td>
+</tr>
+<tr>
+<td>[:graph:]</td>
+<td>可见字符；在ASCII中，包括字符33~126</td>
+</tr>
+<tr>
+<td>[:lower:]</td>
+<td>小写字母</td>
+</tr>
+<tr>
+<td>[:punct:]</td>
+<td>标点符号字符；在ASCII中，与[-!”#$%&amp;’()*+,.&#x2F;:;&lt;&#x3D;&gt;?@[]_&#96;{&vert;}~]等效</td>
+</tr>
+<tr>
+<td>[:print:]</td>
+<td>可打印字符；包括[:graph:]中的所有字符再加上空格字符</td>
+</tr>
+<tr>
+<td>[:space:]</td>
+<td>空白字符如空格符、制表符、回车符、换行符、垂直制表符以及换页符。在ASCII中，等效为[ trnvf]</td>
+</tr>
+<tr>
+<td>[:upper:]</td>
+<td>大写字母</td>
+</tr>
+<tr>
+<td>[:xdigit:]</td>
+<td>用于表示十六进制的字符；在ASCII中，与[0-9A-Fa-f]等效</td>
+</tr>
+</tbody></table>
+<p>在使用的时候记得还要在外面包一层[  ]。比如匹配四个字母，可以写成 [[:alpha:]]{4}</p>
+<p>这里之所以提到POSIX字符类，是因为在shell中无法使用d w 这类的元字符，只能使用POSIX字符类。</p>
+<p>以上就是正则最基础的用法了。掌握这些就可以解决绝大多数的问题了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/23/Beautiful-Soup%E5%BA%93%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D/" rel="next" title="Beautiful Soup库的基本介绍">
+                <i class="fa fa-chevron-left"></i> Beautiful Soup库的基本介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/25/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%802-2/" rel="prev" title="正则表达式基础（2）">
+                正则表达式基础（2） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">通用的正则表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%85%83%E5%AD%97%E7%AC%A6"><span class="nav-number">2.</span> <span class="nav-text">其他元字符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POSIX%E5%AD%97%E7%AC%A6%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">POSIX字符类</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

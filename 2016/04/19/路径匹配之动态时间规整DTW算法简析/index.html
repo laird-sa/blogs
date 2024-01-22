@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Trajectory Similarity," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简述DTW算法又叫动态时间规整（  Dynamic Time Warping），是一个比较简单的dp算法。常用于不等长的离散的路径点的匹配问题，在孤立词语音识别、手势识别、数据挖掘和信息检索等领域有着很不错的表现。 问题描述DTW解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都是一个二维坐标点或者是更高维">
+<meta property="og:type" content="article">
+<meta property="og:title" content="路径匹配之动态时间规整DTW算法简析">
+<meta property="og:url" content="https://www.resonanat.com/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="简述DTW算法又叫动态时间规整（  Dynamic Time Warping），是一个比较简单的dp算法。常用于不等长的离散的路径点的匹配问题，在孤立词语音识别、手势识别、数据挖掘和信息检索等领域有着很不错的表现。 问题描述DTW解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都是一个二维坐标点或者是更高维">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/19/1/1.png">
+<meta property="article:published_time" content="2016-04-19T15:38:29.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.103Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Trajectory Similarity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/04/19/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/04/19/路径匹配之动态时间规整DTW算法简析/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>路径匹配之动态时间规整DTW算法简析 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">路径匹配之动态时间规整DTW算法简析</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-19T23:38:29+08:00">
+                2016-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
+                    <span itemprop="name">Trajectory Similarity</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p><strong>DTW算法</strong>又叫<strong>动态时间规整</strong>（  <strong>Dynamic Time Warping</strong>），是一个比较简单的dp算法。常用于不等长的离散的路径点的匹配问题，在孤立词语音识别、手势识别、数据挖掘和信息检索等领域有着很不错的表现。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>DTW解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都是一个二维坐标点或者是更高维度的坐标。我们现在需要求出一个“距离”，使得他能够表示这两个路径的相似度。</p>
+<p>很明显，如果m等于n，那么我们可以很方便的用对应节点（下标相等）之间的欧氏距离（也可以是其他类型的距离）之和来表示这个”距离“，这看上去还是能让人信服的。但是当m和n不等的时候，我们就发现这种办法就不适用了。但是我们完全可以仍然采用这个思想，只不过与之前每个节点都是一一对应不同，我们可以令其中的某些节点是一对多的对应关系，如下图所示：</p>
+<p><img src="/images/2016/04/19/1/1.png"></p>
+<p>当然，这样的对应关系也得满足”非降“的对应，即若$A_i$与$B_j$对应，那么$A_{i+p}$必然不能与$B_{j-q}$对应（其中$p,q\gt 0$）。</p>
+<p>这样一来，我们就可以通过计算新的对应点之间的距离之和来表示这两个路径之间的距离。</p>
+<p>很明显，这样的匹配方法有很多种，不过对我们来说有意义的匹配方式应该是使最后计算出的距离最小的方式，那么我们到底要怎样确定点的对应关系呢？这就是DTW要解决的问题。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>令$dtw[i][j]$表示$A$序列的前$i$个元素与$B$序列的前$j$个元素匹配后得到的最小距离(下标从1开始)，$dis[i][j]$表示$A_i$与$B_j$的距离。显然，这时候$A_i$必然和$B_j$匹配。那么我们很容易得到下面的递推关系式(考虑边界条件)：</p>
+<p>$i&#x3D;j&#x3D;0:$</p>
+<p>$$dtw[i][j]&#x3D;0$$</p>
+<p>$i&#x3D;0\ or\ j&#x3D;0:$</p>
+<p>$$dtw[i][j]&#x3D;\infty$$</p>
+<p>$for\ 1\leq i\leq n,1\leq j \leq m:$</p>
+<p>$$dtw[i][j]&#x3D;dis[i][j]+min\left\{\begin{aligned}&amp;dtw[i-1][j]\\&amp;dtw[i-1][j-1]\\&amp;dtw[i][j-1]\end{aligned}\right.$$</p>
+<p>最后$dtw[n][m]$就是我们所求的距离，复杂度$O(n*m)$。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>DTW算法在应对不等长路径问题的相似度匹配的时候效果还是挺好的，但是由于他需要计算到每一个点，因此他对噪声比较敏感。而且他也无法应对存在时间维度的路径匹配问题。</p>
+<p>当然，我们利用DTW算法不仅仅是为了获得距离，很多情况下，我们是为了获得点的对应关系，从而对两个序列更好的进行比较。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Yi, Byoung-Kee, Jagadish, HV and Faloutsos, Christos, Efficient retrieval of similar time sequences under time warping. ICDE 1998<br>Lei Chen,Raymond Ng,On The Marriage of Lp-norms and Edit Distance,2004<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/tornadomeet/archive/2012/03/23/2413363.html">HMM学习笔记_1(从一个实例中学习DTW算法)</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/zouxy09/article/details/9140207">语音信号处理之（一）动态时间规整（DTW）</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dynamic_time_warping">Dynamic time warping</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Trajectory-Similarity/" rel="tag"># Trajectory Similarity</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/" rel="next" title="结合连通块平均分割以及投影矫正的验证码分割算法">
+                <i class="fa fa-chevron-left"></i> 结合连通块平均分割以及投影矫正的验证码分割算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/20/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97LCSS%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" rel="prev" title="路径匹配之最长公共子序列LCSS算法简析">
+                路径匹配之最长公共子序列LCSS算法简析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,SSH," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近遇到一个问题，就是过几天我需要离开学校，而且到时候仍然想登陆校园网里的一台服务器进行工作；但是我又没有校园网网关的操作权限，不能做端口映射，也不能搞到校园网内部主机的外网ip，而且学校自己提供的vpn又根本没法用。研究了半天，总算找到了一个比较不错的利用反向ssh(reverse ssh tunnel)进行内网登陆的解决方案。 工作原理之所以很多转发的方法无法应用在这里，就是因为内网主机对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用反向ssh从外网访问内网主机">
+<meta property="og:url" content="https://www.resonanat.com/2017/01/14/%E5%88%A9%E7%94%A8%E5%8F%8D%E5%90%91ssh%E4%BB%8E%E5%A4%96%E7%BD%91%E8%AE%BF%E9%97%AE%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言最近遇到一个问题，就是过几天我需要离开学校，而且到时候仍然想登陆校园网里的一台服务器进行工作；但是我又没有校园网网关的操作权限，不能做端口映射，也不能搞到校园网内部主机的外网ip，而且学校自己提供的vpn又根本没法用。研究了半天，总算找到了一个比较不错的利用反向ssh(reverse ssh tunnel)进行内网登陆的解决方案。 工作原理之所以很多转发的方法无法应用在这里，就是因为内网主机对">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-01-14T09:23:55.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.087Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="SSH">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/01/14/利用反向ssh从外网访问内网主机/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>利用反向ssh从外网访问内网主机 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/14/%E5%88%A9%E7%94%A8%E5%8F%8D%E5%90%91ssh%E4%BB%8E%E5%A4%96%E7%BD%91%E8%AE%BF%E9%97%AE%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">利用反向ssh从外网访问内网主机</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-14T17:23:55+08:00">
+                2017-01-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SSH/" itemprop="url" rel="index">
+                    <span itemprop="name">SSH</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近遇到一个问题，就是过几天我需要离开学校，而且到时候仍然想登陆校园网里的一台服务器进行工作；但是我又没有校园网网关的操作权限，不能做端口映射，也不能搞到校园网内部主机的外网ip，而且学校自己提供的vpn又根本没法用。研究了半天，总算找到了一个比较不错的利用反向ssh(reverse ssh tunnel)进行内网登陆的解决方案。</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>之所以很多转发的方法无法应用在这里，就是因为内网主机对外网其实是不可见的，也就是说外部主机不能用一般的方法访问到内部主机。那么我们就想了，能不能用内网主机找外网主机，找到之后再把这条内网主机登陆外网的信道转换成外网主机登陆内网的信道呢？辛运的是，这个方法的确是可行的，这也就是所谓反向ssh最通俗的理解，这就像寄信一样，”虽然我不知道你的地址，但是你知道我的地址，那么你就先给我写封信，告诉我你的地址，然后我不就可以回信给你了么？“。</p>
+<h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><p>由于我们自己使用的电脑未必有外网ip，因此我们需要一个有固定外网ip的服务器(随便搞个腾讯云阿里云的小机子就行)，然后用这台服务器与内网的机子进行通信，我们到时候要先登陆自己的服务器，然后再利用这个服务器去访问内网的主机。</p>
+<p>1、准备好有固定ip的服务器A，以及待访问的内网机器B。两者都开着sshd服务，端口号默认都是22。顺便做好ssh免密码登陆。</p>
+<p>2、内网主机B主动连接服务器A，执行以下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -NfR 1111:localhost:22 username@servername -p 22</span><br></pre></td></tr></table></figure>
+<p>这条命令的意思是在后台执行(-f)，不实际连接而是做port forwarding(-N)，做反向ssh(-R)，将远程服务器的1111端口映射成连接本机(B)与该服务器的反向ssh的端口。</p>
+<p>附：这里有必要加强一下记忆，这个端口号一不小心就容易搞混。。man文档中的参数命令是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-R [bind_address:]port:host:hostport</span><br></pre></td></tr></table></figure>
+<p>bind_address以及其后面的port是指远程主机的ip以及端口，host以及其后的hostport是指本机的ip和端口。由于ssh命令本身需要远程主机的ip(上上条命令中的servername)，因此这个bind_address原则上是可以省略的。</p>
+<p>执行完这条命令，我们可以在服务器A上看到他的1111端口已经开始监听：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ss -ant |grep 1111</span><br><span class="line">LISTEN     0      128               127.0.0.1:1111                     *:*</span><br></pre></td></tr></table></figure>
+<p>3、在上面的操作中，这个1111端口就已经映射成了内网主机B的22端口了，现在我们只要ssh到自己的这个端口就行了。在服务器A中执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh username@localhost -p1111</span><br></pre></td></tr></table></figure>
+<p>这样就成功的登陆了内网的主机了。</p>
+<h2 id="功能优化"><a href="#功能优化" class="headerlink" title="功能优化"></a>功能优化</h2><p>上面的做法其实有一个问题，就是反向ssh可能会不稳定，主机B对服务器A的端口映射可能会断掉，那么这时候就需要主机B重新链接，而显然远在外地的我无法登陆B。。。这其实有一个非常简单的解决方案，就是用autossh替代步骤2中的ssh：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ autossh -M 2222 -NfR 1111:localhost:22 username@servername -p 22</span><br></pre></td></tr></table></figure>
+<p>后面的参数跟ssh都一样，只是多了一个-M参数，这个参数的意思就是用本机的2222端口来监听ssh，每当他断了就重新把他连起来。。。不过man文档中也说了，这个端口又叫echo port，他其实是有一对端口的形式出现，第二个端口就是这个端口号加一。因此我们要保证这个端口号和这个端口号加一的端口号不被占用。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/eshizhan/archive/2012/07/16/2592902.html">SSH反向连接及Autossh</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/SSH/" rel="tag"># SSH</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/31/good-bye-2016/" rel="next" title="Goodbye 2016">
+                <i class="fa fa-chevron-left"></i> Goodbye 2016
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/16/Eclipse%E4%B8%8BSpark+ScalaIDE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/" rel="prev" title="Eclipse下Spark+ScalaIDE开发环境部署">
+                Eclipse下Spark+ScalaIDE开发环境部署 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">操作步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">功能优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

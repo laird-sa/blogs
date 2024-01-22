@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="不知道为什么，原生的Swing有JFileChooser，JColorChooser但是却没有JFontChooser。虽然网上有很多类似的实现，但是鉴于是作业，我还是自己写了一个简单的FontChooser来练练手。而且真正写起来也不是那么的顺畅，果然还是发现了很多的坑。。。 功能分析 既然是字体选择器，那么至少得能够选择“字体”，“样式”，“大小”。 这类的对话框一般得是“阻塞“的，即弹出该对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Swing的FontChooser对话框">
+<meta property="og:url" content="https://www.resonanat.com/2016/06/01/%E5%9F%BA%E4%BA%8ESwing%E7%9A%84FontChooser%E5%AF%B9%E8%AF%9D%E6%A1%86/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="不知道为什么，原生的Swing有JFileChooser，JColorChooser但是却没有JFontChooser。虽然网上有很多类似的实现，但是鉴于是作业，我还是自己写了一个简单的FontChooser来练练手。而且真正写起来也不是那么的顺畅，果然还是发现了很多的坑。。。 功能分析 既然是字体选择器，那么至少得能够选择“字体”，“样式”，“大小”。 这类的对话框一般得是“阻塞“的，即弹出该对">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/06/01/1/1.png">
+<meta property="article:published_time" content="2016-06-01T06:28:12.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.089Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/06/01/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/06/01/基于Swing的FontChooser对话框/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>基于Swing的FontChooser对话框 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/01/%E5%9F%BA%E4%BA%8ESwing%E7%9A%84FontChooser%E5%AF%B9%E8%AF%9D%E6%A1%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">基于Swing的FontChooser对话框</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-01T14:28:12+08:00">
+                2016-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>不知道为什么，原生的Swing有JFileChooser，JColorChooser但是却没有JFontChooser。虽然网上有很多类似的实现，但是鉴于是作业，我还是自己写了一个简单的FontChooser来练练手。而且真正写起来也不是那么的顺畅，果然还是发现了很多的坑。。。</p>
+<h2 id="功能分析"><a href="#功能分析" class="headerlink" title="功能分析"></a>功能分析</h2><ol>
+<li>既然是字体选择器，那么至少得能够选择“字体”，“样式”，“大小”。</li>
+<li>这类的对话框一般得是“阻塞“的，即弹出该对话框后，本来的对话框应该是点不动的直到弹出的对话框结束。</li>
+<li>仿照JFileChooser和JColorChooser，这类选择工具类的对话框设计为静态的比较好。</li>
+<li>对话框默认的字体一般是待修改的字体。</li>
+<li>选择成功得返回选择后的结果，选择退出得返回原先的结果。</li>
+</ol>
+<h2 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.awt.BorderLayout;</span><br><span class="line"><span class="keyword">import</span> java.awt.Dimension;</span><br><span class="line"><span class="keyword">import</span> java.awt.Font;</span><br><span class="line"><span class="keyword">import</span> java.awt.GraphicsEnvironment;</span><br><span class="line"><span class="keyword">import</span> java.awt.event.ActionEvent;</span><br><span class="line"><span class="keyword">import</span> java.awt.event.ActionListener;</span><br><span class="line"><span class="keyword">import</span> java.awt.event.ItemEvent;</span><br><span class="line"><span class="keyword">import</span> java.awt.event.ItemListener;</span><br><span class="line"><span class="keyword">import</span> java.awt.event.WindowAdapter;</span><br><span class="line"><span class="keyword">import</span> java.awt.event.WindowEvent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.swing.BorderFactory;</span><br><span class="line"><span class="keyword">import</span> javax.swing.JButton;</span><br><span class="line"><span class="keyword">import</span> javax.swing.JComboBox;</span><br><span class="line"><span class="keyword">import</span> javax.swing.JDialog;</span><br><span class="line"><span class="keyword">import</span> javax.swing.JFrame;</span><br><span class="line"><span class="keyword">import</span> javax.swing.JLabel;</span><br><span class="line"><span class="keyword">import</span> javax.swing.JPanel;</span><br><span class="line"><span class="keyword">import</span> javax.swing.SwingConstants;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FontChooser</span> extends JDialog &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> <span class="keyword">final</span> <span class="type">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> JDialog dlg;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> Font font, rawFont;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> JPanel panel;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> JComboBox&lt;String&gt; comboBoxFont, comboBoxStyle, comboBoxSize;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> JLabel text;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">static</span> JButton button;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 向外部提供的静态方法,可阻塞</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="type">static</span> <span class="type">void</span> <span class="title">showDialog</span><span class="params">(JFrame parent, String title, boolean modal, Font rawfont)</span> </span>&#123;</span><br><span class="line">		dlg = <span class="keyword">new</span> <span class="built_in">JDialog</span>(parent, title, modal);</span><br><span class="line">		rawFont = rawfont;</span><br><span class="line">		font = <span class="keyword">new</span> <span class="built_in">Font</span>(rawFont.<span class="built_in">getFontName</span>(), rawFont.<span class="built_in">getStyle</span>(), rawFont.<span class="built_in">getSize</span>());</span><br><span class="line">		<span class="built_in">setDefault</span>();</span><br><span class="line">		<span class="built_in">setComboBox</span>();</span><br><span class="line">		dlg.<span class="built_in">setVisible</span>(<span class="literal">true</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获得取得的字体</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="type">static</span> Font <span class="title">getResFont</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> font;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="type">static</span> <span class="type">void</span> <span class="title">setDefault</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		dlg.<span class="built_in">setSize</span>(<span class="number">550</span>, <span class="number">280</span>);</span><br><span class="line">		dlg.<span class="built_in">setTitle</span>(<span class="string">&quot;选择字体&quot;</span>);</span><br><span class="line">		dlg.<span class="built_in">setResizable</span>(<span class="literal">false</span>);</span><br><span class="line">		dlg.<span class="built_in">setLocationRelativeTo</span>(null);</span><br><span class="line">		comboBoxFont = <span class="keyword">new</span> <span class="built_in">JComboBox</span>&lt;String&gt;();</span><br><span class="line">		comboBoxStyle = <span class="keyword">new</span> <span class="built_in">JComboBox</span>&lt;String&gt;();</span><br><span class="line">		comboBoxSize = <span class="keyword">new</span> <span class="built_in">JComboBox</span>&lt;String&gt;();</span><br><span class="line">		panel = <span class="keyword">new</span> <span class="built_in">JPanel</span>();</span><br><span class="line">		dlg.<span class="built_in">setContentPane</span>(panel);</span><br><span class="line">		panel.<span class="built_in">setLayout</span>(null);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 关闭窗口，则不更新字体</span></span><br><span class="line">		dlg.<span class="built_in">addWindowListener</span>(<span class="keyword">new</span> <span class="built_in">WindowAdapter</span>() &#123;</span><br><span class="line">			@Override</span><br><span class="line">			<span class="keyword">public</span> <span class="type">void</span> <span class="built_in">windowClosing</span>(WindowEvent e) &#123;</span><br><span class="line">				font = rawFont;</span><br><span class="line">				dlg.<span class="built_in">dispose</span>();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">		JPanel panelFont = <span class="keyword">new</span> <span class="built_in">JPanel</span>();</span><br><span class="line">		panelFont.<span class="built_in">add</span>(<span class="keyword">new</span> <span class="built_in">JLabel</span>(<span class="string">&quot;字体:&quot;</span>));</span><br><span class="line">		panelFont.<span class="built_in">add</span>(comboBoxFont);</span><br><span class="line">		panel.<span class="built_in">add</span>(panelFont);</span><br><span class="line">		panelFont.<span class="built_in">setBounds</span>(<span class="number">10</span>, <span class="number">10</span>, <span class="number">150</span>, <span class="number">60</span>);</span><br><span class="line"></span><br><span class="line">		JPanel panelStyle = <span class="keyword">new</span> <span class="built_in">JPanel</span>();</span><br><span class="line">		panelStyle.<span class="built_in">add</span>(<span class="keyword">new</span> <span class="built_in">JLabel</span>(<span class="string">&quot;风格:&quot;</span>));</span><br><span class="line">		panelStyle.<span class="built_in">add</span>(comboBoxStyle);</span><br><span class="line">		panel.<span class="built_in">add</span>(panelStyle);</span><br><span class="line">		panelStyle.<span class="built_in">setBounds</span>(<span class="number">10</span>, <span class="number">70</span>, <span class="number">150</span>, <span class="number">60</span>);</span><br><span class="line"></span><br><span class="line">		JPanel panelSize = <span class="keyword">new</span> <span class="built_in">JPanel</span>();</span><br><span class="line">		panelSize.<span class="built_in">add</span>(<span class="keyword">new</span> <span class="built_in">JLabel</span>(<span class="string">&quot;大小:&quot;</span>));</span><br><span class="line">		panelSize.<span class="built_in">add</span>(comboBoxSize);</span><br><span class="line">		panel.<span class="built_in">add</span>(panelSize);</span><br><span class="line">		panelSize.<span class="built_in">setBounds</span>(<span class="number">10</span>, <span class="number">130</span>, <span class="number">150</span>, <span class="number">60</span>);</span><br><span class="line"></span><br><span class="line">		button = <span class="keyword">new</span> <span class="built_in">JButton</span>(<span class="string">&quot;确定&quot;</span>);</span><br><span class="line">		panel.<span class="built_in">add</span>(button);</span><br><span class="line">		button.<span class="built_in">setBounds</span>(<span class="number">20</span>, <span class="number">190</span>, <span class="number">140</span>, <span class="number">30</span>);</span><br><span class="line">		<span class="comment">// 点确定，则关闭窗口，保留结果</span></span><br><span class="line">		button.<span class="built_in">addActionListener</span>(<span class="keyword">new</span> <span class="built_in">ActionListener</span>() &#123;</span><br><span class="line">			@Override</span><br><span class="line">			<span class="keyword">public</span> <span class="type">void</span> <span class="built_in">actionPerformed</span>(ActionEvent e) &#123;</span><br><span class="line">				dlg.<span class="built_in">dispose</span>();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">		JPanel panelText = <span class="keyword">new</span> <span class="built_in">JPanel</span>();</span><br><span class="line">		text = <span class="keyword">new</span> <span class="built_in">JLabel</span>();</span><br><span class="line">		text.<span class="built_in">setText</span>(<span class="string">&quot;Hello World!&quot;</span>);</span><br><span class="line">		text.<span class="built_in">setFont</span>(font);</span><br><span class="line">		text.<span class="built_in">setBorder</span>(BorderFactory.<span class="built_in">createLoweredBevelBorder</span>());</span><br><span class="line">		panelText.<span class="built_in">setLayout</span>(<span class="keyword">new</span> <span class="built_in">BorderLayout</span>());</span><br><span class="line">		panelText.<span class="built_in">add</span>(text);</span><br><span class="line"></span><br><span class="line">		panelText.<span class="built_in">setBounds</span>(<span class="number">180</span>, <span class="number">30</span>, <span class="number">340</span>, <span class="number">200</span>);</span><br><span class="line">		text.<span class="built_in">setHorizontalAlignment</span>(SwingConstants.CENTER);</span><br><span class="line">		text.<span class="built_in">setVerticalAlignment</span>(SwingConstants.CENTER);</span><br><span class="line">		panel.<span class="built_in">add</span>(panelText);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="type">static</span> <span class="type">void</span> <span class="title">setComboBox</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 获得系统提供的字体</span></span><br><span class="line">		String[] fontnames = GraphicsEnvironment.<span class="built_in">getLocalGraphicsEnvironment</span>().<span class="built_in">getAvailableFontFamilyNames</span>();</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; fontnames.length; i++) &#123;</span><br><span class="line">			comboBoxFont.<span class="built_in">addItem</span>(fontnames[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		comboBoxFont.<span class="built_in">setPreferredSize</span>(<span class="keyword">new</span> <span class="built_in">Dimension</span>(<span class="number">100</span>, <span class="number">30</span>));</span><br><span class="line">		comboBoxFont.<span class="built_in">setSelectedItem</span>(font.<span class="built_in">getFontName</span>());</span><br><span class="line">		comboBoxFont.<span class="built_in">addItemListener</span>(<span class="keyword">new</span> <span class="built_in">ItemListener</span>() &#123;</span><br><span class="line">			@Override</span><br><span class="line">			<span class="keyword">public</span> <span class="type">void</span> <span class="built_in">itemStateChanged</span>(ItemEvent arg0) &#123;</span><br><span class="line">				<span class="keyword">if</span> (arg0.<span class="built_in">getStateChange</span>() == ItemEvent.SELECTED) &#123;</span><br><span class="line">					String s = (String) arg0.<span class="built_in">getItem</span>();</span><br><span class="line">					font = <span class="keyword">new</span> <span class="built_in">Font</span>(s, font.<span class="built_in">getStyle</span>(), font.<span class="built_in">getSize</span>());</span><br><span class="line">					text.<span class="built_in">setFont</span>(font);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">		comboBoxStyle.<span class="built_in">addItem</span>(<span class="string">&quot;普通&quot;</span>);</span><br><span class="line">		comboBoxStyle.<span class="built_in">addItem</span>(<span class="string">&quot;加粗&quot;</span>);</span><br><span class="line">		comboBoxStyle.<span class="built_in">addItem</span>(<span class="string">&quot;倾斜&quot;</span>);</span><br><span class="line">		comboBoxStyle.<span class="built_in">addItem</span>(<span class="string">&quot;加粗倾斜&quot;</span>);</span><br><span class="line">		<span class="keyword">if</span> (font.<span class="built_in">getStyle</span>() == Font.BOLD) &#123;</span><br><span class="line">			comboBoxStyle.<span class="built_in">setSelectedItem</span>(<span class="string">&quot;加粗&quot;</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (font.<span class="built_in">getStyle</span>() == Font.PLAIN) &#123;</span><br><span class="line">			comboBoxStyle.<span class="built_in">setSelectedItem</span>(<span class="string">&quot;普通&quot;</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (font.<span class="built_in">getStyle</span>() == Font.ITALIC) &#123;</span><br><span class="line">			comboBoxStyle.<span class="built_in">setSelectedItem</span>(<span class="string">&quot;倾斜&quot;</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			comboBoxStyle.<span class="built_in">setSelectedItem</span>(<span class="string">&quot;加粗倾斜&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		comboBoxStyle.<span class="built_in">setPreferredSize</span>(<span class="keyword">new</span> <span class="built_in">Dimension</span>(<span class="number">100</span>, <span class="number">30</span>));</span><br><span class="line">		comboBoxStyle.<span class="built_in">addItemListener</span>(<span class="keyword">new</span> <span class="built_in">ItemListener</span>() &#123;</span><br><span class="line">			@Override</span><br><span class="line">			<span class="keyword">public</span> <span class="type">void</span> <span class="built_in">itemStateChanged</span>(ItemEvent arg0) &#123;</span><br><span class="line">				<span class="keyword">if</span> (arg0.<span class="built_in">getStateChange</span>() == ItemEvent.SELECTED) &#123;</span><br><span class="line">					String s = (String) arg0.<span class="built_in">getItem</span>();</span><br><span class="line">					<span class="keyword">if</span> (s.<span class="built_in">equals</span>(<span class="string">&quot;普通&quot;</span>)) &#123;</span><br><span class="line">						font = <span class="keyword">new</span> <span class="built_in">Font</span>(font.<span class="built_in">getFontName</span>(), Font.PLAIN, font.<span class="built_in">getSize</span>());</span><br><span class="line">					&#125; <span class="keyword">else</span> <span class="keyword">if</span> (s.<span class="built_in">equals</span>(<span class="string">&quot;加粗&quot;</span>)) &#123;</span><br><span class="line">						font = <span class="keyword">new</span> <span class="built_in">Font</span>(font.<span class="built_in">getFontName</span>(), Font.BOLD, font.<span class="built_in">getSize</span>());</span><br><span class="line">					&#125; <span class="keyword">else</span> <span class="keyword">if</span> (s.<span class="built_in">equals</span>(<span class="string">&quot;倾斜&quot;</span>)) &#123;</span><br><span class="line">						font = <span class="keyword">new</span> <span class="built_in">Font</span>(font.<span class="built_in">getFontName</span>(), Font.ITALIC, font.<span class="built_in">getSize</span>());</span><br><span class="line">					&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">						font = <span class="keyword">new</span> <span class="built_in">Font</span>(font.<span class="built_in">getFontName</span>(), Font.BOLD | Font.ITALIC, font.<span class="built_in">getSize</span>());</span><br><span class="line">					&#125;</span><br><span class="line">					text.<span class="built_in">setFont</span>(font);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">5</span>; i &lt;= <span class="number">50</span>; i++) &#123;</span><br><span class="line">			comboBoxSize.<span class="built_in">addItem</span>(i + <span class="string">&quot;px&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		comboBoxSize.<span class="built_in">setSelectedItem</span>(font.<span class="built_in">getSize</span>() + <span class="string">&quot;px&quot;</span>);</span><br><span class="line">		comboBoxSize.<span class="built_in">setPreferredSize</span>(<span class="keyword">new</span> <span class="built_in">Dimension</span>(<span class="number">100</span>, <span class="number">30</span>));</span><br><span class="line">		comboBoxSize.<span class="built_in">addItemListener</span>(<span class="keyword">new</span> <span class="built_in">ItemListener</span>() &#123;</span><br><span class="line">			@Override</span><br><span class="line">			<span class="keyword">public</span> <span class="type">void</span> <span class="built_in">itemStateChanged</span>(ItemEvent arg0) &#123;</span><br><span class="line">				<span class="keyword">if</span> (arg0.<span class="built_in">getStateChange</span>() == ItemEvent.SELECTED) &#123;</span><br><span class="line">					String s = (String) arg0.<span class="built_in">getItem</span>();</span><br><span class="line">					s = s.<span class="built_in">substring</span>(<span class="number">0</span>, s.<span class="built_in">length</span>() - <span class="number">2</span>);</span><br><span class="line">					font = <span class="keyword">new</span> <span class="built_in">Font</span>(font.<span class="built_in">getFontName</span>(), font.<span class="built_in">getStyle</span>(), Integer.<span class="built_in">parseInt</span>(s));</span><br><span class="line">					text.<span class="built_in">setFont</span>(font);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="type">static</span> <span class="type">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		JFrame frame = <span class="keyword">new</span> <span class="built_in">JFrame</span>();</span><br><span class="line">		frame.<span class="built_in">setSize</span>(<span class="number">720</span>, <span class="number">540</span>);</span><br><span class="line">		frame.<span class="built_in">setLocationRelativeTo</span>(null);</span><br><span class="line">		frame.<span class="built_in">setVisible</span>(<span class="literal">true</span>);</span><br><span class="line">		FontChooser.<span class="built_in">showDialog</span>(frame, <span class="string">&quot;title&quot;</span>, <span class="literal">true</span>, <span class="keyword">new</span> <span class="built_in">Font</span>(<span class="string">&quot;宋体&quot;</span>, Font.BOLD, <span class="number">20</span>));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行截图"><a href="#运行截图" class="headerlink" title="运行截图"></a>运行截图</h2><p><img src="/images/2016/06/01/1/1.png"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/26/Eclipse%E4%B8%8BWebService%E7%9A%84%E5%8F%91%E5%B8%83%E5%92%8C%E4%BD%BF%E7%94%A8/" rel="next" title="Eclipse下WebService的发布和使用">
+                <i class="fa fa-chevron-left"></i> Eclipse下WebService的发布和使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/02/%E5%9F%BA%E4%BA%8ESwing%E7%9A%84%E7%AE%80%E5%8D%95%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8/" rel="prev" title="基于Swing的简单文本编辑器">
+                基于Swing的简单文本编辑器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">功能分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">实现代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%88%AA%E5%9B%BE"><span class="nav-number">3.</span> <span class="nav-text">运行截图</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

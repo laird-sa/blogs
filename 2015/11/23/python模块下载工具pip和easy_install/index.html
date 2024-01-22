@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在写python的时候，经常会用到一些扩展包，作为python新手，经常又不知道去哪里找这些包。而且就算是找到了，下载下来之后还需要进行繁琐的安装、配置等操作。有时候为了进行这些安装还要去安装能够安装这些程序的程序，比如setuptools等。而安装这些东西有可能还会有很多奇奇怪怪的问题，这样严重影响了编程的体验。还好，python有几个类似ubuntu中apt-get一样的东西，相当于一个包管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python模块下载工具pip和easy_install">
+<meta property="og:url" content="https://www.resonanat.com/2015/11/23/python%E6%A8%A1%E5%9D%97%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7pip%E5%92%8Ceasy_install/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="在写python的时候，经常会用到一些扩展包，作为python新手，经常又不知道去哪里找这些包。而且就算是找到了，下载下来之后还需要进行繁琐的安装、配置等操作。有时候为了进行这些安装还要去安装能够安装这些程序的程序，比如setuptools等。而安装这些东西有可能还会有很多奇奇怪怪的问题，这样严重影响了编程的体验。还好，python有几个类似ubuntu中apt-get一样的东西，相当于一个包管理">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2015-11-22T16:39:25.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.074Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2015/11/23/python模块下载工具pip和easy_install/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>python模块下载工具pip和easy_install | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/23/python%E6%A8%A1%E5%9D%97%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7pip%E5%92%8Ceasy_install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">python模块下载工具pip和easy_install</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-23T00:39:25+08:00">
+                2015-11-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在写python的时候，经常会用到一些扩展包，作为python新手，经常又不知道去哪里找这些包。而且就算是找到了，下载下来之后还需要进行繁琐的安装、配置等操作。有时候为了进行这些安装还要去安装能够安装这些程序的程序，比如setuptools等。而安装这些东西有可能还会有很多奇奇怪怪的问题，这样严重影响了编程的体验。还好，python有几个类似ubuntu中apt-get一样的东西，相当于一个包管理器，能够十分便捷的帮我们安装到自己需要的模块，这就是pip和easy_install。</p>
+<h2 id="pip"><a href="#pip" class="headerlink" title="pip"></a>pip</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# apt-get install python-pip</span><br></pre></td></tr></table></figure>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>比如想安装beautifulsoup包可以这样。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# pip install beautifulsoup</span><br></pre></td></tr></table></figure>
+<p>这样基本就能将包安装好了。当然这里很多情况下是会报一些错的（比如包的名称不对），这些错通常都会输出到他的log文件中去，所有的问题都会在log中找到答案。</p>
+<p>其实所有模块的安装方法都能在该模块的帮助文档中找到。比如beautifulsoup包也可以用apt-get来安装，但是作为一个更加专业的python软件，pip显然在python包的安装上更加有优势。而且，pip不仅可以下载，而且可以列举，更新和卸载包，使用的范围更加的广泛。</p>
+<p>以下是一些常用参数：</p>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>-U 或者 –upgrade</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install -U SomePackage</span><br></pre></td></tr></table></figure>
+<p>可以用来更新其他模块，也可以更新pip自己。</p>
+<h3 id="查看更新"><a href="#查看更新" class="headerlink" title="查看更新"></a>查看更新</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip list --outdated</span><br></pre></td></tr></table></figure>
+<h3 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip uninstall SomePackage</span><br></pre></td></tr></table></figure>
+<h3 id="更新源"><a href="#更新源" class="headerlink" title="更新源"></a>更新源</h3><p>有时候经常会遇到他默认的下载点无法链接的情况，这就时候需要指定下载源了。</p>
+<p>手动指定：</p>
+<p>在pip后面跟-i 来指定源，比如用豆瓣的源来安装web.py框架：</p>
+<p>pip install web.py -i <a target="_blank" rel="noopener" href="http://pypi.douban.com/simple">http://pypi.douban.com/simple</a></p>
+<p>自动指定：</p>
+<p>修改~&#x2F;.pip&#x2F;pip.conf 文件的内容，类似与如下格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line"> index-url = http://pypi.douban.com/simple/</span><br></pre></td></tr></table></figure>
+<p>最后再更新下pip就行了。</p>
+<p>！！！最新发现，更可靠的源：<a target="_blank" rel="noopener" href="http://pypi.zenlogic.net/simple/">http://pypi.zenlogic.net/simple/</a></p>
+<h2 id="easy-install"><a href="#easy-install" class="headerlink" title="easy_install"></a>easy_install</h2><p>在实际中经常发现pip并不好用，因为牵涉到什么ssl的错误，经常会报一些奇奇怪怪的错。相比之下easy_install的表现就稳定许多了。</p>
+<h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# apt-get install python-setuptools</span><br></pre></td></tr></table></figure>
+<p>没错，在setuptools里就有easy_install了。</p>
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>与pip的用法基本相同，只要把pip换成easy_install即可。包括指定源的方法，都一样。</p>
+<hr>
+<p>2017年1月27日：</p>
+<p>最近发现pip在使用自定义的源的时候需要添加–trusted-host参数才能从指定源下载，否则就会提示你需要安装的包找不到。其实这时候只要把在配置文件里写入的pypi源的url改成https即可。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/19/Linux%E4%B8%8B%E7%9A%84%E5%9B%BE%E7%89%87%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E5%B7%A5%E5%85%B7imagemagick/" rel="next" title="Linux下的图片格式转换工具imagemagick">
+                <i class="fa fa-chevron-left"></i> Linux下的图片格式转换工具imagemagick
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/23/Beautiful-Soup%E5%BA%93%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D/" rel="prev" title="Beautiful Soup库的基本介绍">
+                Beautiful Soup库的基本介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#pip"><span class="nav-number">1.</span> <span class="nav-text">pip</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0"><span class="nav-number">1.3.</span> <span class="nav-text">更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%9B%B4%E6%96%B0"><span class="nav-number">1.4.</span> <span class="nav-text">查看更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%B8%E8%BD%BD"><span class="nav-number">1.5.</span> <span class="nav-text">卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E6%BA%90"><span class="nav-number">1.6.</span> <span class="nav-text">更新源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#easy-install"><span class="nav-number">2.</span> <span class="nav-text">easy_install</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-1"><span class="nav-number">2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-1"><span class="nav-number">2.2.</span> <span class="nav-text">使用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

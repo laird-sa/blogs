@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Machine Learning,Computer Vision," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="文件组成为了实现训练以及识别的过程，我总共设计了6个文件，作用如下：    文件 作用    split.py 用于将验证码中四个小字符分割出来，并分类保存。   util.py 用于保存一些常用的函数   logistic_sgd.py 这是官网上的样例代码，实现了softmax的分类算法，当然还要进行下修改   package.py 这个用来将图像数据进行处理并打包压缩成为方便使用的数据集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自制正方软件系统验证码的识别程序（2&#x2F;4）">
+<meta property="og:url" content="https://www.resonanat.com/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F2-4/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="文件组成为了实现训练以及识别的过程，我总共设计了6个文件，作用如下：    文件 作用    split.py 用于将验证码中四个小字符分割出来，并分类保存。   util.py 用于保存一些常用的函数   logistic_sgd.py 这是官网上的样例代码，实现了softmax的分类算法，当然还要进行下修改   package.py 这个用来将图像数据进行处理并打包压缩成为方便使用的数据集">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-02-05T10:48:39.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.099Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Computer Vision">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/02/05/自制正方软件系统验证码的识别程序2-4/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>自制正方软件系统验证码的识别程序（2/4） | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F2-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">自制正方软件系统验证码的识别程序（2/4）</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-05T18:48:39+08:00">
+                2016-02-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="文件组成"><a href="#文件组成" class="headerlink" title="文件组成"></a>文件组成</h2><p>为了实现训练以及识别的过程，我总共设计了6个文件，作用如下：</p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>split.py</td>
+<td>用于将验证码中四个小字符分割出来，并分类保存。</td>
+</tr>
+<tr>
+<td>util.py</td>
+<td>用于保存一些常用的函数</td>
+</tr>
+<tr>
+<td>logistic_sgd.py</td>
+<td>这是官网上的样例代码，实现了softmax的分类算法，当然还要进行下修改</td>
+</tr>
+<tr>
+<td>package.py</td>
+<td>这个用来将图像数据进行处理并打包压缩成为方便使用的数据集</td>
+</tr>
+<tr>
+<td>train.py</td>
+<td>这是开始训练的接口</td>
+</tr>
+<tr>
+<td>check.py</td>
+<td>这是利用训练结果进行识别的接口</td>
+</tr>
+</tbody></table>
+<p>还有两个文件夹：</p>
+<table>
+<thead>
+<tr>
+<th>文件夹</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>recognized&#x2F;</td>
+<td>用于保存可作为训练集的图片，图片以内容的实际值命名</td>
+</tr>
+<tr>
+<td>number&#x2F;</td>
+<td>用于保存分离子图后的小图片，以类似0&#x2F; 1&#x2F; a&#x2F;….的文件夹的形式进行分类</td>
+</tr>
+</tbody></table>
+<h2 id="运行依赖"><a href="#运行依赖" class="headerlink" title="运行依赖"></a>运行依赖</h2><p>这里我使用的是python2.7版，需要以下必要的运行库的支持：</p>
+<h3 id="theano："><a href="#theano：" class="headerlink" title="theano："></a>theano：</h3><p><strong>安装</strong>： <code>$sudo pip install theano</code></p>
+<p><strong>目的</strong>：这是学习算法的运行依赖</p>
+<h3 id="numpy："><a href="#numpy：" class="headerlink" title="numpy："></a>numpy：</h3><p><strong>安装</strong>：<code>$sudo apt-get install python-numpy</code></p>
+<p><strong>目的</strong>：提供了很多必要的数学运算方法</p>
+<h3 id="PIL："><a href="#PIL：" class="headerlink" title="PIL："></a>PIL：</h3><p><strong>安装</strong>：<code>$sudo apt-get install python-pil</code></p>
+<p><strong>目的</strong>：进行图片的处理</p>
+<h2 id="split-py"><a href="#split-py" class="headerlink" title="split.py"></a>split.py</h2><p>由于牵涉到文件写入，而且与其他代码不存在依赖关系，所以把他独立出来方便修改。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;... spliting&#x27;</span></span><br><span class="line"></span><br><span class="line">source_dir=<span class="string">&#x27;recognized/&#x27;</span></span><br><span class="line">dest_dir=<span class="string">&#x27;number/&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> os.path.exists(dest_dir):</span><br><span class="line">	shutil.rmtree(dest_dir)</span><br><span class="line"></span><br><span class="line">os.mkdir(dest_dir)</span><br><span class="line"><span class="built_in">list</span>=os.listdir(source_dir)</span><br><span class="line">directory=<span class="string">&#x27;123456780abcdefghijklmnpqrstuvwxy&#x27;</span></span><br><span class="line">cnt=&#123;&#125;</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> directory:</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(dest_dir+i):</span><br><span class="line">		os.mkdir(dest_dir+i+<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">	cnt[i]=<span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> <span class="built_in">list</span>:</span><br><span class="line">	img=Image.<span class="built_in">open</span>(source_dir+name)</span><br><span class="line">	img.crop((<span class="number">5</span>,<span class="number">2</span>,<span class="number">17</span>,<span class="number">20</span>)).save(dest_dir+name[<span class="number">0</span>]+<span class="string">&#x27;/&#x27;</span>+<span class="built_in">str</span>(cnt[name[<span class="number">0</span>]]),<span class="string">&#x27;png&#x27;</span>)</span><br><span class="line">	cnt[name[<span class="number">0</span>]]+=<span class="number">1</span></span><br><span class="line">	img.crop((<span class="number">17</span>,<span class="number">2</span>,<span class="number">29</span>,<span class="number">20</span>)).save(dest_dir+name[<span class="number">1</span>]+<span class="string">&#x27;/&#x27;</span>+<span class="built_in">str</span>(cnt[name[<span class="number">1</span>]]),<span class="string">&#x27;png&#x27;</span>)</span><br><span class="line">	cnt[name[<span class="number">1</span>]]+=<span class="number">1</span></span><br><span class="line">	img.crop((<span class="number">29</span>,<span class="number">2</span>,<span class="number">41</span>,<span class="number">20</span>)).save(dest_dir+name[<span class="number">2</span>]+<span class="string">&#x27;/&#x27;</span>+<span class="built_in">str</span>(cnt[name[<span class="number">2</span>]]),<span class="string">&#x27;png&#x27;</span>)</span><br><span class="line">	cnt[name[<span class="number">2</span>]]+=<span class="number">1</span></span><br><span class="line">	img.crop((<span class="number">41</span>,<span class="number">2</span>,<span class="number">53</span>,<span class="number">20</span>)).save(dest_dir+name[<span class="number">3</span>]+<span class="string">&#x27;/&#x27;</span>+<span class="built_in">str</span>(cnt[name[<span class="number">3</span>]]),<span class="string">&#x27;png&#x27;</span>)</span><br><span class="line">	cnt[name[<span class="number">3</span>]]+=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>其实也很简单，就是从recognized&#x2F;中读取源图，分割成4张子图保存在number&#x2F;中对应的文件夹下，并以数字序数命名。这里用了PIL进行图片分割。但其实这里的难点不是代码本身，而是要观察每张图片分隔的界限。由于普通图片查看器的并没有标尺，为了观察的更细致，我用的是GIMP（Ubuntu中的ps）进行观察。</p>
+<p>为了方便纠正训练错误，在每次训练前我会把之前的图片删除重新写入。</p>
+<h2 id="package-py"><a href="#package-py" class="headerlink" title="package.py"></a>package.py</h2><p>这个文件用来将之前分割过的图片进行转化，也是最关键的部分。</p>
+<p>我的思路就是将每个图片用PIL转化成灰度图，在转化为二值图，成为一个12*18的矩阵，再转化为单行数组。数组中每一个点就是一个特征。但是在后来的评估中，为了提高识别准确率，又加入了三个特征，即：空白的联通块数、字符的边界像素个数、字符的填充像素个数。事实证明这三个特征极大的提高了验证的准确性。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle,os,Image,gzip</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> util <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;... packaging&#x27;</span></span><br><span class="line"></span><br><span class="line">source_dir=<span class="string">&#x27;number/&#x27;</span></span><br><span class="line"></span><br><span class="line">os.chdir(source_dir)</span><br><span class="line"><span class="built_in">list</span>=os.listdir(<span class="string">&#x27;./&#x27;</span>)</span><br><span class="line">data=[]</span><br><span class="line">ans=[]</span><br><span class="line"></span><br><span class="line"><span class="built_in">dict</span>=<span class="string">&#x27;012345678abcdefghijklmnpqrstuvwxy&#x27;</span></span><br><span class="line"><span class="keyword">for</span> num <span class="keyword">in</span> <span class="built_in">list</span>:</span><br><span class="line">	os.chdir(num)</span><br><span class="line">	list_pic=os.listdir(<span class="string">&#x27;./&#x27;</span>)</span><br><span class="line">	<span class="keyword">for</span> pic <span class="keyword">in</span> list_pic:</span><br><span class="line">		img=Image.<span class="built_in">open</span>(pic)</span><br><span class="line">		img=blur1(img)</span><br><span class="line">		cnt1=seed_fill(img)</span><br><span class="line">		cnt2=count_fill(img)</span><br><span class="line">		cnt2=(cnt2-<span class="number">50</span>)/<span class="number">10.0</span></span><br><span class="line">		cnt3=count_border(img)</span><br><span class="line">		cnt3=(cnt3-<span class="number">50</span>)/<span class="number">10.0</span></span><br><span class="line">		img=blur2(img)</span><br><span class="line">		arr=np.array(img)</span><br><span class="line">		arr=arr.reshape(<span class="number">12</span>*<span class="number">18</span>).astype(<span class="string">&#x27;int&#x27;</span>).astype(<span class="string">&#x27;bool&#x27;</span>).astype(<span class="string">&#x27;float32&#x27;</span>)</span><br><span class="line">		arr=arr.tolist()</span><br><span class="line">		arr.append(cnt1)</span><br><span class="line">		arr.append(cnt2)</span><br><span class="line">		arr.append(cnt3)</span><br><span class="line">		arr=np.array(arr).astype(<span class="string">&#x27;float32&#x27;</span>)</span><br><span class="line">		data.append(arr)</span><br><span class="line">		ans.append(<span class="built_in">float</span>(<span class="built_in">dict</span>.find(num)))</span><br><span class="line">	os.chdir(<span class="string">&#x27;../&#x27;</span>)</span><br><span class="line"></span><br><span class="line">os.chdir(<span class="string">&#x27;../&#x27;</span>)</span><br><span class="line">data=np.array(data)</span><br><span class="line">ans=np.array(ans)</span><br><span class="line"></span><br><span class="line">size=<span class="built_in">len</span>(data)</span><br><span class="line"></span><br><span class="line">rand_arr=np.arange(size)</span><br><span class="line">np.random.shuffle(rand_arr)</span><br><span class="line"></span><br><span class="line">rand_data=[]</span><br><span class="line">rand_ans=[]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> rand_arr:</span><br><span class="line">	rand_data.append(data[i])</span><br><span class="line">	rand_ans.append(ans[i])</span><br><span class="line"></span><br><span class="line">rand_data=np.array(rand_data)</span><br><span class="line">rand_ans=np.array(rand_ans)</span><br><span class="line"></span><br><span class="line">len_train=size*<span class="number">0.6</span></span><br><span class="line">len_valid=size*<span class="number">0.2</span></span><br><span class="line">len_test=size-len_train-len_valid</span><br><span class="line"></span><br><span class="line">output=((rand_data[<span class="number">0</span>:len_train],rand_ans[<span class="number">0</span>:len_train]),(rand_data[len_train:len_train+len_valid],rand_ans[len_train:len_train+len_valid]),(rand_data[size-len_test:size],rand_ans[size-len_test:size]))</span><br><span class="line"></span><br><span class="line">outputfile=<span class="built_in">open</span>(<span class="string">&#x27;vericode.pkl&#x27;</span>,<span class="string">&#x27;wb&#x27;</span>)</span><br><span class="line">cPickle.dump(output,outputfile)</span><br><span class="line">outputfile.close()</span><br><span class="line"></span><br><span class="line">outputfile=<span class="built_in">open</span>(<span class="string">&#x27;vericode.pkl&#x27;</span>,<span class="string">&#x27;rb&#x27;</span>)</span><br><span class="line">outputgzipfile=gzip.<span class="built_in">open</span>(<span class="string">&#x27;vericode.pkl.gz&#x27;</span>,<span class="string">&#x27;wb&#x27;</span>)</span><br><span class="line">outputgzipfile.writelines(outputfile)</span><br><span class="line">outputfile.close()</span><br><span class="line">outputgzipfile.close()</span><br><span class="line">os.remove(<span class="string">&#x27;vericode.pkl&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>没写注释，就列下注意点吧：</p>
+<ul>
+<li>在进行图像格式处理的过程中，很多小细节需要注意，特别是图片到数组的格式转化。</li>
+<li>对于新加特征值的计算，我放在了util.py中实现。</li>
+<li>对于新加的特征值还要进行特征值的优化，用以提高迭代效率。</li>
+<li>对数据需要进行训练集、评估集和测试集分类，比例为6:2:2，并且首先需要进行随机化处理。</li>
+<li>输出的验证集我是用cPickle直接输出之后再用gzip进行了压缩。</li>
+<li>尤其注意输出的格式，我是用的mnist数据集的标准格式进行处理。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/Computer-Vision/" rel="tag"># Computer Vision</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F1-4/" rel="next" title="自制正方软件系统验证码的识别程序（1/4）">
+                <i class="fa fa-chevron-left"></i> 自制正方软件系统验证码的识别程序（1/4）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F3-4/" rel="prev" title="自制正方软件系统验证码的识别程序（3/4）">
+                自制正方软件系统验证码的识别程序（3/4） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%BB%84%E6%88%90"><span class="nav-number">1.</span> <span class="nav-text">文件组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E4%BE%9D%E8%B5%96"><span class="nav-number">2.</span> <span class="nav-text">运行依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#theano%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">theano：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#numpy%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">numpy：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PIL%EF%BC%9A"><span class="nav-number">2.3.</span> <span class="nav-text">PIL：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#split-py"><span class="nav-number">3.</span> <span class="nav-text">split.py</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#package-py"><span class="nav-number">4.</span> <span class="nav-text">package.py</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

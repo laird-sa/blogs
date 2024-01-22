@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,Shell,Tools,Xml," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前几天干活的时候遇到一个需要解析处理xml文件的一个需求，当时考虑到逻辑比较复杂，因此用java慢慢搞了搞。不过这个需求经常会变，每次变化之后都要重新找到jar包的代码，改了之后还要替换原来的jar包，一来不方便修改，二来不方便统一保存代码，三来也不方便查看jar包的功能。其实对于这种比较灵活的功能，最方便高效的做法是采用一些脚本语言，比如python，ruby等等，开发效率高，而且也能处理一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Shell解析处理XML方法汇总">
+<meta property="og:url" content="https://www.resonanat.com/2017/10/15/Shell%E8%A7%A3%E6%9E%90%E5%A4%84%E7%90%86XML%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言前几天干活的时候遇到一个需要解析处理xml文件的一个需求，当时考虑到逻辑比较复杂，因此用java慢慢搞了搞。不过这个需求经常会变，每次变化之后都要重新找到jar包的代码，改了之后还要替换原来的jar包，一来不方便修改，二来不方便统一保存代码，三来也不方便查看jar包的功能。其实对于这种比较灵活的功能，最方便高效的做法是采用一些脚本语言，比如python，ruby等等，开发效率高，而且也能处理一">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-10-15T05:24:41.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.056Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Shell">
+<meta property="article:tag" content="Tools">
+<meta property="article:tag" content="Xml">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2017/10/15/Shell解析处理XML方法汇总/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>Shell解析处理XML方法汇总 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/10/15/Shell%E8%A7%A3%E6%9E%90%E5%A4%84%E7%90%86XML%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Shell解析处理XML方法汇总</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-15T13:24:41+08:00">
+                2017-10-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Shell/" itemprop="url" rel="index">
+                    <span itemprop="name">Shell</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前几天干活的时候遇到一个需要解析处理xml文件的一个需求，当时考虑到逻辑比较复杂，因此用java慢慢搞了搞。不过这个需求经常会变，每次变化之后都要重新找到jar包的代码，改了之后还要替换原来的jar包，一来不方便修改，二来不方便统一保存代码，三来也不方便查看jar包的功能。<br>其实对于这种比较灵活的功能，最方便高效的做法是采用一些脚本语言，比如python，ruby等等，开发效率高，而且也能处理一些复杂逻辑。但是由于种种原因，工作中有的机器没有安装这些语言的解释器。因此不得已，研究了一波用shell脚本解析xml的方法。<br>说到底，shell还是不太适合处理复杂的逻辑，但是对于一些简单的查找替换等需求，用shell来搞还是挺方便的。<br>我这里主要采用了下面三个工具：</p>
+<ul>
+<li>xmllint</li>
+<li>xpath</li>
+<li>xml2</li>
+</ul>
+<p>下面就分别总结下这三个工具的用法，方便以后查阅。</p>
+<h2 id="xmllint"><a href="#xmllint" class="headerlink" title="xmllint"></a>xmllint</h2><h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><p>xmllint其实是由一个叫libxml2的c语言库函数实现的一个小工具，因此效率比较高，对不同系统的支持度也很好，功能也比较全。他一般属于<code>libxml2-utils</code>这个软件包，因此类似与<code>sudo apt install libxml2-utils</code>的命令就可以安装。</p>
+<h3 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h3><p>xmllint至少支持下面几个常用功能：</p>
+<ol>
+<li>支持xpath查询语句</li>
+<li>支持类shell的交互式查询</li>
+<li>支持xml格式验证</li>
+<li>支持dtd,xsd对xml的校验</li>
+<li>支持编码转换</li>
+<li>支持xml格式化</li>
+<li>支持去空格压缩</li>
+<li>支持时间效率统计</li>
+</ol>
+<p>其实我们比较常用的功能主要也就是三个–xpath查询、去空格和格式化、校验。<br>比如当前有sample.xml:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="执行xpath查询"><a href="#执行xpath查询" class="headerlink" title="执行xpath查询"></a>执行xpath查询</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --xpath <span class="string">&quot;//book[@id=2]/name/text()&quot;</span> sample.xml</span><br><span class="line">book2</span><br></pre></td></tr></table></figure>
+
+<h4 id="去空格"><a href="#去空格" class="headerlink" title="去空格"></a>去空格</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --noblanks sample.xml</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span><span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span><span class="tag">&lt;<span class="name">license</span>/&gt;</span><span class="tag">&lt;/<span class="name">book</span>&gt;</span><span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span><span class="tag">&lt;/<span class="name">book</span>&gt;</span><span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span><span class="tag">&lt;/<span class="name">book</span>&gt;</span><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="格式化"><a href="#格式化" class="headerlink" title="格式化"></a>格式化</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --format sample.xml</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">license</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="xsd校验"><a href="#xsd校验" class="headerlink" title="xsd校验"></a>xsd校验</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ cat sample.xsd</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xs:schema</span> <span class="attr">id</span>=<span class="string">&quot;books&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;&quot;</span> <span class="attr">xmlns:xs</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema&quot;</span> <span class="attr">xmlns:msdata</span>=<span class="string">&quot;urn:schemas-microsoft-com:xml-msdata&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;books&quot;</span> <span class="attr">msdata:IsDataSet</span>=<span class="string">&quot;true&quot;</span> <span class="attr">msdata:Locale</span>=<span class="string">&quot;en-US&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">xs:choice</span> <span class="attr">minOccurs</span>=<span class="string">&quot;0&quot;</span> <span class="attr">maxOccurs</span>=<span class="string">&quot;unbounded&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;book&quot;</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">xs:sequence</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xs:string&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;0&quot;</span> <span class="attr">msdata:Ordinal</span>=<span class="string">&quot;0&quot;</span> /&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;price&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xs:string&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;0&quot;</span> <span class="attr">msdata:Ordinal</span>=<span class="string">&quot;1&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">xs:sequence</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">xs:attribute</span> <span class="attr">name</span>=<span class="string">&quot;id&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xs:string&quot;</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">xs:element</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">xs:choice</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">xs:element</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">xs:schema</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">myths@business:~$ xmllint --noout --schema sample.xsd sample.xml</span><br><span class="line">sample.xml validates</span><br></pre></td></tr></table></figure>
+<p>注意校验结果信息是输出到stderr中的，工具默认会把原文件回显到stdout里，可以加–noout参数关闭stdout回显。</p>
+<h4 id="流传递"><a href="#流传递" class="headerlink" title="流传递"></a>流传递</h4><p>xmllint默认是传递文件名，如果我们希望用通过管道传递文件流的方式传递数据，我们可以这样弄：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ cat sample.xml |xmllint --format -</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">license</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="奇怪报错”XPath-set-is-empty”"><a href="#奇怪报错”XPath-set-is-empty”" class="headerlink" title="奇怪报错”XPath set is empty”"></a>奇怪报错”XPath set is empty”</h4><p>这个问题在使用xmllint的xpath功能时候会经常遇到，其实原因主要是xml文件自带了名空间，比如maven的pom文件的开头：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>或者maven的setting文件的开头：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">settings</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>他们都会有个xmlns的属性，表示该xml文件的名空间。如果对这种文件直接执行查找则会报错：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~/cucumber/code/device<span class="comment"># xmllint --xpath &quot;/project&quot; pom.xml </span></span><br><span class="line">XPath <span class="built_in">set</span> is empty</span><br></pre></td></tr></table></figure>
+<p>解决方案要么把文件的xmlns属性去掉，要么就只能采用下面这种变通的办法指定节点名：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~/cucumber/code/device<span class="comment"># xmllint --xpath &quot;/*[local-name()=&#x27;project&#x27;]&quot; pom.xml </span></span><br><span class="line">&lt;project xmlns=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> xsi:schemaLocation=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;  </span><br><span class="line">	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;  </span><br><span class="line">...</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="xpath"><a href="#xpath" class="headerlink" title="xpath"></a>xpath</h2><h3 id="简述-1"><a href="#简述-1" class="headerlink" title="简述"></a>简述</h3><p>xpath工具其实是封装了的perl脚本，本身也只有两百来行，功能比较专一，就是提供xpath的查询功能。他一般属于<code>libxml-xpath-perl</code>这个软件包，因此类似于<code>sudo apt install libxml-xpath-perl</code>的命令就可以安装。像suse之类的系统还会直接自带。</p>
+<h3 id="功能-1"><a href="#功能-1" class="headerlink" title="功能"></a>功能</h3><p>不同系统中安装的版本可能不同，不过基本功能是类似的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xpath -e <span class="string">&#x27;//book/name/text()&#x27;</span>  sample.xml</span><br><span class="line">Found 3 nodes <span class="keyword">in</span> sample.xml:</span><br><span class="line">-- NODE --</span><br><span class="line">book1</span><br><span class="line">-- NODE --</span><br><span class="line">book2</span><br><span class="line">-- NODE --</span><br><span class="line">book3</span><br></pre></td></tr></table></figure>
+<p>默认会将查询呢结果输出到stdout中，将说明信息输出到stderr中。如果为了方便收集结果，可以将stderr重定向到&#x2F;dev&#x2F;null，或者加上-q参数：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xpath -e <span class="string">&#x27;//book/name/text()&#x27;</span> sample.xml 2&gt;/dev/null</span><br><span class="line">book1</span><br><span class="line">book2</span><br><span class="line">book3</span><br><span class="line"></span><br><span class="line">myths@business:~$ xpath -q -e <span class="string">&#x27;//book/name/text()&#x27;</span> sample.xml</span><br><span class="line">book1</span><br><span class="line">book2</span><br><span class="line">book3</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="对比xmllint"><a href="#对比xmllint" class="headerlink" title="对比xmllint"></a>对比xmllint</h3><p>xpath相比xmllint的xpath功能有一点点区别很重要，如果xpath匹配了多个结果，那么xpath就会分行输出，而xmllint则会揉到一行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --xpath <span class="string">&quot;//book/name/text()&quot;</span> sample.xml</span><br><span class="line">book1book2book3</span><br></pre></td></tr></table></figure>
+<p>除此之外，xmllint工具相对比较稳定，在不同的系统内的使用参数基本固定。而xpath工具不是很标准，在不同系统内的默认版本之间甚至不互相兼容。比如在ubuntu14.04内默认用法是<code>/usr/bin/xpath [options] -e query [-e query...] [filename...]</code>,而在suse12内的默认用法却是<code>/usr/bin/xpath [filename] query</code>。这会很容易导致相同脚本对不同系统的不兼容性。</p>
+<h2 id="xml2"><a href="#xml2" class="headerlink" title="xml2"></a>xml2</h2><h3 id="简述-2"><a href="#简述-2" class="headerlink" title="简述"></a>简述</h3><p>xml2这个工具感觉知道的人并不多，不过其实他在某些场景里跟其他命令配合能起到奇效。这个工具的开发人员的博客似乎已经挂掉了，不过目测应该用C以及libxml2库写的一个小工具。一般是在<code>xml2</code>软件包中，因此类似<code>sudo apt install xml2</code>的命令就可以安装。</p>
+<h3 id="功能-2"><a href="#功能-2" class="headerlink" title="功能"></a>功能</h3><p>这个工具包含六个命令：xml2,2xml,html2,2html,csv2,2csv，功能也非常unix，就是分别将xml,html,csv格式与一种他称之为“flat format”的格式进行转换。举个例子：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ <span class="built_in">cat</span> sample.xml |xml2</span><br><span class="line">/books/book/@<span class="built_in">id</span>=1</span><br><span class="line">/books/book/name=book1</span><br><span class="line">/books/book/price=100</span><br><span class="line">/books/book</span><br><span class="line">/books/book/@<span class="built_in">id</span>=2</span><br><span class="line">/books/book/name=book2</span><br><span class="line">/books/book/price=200</span><br><span class="line">/books/book</span><br><span class="line">/books/book/@<span class="built_in">id</span>=3</span><br><span class="line">/books/book/name=book3</span><br><span class="line">/books/book/price=300</span><br><span class="line"></span><br><span class="line">myths@business:~$ <span class="built_in">cat</span> sample.xml |xml2|2xml</span><br><span class="line">&lt;books&gt;&lt;book <span class="built_in">id</span>=<span class="string">&quot;1&quot;</span>&gt;&lt;name&gt;book1&lt;/name&gt;&lt;price&gt;100&lt;/price&gt;&lt;/book&gt;&lt;book <span class="built_in">id</span>=<span class="string">&quot;2&quot;</span>&gt;&lt;name&gt;book2&lt;/name&gt;&lt;price&gt;200&lt;/price&gt;&lt;/book&gt;&lt;book <span class="built_in">id</span>=<span class="string">&quot;3&quot;</span>&gt;&lt;name&gt;book3&lt;/name&gt;&lt;price&gt;300&lt;/price&gt;&lt;/book&gt;&lt;/books&gt;</span><br></pre></td></tr></table></figure>
+<p>这种自定义的格式非常简单而巧妙，有的表示新建节点(<code>/books/book</code>)，有的表示给节点赋值(<code>/books/book/name=book1</code>)，有的表示给节点的属性赋值(<code>/books/book/@id=1</code>)。写法跟xpath很像但又不完全一样。而且相互对应的两个命令放在一起能做到幂等。</p>
+<p>那么这种转化命令有什么用呢？其实我们经常会遇到一些创建xml文件的需求，但是直接按照xml格式动态生成就非常麻烦，这时候用flat format做个中转就非常方便了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env bash</span></span><br><span class="line"></span><br><span class="line">tempFile=$(<span class="built_in">mktemp</span> tmp.XXXX)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">addBook</span></span>()&#123;</span><br><span class="line">    <span class="built_in">id</span>=<span class="variable">$1</span></span><br><span class="line">    name=<span class="variable">$2</span></span><br><span class="line">    price=<span class="variable">$3</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book/@id=<span class="variable">$id</span>&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book/name=<span class="variable">$name</span>&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book/price=<span class="variable">$price</span>&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">main</span></span>()&#123;</span><br><span class="line">    addBook 1 book1 100</span><br><span class="line">    addBook 2 book2 200</span><br><span class="line">    addBook 3 book3 300</span><br><span class="line">    <span class="built_in">cat</span> <span class="variable">$tempFile</span>|2xml|xmllint --format --output new_sample.xml -</span><br><span class="line">    <span class="built_in">rm</span> <span class="variable">$tempFile</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">main <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<p>上面这段代码就生成了与sample.xml一模一样的new_sample.xml.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/Shell/" rel="tag"># Shell</a>
+          
+            <a href="/tags/Tools/" rel="tag"># Tools</a>
+          
+            <a href="/tags/Xml/" rel="tag"># Xml</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/08/compare-vps-ecs-vh/" rel="next" title="云主机和 VPS 的区别">
+                <i class="fa fa-chevron-left"></i> 云主机和 VPS 的区别
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/16/the-prosperous-china-as-you-wish/" rel="prev" title="这是最好的时代 这是最坏的时代">
+                这是最好的时代 这是最坏的时代 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xmllint"><span class="nav-number">2.</span> <span class="nav-text">xmllint</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD"><span class="nav-number">2.2.</span> <span class="nav-text">功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8Cxpath%E6%9F%A5%E8%AF%A2"><span class="nav-number">2.2.1.</span> <span class="nav-text">执行xpath查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%BB%E7%A9%BA%E6%A0%BC"><span class="nav-number">2.2.2.</span> <span class="nav-text">去空格</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E5%8C%96"><span class="nav-number">2.2.3.</span> <span class="nav-text">格式化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#xsd%E6%A0%A1%E9%AA%8C"><span class="nav-number">2.2.4.</span> <span class="nav-text">xsd校验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E4%BC%A0%E9%80%92"><span class="nav-number">2.2.5.</span> <span class="nav-text">流传递</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A5%87%E6%80%AA%E6%8A%A5%E9%94%99%E2%80%9DXPath-set-is-empty%E2%80%9D"><span class="nav-number">2.2.6.</span> <span class="nav-text">奇怪报错”XPath set is empty”</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xpath"><span class="nav-number">3.</span> <span class="nav-text">xpath</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0-1"><span class="nav-number">3.1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-1"><span class="nav-number">3.2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94xmllint"><span class="nav-number">3.3.</span> <span class="nav-text">对比xmllint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xml2"><span class="nav-number">4.</span> <span class="nav-text">xml2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0-2"><span class="nav-number">4.1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-2"><span class="nav-number">4.2.</span> <span class="nav-text">功能</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

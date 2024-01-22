@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,Computer Vision," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在上一节 中记录了基于投影的验证码矫正算法的实现。通过矫正，我们可以比较好的将倾斜的字符归一成较为规整的字符，接下来我们需要对矫正后的字符进行分割。简单的方法大概是投影法了，但是很明显，这样做的可靠性并不够。我们也可以找到整张图的最左端和最右端然后平均分割，但是在字符大小不一样的情况下效果也太好。还有个朴素的方法就是找连通块，但是由于存在字符粘连问题，连通块也不能完全区分字符。那么我这里就结合后两">
+<meta property="og:type" content="article">
+<meta property="og:title" content="结合连通块平均分割以及投影矫正的验证码分割算法">
+<meta property="og:url" content="https://www.resonanat.com/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="在上一节 中记录了基于投影的验证码矫正算法的实现。通过矫正，我们可以比较好的将倾斜的字符归一成较为规整的字符，接下来我们需要对矫正后的字符进行分割。简单的方法大概是投影法了，但是很明显，这样做的可靠性并不够。我们也可以找到整张图的最左端和最右端然后平均分割，但是在字符大小不一样的情况下效果也太好。还有个朴素的方法就是找连通块，但是由于存在字符粘连问题，连通块也不能完全区分字符。那么我这里就结合后两">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/1.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/3.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/4.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/5.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/6.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/7.png">
+<meta property="og:image" content="https://www.resonanat.com/images/2016/04/17/1/8.png">
+<meta property="article:published_time" content="2016-04-17T11:16:24.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.098Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Computer Vision">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/2016/04/17/1/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2016/04/17/结合连通块平均分割以及投影矫正的验证码分割算法/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>结合连通块平均分割以及投影矫正的验证码分割算法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">结合连通块平均分割以及投影矫正的验证码分割算法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-17T19:16:24+08:00">
+                2016-04-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在<a href="/2016/04/16/1/">上一节</a> 中记录了基于投影的验证码矫正算法的实现。通过矫正，我们可以比较好的将倾斜的字符归一成较为规整的字符，接下来我们需要对矫正后的字符进行分割。简单的方法大概是投影法了，但是很明显，这样做的可靠性并不够。我们也可以找到整张图的最左端和最右端然后平均分割，但是在字符大小不一样的情况下效果也太好。还有个朴素的方法就是找连通块，但是由于存在字符粘连问题，连通块也不能完全区分字符。那么我这里就结合后两种方法，先进行连通块分割，对于能分割的字符直接进行后续处理，对于不能分割的字符再用平均分割的方法分割处理。实践表明这种方法对于那些干扰线不明显的验证码（比如新浪微博的验证码）的分割效果还是不错的。</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2,os,sys,math</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getBinary</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：图片路径名称</span></span><br><span class="line"><span class="string">    输出：黑底二值化的图片</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    im=cv2.imread(path,<span class="number">0</span>)</span><br><span class="line">    thresh,im=cv2.threshold(<span class="number">255</span>-im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line">    <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadow</span>(<span class="params">im,angel</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图片，投影角度</span></span><br><span class="line"><span class="string">    输出：投影大小</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    x=[]</span><br><span class="line">    height , width = im.shape</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                x.append(j-<span class="number">1.0</span>*i/math.tan(math.radians(angel)))</span><br><span class="line">    x=np.array(x)</span><br><span class="line">    <span class="keyword">return</span> x.<span class="built_in">max</span>()-x.<span class="built_in">min</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadowTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试shadow函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">1</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> shadow(im,<span class="number">50</span>)</span><br><span class="line">        figure()</span><br><span class="line">        gray()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngle</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图</span></span><br><span class="line"><span class="string">    输出：最优的投影角度</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    minShadow=<span class="number">500</span></span><br><span class="line">    ans=<span class="number">90</span></span><br><span class="line">    <span class="keyword">for</span> angle <span class="keyword">in</span> np.linspace(<span class="number">45</span>,<span class="number">135</span>,<span class="number">91</span>):</span><br><span class="line">        thisShadow=shadow(im,angle)</span><br><span class="line">        <span class="keyword">if</span> minShadow&gt;thisShadow:</span><br><span class="line">            ans=angle</span><br><span class="line">            minShadow=thisShadow</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngleTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试getAngle函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">5</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> getAngle(im)</span><br><span class="line">        gray()</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affine</span>(<span class="params">im,angle=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图，仿射变换角度（默认为自适应最优角度）</span></span><br><span class="line"><span class="string">    输出：旋转后的灰度图</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    height,width=im.shape</span><br><span class="line">    <span class="keyword">if</span> angle==<span class="literal">None</span>:</span><br><span class="line">        angle=getAngle(im)</span><br><span class="line">    pts1=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>,<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line">    pts2=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>+height/<span class="number">2</span>/math.tan(math.radians(angle)),<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line">    M=cv2.getAffineTransform(pts1,pts2)</span><br><span class="line">    dst=cv2.warpAffine(im,M,(width,height))</span><br><span class="line">    <span class="keyword">return</span> dst</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affineTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试affine函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">50</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        dst=affine(im)</span><br><span class="line">        gray() </span><br><span class="line">        figure()</span><br><span class="line">        imshow(np.hstack([im,dst]))</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">splitImg</span>(<span class="params">im,num</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图，图中包含的字符个数</span></span><br><span class="line"><span class="string">    输出：分割后的图片数组</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    height,width=im.shape</span><br><span class="line">    maxPos=<span class="number">0</span></span><br><span class="line">    minPos=width</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                maxPos=<span class="built_in">max</span>(maxPos,j)</span><br><span class="line">                minPos=<span class="built_in">min</span>(minPos,j)</span><br><span class="line">    points=[]</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num+<span class="number">1</span>):</span><br><span class="line">        points.append(minPos+(maxPos-minPos)/num*i)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num):</span><br><span class="line">        left=points[i]</span><br><span class="line">        right=points[i+<span class="number">1</span>]</span><br><span class="line">        p1=np.zeros((height,left))</span><br><span class="line">        p2=np.ones((height,right-left+<span class="number">1</span>))*<span class="number">255</span></span><br><span class="line">        p3=np.zeros((height,width-right))</span><br><span class="line">        new_im=np.hstack([p1,p2,p3])</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> im[i][j]==<span class="number">0</span>:</span><br><span class="line">                    new_im[i][j]=<span class="number">0</span></span><br><span class="line">        ans.append(new_im)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seedSplit</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图</span></span><br><span class="line"><span class="string">    输出：从图中高亮提取出的字符图片数组</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    angle=getAngle(im)</span><br><span class="line">    height,width = im.shape</span><br><span class="line">    vis=np.zeros((height,width))</span><br><span class="line">    vis2=np.zeros((height,width))</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mark</span>(<span class="params">i,j</span>):</span><br><span class="line">        vis2[i][j]=<span class="number">1</span></span><br><span class="line">        points=[]</span><br><span class="line">        points.append((i,j))</span><br><span class="line">        <span class="keyword">for</span> dx <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">            <span class="keyword">for</span> dy <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> i+dx&gt;=<span class="number">0</span> <span class="keyword">and</span> i+dx&lt;height <span class="keyword">and</span> j+dy&gt;=<span class="number">0</span> <span class="keyword">and</span> j+dy&lt;width <span class="keyword">and</span> im[i+dx][j+dy]==<span class="number">255</span> <span class="keyword">and</span> vis2[i+dx][j+dy]==<span class="number">0</span>:</span><br><span class="line">                     points.extend(mark(i+dx,j+dy))</span><br><span class="line">        <span class="keyword">return</span> points</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">delete</span>(<span class="params">i,j</span>):</span><br><span class="line">        vis[i][j]=<span class="number">1</span></span><br><span class="line">        ans=<span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> dx <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">            <span class="keyword">for</span> dy <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> i+dx&gt;=<span class="number">0</span> <span class="keyword">and</span> i+dx&lt;height <span class="keyword">and</span> j+dy&gt;=<span class="number">0</span> <span class="keyword">and</span> j+dy&lt;width <span class="keyword">and</span> im[i+dx][j+dy]==<span class="number">255</span> <span class="keyword">and</span> vis[i+dx][j+dy]==<span class="number">0</span>:</span><br><span class="line">                    ans+=delete(i+dx,j+dy)</span><br><span class="line">        <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getImg</span>(<span class="params">points</span>):</span><br><span class="line">        new_im=np.zeros((height,width))</span><br><span class="line">        <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">            i,j=point         </span><br><span class="line">            new_im[i][j]=<span class="number">255</span></span><br><span class="line">        <span class="keyword">return</span> new_im,<span class="built_in">len</span>(points)</span><br><span class="line"></span><br><span class="line">    imgs=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> vis[i][j]==<span class="number">1</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                num=delete(i,j)   </span><br><span class="line">                <span class="keyword">if</span> num&lt;=<span class="number">50</span>:</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                points=mark(i,j)</span><br><span class="line">                imgs.append(getImg(points))</span><br><span class="line">            vis[i][j]=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    imgs.sort(<span class="keyword">lambda</span> left,right:cmp(left[<span class="number">1</span>],right[<span class="number">1</span>]))</span><br><span class="line">    new_imgs=[]</span><br><span class="line">    <span class="keyword">for</span> i,j <span class="keyword">in</span> imgs:</span><br><span class="line">        new_imgs.append((affine(i,angle),j))</span><br><span class="line">    imgs=new_imgs</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(imgs)&gt;<span class="number">4</span>:</span><br><span class="line">        imgs=imgs[<span class="built_in">len</span>(imgs)-<span class="number">4</span>:]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs[<span class="built_in">len</span>(imgs)-<span class="number">4</span>:]:</span><br><span class="line">            ans.append(i[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">4</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs:</span><br><span class="line">            ans.append(i[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">3</span>:</span><br><span class="line">        ans.append(imgs[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">        ans.append(imgs[<span class="number">1</span>][<span class="number">0</span>])</span><br><span class="line">        ans.extend(splitImg(imgs[<span class="number">2</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">2</span>:</span><br><span class="line">        rate=imgs[<span class="number">0</span>][<span class="number">1</span>]*<span class="number">1.0</span>/imgs[<span class="number">1</span>][<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> rate&gt;<span class="number">0.6</span>:</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">0</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">1</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            ans.append(imgs[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">1</span>][<span class="number">0</span>],<span class="number">3</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        ans.extend(splitImg(imgs[<span class="number">0</span>][<span class="number">0</span>],<span class="number">4</span>))</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seedSplitTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试seedSplit函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    gray()</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[<span class="number">5</span>:<span class="number">15</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line">        imgs=seedSplit(im)   </span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs:</span><br><span class="line">            figure()</span><br><span class="line">            imshow(i)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getTrainPic</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：图片</span></span><br><span class="line"><span class="string">    输出：依次输出图片中包含的字符，并归一化成统一大小</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getCenterx</span>(<span class="params">img</span>):</span><br><span class="line">        height,width=im.shape</span><br><span class="line">        points=[]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> img[i][j]==<span class="number">255</span>:</span><br><span class="line">                    points.append(j)</span><br><span class="line">        <span class="keyword">return</span> np.average(points)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getResult</span>(<span class="params">im,row=<span class="number">30</span>,column=<span class="number">30</span></span>):</span><br><span class="line">        height,width=im.shape</span><br><span class="line">        maxX=<span class="number">0</span></span><br><span class="line">        maxY=<span class="number">0</span></span><br><span class="line">        minX=<span class="number">99999</span></span><br><span class="line">        minY=<span class="number">99999</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                    maxX=<span class="built_in">max</span>(maxX,j)</span><br><span class="line">                    minX=<span class="built_in">min</span>(minX,j)</span><br><span class="line">                    maxY=<span class="built_in">max</span>(maxY,i)</span><br><span class="line">                    minY=<span class="built_in">min</span>(minY,i)</span><br><span class="line">        im=im[minY:maxY+<span class="number">1</span>].T[minX:maxX+<span class="number">1</span>].T</span><br><span class="line">        im=cv2.copyMakeBorder(im,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,cv2.BORDER_CONSTANT)</span><br><span class="line">        im=cv2.resize(im,(<span class="number">30</span>,<span class="number">30</span>))</span><br><span class="line">        <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line">    imgs=seedSplit(im)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(imgs)):</span><br><span class="line">        imgs[i]=(imgs[i],getCenterx(imgs[i]))</span><br><span class="line">    imgs.sort(<span class="keyword">lambda</span> x,y:cmp(x[<span class="number">1</span>],y[<span class="number">1</span>]))</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i,j <span class="keyword">in</span> imgs:</span><br><span class="line">        ans.append(getResult(i))</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getTrainPicTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试getTrain函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    gray()</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">10</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        imgs=getTrainPic(im)</span><br><span class="line">        res=np.hstack([imgs[<span class="number">0</span>],imgs[<span class="number">1</span>],imgs[<span class="number">2</span>],imgs[<span class="number">3</span>]])</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">        figure()</span><br><span class="line">        imshow(res)</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">getTrainPicTest()</span><br></pre></td></tr></table></figure>
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p><img src="/images/2016/04/17/1/1.png"><br><img src="/images/2016/04/17/1/2.png"><br><img src="/images/2016/04/17/1/3.png"><br><img src="/images/2016/04/17/1/4.png"><br><img src="/images/2016/04/17/1/5.png"><br><img src="/images/2016/04/17/1/6.png"><br><img src="/images/2016/04/17/1/7.png"><br><img src="/images/2016/04/17/1/8.png"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Computer-Vision/" rel="tag"># Computer Vision</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/16/%E7%94%A8%E6%8A%95%E5%BD%B1%E6%B3%95%E7%9F%AB%E6%AD%A3%E5%AD%97%E7%AC%A6%E6%97%8B%E8%BD%AC/" rel="next" title="用投影法矫正字符旋转">
+                <i class="fa fa-chevron-left"></i> 用投影法矫正字符旋转
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" rel="prev" title="路径匹配之动态时间规整DTW算法简析">
+                路径匹配之动态时间规整DTW算法简析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%88%E6%9E%9C"><span class="nav-number">2.</span> <span class="nav-text">效果</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

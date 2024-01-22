@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Nodejs," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言以前一直忽视了版本号规则的重要性，这两天改了一个bug让我深刻的领悟了遵守语义化版本规则(semver)的重要性。尤其是当自己需要造轮子给别人用的时候，如果没有遵循语义化版本规则，是很容易给别人留坑的。。。 简述首先稍微解释下语义化本本规则，这套规则其实在网上也是到处被搬运(吐槽一波，非常讨厌这种搬运语法啊规则啊这些知识点而不说明出处的行为)。其实这套规则的出处是来自semver的官网。具体的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于语义化版本规则(Semver)的领悟">
+<meta property="og:url" content="https://www.resonanat.com/2018/03/31/%E5%85%B3%E4%BA%8E%E8%AF%AD%E4%B9%89%E5%8C%96%E7%89%88%E6%9C%AC%E8%A7%84%E5%88%99-Semver-%E7%9A%84%E9%A2%86%E6%82%9F/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="前言以前一直忽视了版本号规则的重要性，这两天改了一个bug让我深刻的领悟了遵守语义化版本规则(semver)的重要性。尤其是当自己需要造轮子给别人用的时候，如果没有遵循语义化版本规则，是很容易给别人留坑的。。。 简述首先稍微解释下语义化本本规则，这套规则其实在网上也是到处被搬运(吐槽一波，非常讨厌这种搬运语法啊规则啊这些知识点而不说明出处的行为)。其实这套规则的出处是来自semver的官网。具体的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-03-31T13:39:24.000Z">
+<meta property="article:modified_time" content="2024-01-22T01:54:03.082Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="Nodejs">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2018/03/31/关于语义化版本规则-Semver-的领悟/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+
+
+  <title>关于语义化版本规则(Semver)的领悟 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/03/31/%E5%85%B3%E4%BA%8E%E8%AF%AD%E4%B9%89%E5%8C%96%E7%89%88%E6%9C%AC%E8%A7%84%E5%88%99-Semver-%E7%9A%84%E9%A2%86%E6%82%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">关于语义化版本规则(Semver)的领悟</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-31T21:39:24+08:00">
+                2018-03-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Nodejs/" itemprop="url" rel="index">
+                    <span itemprop="name">Nodejs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>以前一直忽视了版本号规则的重要性，这两天改了一个bug让我深刻的领悟了遵守语义化版本规则(semver)的重要性。尤其是当自己需要造轮子给别人用的时候，如果没有遵循语义化版本规则，是很容易给别人留坑的。。。</p>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>首先稍微解释下语义化本本规则，这套规则其实在网上也是到处被搬运(吐槽一波，非常讨厌这种搬运语法啊规则啊这些知识点而不说明出处的行为)。其实这套规则的出处是来自semver的<a target="_blank" rel="noopener" href="https://semver.org/lang/zh-CN">官网</a>。具体的概念文档里解释的很清楚，这里就不赘述了。</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>问题来源于我对node里ejs的一次错误使用。<br>ejs包里有一个 renderFile 的方法，这个方法原本是设计成同步的，因此我们可以直接从返回值里获取render之后的结果。<br>但是最近一次更新，他修改了这个函数的实现，使他支持了异步操作，同时也取消了同步返回结果的功能，导致我在使用的时候出现了没想到的bug。<br>程序员还是直接看代码比较习惯，直接上一张操作流程图吧:<br><a href="/images/2018/03/31/2/ejs_error.cast">@asciinema</a><br>在2.5.6版本中，他是支持返回值获取结果的，但是在2.5.8中，他突然就取消了这个功能，造成了向下不兼容的情况出现。<br>当然，引入新功能导致向下不兼容本身并没有错，但是问题就在于新发布的这个版本只是修改了次版本号，根据npm的语义化版本规则，默认的’^2.5.6’版本号会自动升级为’2.x.x’的更新的包。这就导致npm在更新的时候会自动升级到这个向下不兼容的版本，从而使原本可用的代码变得不可用。这样类似的bug相当难以被发现，尤其是当依赖一层套一层之后，谁知道是哪一层引用了这样的包。。。</p>
+<h2 id="解决-教训"><a href="#解决-教训" class="headerlink" title="解决&amp;教训"></a>解决&amp;教训</h2><ul>
+<li>作为包的使用者而言，如果我们不信任某些包以后的版本，我们可以不使用<code>^</code>前缀自动更新版本，而是采用确定版本号的方式，这样可以保证即使今后这个包打了坏补丁也不会影响到之前的版本。</li>
+<li>作为轮子的制造者，在发布一个向下不兼容的版本时，一定要注意修改major version，保证低版本不会因为自动更新导致bug。</li>
+<li>作为一名普通的码农，也要有一点意识，就是尽量不要使用 ‘undocumented functionality’ 这样的功能很有可能被后续版本淘汰；同时，要学会正确编写异步代码，不能总想着用同步的方式来调用异步api。<br>嗯，大概就是这些。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://semver.org/lang/zh-CN/">Semver</a><br><a target="_blank" rel="noopener" href="https://github.com/mde/ejs/issues/357">The issue that I raised in gayhub</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Nodejs/" rel="tag"># Nodejs</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/31/%E5%85%B3%E4%BA%8Efirefox%E4%B8%AD%E9%93%BE%E6%8E%A5%E7%82%B9%E5%87%BB%E5%BC%B9%E5%87%BA%E7%A9%BA%E7%99%BD%E6%A0%87%E7%AD%BE%E9%A1%B5%E7%9A%84%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/" rel="next" title="关于firefox中链接点击弹出空白标签页的问题分析">
+                <i class="fa fa-chevron-left"></i> 关于firefox中链接点击弹出空白标签页的问题分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/03/spring-ioc-annotation/" rel="prev" title="「Spring」IoC注解实现">
+                「Spring」IoC注解实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-%E6%95%99%E8%AE%AD"><span class="nav-number">4.</span> <span class="nav-text">解决&amp;教训</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

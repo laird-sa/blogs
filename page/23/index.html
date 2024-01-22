@@ -264,7 +264,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/29/how-to-choose-customlized-rom-and-stock-ui/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/29/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -283,7 +283,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/08/29/how-to-choose-customlized-rom-and-stock-ui/" itemprop="url">如何选择 AOKP 类 ROM 和厂商定制 UI</a></h2>
+                <a class="post-title-link" href="/2017/04/29/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/" itemprop="url">C++11学习笔记1</a></h2>
         
 
         <div class="post-meta">
@@ -295,8 +295,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-29T17:21:00+08:00">
-                2016-08-29
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-29T23:52:25+08:00">
+                2017-04-29
               </time>
             
 
@@ -318,8 +318,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%82%E9%97%BB%E5%A0%82/" itemprop="url" rel="index">
-                    <span itemprop="name">异闻堂</span>
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
                   </a>
                 </span>
 
@@ -356,10 +356,214 @@
 
       
         
-          <p>最近老是被人问及，在厂商提供的原厂 ROM 、AOKP ，和移植的其它ROM（比如移植的 flyme 和 MIUI），到底应该怎么选择。于是我决定写一写这篇博客，从功能层面和国内用户的行为习惯来讲讲如何选择这几类 ROM。</p>
+          
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>很久以前就知道<code>C++11</code>对我们课上讲的C++有很多改进的地方，当时也没有细学，最近一个偶然的机会陡然发现原来身边的同学好多都对<code>C++11</code>都颇有心得，推崇备至，回头想想在<code>C++14</code>，甚至C++17都不新鲜的现在，连<code>C++11</code>都不会的话显然有点说不过去了。。。于是呢我就打算利用最近闲着的时间，在补《人民的名义》的间隙顺便学学C++11应该也是极好的。</p>
+<h1 id="类型推导"><a href="#类型推导" class="headerlink" title="类型推导"></a>类型推导</h1><h2 id="auto关键字"><a href="#auto关键字" class="headerlink" title="auto关键字"></a>auto关键字</h2><h3 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h3><p>auto关键字不是<code>C++11</code>里诞生的关键字，在这之前，auto代表的意思是“具有全局存储期的局部变量”，限定的是变量的作用域。显然，这玩意并没什么用，于是在<code>C++11</code>里，他就变成了可以自动推导的变量类型。所谓自动推导，并不意味着他就跟javascript里的var一样，颠覆了C++强类型语言的性质，他其实只是在编译的过程中由电脑来推导变量类型，在运行时是不存在auto这种变量的。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><p>我们可以用auto声明其他的变量，但是需要注意下面几点：</p>
+<ol>
+<li>auto 声明的变量必须在编译阶段就能识别类型。</li>
+<li>auto 不能声明非静态成员变量。</li>
+<li>auto 不能用来声明函数参数。</li>
+<li>auto 的自动推导于模板的自动推导(<a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/template_argument_deduction">Template argument deduction</a>)本质相同。</li>
+<li>当auto不被声明为指针或引用时，auto的推导结果将和初始化表达式的抛弃ref(引用)和cv(const volatile)限定符的类型一致。</li>
+<li>当auto被声明为引用或指针时，auto的推导结果将继承初始化表达式的cv限定符。</li>
+</ol>
+<p>不过细想，有时候还是有点绕人的，比如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> x=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> * x1 = &amp;x;  <span class="comment">//x1 -&gt; int *, auto -&gt; int</span></span><br><span class="line"><span class="keyword">auto</span> x2 = &amp;x;    <span class="comment">//x2 -&gt; int *, auto -&gt; int *</span></span><br></pre></td></tr></table></figure>
+<p>明明写法不一样，但是推导出来的x1和x2的类型竟然是一样的。这看上去有点不可思议，不过换一个看法估计就更清楚一点:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> x=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;<span class="built_in">func</span>(T *x1);</span><br><span class="line"><span class="built_in">func</span>(&amp;x);</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;<span class="built_in">func</span>(T x2);</span><br><span class="line"><span class="built_in">func</span>(&amp;x);</span><br></pre></td></tr></table></figure>
+<p>对于x1，T被推导成了int，因此x1被推导成了int <em>;<br>对于x2，T被推导成了int</em>，因此x2也被推导成了int *;</p>
+<p>这很好理解，那么auto也就很好理解了。（虽然还是有点怪怪的感觉。。。）</p>
+<h3 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h3><ol>
+<li>简化代码。</li>
+<li>判断泛型中的变量类型。</li>
+</ol>
+<p>他出现的目的，主要是由于我们懒得写那些巨长无比的类型名，最典型的用处就是在声明迭代器的时候：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">std::map&lt;<span class="type">double</span>,<span class="type">double</span>&gt; mp;</span><br><span class="line"><span class="keyword">for</span>(std::map&lt;<span class="type">double</span>,<span class="type">double</span>&gt;::iterator it=mp.<span class="built_in">begin</span>(),it!=mp.<span class="built_in">end</span>();it++)&#123;</span><br><span class="line">    .....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这迭代器的声明太傻了，我们不喜欢，我们喜欢下面的样子:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">std::map&lt;<span class="type">double</span>,<span class="type">double</span>&gt; mp;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> it=mp.<span class="built_in">begin</span>(),it!=mp.<span class="built_in">end</span>();it++)&#123;</span><br><span class="line">    .....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，有时候我们用这个也的确是因为我们无法判断真正的类型是什么，比如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>&#123;</span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">func</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span>&#123;</span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">int</span>* <span class="title">func</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">work</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> val=T::<span class="built_in">func</span>():</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="built_in">main</span>()&#123;</span><br><span class="line">    <span class="built_in">work</span>&lt;A&gt;();</span><br><span class="line">    <span class="built_in">work</span>&lt;B&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们希望work函数能统一处理所有叫func的静态函数，但是由于返回值不同，所以我们不能直接指定val的类型，但是用auto就能暂时确定val的类型，用于后续处理。</p>
+<h2 id="decltype关键字"><a href="#decltype关键字" class="headerlink" title="decltype关键字"></a>decltype关键字</h2><h3 id="目的-1"><a href="#目的-1" class="headerlink" title="目的"></a>目的</h3><p>decltype关键字使用来在编译时推导出一个表达式的类型,通常用这个结果来声明另一个变量。</p>
+<h3 id="用法-1"><a href="#用法-1" class="headerlink" title="用法"></a>用法</h3><p>参照下面的例子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span>&#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">decltype</span>(A.x) t1=<span class="number">2</span>; <span class="comment">//t1 -&gt; int</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> a=<span class="number">0</span>,b=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">decltype</span>(a+b) t2=<span class="number">2</span>; <span class="comment">//t2 -&gt; int</span></span><br><span class="line"><span class="keyword">decltype</span>(a+=b) t3=<span class="number">2</span>; <span class="comment">//t3 -&gt;int &amp;</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> &amp;c=a;</span><br><span class="line"><span class="keyword">decltype</span>(c) t4=<span class="number">3</span>; <span class="comment">// t4 -&gt; const int &amp;;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"><span class="keyword">decltype</span>(<span class="built_in">func</span>()) t5=<span class="number">2</span>; <span class="comment">//t5 -&gt; int </span></span><br></pre></td></tr></table></figure>
+<p>需要注意的是当decltype的参数是函数的时候，他并不需要执行这个函数，毕竟这是在编译阶段完成的事情嘛。</p>
+<h3 id="用途-1"><a href="#用途-1" class="headerlink" title="用途"></a>用途</h3><p>虽然decltype在泛型中有一些重要的用法，但是最常用的用一个类型来定义另一个类型：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">decltype</span><span class="params">(<span class="literal">nullptr</span>)</span> <span class="type">nullptr_t</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">decltype</span><span class="params">(<span class="keyword">sizeof</span>(<span class="number">0</span>))</span> <span class="type">size_t</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这种重新定义类型的方法更加直观。</p>
+<h2 id="返回类型后置语法"><a href="#返回类型后置语法" class="headerlink" title="返回类型后置语法"></a>返回类型后置语法</h2><h3 id="目的-2"><a href="#目的-2" class="headerlink" title="目的"></a>目的</h3><p>有时候我们在用模板函数的时候无法指定函数的返回值，需要通过一些参数的运算才能获得返回值类型，这时候就需要返回类型后置语法来处理了。</p>
+<h3 id="用法-用途"><a href="#用法-用途" class="headerlink" title="用法&amp;用途"></a>用法&amp;用途</h3><p>比如下面的场景：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span>&amp; <span class="title">foo</span><span class="params">(<span class="type">int</span> &amp;i)</span></span>;</span><br><span class="line"><span class="function"><span class="type">float</span> <span class="title">foo</span><span class="params">(<span class="type">float</span> *i)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">??? <span class="built_in">func</span>(T&amp; val)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">foo</span>(val);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>显然，我们不能将???处简单的用T来替换，这看上去就很无解了，这时候就需要auto+decltype来共同处理了：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span>&amp; <span class="title">foo</span><span class="params">(<span class="type">int</span> &amp;i)</span></span>;</span><br><span class="line"><span class="function"><span class="type">float</span> <span class="title">foo</span><span class="params">(<span class="type">float</span> *i)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">func</span><span class="params">(T&amp; val)</span>-&gt; <span class="title">decltype</span><span class="params">(foo(val))</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">foo</span>(val);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="模板的优化"><a href="#模板的优化" class="headerlink" title="模板的优化"></a>模板的优化</h2><h3 id="右尖号的细节处理"><a href="#右尖号的细节处理" class="headerlink" title="右尖号的细节处理"></a>右尖号的细节处理</h3><p>我们知道，在C++11之前，下面的声明是有问题的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line">vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;v;</span><br></pre></td></tr></table></figure>
+<p>编译器会报错，他把俩右尖号看成是位移符了，我们得改成这样：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line">vector&lt;vector&lt;<span class="type">int</span>&gt; &gt;v;</span><br></pre></td></tr></table></figure>
+<p>在C++11之后，设计者考虑了这个因素，第一种的写法也能够认了。不过带来一个小bug就是下面的语法行不通了:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vector&lt; 16&gt;&gt;<span class="number">2</span>　&gt;v;</span><br></pre></td></tr></table></figure>
+<p>虽然没人这样写，但是他编译的时候的确会报错。实际写的时候还是加括号比较稳妥一点。</p>
+<h3 id="模板别名"><a href="#模板别名" class="headerlink" title="模板别名"></a>模板别名</h3><p>c++11引了using的别名语法，事实上就是typedef的加强版。基本操作如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> uint=<span class="type">unsigned</span> <span class="type">int</span> ;</span><br><span class="line"><span class="keyword">using</span> <span class="type">func_t</span>=<span class="built_in">void</span> (*)(<span class="type">int</span>,<span class="type">int</span>);</span><br></pre></td></tr></table></figure>
+<p>这不新鲜，新鲜的是using语法甚至定义泛型，这是typedef所做不到的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;map&gt;</span></span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">using</span> mp_str=std::map&lt;string,T&gt;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">work</span><span class="params">()</span></span>&#123;</span><br><span class="line">    mp_str&lt;<span class="type">int</span>&gt;mp1;</span><br><span class="line">    mp_str&lt;string&gt;mp2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个用法就像生成一个新模板一样将map的key的类型固定，只露出了值的类型。</p>
+<h2 id="基于范围的for循环-Range-for-statement"><a href="#基于范围的for循环-Range-for-statement" class="headerlink" title="基于范围的for循环(Range-for statement)"></a>基于范围的for循环(Range-for statement)</h2><p>我们知道在python之类的语言里都支持类似<code>for i in arr</code>这样的for循环语法，这种语法相比显式用下标和迭代器来循环更加简洁。虽然在algorithm头文件里有一个<code>for_each</code>函数做到了类似的效果，但是他仍然需要显式地指定begin()和end()，并不是真正意义上的基于范围。<br>在C++11里引入了基于范围的for循环，它可以支持迭代任何容器、数组、初始化列表等类型。<br>具体方法如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a[]=&#123;<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> i :a)&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">std::vector&lt;<span class="type">int</span>&gt;v=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> i : v)&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> i : &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;)&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>除了能循环数组，vector这类容器之外，还能迭代map等特殊容器，不过需要注意的是，对于map来说，我们获得的迭代变量是pair类型的，因此我们需要用ite.first、ite.second来获得键和值:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">std::map&lt;<span class="type">int</span>,<span class="type">int</span>&gt;m=&#123;&#123;<span class="number">1</span>,<span class="number">2</span>&#125;,&#123;<span class="number">3</span>,<span class="number">4</span>&#125;&#125;;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> ite : m)&#123;</span><br><span class="line">    std::cout&lt;&lt; ite.first ;</span><br><span class="line">    std::cout&lt;&lt; ite.second ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同时，这个迭代变量还可以声明成引用类型，也就是说我们可以通过他对原数组进行修改:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> a[]=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> &amp;i : a)&#123;</span><br><span class="line">        i*=<span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> i : a)&#123;</span><br><span class="line">        std::cout&lt;&lt;i&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果是:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">4</span><br><span class="line">6</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/auto">auto</a><br><a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/template_argument_deduction">基于模板的参数推断</a><br><a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/decltype">decltype</a><br><a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/type_alias">类型别名</a><br><a target="_blank" rel="noopener" href="https://book.douban.com/subject/26419368/">深入应用c++11</a><br><a target="_blank" rel="noopener" href="http://www.stroustrup.com/C++11FAQ.html">C++FAQ</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/28/wpo-data-uri-performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/04/28/wpo-data-uri-performance/" itemprop="url">Web 性能优化（3）——探讨 data URI 的性能</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-28T21:16:18+08:00">
+                2017-04-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>业内常会有 Data URI 的利与弊、用与不用的讨论，即使在最有经验的前端开发者眼中，也会形成对 data URI 截然不同的看法。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/08/29/how-to-choose-customlized-rom-and-stock-ui/#more" rel="contents">
+            <a class="btn" href="/2017/04/28/wpo-data-uri-performance/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -410,7 +614,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/12/bower/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/28/pseudo-elements-and-pseudo-classes/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -429,7 +633,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/08/12/bower/" itemprop="url">好用的Web包管理器-Bower</a></h2>
+                <a class="post-title-link" href="/2017/04/28/pseudo-elements-and-pseudo-classes/" itemprop="url">重新认识伪类和伪元素</a></h2>
         
 
         <div class="post-meta">
@@ -441,8 +645,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-12T15:32:41+08:00">
-                2016-08-12
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-28T16:35:10+08:00">
+                2017-04-28
               </time>
             
 
@@ -464,8 +668,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
-                    <span itemprop="name">环境配置</span>
+                  <a href="/categories/CSS3/" itemprop="url" rel="index">
+                    <span itemprop="name">CSS3</span>
                   </a>
                 </span>
 
@@ -502,10 +706,10 @@
 
       
         
-          <p>Bower是twitter推出的客户端包管理工具，用于命令行操作包的搜索、下载、更新、卸载(如jQuery、Bootstrap、JavaScript、HTML、CSS之类的网络资源)。Bower对包结构没有强制规范，可以很方便获取各种Web模块文件，但bower本身不存储模块文件和模块版本信息，模块发布者通过register方式将模块可访问的公开的git地址记录在bower的数据库中，而所有版本都是通过代码库的tag来决定的。</p>
+          <p>熟悉前端的人都会听过<code>css</code>的伪类与伪元素，然而大多数的人都会将这两者混淆(包括我)。那今天就让我们来看看伪类和伪元素的区别吧!</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/08/12/bower/#more" rel="contents">
+            <a class="btn" href="/2017/04/28/pseudo-elements-and-pseudo-classes/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -556,7 +760,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/22/javascript-Function/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/26/Angular2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -575,7 +779,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/07/22/javascript-Function/" itemprop="url">js高级与面向对象之函数</a></h2>
+                <a class="post-title-link" href="/2017/04/26/Angular2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" itemprop="url">Angular2学习笔记</a></h2>
         
 
         <div class="post-meta">
@@ -587,8 +791,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-22T19:40:39+08:00">
-                2016-07-22
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-26T23:23:27+08:00">
+                2017-04-26
               </time>
             
 
@@ -610,8 +814,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
                   </a>
                 </span>
 
@@ -648,10 +852,212 @@
 
       
         
-          <h2 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">func</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="comment">//函数体</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//2.函数表达式</span></span><br><span class="line"><span class="keyword">var</span> func1 = <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//3.通过Function构造函数来创建</span></span><br><span class="line"><span class="keyword">var</span> func2 = <span class="keyword">new</span> <span class="title class_">Function</span>();</span><br></pre></td></tr></table></figure>
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>阴差阳错，当初在选择写网站的时候选择了使用Angular2+RESTfuｌ，现在想起来，这个选择可能有点轻率了。虽然这套框架我个人觉得可能的确比较适合做移动端Web的开发，但是由于网站开发的经验明显不足，加上这套技术还不是相当的成熟，在学习的过程中走了很多的弯路。而且，功利一点的讲，对于找工作的帮助可能并不是很大，很多Web相关的职务招的都是Java方向的，而我直接跳过这种传统框架直接接触新知识难免会发现基础不牢的情况。不过还好，经过这一段时间的倒腾，好歹把Angular2的东西稍微消化了一点，相比啥都不会，也算是有点收获吧。</p>
+<h2 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h2><p>刚学习Angular2的时候，是照着他的<a target="_blank" rel="noopener" href="https://angular.cn/docs/ts/latest/">中文文档</a>上来的。虽然这上面对框架解释的非常细致，讲的也很清晰，例子也很典型，但是这个文档还是有点偏旧了。文档中介绍的example中用的结构还是用的基于github源码的较早前的版本，现在用起来十分的不方便。现在基本上都是用angular-cli来组织文件，这个项目对Angular2提供了强大的支持，我们用起来也比以前方便了很多。<br>具体的过程就不细说了，可以参考angular-cli的<a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">wiki</a>，主要是以下步骤：</p>
+<ol>
+<li>安装新版本的node。(注意node的版本一定要是6以上的，否则会报奇奇怪怪的错);</li>
+<li>安装angular-cli (<code>npm install -g @angular/cli</code>);</li>
+<li>新建项目 (ng new PROJECTNAME);</li>
+<li>选择一个合适的IDE，我选择的是WebStorm;</li>
+</ol>
+<p>这样基本上就算是搭好了Angular2简单的开发环境。</p>
+<h2 id="开发细节"><a href="#开发细节" class="headerlink" title="开发细节"></a>开发细节</h2><p>Angular2这类MVVM架构的框架跟传统的MVC框架有很大的不同，不过主要需要考虑的就是下面这几个部分：</p>
+<ol>
+<li>模板。主要是模板语言部分以及在模板中使用组件的变量等等。</li>
+<li>数据绑定。包括属性绑定、事件绑定、插值绑定以及双向绑定，主要用于组件内的变量在页面中的显示以及页面等。</li>
+<li>服务。这包括两方面，一个是访问RESTFUL的服务，另一个是用来保存本地变量的。访问RESTFUL的服务通常是使用Promise来进行异步回调使用的，访问本地变量的服务则要注意不要写成全局的变量，否则就会出现类似所有同时访问网站的用户都共享同一个变量的尴尬场面。。。</li>
+<li>依赖注入。依赖注入做的就是控制变量的传递关系，防止数据混乱的调用关系等等。</li>
+</ol>
+<p>具体的使用方法等到需要的时候查看文档即可。</p>
+<h2 id="项目发布"><a href="#项目发布" class="headerlink" title="项目发布"></a>项目发布</h2><p>如果是测试环境，直接<code>ng serve</code>就可以用node服务器在本地的默认4200端口显示页面了。<br>但是，用测试环境你会发现项目非常的巨大，一个啥依赖都没有的’Hello world’就足足有3MB的大小，这显然是用户无法接受的。</p>
+<p>那么为什么他会有这么大呢？这是由于Angular2默认使用的是JIT(Just-in-Time - JIT)编译。这个JIT编译有他的好处，他意味这我们的代码是在客户端解释的，那么他编译的效率会比较高，编译的结果会更好。但是他也有很多的缺点，Angular2文档中列举了下面几点：</p>
+<ol>
+<li>渲染得更快;</li>
+<li>需要的异步请求更少;</li>
+<li>需要下载的Angular框架体积更小;</li>
+<li>提早检测模板错误;</li>
+<li>更安全;</li>
+</ol>
+<p>于是，Angular2又提出了一个新的编译方法叫AOT(Ahead of Time - AOT)。这个编译方法就是相当于静态编译，这样就可以提前筛掉没有使用过的组建，并且减轻了客户端的压力。显然这很棒棒喽，但是文档中介绍的转换方法实在是麻烦，弄了半天报了一堆错也没弄成，最后还是用了angular-cli才算搞定。</p>
+<p>对于开发环境，可以使用<code>ng serve --prod --aot</code>来进行简单的优化。不过对于真正的生产环境我们显然不能用node服务器，我这里用的是nginx来部署，具体步骤如下：</p>
+<ol>
+<li>使用命令<code>ng build --prod --aot</code>来生成<code>dist/</code>文件夹。</li>
+<li>将上面的文件夹配置成nginx站点的根目录</li>
+<li>配置gzip压缩，进一步减少文件传输量</li>
+<li>使用try_files选项配置跳转的启动路径，否则直接输入二级路由是会报错的。</li>
+</ol>
+<p>具体的配置应当是下面这样：</p>
+<pre><code>server &#123;
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /var/www/html/dist;
+    index index.html index.htm;
+
+    # Make site accessible from http://localhost/
+    server_name localhost;
+
+    location / &#123;
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files $uri $uri /index.html;
+        # Uncomment to enable naxsi on this location
+        # include /etc/nginx/naxsi.rules
+    &#125;
+    gzip on;
+    gzip_min_length 1k;
+    gzip_buffers 4 8k;
+    gzip_http_version 1.1;
+    gzip_types text/plain application/javascript application/x-javascript text/javascript text/css application/xml;
+&#125;
+</code></pre>
+<p>这基本就是Angular2项目开发的基本过程了。</p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">angular-cli</a><br><a target="_blank" rel="noopener" href="https://angular.cn/docs/ts/latest/">angular中文文档</a><br><a target="_blank" rel="noopener" href="https://my.oschina.net/syscde/blog/790763">nginx发布Angular2</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/25/java-exception/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/04/25/java-exception/" itemprop="url">「Java教程」异常处理机制</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-25T08:34:31+08:00">
+                2017-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">Java教程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>Java语言提供了完善的异常处理机制。正确运用这套机制，有助于提高程序的健壮性。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/07/22/javascript-Function/#more" rel="contents">
+            <a class="btn" href="/2017/04/25/java-exception/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -702,7 +1108,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/09/javascript-prototype-chain/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/24/%E4%BA%91%E8%AE%A1%E7%AE%97%E6%AF%94%E8%B5%9B%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -721,7 +1127,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/07/09/javascript-prototype-chain/" itemprop="url">js高级与面向对象之原型链</a></h2>
+                <a class="post-title-link" href="/2017/04/24/%E4%BA%91%E8%AE%A1%E7%AE%97%E6%AF%94%E8%B5%9B%E6%80%BB%E7%BB%93/" itemprop="url">云计算比赛总结</a></h2>
         
 
         <div class="post-meta">
@@ -733,8 +1139,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-09T19:41:47+08:00">
-                2016-07-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-24T22:20:35+08:00">
+                2017-04-24
               </time>
             
 
@@ -756,8 +1162,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
                   </a>
                 </span>
 
@@ -794,10 +1200,174 @@
 
       
         
-          <h2 id="原型链是什么？"><a href="#原型链是什么？" class="headerlink" title="原型链是什么？"></a>原型链是什么？</h2><p>只要是对象就会有原型，那么所有的原型就会形成一个链式的结构，这个结构就称为原型链</p>
+          
+            <p>2017年4月23日，今天为期近半年的云计算比赛终于落下了帷幕。尘埃落定，分完奖金，分完奖品，好像一切没有发生过一样，生活也慢慢步入了正轨。但是我总觉得，一切事情总得留下写什么值得记忆和回味的东西。在一切渐渐过去之后，比赛本身变得其实不那么重要，反而是那些看起来与比赛无关的细节更值得铭记。从前我一直觉得，有些事情体验了就好，但是我渐渐发现，体验过的东西几乎都特别的容易忘记，没有思考与总结的体验只能算的上是走马观花，我特别羡慕像杨振宁那样的学者，虽然身体渐渐衰老，但是他总能非常清楚的记得在某年某月某日，与某人发生过哪些对话。虽然我的记性不太好，但是我也希望我的经历能够不仅仅成为过去，而是成为自己一直受用的财富。</p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>其实参加这个比赛的原因非常搞笑，在上学期的一次大创项目的例会上，指导老师跟我们聊了聊项目的问题，发现没啥好聊的，然后话锋一转说，“哎？我听说最近有个云计算比赛，你们要不要参加看看，前几年某某老师带的队伍好像都拿了不错的名次，blabla。。。”，我们当然不敢表达什么反对意见了，然后就在我们的项目没啥进展的情况下，撂下手头的事开始搞这个云计算方面的事情。。。<br>然而尴尬的是，我们并没有人会scala，hadoop，spark这类搞分布式云计算常用的疙瘩，一切都得从头学起，但是我们其实也并没有太多的时间。因此拖着拖着，就过了春节。春节过来后，发现不能再拖了，就迎着头皮加班加点的搞了一个多礼拜，才稍微理清楚眉目。虽说是四人的小team，但是实际做起来就我跟某大佬两个人在做。比赛总共两道题，那就一人一道题，我负责基于kmeans聚类的大数据分类算法，大佬负责通用后缀树的构建算法。</p>
+<h2 id="研究"><a href="#研究" class="headerlink" title="研究"></a>研究</h2><p>关于这个kmeans算法，其实spark的mllib里有一个kmeans的库。不过显然，这个在我们的数据集上跑的效率并不好，于是我们就参照大赛提供的一个名叫<a target="_blank" rel="noopener" href="http://glaros.dtc.umn.edu/gkhome/views/cluto">cluto</a>的单机kmeans工具作为参照。里面有一些相关文档，因此我主要是参照这个进行处理。</p>
+<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>问题其实很简单，就是给定两个数据集，你给我用spark跑出这两个数据集的聚类结果。这两个数据集，一个是数目较多特征较少的稠密矩阵，另一个是数目较少特征较多的文本矩阵。初赛跑第一类数据，决赛跑第二类数据。然后评测的时候总和比较准确率(NMI)跟时间。</p>
+<h3 id="我的思路"><a href="#我的思路" class="headerlink" title="我的思路"></a>我的思路</h3><p>照着cluto的意思，我就简单的利用spark mllib中的相关函数进行拼接处理。事实上mllib提供的kmeans库本身没有太大的毛病（感觉毛病其实有两点，后面会说），之所以在大多数情况下效果不是太好，我看主要是因为，人家在设计这个玩意的时候，压根就没打算让你直接套。你得根据你实际的数据集，进行相应的预处理，而这些预处理的手段他其实也在其他的模块里有提供，而且大部分都实现的没啥问题。问题的重点就在于我们如何去根据数据集去选择正确的预处理方式。<br>通常情况下，预处理的方式无非下面这几步：</p>
+<ol>
+<li>特征提取（降维）</li>
+<li>行列加权</li>
+<li>归一化</li>
+</ol>
+<p>所谓特征提取，通常也就是用PCA，SVD这类算法，从高维数据中提取更有代表性的维度来讨论，从而加快运算速度。<br>所谓行列加权，通常是采用一些经验算法，比如IDF加权，将数据进“强化”，使其能更加突出主要维度的作用。<br>所谓归一化，很简单，就是消除各条数据尺度不同带来的影响。虽然很简单，但是也很重要，对结果的影响也不小。</p>
+<p>不过上面的这些步骤也不能一概而论，比如有些数据集上，降维有可能导致数据丢失，行列加权会导致数据异常，归一化会导致主要维度丢失等等。因此mllib在设计的时候就没有将这些方法融入kmeans里面，而是分开来供大家选择，有针对性的使用。</p>
+<p>没错，虽然答辩的时候吹的天花乱坠（其实也没啥干货。。。），但是实际操作的时候用的就是上面的三个步骤，自己几乎没有实现任何功能模块，完全调用mllib中的库。。。</p>
+<p>除此预处理之外，就是些细节参数的选择了，主要包括下面几点：</p>
+<ol>
+<li>距离函数的选择</li>
+<li>初始化中心点的选择</li>
+<li>平均准确率与时间的抉择</li>
+</ol>
+<p>mllib自带的kmeans模块有一个缺点就是他只支持了平方欧氏距离，虽然现在看起来，似乎所有的距离公式都可以某种程度上互相转换。但是简单的看，在很多情况下，不同的距离测度在不同数据集上的表现也不完全相同，因此更换一个合适的距离测度似乎是一个轻松讨巧的提高准确率的办法。我在实际操作中采用的是余弦距离，稍微修改下源码就可以办到。<br>初始化中心点的方法大多数情况采用其自带的kmeans++算法，准确率一般会提高一点。不过也不排除random更好的情况。<br>至于平均准确率与时间的抉择就十分有讲究了，我们比赛成绩说的过去的很大一部分原因就是这个抉择做的还算不错。我们知道在spark1.6以下的版本里，有一个参数叫runs，不过由于一些代码可维护性、执行效率等的原因，在高版本的spark里这个参数被取消了。这个参数曾经存在的意义在于，我们知道kmeans本身的初始点选择具有一定的随机性，那么每次聚类结果的准确率就不一定相同，有时好，有时不好。我们在比赛的时候显然希望尽可能的避免表现不好的情况，那么我们就可以通过运行多次数据，取代价函数最低的那组模型作为最终的模型，这个运行次数就是runs参数的意义。显然，这个参数并不能提高kmeans本身的准确率，而是通过时间，去换取准确率高的概率，减少准确率低的概率。这就是一个简单的“时间换准确率的想法”。与之对应的，也有用“准确率换时间的想法”，比如有许多队伍，在聚类时并不采用整个数据集，而是去进行采样，获取一些有代表性的数据，来做聚类，这样有的确会提高算法执行速度，但是也有降低准确率的可能。</p>
+<h3 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h3><p>当然，我的算法是存在问题的。最突出的问题在于，在实际的运行中，我发现spark提供的kmeans算法并不能很好的并行计算，绝大多数的stage都集中在一个worker上。。，这是一个很尴尬的问题，他意味着这实际上就不是一个分布式程序。不过这个问题也不完全出于我，因为我采用的就是spark mllib中的kmeans实现。这个实现似乎在操作中有一些问题，导致几乎所有的数据都在一个worker上跑，我尝试采用了RangePartition来代替HashPartition，但是结果也并没有任何好转。情急之下我也就没有过多的考虑这个问题，就直接提交了代码。事实上如果这个问题解决了，那么运行时间应该能缩短成1&#x2F;7左右，成绩排进前两名应该是没啥问题的。不过这或许就是差距所在吧。</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>虽然总体上讲，在进入决赛的11支队伍里，我们在两道题上做的都不是很突出，但是由于我们两道题都比较稳定，没有出现短板，因此最后拿了第三名，低于南大PASA实验室的研究僧以及东北大学的队伍。相比之下，南师大的队伍虽然第二题全场最高，但是第一题却是倒数第二，混了个三等奖；东南大学的队伍，虽然第二题跟南大一样跑除了隐藏数据集，但是第一题同样扑街，也混了三等奖。。。<br>说起第一题的结果，其实也颇有争议，评委方认为这个聚类问题得综合考虑时间以及准确率来判分，但是实际操作中，为了防止高速低准确度混分情况的出现，在评价速度分的时候乘上了与准确率有关的系数，导致准确率的影响过大。我这种“时间换准确率”的做法就比较占便宜了，而那种“准确率换时间”的做法就吃了亏。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/23/optimization-of-my-blog/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/04/23/optimization-of-my-blog/" itemprop="url">本博客的优化汇总</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-23T16:25:00+08:00">
+                2017-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p><img src="https://bbs-static.nfz.yecdn.com/i/0000087.png" alt="0000087.png"></p>
+<p>我一直在关注我的博客的浏览体验，其中，网站的加载速度对于浏览体验来说是非常重要的。
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/07/09/javascript-prototype-chain/#more" rel="contents">
+            <a class="btn" href="/2017/04/23/optimization-of-my-blog/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -848,7 +1418,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/15/javascript-inherit/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/23/git/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -867,7 +1437,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/06/15/javascript-inherit/" itemprop="url">js高级与面向对象之继承</a></h2>
+                <a class="post-title-link" href="/2017/04/23/git/" itemprop="url">Git 常用命令学习及整理</a></h2>
         
 
         <div class="post-meta">
@@ -879,8 +1449,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-15T13:43:28+08:00">
-                2016-06-15
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-23T10:23:21+08:00">
+                2017-04-23
               </time>
             
 
@@ -902,8 +1472,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
+                  <a href="/categories/Git/" itemprop="url" rel="index">
+                    <span itemprop="name">Git</span>
                   </a>
                 </span>
 
@@ -940,10 +1510,10 @@
 
       
         
-          <p>一个对象没有某些属性和方法，另一个对象有，拿过来使用，就是继承</p>
+          <p>最近用Git比较多，所以大概整理下 <strong>Git是目前世界上最先进的分布式版本控制系统。</strong></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/06/15/javascript-inherit/#more" rel="contents">
+            <a class="btn" href="/2017/04/23/git/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -994,7 +1564,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/04/javascript-prototype/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/22/Cron/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1013,7 +1583,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/06/04/javascript-prototype/" itemprop="url">js高级与面向对象之原型</a></h2>
+                <a class="post-title-link" href="/2017/04/22/Cron/" itemprop="url">Ubuntu 使用 Cron 实现计划任务</a></h2>
         
 
         <div class="post-meta">
@@ -1025,8 +1595,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-04T13:41:47+08:00">
-                2016-06-04
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-22T00:21:21+08:00">
+                2017-04-22
               </time>
             
 
@@ -1048,8 +1618,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
+                  <a href="/categories/Cron/" itemprop="url" rel="index">
+                    <span itemprop="name">Cron</span>
                   </a>
                 </span>
 
@@ -1086,10 +1656,10 @@
 
       
         
-          <h2 id="原型的基本概念"><a href="#原型的基本概念" class="headerlink" title="原型的基本概念"></a>原型的基本概念</h2><p>在构造函数创建出来的时候，系统会默认的帮构造函数创建并且关联一个空对象，这个对象就成为原型</p>
+          <p>Windows 自带定时执行任务的工具叫做“计划任务”，Linux 下我们使用 Cron 实现这一功能。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/06/04/javascript-prototype/#more" rel="contents">
+            <a class="btn" href="/2017/04/22/Cron/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1140,7 +1710,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/23/hexo-github/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/19/%E6%88%91%E7%9A%84%E7%89%9B%E5%AE%A2%E7%BD%91%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1159,7 +1729,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/05/23/hexo-github/" itemprop="url">基于Hexo+github搭建静态博客</a></h2>
+                <a class="post-title-link" href="/2017/04/19/%E6%88%91%E7%9A%84%E7%89%9B%E5%AE%A2%E7%BD%91%E9%9D%A2%E8%AF%95%E7%BB%8F%E5%8E%86/" itemprop="url">我的牛客网面试经历</a></h2>
         
 
         <div class="post-meta">
@@ -1171,8 +1741,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-23T11:16:51+08:00">
-                2016-05-23
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-19T23:43:24+08:00">
+                2017-04-19
               </time>
             
 
@@ -1194,8 +1764,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Hexo%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index">
-                    <span itemprop="name">Hexo博客</span>
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
                   </a>
                 </span>
 
@@ -1232,458 +1802,17 @@
 
       
         
-          <h3 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h3><p>在安装<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">hexo</a>之前，必须确认你已经安装了<a target="_blank" rel="noopener" href="http://nodejs.org/">Node.js</a>和<a target="_blank" rel="noopener" href="http://git-scm.com/">Git</a>。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/05/23/hexo-github/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/20/javascript-constructor/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/05/20/javascript-constructor/" itemprop="url">js高级与面向对象之构造函数</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-20T13:39:33+08:00">
-                2016-05-20
-              </time>
-            
-
-            
-
-            
-          </span>
+          
+            <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>其实本来我并不知道牛客网也在招人，不过一直觉得牛客网这个平台非常棒，之前也在这里刷过一些题目，平时没事的时候就会到讨论区默默窥屏，看看大牛们是怎么面试的，顺便也将自己的经历分享给其他人。一次偶然的经历，我得知了牛客网似乎也在招聘，抱着试试看的态度，就投了一份简历过去。可能由于是初创的小公司，办事效率很高，第一天晚上投简历，第二天就打电话约面试，第三天晚上就正式面试了。而且让我没想到的是，面试官就是牛客的CEO叶老大。。。</p>
+<h2 id="面试过程"><a href="#面试过程" class="headerlink" title="面试过程"></a>面试过程</h2><p>和我想象的不一样，这次面试没谈项目，没谈人生，没谈理想，也没谈什么诗和远方。我想应该是由于面试官本身是一个资深程序员，相比hr出身的面试官，更有务实性，给人一种talk is cheap的感觉。不过我也没感受到来自他的压力，他本人应该是那种文静随和的类型，不会大段大段的罗嗦，而且，很显然他早就准备好了套路，估计也是阅人无数的那种类型。下面简要整理下这次的面试过程。<br>我们是在牛客网的面试平台上进行的，让我耳目一新的是，面试平台不仅仅是视频聊天，还可以直接编程运行。而且你所敲的每一个字母，面试官那里都能实时显示，所以可以非常方便的就代码进行沟通。当然，这样也基本杜绝的作弊的可能。<br>和我之前说的一样，主考官非常务实，上来就说我先搞几道题试试。。。<br>题目是他当场边打字边解释。</p>
+<h3 id="第一题"><a href="#第一题" class="headerlink" title="第一题"></a>第一题</h3><p><strong>第一题大概是热身，让我实现一个字符串比较函数。</strong><br>显然这个还是很简单的，不过发生了一个小插曲，就是他让我实现的函数名叫strcpy。。。我不知死活的向他提议何不改成strcmp。。。他想了想似乎很有道理，把函数名改成了strcompare。。。<br>题目很简单，一小会就写好了，他研究了一会，试了试边界条件，发现没什么问题，这道题就算是过了。</p>
+<h3 id="第二题"><a href="#第二题" class="headerlink" title="第二题"></a>第二题</h3><p><strong>第二题稍微考察算法能力，让我实现一个正则匹配的判断函数，也就是给两个串s1，s2，其中s1是含有*和.的模式串，s2是普通字符串，让我写一个函数判断s1是否能匹配s2。</strong><br>这就体现出我楞的一面了。<br>我上来想都没想，直接用递归搞，虽然三下五除二把一些简单的样例过了，但是仔细研究则发现很多边界条件都不对。面试官则跟我一起看，有种帮我一起找bug的感觉，不过我心里清楚，要是我自己的bug让别人找到了拿岂不是很没面子。还好我当时没有太抽，研究了一会终于找到了那个小bug。面试官看了看，试了试几个边界，分析了下我的代码，发现没啥问题，就说ok。但是，他接着问，你能分析你这代码的复杂度么。。。我有点小懵，其实递归算法的复杂度我还真没仔细研究过，于是瞎猜了猜，感觉不太对劲。他想估计有点觉得我开始不靠谱龙，问我你知道递归函数的复杂度怎么算么。。。我忽然想起了徐老师乐此不疲讲的归并排序，就说应该是要解一个。。递归方程？他表示大差不差吧，这才算放过我。<br>正当我以为万事大吉的时候，他又问我，你能不能把你的时间复杂度降低一点啊，我想了想没想出啥好办法。。。他问我会不会动态规划。。。我。。。好久没刷题，想了一会才想出正确的解法。。。回头一看。。。这不就是个简单的不能再简单的dp么。。。虽然绕了一些弯子，不过好歹搞了出来。。。</p>
+<h3 id="第三题"><a href="#第三题" class="headerlink" title="第三题"></a>第三题</h3><p>面试官问我会不会java，我当然会，不过考虑到好久没写，怕手生，顺便也给自己台阶下，我表示我们虽然上过这课，但是课比较水，没有项目练手，他笑了笑表示了解。于是就让我说一下<strong>java中抽象类跟接口的区别</strong>。我当时短路，只说我知道接口只定义函数的声明，而抽象类的函数可以有具体实现。然后他问我一个类能实现多少接口，一个类能继承多少个抽象类，我这才想起来原来这也是一个区别。。。</p>
+<h3 id="第四题"><a href="#第四题" class="headerlink" title="第四题"></a>第四题</h3><p>这是我整场面试最大的痛。。。<br><strong>问，给你八颗药，AAAABBBB，他们从外观上一模一样，现在我要每天吃一个A一个B，问有没有好办法。</strong><br>我想了半天，表示我办不到，如果有什么好方法，我也会觉得很神奇。。。他笑笑表示。。。你回去好好想想。<br>回去我问了舍友。。。被嘲讽。。。</p>
+<h3 id="第五题"><a href="#第五题" class="headerlink" title="第五题"></a>第五题</h3><p>第五题还是挺有意思的，有种诡辩的感觉。<br><strong>问，我们照镜子的时候，大家都说左右是反的，但是为什么不说上下是反的呢？</strong><br>显然，常识告诉我上下是不“反”的，但是他这么一说，倒是真给人一种上下也应该是反的的感觉。其实问题的关键应该在于参考系的选择，我们说左右反，是因为我们以上下为轴来看的，这显然不够“有说服力”，如果我们把脑袋横过来看，把以左右为轴来看，那么上下也是反的。我当时感觉答的意思应该差不多，面试官表示其实这其实是个开放性的题目，主要看你能不能把你的话圆过去，只要没有太大的逻辑问题都行。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>总体上，整个过程下来感觉还是挺轻松的，主要是现场编程可能会有点压力。有人说小公司更加注重让你直接做事，大公司才注重你的学习能力，其实我倒觉得这个表述还是不够客观的，至少这次面试，面试官没有出任何项目经验（板砖）的题目，反而全是算法题和思维题，而且虽然公司是用java做开发，但是他也能包容没有很多java开发经验的同学。不过这次体验最大的收获应该在于，小公司有时候也不比大公司容易进，从工作角度讲，小公司的工作激情可能比大公司更高，从待遇上讲，一个有潜力的小公司待遇甚至不输BAT。<br>Exp++。</p>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>首先，什么是_声明_、<em>初始化_、_赋值_、_定义</em>?</p>
-<ul>
-<li>声明：告诉解析器有这个东西存在</li>
-<li>初始化：就理解为第一次赋值</li>
-<li>定义：不需要去理解</li>
-<li>赋值：改变变量的值，就是赋值</li>
-</ul>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/05/20/javascript-constructor/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/18/javascript-part2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/05/18/javascript-part2/" itemprop="url">JavaScript高级篇之part2</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-18T18:29:33+08:00">
-                2016-05-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>javascript高级与面向对象笔记整理，接part1篇！！</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/05/18/javascript-part2/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/08/javascript-part1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/05/08/javascript-part1/" itemprop="url">JavaScript高级篇之part1</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-08T17:31:48+08:00">
-                2016-05-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>javascript高级与面向对象笔记整理，第一篇！！</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/05/08/javascript-part1/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
         
       
     </div>
@@ -1721,7 +1850,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/22/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="extend next" rel="next" href="/page/24/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/22/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/24/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1767,7 +1896,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">231</span>
+                  <span class="site-state-item-count">502</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1778,7 +1907,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-count">63</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1789,7 +1918,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">187</span>
+                  <span class="site-state-item-count">251</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
