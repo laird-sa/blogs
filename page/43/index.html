@@ -307,6 +307,806 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/11/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Bctags%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/11/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Bctags%E5%B7%A5%E5%85%B7/" itemprop="url">vim高级用法之ctags工具</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-11T14:59:32+00:00">
+                2016-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>都说vim强大，然而之前的简单用法并没有让我觉得vim有多强大，顶多是一个功能齐全的记事本，只到我发现了这个工具－－ctags，以及由他衍生出来的很多插件，让我明白了，“哦，vim 至少可以作为一个很不错的C语言的IDE”。～～</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>ctags工具其实可以认为是为C语言的文件添加索引的工具。C文件经过他的处理后会生成一个tags文件来保存文件中所有函数、变量、宏的索引，通过这个索引，就能非常方便的在后续的编辑过程中获取这些信息，从而达到自动补全、识别函数和变量等一系列的功能。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>ctags工具有他的官网可以下载，但是实际上我们并不需要手动安装。一般情况下ubuntu系统内会自带ctags工具，他的名字叫：exuberant-ctags（朝气蓬勃的C标签0.0）。可以通过<code>$ ctags --version </code>命令来查看版本。如果没有，则只需要<code>$ sudo apt-get install exuberant-ctags</code> 就可以直接下载使用了。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>首先，对我们需要索引的文件进行预处理：<code>$ctags foo.cpp</code>（当然，如果需要递归处理所有子文件夹的话可以加 -R 参数，如： <code>$ctags -R</code>）。</p>
+<p>预处理后，我们会发现在当前文件夹下出现了名叫tags的文件。比如，对于如下的cpp文件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FOO</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">fun</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> global;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">fun</span>();</span><br><span class="line">        FOO foo;</span><br><span class="line">        <span class="type">int</span> local;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成的tags文件是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">!_TAG_FILE_FORMAT       2       /extended format; --format=1 will not append ;&quot; to lines/</span><br><span class="line">!_TAG_FILE_SORTED       1       /0=unsorted, 1=sorted, 2=foldcase/</span><br><span class="line">!_TAG_PROGRAM_AUTHOR    Darren Hiebert  /dhiebert@users.sourceforge.net/</span><br><span class="line">!_TAG_PROGRAM_NAME      Exuberant Ctags //</span><br><span class="line">!_TAG_PROGRAM_URL       http://ctags.sourceforge.net    /official site/</span><br><span class="line">!_TAG_PROGRAM_VERSION   5.9~svn20110310 //</span><br><span class="line">FOO     a.cpp   /^struct FOO&#123;$/;&quot;       s       file:</span><br><span class="line">fun     a.cpp   /^void fun()&#123;$/;&quot;       f</span><br><span class="line">global  a.cpp   /^int global;$/;&quot;       v</span><br><span class="line">main    a.cpp   /^int main()&#123;$/;&quot;       f</span><br></pre></td></tr></table></figure>
+<p>大概解释一下他的文件格式就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">格式：&#123;tagname&#125; &#123;TAB&#125; &#123;tagfile&#125; &#123;TAB&#125; &#123;tagaddress&#125; &#123;term&#125; &#123;field&#125; ..</span><br><span class="line">• &#123;tagname&#125; - 标识符名字,例如函数名、类名、结构名、宏等。不能包含制表符。</span><br><span class="line">• &#123;tagfile&#125; - 包含 &#123;tagname&#125; 的文件。它不能包含制表符。</span><br><span class="line">• &#123;tagaddress&#125; - 可以定位到 &#123;tagname&#125;光标位置的 Ex 命令。通常只包含行号或搜索命令。出于安全的考虑,vim会限制其中某些命令的执行。</span><br><span class="line">• &#123;term&#125; - 设为 ;&quot; ,这是为了兼容Vi编辑器,使Vi忽略后面的&#123;field&#125;字段。</span><br><span class="line">• &#123;field&#125; .. - 此字段可选,通常用于表示此&#123;tagname&#125;的类型是函数、类、宏或是其它。</span><br><span class="line">!_TAG_FILE_SORTED&lt;Tab&gt;1&lt;Tab&gt;&#123;anything&#125;</span><br><span class="line">上面这个标记说明tag文件是经过排序的,并且排序时区分了大小写,对排序的tag,vim会使用二分法来进行查找,大大加快了查找速度;如果值为0,则表示tag文件未经排序;如果值为2,则表示tag文件是忽略大小写排序的。</span><br></pre></td></tr></table></figure>
+<p>其实就是规定一种保存结构体、函数名、和全局变量的索引了。</p>
+<p>经过这样的处理之后，我们就可以使用他带来的非常实用的操作了：</p>
+<ol>
+<li>对于已经建立索引的条目，我们可以用<code>Ctrl+]</code> 的快捷键来快速找到他的声明，即使是位于不同文件（就像很多IDE中的F12用来查看声明一样），查看完之后可以通过<code>Ctrl+t </code> 或<code>Ctrl+o</code> 来返回原来的地方。</li>
+<li>选中局部变量，按<code>gd</code> 可以搜索到该变量的声明。</li>
+<li>选中单词，按<code>*</code>可以转到该单词下一次出现的地方。</li>
+<li>选中单词，按<code>#</code>可以转到该单词上一次出现的地方。</li>
+<li>在行末模式下输入<code>:ta foo</code> 可以立刻找到foo函数的声明。</li>
+</ol>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>要使用tags文件，默认是必须要在当前含有tags文件的地方打开vim才能加载到tags文件，否则需要在行末模式下手动指定<code>:set tags=（你存放tags文件的路径，如果有多个路径的话中间用,隔开，而且貌似不支持*之类的通配符）</code> 或者在<code>/etc/vim/vimrc</code>里面加上这句话，或者在<code>~/.vimrc</code> 里面加上这句话。</p>
+<p>晓得了这个工具，就像是打开了vim 插件类工具的大门，强大的 vim 配置就要诞生了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/10/%E4%BF%9D%E6%8C%81SSH%E8%BF%9E%E6%8E%A5%E6%8C%81%E7%BB%AD%E4%B8%8D%E6%96%AD%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/10/%E4%BF%9D%E6%8C%81SSH%E8%BF%9E%E6%8E%A5%E6%8C%81%E7%BB%AD%E4%B8%8D%E6%96%AD%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/" itemprop="url">保持SSH连接持续不断的配置方法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-10T12:40:47+00:00">
+                2016-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SSH/" itemprop="url" rel="index">
+                    <span itemprop="name">SSH</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在修改服务器的一些文件的过程中，经常碰到的情况就是需要隔一段时间修改一下文件，然后需要去查阅相关的资料，等下一次想修改的时候发现ssh连接由于长时间未相应已经断开了。而且这时候终端会卡在那里，十分的不方便。所以在网上找了几个配置SSH的方法，能保证连接能够长时间不断开。<br>方法有两种，一般配置一种就可以。但是我为了效果更好，把他们同时配置一下：</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>在<code>/etc/ssh/ssh_config</code> 配置文件中，将<code>Host *</code> 后面添加<code>ServerAliveInterval 30 </code> ，再保存即可。</p>
+<p>那么这个条目哪来的呢？其实在他配置文件本身早就有这个的说明了。</p>
+<p>打开配置文件<code>/etc/ssh/ssh_config</code> ，我们大概会看到这样的样子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"># This is the ssh client system-wide configuration file.  See</span><br><span class="line"># ssh_config(5) for more information.  This file provides defaults for</span><br><span class="line"># users, and the values can be changed in per-user configuration files</span><br><span class="line"># or on the command line.</span><br><span class="line"></span><br><span class="line"># Configuration data is parsed as follows:</span><br><span class="line">#  1\. command line options</span><br><span class="line">#  2\. user-specific file</span><br><span class="line">#  3\. system-wide file</span><br><span class="line"># Any configuration value is only changed the first time it is set.</span><br><span class="line"># Thus, host-specific definitions should be at the beginning of the</span><br><span class="line"># configuration file, and defaults at the end.</span><br><span class="line"></span><br><span class="line"># Site-wide defaults for some commonly used options.  For a comprehensive</span><br><span class="line"># list of available options, their meanings and defaults, please see the</span><br><span class="line"># ssh_config(5) man page.</span><br><span class="line"></span><br><span class="line">Host *</span><br><span class="line">#   ForwardAgent no</span><br><span class="line">#   ForwardX11 no</span><br><span class="line">#   ForwardX11Trusted yes</span><br><span class="line">#   RhostsRSAAuthentication no</span><br><span class="line">#   RSAAuthentication yes</span><br><span class="line">#   PasswordAuthentication yes</span><br><span class="line">#   HostbasedAuthentication no</span><br><span class="line">。。。。。</span><br></pre></td></tr></table></figure>
+<p>注意到在最后有很多的注释掉的配置，很明显，这就是常用的可选条目。但是看了下并没有我们想配置的内容。</p>
+<p>再仔细的看了下开头的说明，注意到有这样一句话：<code># ssh_config(5) man page.</code> ，哦～，原来这个配置文件有man文档，OK，打开之后果然在当中找到了这样的配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ServerAliveInterval</span><br><span class="line">             Sets a timeout interval in seconds after which if no</span><br><span class="line">             data has been received from the server, ssh(1) will</span><br><span class="line">             send a message through the encrypted channel to request</span><br><span class="line">             a response from the server.  The default is 0, indicat‐</span><br><span class="line">             ing that these messages will not be sent to the server,</span><br><span class="line">             or 300 if the BatchMode option is set.  This option</span><br><span class="line">             applies to protocol version 2 only.  ProtocolKeepAlives</span><br><span class="line">             and SetupTimeOut are Debian-specific compatibility</span><br><span class="line">             aliases for this option.</span><br></pre></td></tr></table></figure>
+<p>那么一切都清楚了～～～原理就是让客户端每隔一段时间向服务端发送信息来保持唤醒。</p>
+<h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><p>服务段的原理和客户端一样，只不过由于是服务器，所以配置文件不一样。服务端的配置文件是<code>/etc/ssh/sshd_config</code> 。查看<code>man sshd_config</code> ，我们可以看到这样两个配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveCountMax</span><br><span class="line">             Sets the number of client alive messages (see below)</span><br><span class="line">             which may be sent without sshd(8) receiving any mes‐</span><br><span class="line">             sages back from the client.  If this threshold is</span><br><span class="line">             reached while client alive messages are being sent,</span><br><span class="line">             sshd will disconnect the client, terminating the ses‐</span><br><span class="line">             sion.  It is important to note that the use of client</span><br><span class="line">             alive messages is very different from TCPKeepAlive</span><br><span class="line">             (below).  The client alive messages are sent through</span><br><span class="line">             the encrypted channel and therefore will not be spoofa‐</span><br><span class="line">             ble.  The TCP keepalive option enabled by TCPKeepAlive</span><br><span class="line">             is spoofable.  The client alive mechanism is valuable</span><br><span class="line">             when the client or server depend on knowing when a con‐</span><br><span class="line">             nection has become inactive.</span><br><span class="line"></span><br><span class="line">             The default value is 3\.  If ClientAliveInterval (see</span><br><span class="line">             below) is set to 15, and ClientAliveCountMax is left at</span><br><span class="line">             the default, unresponsive SSH clients will be discon‐</span><br><span class="line">             nected after approximately 45 seconds.  This option</span><br><span class="line">             applies to protocol version 2 only.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveInterval</span><br><span class="line">             Sets a timeout interval in seconds after which if no</span><br><span class="line">             data has been received from the client, sshd(8) will</span><br><span class="line">             send a message through the encrypted channel to request</span><br><span class="line">             a response from the client.  The default is 0, indicat‐</span><br><span class="line">             ing that these messages will not be sent to the client.</span><br><span class="line">             This option applies to protocol version 2 only.</span><br></pre></td></tr></table></figure>
+<p>根据说明，添加如下两行即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveInterval 60</span><br><span class="line">ClientAliveCountMax 3</span><br></pre></td></tr></table></figure>
+<p>这样就可以保证连接始终唤醒了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/08/%E4%B8%80%E4%B8%AA%E5%AE%9E%E7%94%A8%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9F%A5%E9%87%8D%E7%A8%8B%E5%BA%8Fsim%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/08/%E4%B8%80%E4%B8%AA%E5%AE%9E%E7%94%A8%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9F%A5%E9%87%8D%E7%A8%8B%E5%BA%8Fsim%E5%B7%A5%E5%85%B7/" itemprop="url">一个实用的代码查重程序sim工具</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-08T07:19:55+00:00">
+                2016-01-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>sim工具是在搭建hustoj的过程中发现的一个小玩意。毕竟作为一个OJ，hust的人肯定也考虑到了网络比赛中代码复制粘贴的现象。所以一个代码判重的工具肯定是必不可少的。然而这个工具在网站的前后台中并没有体现，而是作为一个附带的工具一起打包下来的。而且事实上他打包的版本有点老了，所以我去了作者的博客上找了最新的版本－－<a target="_blank" rel="noopener" href="https://dickgrune.com/">Dick grune</a>。</p>
+<p>额，是的没错，他就叫 Dick~~，大概看了下博客，真是个挺厉害的人，写了不少的书，都是关于编译方面的东西，好像还搞了LaTeX的解释器啥的。。。我现在要用的是他的一个小工具，在<a target="_blank" rel="noopener" href="https://dickgrune.com/Programs/similarity_tester/">这里</a>下载。</p>
+<p>下下来解包之后还要细心的查看并编辑下Makefile的配置，然后进行编译，主要是这几步：</p>
+<ol>
+<li>选择操作系统，Makefile里有两套配置，一套是“For UNIX-like systems”，另一套是“For MSDOS + MinGW”，根据当前系统把另一套注释掉就行了。</li>
+<li>修改<code>BINDIR</code>的值，推荐设置为<code>/usr/bin/</code>，一般来说，放到$PATH下比较方便。</li>
+<li>修改<code>MAN1DIR</code>的值，推荐设置为<code>/usr/share/man/man1</code>，这个目录是系统man文档的默认目录。</li>
+<li>将<code>sim.1</code>文件放到刚才设置的<code>MAN1DIR</code>里，放进去之后，<code>man sim</code>命令就应该可用了。</li>
+<li>安装依赖，一般来说，安装了<code>gcc</code>,<code>make</code>,<code>flex</code>这几个东西就够了。</li>
+<li>执行<code>make install</code>。</li>
+</ol>
+<p>搞定之后就会发现生成了一堆可执行文件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sim_8086</span><br><span class="line">sim_c</span><br><span class="line">sim_c++</span><br><span class="line">sim_java</span><br><span class="line">sim_lisp</span><br><span class="line">sim_m2</span><br><span class="line">sim_mira</span><br><span class="line">sim_pasc</span><br><span class="line">sim_txt</span><br></pre></td></tr></table></figure>
+<p>这样，编译工作就搞定了。不过，如果是用的windows，其实直接就有编译好的可执行文件了，不需要自己编译安装。。。</p>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><ol>
+<li>选择语言： sim 支持多种语言：C, Java, Pascal, Modula-2, Lisp , Miranda, or text files，对应的命令分别是： sim_c ，sim_java，sim_pasc ，sim_m2，sim_lisp ，sim_mira，sim_text 。</li>
+<li>选择参数： 常用的参数有三个：</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-p</td>
+<td>表示以“F consists for x % of G material”的形式输出相似度</td>
+</tr>
+<tr>
+<td>-t N</td>
+<td>表示只显示相似度大于N%的条目（除text 默认为20%外，其余默认为1%);</td>
+</tr>
+<tr>
+<td>-o file</td>
+<td>表示将结果输出到file中</td>
+</tr>
+</tbody></table>
+<pre><code>最后可以输入文件名，支持通配符。
+</code></pre>
+<h2 id="示意"><a href="#示意" class="headerlink" title="示意"></a>示意</h2><p>如下两个文件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="comment">//定义一个新的数据类型</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> yue;<span class="comment">//月份</span></span><br><span class="line">	<span class="type">int</span> tian;<span class="comment">//天</span></span><br><span class="line">&#125;Date;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(Date x, Date y)</span></span>;<span class="comment">//函数声明</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Date date1, date2;</span><br><span class="line">	<span class="comment">//类型赋值</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;输入一个日期（mm/dd）：\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d/%d&quot;</span>, &amp;date1.yue, &amp;date1.tian);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;再输入一个日期（在上一个日期之后）（mm/dd）：\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d/%d&quot;</span>, &amp;date2.yue, &amp;date2.tian);</span><br><span class="line">	<span class="comment">//调用函数</span></span><br><span class="line">	<span class="built_in">f</span>(date1, date2);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(Date x, Date y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> m, n;</span><br><span class="line">	<span class="type">int</span> t;</span><br><span class="line">	<span class="comment">//计算两个日期的天数</span></span><br><span class="line">	<span class="keyword">switch</span> (x.yue)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:m = x.tian; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:m = x.tian + <span class="number">31</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:m = x.tian + <span class="number">59</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:m = x.tian + <span class="number">90</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:m = x.tian + <span class="number">120</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:m = x.tian + <span class="number">151</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:m = x.tian + <span class="number">181</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:m = x.tian + <span class="number">212</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:m = x.tian + <span class="number">243</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:m = x.tian + <span class="number">273</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:m = x.tian + <span class="number">304</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:m = x.tian + <span class="number">334</span>; <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">switch</span> (y.yue)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:n = y.tian; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:n = y.tian + <span class="number">31</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:n = y.tian + <span class="number">59</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:n = y.tian + <span class="number">90</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:n = y.tian + <span class="number">120</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:n = y.tian + <span class="number">151</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:n = y.tian + <span class="number">181</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:n = y.tian + <span class="number">212</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:n = y.tian + <span class="number">243</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:n = y.tian + <span class="number">273</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:n = y.tian + <span class="number">304</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:n = y.tian + <span class="number">334</span>; <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//求相差天数</span></span><br><span class="line">	t = n - m;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;相差的天数：%d\n&quot;</span>, t);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="comment">//使用结构体</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> month;</span><br><span class="line">	<span class="type">int</span> day;</span><br><span class="line">&#125;date;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">f</span><span class="params">(date d1, date d2)</span></span>;<span class="comment">//函数声明</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	date d1, d2;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;输入第一个日期:\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d,%d&quot;</span>, &amp;d1.month, &amp;d1.day);<span class="comment">//输入第一个日期</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;输入第一个日期:\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d,%d&quot;</span>, &amp;d2.month, &amp;d2.day);<span class="comment">//输入第二个日期</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;相差%d天&quot;</span>, <span class="built_in">f</span>(d1, d2));<span class="comment">//调用函数并输出相差天数</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">f</span><span class="params">(date d1, date d2)</span><span class="comment">//函数定义</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> x, m, n;</span><br><span class="line">	<span class="keyword">switch</span> (d1.month)<span class="comment">//计算第一个日期是一年的第几天</span></span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">		m = d1.day;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">		m = d1.day + <span class="number">31</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">		m = d1.day + <span class="number">59</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">		m = d1.day + <span class="number">90</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">		m = d1.day + <span class="number">120</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">		m = d1.day + <span class="number">151</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">		m = d1.day + <span class="number">181</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">		m = d1.day + <span class="number">212</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">		m = d1.day + <span class="number">243</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">		m = d1.day + <span class="number">273</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:</span><br><span class="line">		m = d1.day + <span class="number">304</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:</span><br><span class="line">		m = d1.day + <span class="number">334</span>;<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">switch</span> (d2.month)<span class="comment">//计算第二个日期是一年的第几天</span></span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">		n = d2.day;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">		n = d2.day + <span class="number">31</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">		n = d2.day + <span class="number">59</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">		n = d2.day + <span class="number">90</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">		n = d2.day + <span class="number">120</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">		n = d2.day + <span class="number">151</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">		n = d2.day + <span class="number">181</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">		n = d2.day + <span class="number">212</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">		n = d2.day + <span class="number">243</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">		n = d2.day + <span class="number">273</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:</span><br><span class="line">		n = d2.day + <span class="number">304</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:</span><br><span class="line">		n = d2.day + <span class="number">334</span>;<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	x = m - n;<span class="comment">//计算日期差</span></span><br><span class="line">	<span class="keyword">if</span> (x &gt;= <span class="number">0</span>)<span class="comment">//返回非负值</span></span><br><span class="line">		<span class="keyword">return</span> x;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> -x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这两个是用来计算日期只差的cpp文件（学生提交的作业，对不对另说），看上去还是有点差别的，至少很多变量名都经过了替换，修改了注释，而且也改了缩进的风格，但是经过sim程序判别之后，可以发现他们的相似度还是极高的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:~/桌面$ sim_c -p a.cpp b.cpp</span><br><span class="line">File a.cpp: 374 tokens, 82 lines</span><br><span class="line">File b.cpp: 388 tokens, 81 lines</span><br><span class="line">Total: 762 tokens</span><br><span class="line"></span><br><span class="line">a.cpp consists for 89 % of b.cpp material</span><br><span class="line">b.cpp consists for 86 % of a.cpp material</span><br></pre></td></tr></table></figure>
+<p>相似度仍然达到了90%左右，所以我们可以确定的认为这两份作业是抄袭的。可以证明这个程序的识别率还是非常高的～</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/08/Ubuntu%E4%B8%AD%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%B8%8B%E7%9A%84%E5%9B%BE%E7%89%87%E6%9F%A5%E7%9C%8B%E5%99%A8eog/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/08/Ubuntu%E4%B8%AD%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%B8%8B%E7%9A%84%E5%9B%BE%E7%89%87%E6%9F%A5%E7%9C%8B%E5%99%A8eog/" itemprop="url">Ubuntu中命令行下的图片查看器eog</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-08T02:37:15+00:00">
+                2016-01-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>有时候在命令行下看文件的时候突然遇到个图片，这个又不能直接在命令行下查看，还得手动在桌面上打开文件来查看，十分的不方便。其实ubuntu本身自带的图像查看器就带了一个命令行下打开的接口——eog 命令（eye of gnome 的缩写，十分好记）。</p>
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">EOG(1)                 General Commands Manual                EOG(1)</span><br><span class="line"></span><br><span class="line">NAME</span><br><span class="line">       eog - a GNOME image viewer</span><br><span class="line"></span><br><span class="line">SYNOPSIS</span><br><span class="line">       eog [options] files...</span><br><span class="line"></span><br><span class="line">DESCRIPTION</span><br><span class="line">       An image viewer for GNOME which uses gdk_pixbuf</span><br></pre></td></tr></table></figure>
+<p>用man 命令可以看到用法，其实通常option 选项可以忽略，直接在后面接文件名即可，非常的方便。</p>
+<h2 id="附加"><a href="#附加" class="headerlink" title="附加"></a>附加</h2><p>后来发现，其实Linux桌面下绝大多数图片查看器都可以用命令行打开，比如使用shotwell命令也可以从命令行查看图片。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/07/sudo%E5%91%BD%E4%BB%A4%E5%85%8D%E8%BE%93%E5%AF%86%E7%A0%81%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/07/sudo%E5%91%BD%E4%BB%A4%E5%85%8D%E8%BE%93%E5%AF%86%E7%A0%81%E9%85%8D%E7%BD%AE/" itemprop="url">sudo命令免输密码配置</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-07T03:42:12+00:00">
+                2016-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>闲来无聊再次作死权限的管理，这次是想实现一下输入sudo 命令时无需输入密码的配置。之前看了教程，感觉挺简单的，就没试过。今天突然心血来潮想配置下，结果就被权限玩的很惨，重启了好几次电脑。。。。。。</p>
+<p>网上说的很简单，就是在&#x2F;etc&#x2F;sudoers文件里的<code>%admin ALL=(ALL)  ALL</code> 改成<code>%admin ALL=(ALL) NOPASSWD: ALL</code> 即可。其实他说的也没错，可是自己手敲的时候敲残了，结果保存之后再用sudo 命令就报错了，说无法正确读取sudo！本来修改sudoers文件就需要sudo 命令，现在sudo 命令也用不了了。。。没辙，只能重启电脑进recovery模式重新配置一下了。（方法见：<a href="/2015/10/05/1/">这里</a>）</p>
+<p>好了，修改完之后发现还是不能实现免密码登陆。想了想有可能是我当前的用户不在admin组里，于是打开&#x2F;etc&#x2F;group文件看了看，竟然没有admin这个组。没事，我记得我的用户是在sudo这个组里的，那么再次修改下sudoers文件，在sudo 组里加上<code>NOPASSWD:ALL</code> 即可了。（手残又敲错，重启电脑中。。。。）</p>
+<p>这样配置完之后，试了下果然可行。</p>
+<p>后来想了想，如果每次不小心配置错sudoers 文件都要重启的话，岂不是很麻烦。肯定有更好的方法。查了下发现可以用　visudo 这个命令来修改&#x2F;etc&#x2F;sudoers文件。用这个修改之后，他会检查语法，如果语法不合规范，他是不会让你保存的。这倒是蛮人性化的，只是这个命令用的是nano 编辑器，vim 用惯了就完全不习惯这种东西了。不高兴。</p>
+<p>网上找了下还有一个办法，就是先给sudoers文件740的权限，修改，修改完再改回440。这样就可以在出错的时候有修改的权限了。然而试了下并没有卵用，就算有440的权限，修改这个还是要用sudo 命令的，此法不通。。。（作死重启修改配置中。。。）</p>
+<p>然后突发奇想，何不把权限改成777，这样不就能修改了么，大不了最后再改回来就行了。试了下，发现ubuntu有一个坑爹、但是很有道理的策略，就是sudoers文件的不能对所有用户都有７的权限，否则就不给你用。。。。无奈，再次啥都动不了（作死重启修改配置中。。。）</p>
+<p>最后突然意识到－－－－为什么不在一开始就用　sudo  -i　进入root 模式呢，这样不就不用输入sudo 来修改文件了么。。。。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/06/Hustoj%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%89%E8%A3%85%E6%90%AD%E5%BB%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1062,772 +1862,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/" itemprop="url">一款开源的车牌号码识别系统openalpr</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-27T15:56:49+00:00">
-                2015-12-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>关于车牌号码的识别，其实研究也很多了。但是对于普通的开发者而言，本身不想去研究这些算法层面的东西，只是想能够直接应用来做我们自己需要的事情。虽然很多网站提供了Api接口，但是毫无疑问这是要money的。之前看到国人发的一片博客介绍他自己写的开源车牌识别系统叫Easypr，我自己也下载下来研究了一下。然而使用的时候发现错误有很多，而且没有正规的接口文档，做的也特别粗糙，显然不太适合直接使用。百度不到我就直接去google，果然还是发现了老外写的一款开源的识别软件–openalpr(Open Automatic License Plate Recognition 开源自动车牌识别)，发布在<a target="_blank" rel="noopener" href="https://github.com/openalpr/openalpr">github</a>上。拿过来测试之后发现效果还挺好的，而且文档清楚，虽然不能识别中文，但是对字母和数字的识别准确性还是挺好的。不管怎么说，先记下来以防以后用到。</p>
-<p>这个程序有很多版本，有各种语言的接口，也有Linux下的二进制文件。鉴于现在不需要用来开发，我们直接用他编译成的二进制命令即可。当然如果有需要，也可以去下载他的源码，调用他的函数库。如果有闲工夫的话也可以尝试这改一改。。。。让他能识别中文，造福国人。</p>
-<p>安装：</p>
-<p>使用github上提供的最简单的方法–</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget -O - http://deb.openalpr.com/openalpr.gpg.key | sudo apt-key add -</span><br><span class="line">echo &quot;deb http://deb.openalpr.com/master/ openalpr main&quot; | sudo tee /etc/apt/sources.list.d/openalpr.list</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install openalpr openalpr-daemon openalpr-utils libopenalpr-dev</span><br></pre></td></tr></table></figure>
-<p>帮助：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">alpr  [-c &lt;country_code&gt;] [--config &lt;config_file&gt;] [-n &lt;topN&gt;] [--seek</span><br><span class="line">         &lt;integer_ms&gt;] [-p &lt;pattern code&gt;] [--clock] [-d] [-j] [--]</span><br><span class="line">         [--version] [-h] &lt;image_file_path&gt;</span><br><span class="line"></span><br><span class="line">Where: </span><br><span class="line"></span><br><span class="line">   -c &lt;country_code&gt;,  --country &lt;country_code&gt;</span><br><span class="line">     Country code to identify (either us for USA or eu for Europe). </span><br><span class="line">     Default=us</span><br><span class="line"></span><br><span class="line">   --config &lt;config_file&gt;</span><br><span class="line">     Path to the openalpr.conf file</span><br><span class="line"></span><br><span class="line">   -n &lt;topN&gt;,  --topn &lt;topN&gt;</span><br><span class="line">     Max number of possible plate numbers to return.  Default=10</span><br><span class="line"></span><br><span class="line">   --seek &lt;integer_ms&gt;</span><br><span class="line">     Seek to the specified millisecond in a video file. Default=0</span><br><span class="line"></span><br><span class="line">   -p &lt;pattern code&gt;,  --pattern &lt;pattern code&gt;</span><br><span class="line">     Attempt to match the plate number against a plate pattern (e.g., md</span><br><span class="line">     for Maryland, ca for California)</span><br><span class="line"></span><br><span class="line">   --clock</span><br><span class="line">     Measure/print the total time to process image and all plates. </span><br><span class="line">     Default=off</span><br><span class="line"></span><br><span class="line">   -d,  --detect_region</span><br><span class="line">     Attempt to detect the region of the plate image.  [Experimental] </span><br><span class="line">     Default=off</span><br><span class="line"></span><br><span class="line">   -j,  --json</span><br><span class="line">     Output recognition results in JSON format.  Default=off</span><br><span class="line"></span><br><span class="line">   --,  --ignore_rest</span><br><span class="line">     Ignores the rest of the labeled arguments following this flag.</span><br><span class="line"></span><br><span class="line">   --version</span><br><span class="line">     Displays version information and exits.</span><br><span class="line"></span><br><span class="line">   -h,  --help</span><br><span class="line">     Displays usage information and exits.</span><br><span class="line"></span><br><span class="line">   &lt;image_file_path&gt;</span><br><span class="line">     Image containing license plates</span><br><span class="line"></span><br><span class="line">   OpenAlpr Command Line Utility</span><br></pre></td></tr></table></figure>
-<p>效果：</p>
-<p><img src="/images/2015/12/27/1/1.jpg"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/Download$ alpr a.jpg</span><br><span class="line">plate0: 10 results</span><br><span class="line">    - EHL5747	 confidence: 90.5541</span><br><span class="line">    - EHL577	 confidence: 83.4746</span><br><span class="line">    - EHLS747	 confidence: 82.0519</span><br><span class="line">    - EH5747	 confidence: 80.6372</span><br><span class="line">    - EHLB747	 confidence: 78.9456</span><br><span class="line">    - EHE5747	 confidence: 78.337</span><br><span class="line">    - EHC5747	 confidence: 77.903</span><br><span class="line">    - EHL747	 confidence: 77.4477</span><br><span class="line">    - EBL5747	 confidence: 76.8316</span><br><span class="line">    - EL5747	 confidence: 75.6551</span><br></pre></td></tr></table></figure>
-<p>对于正面的牌照识别的效果还是很好的，但是对于中国的车牌来说识别的效果就很差了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/26/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C3-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/26/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C3-3/" itemprop="url">苏大Mooc系统的刷课脚本的制作（3/3）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-26T15:36:09+00:00">
-                2015-12-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最后决定用最简单的python脚本进行实现。具体过程部分析了，不过值得一提的是，在登陆获取用户的cookie的时候，他也发送了一个挺长的“随机”串，研究了半天才发现他是使用了md5摘要算法，将密码和密码的摘要一同发给了服务器。。。。。。</p>
-<p>以下是源码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cheat.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> urllib,urllib2,cookielib,md5,re,json,sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">login</span>(<span class="params">name,pwd</span>):</span><br><span class="line">	url_login=<span class="string">&quot;http://ids1.suda.edu.cn/amserver/UI/Login?goto=http://myauth.suda.edu.cn/default.aspx?app=kczx&quot;</span></span><br><span class="line">	m=md5.new()</span><br><span class="line">	m.update(pwd)</span><br><span class="line">	pwd_md5=m.hexdigest()</span><br><span class="line">	cj=cookielib.CookieJar()</span><br><span class="line">	post_data=urllib.urlencode(&#123;</span><br><span class="line">		<span class="string">&#x27;IDButton&#x27;</span>:<span class="string">&#x27;Submit&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;encoded&#x27;</span>:<span class="string">&#x27;false&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;goto&#x27;</span>:<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;gx_charset&#x27;</span>:<span class="string">&#x27;UTF-8&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;IDToken0&#x27;</span>:<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;IDToken1&#x27;</span>:name,</span><br><span class="line">		<span class="string">&#x27;IDToken9&#x27;</span>:pwd,</span><br><span class="line">		<span class="string">&#x27;IDToken2&#x27;</span>:pwd_md5,</span><br><span class="line">	&#125;)</span><br><span class="line">	opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">	opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36))&#x27;</span>)]</span><br><span class="line">	urllib2.install_opener(opener)</span><br><span class="line">	req=urllib2.Request(url_login,post_data)</span><br><span class="line">	urllib2.urlopen(req)</span><br><span class="line">	<span class="keyword">return</span> opener</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">watch</span>(<span class="params">PlainId,fPartName,fPartId,fSecond,fVideoSecond,fVideoFileId,opener</span>):</span><br><span class="line">	<span class="keyword">if</span> fVideoFileId==<span class="string">u&#x27;0&#x27;</span>:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	url=<span class="string">&#x27;http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SSetStageLearnPartStudent&amp;fPlanID=&#x27;</span>+PlainId+<span class="string">&#x27;&amp;fPartID=&#x27;</span>+fPartId+<span class="string">&#x27;&amp;fSecond=&#x27;</span>+fVideoSecond</span><br><span class="line">	urllib2.install_opener(opener)</span><br><span class="line">	urllib2.urlopen(url)</span><br><span class="line">	<span class="built_in">print</span> fPartName+<span class="string">&#x27;has been watched&#x27;</span></span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">	<span class="comment">#url_lecture=&#x27;http://kczx.suda.edu.cn/G2S/Learning/Learning.htm?Part=&amp;Plan=34&amp;type=2&#x27;</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(sys.argv)!=<span class="number">4</span>:</span><br><span class="line">		<span class="built_in">print</span> <span class="string">&#x27;Please enter &lt;number&gt; &lt;pwd&gt; &lt;url&gt;&#x27;</span></span><br><span class="line">		sys.exit();</span><br><span class="line">	name=sys.argv[<span class="number">1</span>]</span><br><span class="line">	pwd=sys.argv[<span class="number">2</span>]</span><br><span class="line">	url_lecture=sys.argv[<span class="number">3</span>]</span><br><span class="line">	opener=login(name,pwd)</span><br><span class="line">	urllib2.install_opener(opener)</span><br><span class="line">	PlainId=re.findall(<span class="string">r&#x27;(?&lt;=Plan=).*?(?=&amp;)&#x27;</span>,url_lecture)[<span class="number">0</span>]</span><br><span class="line">	url_ajax=<span class="string">&#x27;http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SStageLearnGetChapter&amp;fPlanID=&#x27;</span>+PlainId</span><br><span class="line">	ajax_text=urllib2.urlopen(url_ajax).read()</span><br><span class="line">	ajax_text=ajax_text.replace(<span class="string">&#x27;RowCount&#x27;</span>,<span class="string">&#x27;&quot;RowCount&quot;&#x27;</span>)</span><br><span class="line">	ajax_text=ajax_text.replace(<span class="string">&#x27;Rows&#x27;</span>,<span class="string">&#x27;&quot;Rows&quot;&#x27;</span>)</span><br><span class="line">	s=json.loads(ajax_text)</span><br><span class="line">	fPartName=[]</span><br><span class="line">	fPartId=[]</span><br><span class="line">	fSecond=[]</span><br><span class="line">	fVideoFileId=[]</span><br><span class="line">	fVideoSecond=[]</span><br><span class="line">	<span class="keyword">for</span> k <span class="keyword">in</span> s[<span class="string">&#x27;Rows&#x27;</span>]:</span><br><span class="line">		fPartName.append(k[<span class="string">&#x27;fPartName&#x27;</span>])</span><br><span class="line">		fPartId.append(k[<span class="string">&#x27;fPartID&#x27;</span>])</span><br><span class="line">		fSecond.append(k[<span class="string">&#x27;fSecond&#x27;</span>])</span><br><span class="line">		fVideoSecond.append(k[<span class="string">&#x27;fvideoSecond&#x27;</span>])</span><br><span class="line">		fVideoFileId.append(k[<span class="string">&#x27;fVideoFileID&#x27;</span>])</span><br><span class="line">	<span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(fPartName)):</span><br><span class="line">		watch(PlainId,fPartName[k],fPartId[k],fSecond[k],fVideoSecond[k],fVideoFileId[k],opener)</span><br></pre></td></tr></table></figure>
-<p>当然，为了省事，没有任何的容错处理和用户界面。。。使用时，输入：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ python cheat.py &lt;学号&gt; &lt;密码&gt; &lt;课程网址&gt;</span><br></pre></td></tr></table></figure>
-<p>而且在Linux下，课程网址中的“&amp;”符号需要转义为”&amp;“才能用。。。。。。</p>
-<p>基本就是这些了，按理说如果管理员有心，是可以查出我们提交的数据其实是有问题的，不过目测应该是没人看的吧～～～</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/25/Linux%E4%B8%AD%E6%A1%8C%E9%9D%A2%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E4%B8%8Etweak%E5%B7%A5%E5%85%B7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/25/Linux%E4%B8%AD%E6%A1%8C%E9%9D%A2%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E4%B8%8Etweak%E5%B7%A5%E5%85%B7/" itemprop="url">Linux中桌面环境配置与tweak工具</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-25T07:30:29+00:00">
-                2015-12-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>因为Linux是高度自制的，所以几乎任何的设置都可以自行调节，包括主题和桌面效果。</p>
-<p>事实上，主题特效是可以调节为任意效果的，甚至可以调节成Mac的样子（当然这样有点二）。</p>
-<p>Ubuntu中调节桌面效果的文件路径为:&#x2F;usr&#x2F;share&#x2F;themes&#x2F;，路径下是这样的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:/usr/share/themes$ ls</span><br><span class="line">AgingGorilla  Atlanta  Crux     Emacs  HighContrast  Radiance  Simple</span><br><span class="line">Ambiance      Bright   Default  Esco   Metabox       Raleigh</span><br></pre></td></tr></table></figure>
-<p>每个文件夹就是每个主题了。如果我们想修改主题，我们只需要查询相关文档进行修改即可。</p>
-<p>比如如果想调节Ambiance主题下窗口标题的透明度，可以打开&#x2F;usr&#x2F;share&#x2F;themes&#x2F;Ambiance&#x2F;gtk-3.0&#x2F;apps&#x2F;unity.css文件：</p>
-<p>将 UnityDecoration.top 的 background-image 设置由：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from (shade (@dark_bg_color, 1.5)),</span><br><span class="line">to (shade (@dark_bg_color, 1.04)));</span><br></pre></td></tr></table></figure>
-<p>修改为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from (shade (alpha (@dark_bg_color, 0.4), 1.5)),</span><br><span class="line">to (shade (alpha (@dark_bg_color, 0.4), 1.04)));</span><br></pre></td></tr></table></figure>
-<p>将UnityDecoration.top:backdrop 的 background-image 设置由：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from (shade (#474642, 0.92)),</span><br><span class="line">to (@dark_bg_color));</span><br></pre></td></tr></table></figure>
-<p>修改为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from (shade (alpha (#474642, 0.4), 0.92)),</span><br><span class="line">to (alpha (@dark_bg_color, 0.4)));</span><br></pre></td></tr></table></figure>
-<p>保存后，重新载入主题即可生效。</p>
-<p>事实上事情还可以简单点，Ubuntu下有修改桌面效果的现成的软件包：tweak，用这个可以更加方便的修改主题。</p>
-<p>安装：<code>$ sudo apt-get install unity-tweak-tool</code></p>
-<p>界面：</p>
-<p><img src="/images/2015/12/25/1/1.png"></p>
-<p>简单易懂，用起来更加方便了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/24/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C2-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/24/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C2-3/" itemprop="url">苏大Mooc系统的刷课脚本的制作（2/3）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-24T15:49:00+00:00">
-                2015-12-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>我们知道了通过发送get请求来进行手动刷课的原理，但是这显然还是不够方便。而且虽然我们知道了发送的包，但是我们并不知道这些数据从何而来。这是一个问题。</p>
-<p>继续查看源码，终于在头信息里发现他引用了一个叫StudentLearning.js文件，介绍了整个系统运行的逻辑。其中有一个非常重要的函数：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//视频学习表</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">GetStudentstudy</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title class_">Isfull</span> != <span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> ($(<span class="string">&quot;.item_odd1&quot;</span>).<span class="title function_">attr</span>(<span class="string">&quot;kid&quot;</span>) != <span class="string">&quot;&quot;</span>) &#123;</span><br><span class="line">            noteTime = <span class="built_in">parseInt</span>(<span class="title function_">jwplayer</span>(<span class="string">&quot;div_play&quot;</span>).<span class="title function_">getPosition</span>());</span><br><span class="line">            $.<span class="title function_">ajax</span>(&#123; <span class="attr">url</span>: <span class="string">&#x27;StudentLearning.ashx?action=GetG2SSetStageLearnPartStudent&amp;fPlanID=&#x27;</span> + $(<span class="string">&quot;.item_odd1&quot;</span>).<span class="title function_">attr</span>(<span class="string">&quot;FBI&quot;</span>) + <span class="string">&#x27;&amp;fPartID=&#x27;</span> + $(<span class="string">&quot;.item_odd1&quot;</span>).<span class="title function_">attr</span>(<span class="string">&quot;kid&quot;</span>) + <span class="string">&quot;&amp;fSecond=&quot;</span> + noteTime, <span class="attr">cache</span>: <span class="literal">false</span>,</span><br><span class="line">                <span class="attr">success</span>: <span class="keyword">function</span>(<span class="params">data</span>) &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看到了我们之前用的地址了，这里他用ajax技术向后台传输那些数据，fPlanID、fPartID、fSecond这些东西就来自于这里了。</p>
-<p>其中的fPlanID的值很明显就是课程的URL:<code>http://kczx.suda.edu.cn/G2S/Learning/Learning.htm?Part=&amp;Plan=34&amp;type=2</code>里的Plan值了。那么fPartID该怎么得到呢？</p>
-<p>在StudentLearning.js中找了一下，又发现了一个函数：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">GetList</span>(<span class="params">type</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> flagqimokaoshi = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">var</span> locktiaozhuan = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">var</span> fPlanID = <span class="title function_">request</span>(<span class="string">&quot;Plan&quot;</span>);</span><br><span class="line">    <span class="keyword">var</span> flagPartID = <span class="title function_">request</span>(<span class="string">&quot;Part&quot;</span>);</span><br><span class="line">    <span class="keyword">var</span> flagisLmitNum = <span class="number">0</span>;</span><br><span class="line">    $.<span class="title function_">ajax</span>(&#123; <span class="attr">url</span>: <span class="string">&#x27;StudentLearning.ashx?action=GetG2SStageLearnGetChapter&amp;fPlanID=&#x27;</span> + fPlanID, <span class="attr">cache</span>: <span class="literal">false</span>, <span class="attr">async</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">success</span>: <span class="keyword">function</span>(<span class="params">data</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (data != <span class="string">&quot;False&quot;</span>) &#123;</span><br><span class="line">                data = data.<span class="title function_">replace</span>(<span class="regexp">/[\r\n]/g</span>, <span class="string">&quot;\\r\\n&quot;</span>);</span><br><span class="line">                <span class="keyword">var</span> json = <span class="built_in">eval</span>(<span class="string">&quot;(&quot;</span> + data + <span class="string">&quot;)&quot;</span>);</span><br><span class="line">                <span class="keyword">var</span> strHtml = <span class="string">&quot;&quot;</span>;</span><br><span class="line">                <span class="keyword">var</span> flagParent = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">var</span> flagPart = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">if</span> (json.<span class="property">Rows</span>.<span class="property">length</span> &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    strHtml += <span class="string">&quot; &lt;ul class=&#x27;catalogue_ul1&#x27; id=&#x27;chapterList&#x27;&gt;&quot;</span>;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; json.<span class="property">Rows</span>.<span class="property">length</span>; i++) &#123;</span><br><span class="line">                        <span class="keyword">var</span> rows = json.<span class="property">Rows</span>[i];</span><br><span class="line">                        <span class="keyword">var</span> fPartID = rows.<span class="property">fPartID</span>;</span><br><span class="line">                        <span class="keyword">var</span> fPartName = rows.<span class="property">fPartName</span>;</span><br><span class="line">                        <span class="keyword">var</span> fParentID = rows.<span class="property">fParentID</span>;</span><br><span class="line">                        <span class="keyword">var</span> fVideoURL = rows.<span class="property">fVideoURL</span>;</span><br><span class="line">                        <span class="keyword">var</span> zhuangtai = <span class="number">0</span>;</span><br><span class="line">                        <span class="keyword">var</span> fpartvideourl = rows.<span class="property">fpartvideourl</span>;</span><br><span class="line">                        <span class="keyword">var</span> fCCPWebSiteID = rows.<span class="property">fCCPWebSiteID</span>;</span><br><span class="line">                        <span class="keyword">var</span> fSchoolWork_ExamID = <span class="string">&quot;&quot;</span>;</span><br><span class="line">                        fSchoolWork_ExamID = rows.<span class="property">fSchoolWork_ExamID</span>;</span><br><span class="line">                        <span class="keyword">var</span> fVideoFileID = rows.<span class="property">fVideoFileID</span>;</span><br><span class="line">                        <span class="keyword">var</span> fIsCrossChapter = rows.<span class="property">fIsCrossChapter</span>; <span class="comment">//是否跨章</span></span><br><span class="line">                        <span class="keyword">var</span> fStatus = rows.<span class="property">fStatus</span>; <span class="comment">//测试状态</span></span><br><span class="line">                        <span class="keyword">var</span> fSecond = rows.<span class="property">fSecond</span>; <span class="comment">//已读视频(秒)</span></span><br><span class="line">                        <span class="keyword">var</span> fContent = rows.<span class="property">fContent</span>;</span><br><span class="line">                        <span class="keyword">var</span> fstudyStatus = rows.<span class="property">fstudyStatus</span>; <span class="comment">//学习状态</span></span><br><span class="line">                        <span class="keyword">var</span> fBuildMode = rows.<span class="property">fBuildMode</span>; <span class="comment">//作业状态 1 指定试卷 2 题库选题 3 直接出题</span></span><br><span class="line">                        <span class="keyword">var</span> fvideoSecond = rows.<span class="property">fvideoSecond</span>; <span class="comment">//视频总时长(秒)</span></span><br><span class="line">                        <span class="keyword">var</span> fxuexi = rows.<span class="property">fxuexi</span>;</span><br><span class="line">                        <span class="keyword">var</span> qimokaishi = rows.<span class="property">qimokaishi</span>; <span class="comment">//期末考试</span></span><br><span class="line">                        <span class="keyword">var</span> qimofBuildMode = rows.<span class="property">qimofBuildMode</span>;</span><br><span class="line">                        <span class="keyword">var</span> qimofCCPWebSiteID = rows.<span class="property">qimofCCPWebSiteID</span>;</span><br><span class="line">                        <span class="keyword">var</span> weixuexi = rows.<span class="property">weixuexi</span>; <span class="comment">//是否学习 1已学 2 未学</span></span><br><span class="line">                        <span class="keyword">var</span> fisTest = rows.<span class="property">fisTest</span>;</span><br><span class="line">                        <span class="keyword">var</span> fTaskID = rows.<span class="property">fTaskIDs</span>;</span><br><span class="line">                        <span class="keyword">var</span> fisLmitNum = rows.<span class="property">fisLmitNum</span>;</span><br><span class="line">                        <span class="keyword">var</span> <span class="title class_">MustFileIsFinish</span>=rows.<span class="property">MustFileIsFinish</span>;<span class="comment">//资料学习情况 1:已完成学习 0:未完成 </span></span><br><span class="line">                        <span class="keyword">var</span> flagyangshi = <span class="string">&quot;time_ico1 unPlay &quot;</span>;</span><br><span class="line">                        <span class="keyword">var</span> icoTest = <span class="string">&quot;&quot;</span>;</span><br><span class="line">                        <span class="keyword">var</span> ficoTestTitle = <span class="string">&quot;&quot;</span>;</span><br><span class="line">                        <span class="keyword">if</span> (weixuexi == <span class="number">1</span>) &#123;</span><br><span class="line">                            zhuangtai = <span class="number">1</span>;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            zhuangtai = <span class="number">0</span>;</span><br><span class="line">                        &#125;</span><br><span class="line"> ......</span><br></pre></td></tr></table></figure>
-<p>名字叫GetList，那么意图也就很明显了，就是得到课程列表的所有信息。用ajax向后台传入课程名，然后就会得到一大串的关于整个课程信息的回复。尝试了发送下，得到如下类似json格式的反馈：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    RowCount<span class="punctuation">:</span> <span class="number">34</span><span class="punctuation">,</span></span><br><span class="line">    Rows<span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;fPartID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;264&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fPartName&quot;</span><span class="punctuation">:</span> <span class="string">&quot; 大学文化——大学的内涵与使命&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fParentID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fPlanID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;34&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fBrief&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fVideoFileID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fSchoolWork_ExamID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3172&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fCCPWebSiteID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;27745&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fBuildMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fpartvideourl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fStatus&quot;</span><span class="punctuation">:</span> <span class="string">&quot;20&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fSecond&quot;</span><span class="punctuation">:</span> <span class="string">&quot;5953&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fvideoSecond&quot;</span><span class="punctuation">:</span> <span class="string">&quot;5953&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fVideoURL&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fContent&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fOrder&quot;</span><span class="punctuation">:</span> <span class="string">&quot;100&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fIsCrossChapter&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimokaishi&quot;</span><span class="punctuation">:</span> <span class="string">&quot;5919&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimofBuildMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimofCCPWebSiteID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;27745&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimoStatus&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fstudyStatus&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fxuexi&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;weixuexi&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fisTest&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;MustFileIsFinish&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fTaskID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fisLmitNum&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-1&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;fPartID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;265&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fPartName&quot;</span><span class="punctuation">:</span> <span class="string">&quot; 大学文化——大学的内涵与使命（一）&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fParentID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;264&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fPlanID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;34&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fBrief&quot;</span><span class="punctuation">:</span> <span class="string">&quot;%u5185%u5BB9%u63CF%u8FF0%uFF08%u6700%u591A200%u5B57%uFF09&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fVideoFileID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;651&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fSchoolWork_ExamID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fCCPWebSiteID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fBuildMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fpartvideourl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://42.244.42.193:1221/download/38d2e715-2044-429d-b29d-89b964863a81.mp4&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fStatus&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fSecond&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1756&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fvideoSecond&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1756&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fVideoURL&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fContent&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fOrder&quot;</span><span class="punctuation">:</span> <span class="string">&quot;101&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fIsCrossChapter&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimokaishi&quot;</span><span class="punctuation">:</span> <span class="string">&quot;5919&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimofBuildMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimofCCPWebSiteID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;27745&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;qimoStatus&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fstudyStatus&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fxuexi&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;weixuexi&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fisTest&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;MustFileIsFinish&quot;</span><span class="punctuation">:</span> <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fTaskID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;fisLmitNum&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-1&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
-<p>说他是类json格式，是因为他的RowCount和Rows没有加引号。。。。也是无语。。。</p>
-<p>我们发现想要得到的信息几乎全在这里，通过他的命名也很容易看懂其表示的含义。</p>
-<p>OK，到现在我们已经知道了所有想要的信息和业务的逻辑了，剩下的就是将这个思想付诸实现了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/22/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C1-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/22/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C1-3/" itemprop="url">苏大Mooc系统的刷课脚本的制作（1/3）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-22T15:56:38+00:00">
-                2015-12-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>闲话不说，其实写这个目的大家都懂，懒得看那些无聊的网路课。但是由于课程的要求，这些课程必须要看，而且由于技术原因，又不能跳着看，视频的播放条不能拖动，只能硬着头皮的刷时间。很多同学都是开着视频开着静音做其他的事，想想也是悲哀。</p>
-<p>当然，我写这个程序的初衷并不是为了偷懒，而是纯粹的学习。用技术手段做出一些别人难以实现的事情可是很有成就感的。为了实现这样一个简单的目的其实也不是那么简单的（至少对我这个前几天刚接触web的人而言）。。。</p>
-<h2 id="课程首页"><a href="#课程首页" class="headerlink" title="课程首页"></a>课程首页</h2><p><img src="/images/2015/12/22/1/1.png"></p>
-<p>从右边点击课程名字就会打开视频，学习完的视频前面会有绿色的钩钩；每个视频下面有播放条，播放条只能在已经看过的部分任意拖动，不能向前拖动。</p>
-<p>这就是课程首页的情况，接下来就是想查看源码。结果发现网页是动态生成的，而不是之前学习的静态网页。这两者最直观的感受就是源代码和审查元素得到的代码不一样，也就是用javascript之类的语言根据即时的情况生成的网页。这时候就需要细致的分析js代码了。</p>
-<p>&nbsp;</p>
-<h2 id="封包分析"><a href="#封包分析" class="headerlink" title="封包分析"></a>封包分析</h2><p>很自然的想法就是查看下封包，弄清楚在观看视频的时候到底是发送了什么东西给后台让后台标记当前视频为已看。经过一番查找（需要细心的找），在用chrome找到了这样的一个包：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">General：</span><br><span class="line"></span><br><span class="line">Request URL:http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SSetStageLearnPartStudent&amp;fPlanID=34&amp;fPartID=359&amp;fSecond=550&amp;_=1451308953409</span><br><span class="line">Request Method:GET</span><br><span class="line">Status Code:200 OK</span><br><span class="line">Remote Address:42.244.42.191:80</span><br><span class="line"></span><br><span class="line">Request Headers：</span><br><span class="line"></span><br><span class="line">Accept:*/*</span><br><span class="line">Accept-Encoding:gzip, deflate, sdch</span><br><span class="line">Accept-Language:zh-CN,zh;q=0.8</span><br><span class="line">Connection:keep-alive</span><br><span class="line">Cookie:ASP.NET_SessionId=zh4ifl55q521xx45bmbjwa45; amlbcookie=01; iPlanetDirectoryPro=AQIC5wM2LY4SfcxX1vREajjp5zIi4s9GtkPT1Ivxjw%2BJfo4%3D%40AAJTSQACMDE%3D%23</span><br><span class="line">Host:kczx.suda.edu.cn</span><br><span class="line">Referer:http://kczx.suda.edu.cn/G2S/Learning/Learning.htm?Part=&amp;Plan=34&amp;type=2</span><br><span class="line">User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36</span><br><span class="line">X-Requested-With:XMLHttpRequest</span><br><span class="line"></span><br><span class="line">Query String Parameters：</span><br><span class="line"></span><br><span class="line">action:GetG2SSetStageLearnPartStudent</span><br><span class="line">fPlanID:34</span><br><span class="line">fPartID:359</span><br><span class="line">fSecond:550</span><br><span class="line">_:1451308953409</span><br></pre></td></tr></table></figure>
-<p>看到了顿时就豁然开朗了，原来每隔一段时间，网页会通过一个get请求，将当前看的视频的名称、看到的时间发送给后台，让后台加以记录，确认已经看到的地方。fPlanID很明显是课程的编号，fPartID应该是视频的编号，而fSecond应该是当前看到的时间了（最后哪个_:的值，可能是token值，然而翻遍代码，并没有找到对应的值，我想应该是一个随机数，暂时不去管他，应该也无妨）。所以，“作弊”的方法也就很简单了，就是根据这个信息，将描述视频的信息和当前看到（伪造）的时间发送给后台就可以了。</p>
-<p>经过一番尝试，这样做果断是合理的。那么，通过这个手段，我们就可以手动的通过输入地址发送get请求来“刷课”了。虽然这显然不够帅，然而对那些没有编程基础的人来说，这种方法倒也是简单快捷的（总比挂着视频方便）。</p>
-<p>&nbsp;</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1878,7 +1912,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1889,7 +1923,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1900,7 +1934,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

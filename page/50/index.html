@@ -307,6 +307,761 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/07/Shamir%E5%AF%86%E9%92%A5%E5%88%86%E4%BA%AB%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/07/Shamir%E5%AF%86%E9%92%A5%E5%88%86%E4%BA%AB%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">Shamir密钥分享算法简析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-07T05:38:00+00:00">
+                2015-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Cryptography/" itemprop="url" rel="index">
+                    <span itemprop="name">Cryptography</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>秘密共享技术是密码学和信息安全的一个重要研究内容，$Shamir$密钥分享算法最早是由$Shamir$和$Blackly$在1970年基于$Lagrange$插值和矢量方法提出的，其基本思想是分发者通过秘密多项式，将秘密$s$分解为$n$个秘密分发个持有者，其中任意不少于$k$个秘密均能恢复密文，而任意少于$k$个秘密均无法得到密文的任何信息。</p>
+<h2 id="实际应用"><a href="#实际应用" class="headerlink" title="实际应用"></a>实际应用</h2><p>比如在门限体系中，为了保证信息安全性，一个秘密通常不能由单个持有者保存。比如一些重要场所的通行，比如遗嘱的生效等，必须将秘密分由多人保管并且只有当多人同时在场时秘密才能得以恢复。在这些场合，就需要这样一套的密钥分享技术。</p>
+<h2 id="算法思路"><a href="#算法思路" class="headerlink" title="算法思路"></a>算法思路</h2><h3 id="表示"><a href="#表示" class="headerlink" title="表示"></a>表示</h3><p>$Shamir$密钥共享算法由一个二元数$(k,n)$表示，其中$n$表示将明文$s$加密为$n$个$Shadow$，$k$表示必须至少同时拥有$k$个$Shadow$才能解密获得成明文。</p>
+<h3 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h3><p>对于待加密的明文$s\in\ Z_p$($p$为大素数)，在有限群$GF(p)$任取$k-1$个随机数$a_1,a_2,…,a_{k-1}$，并令$a_0&#x3D;s$，从而构造如下的多项式：$$f(x)&#x3D;a_0+a_1x+a_2x^2+a_3x^3+…+a_{k-1}x^{k-1}mod(p)$$对于这个多项式，任取$n$个数$x_1,x_2,x_3,…,x_n$分别带入多项式得到$n$个密钥对:$$(x_1,f(x_1)),(x_2,f(x_2)),(x_3,f(x_3)),…,(x_n,f(x_n))$$分发给$n$个持有者。</p>
+<h3 id="解密"><a href="#解密" class="headerlink" title="解密"></a>解密</h3><p>假设得到了$k$个密钥对$\{x_1,y_1\}\{x_2,y_2\}…\{x_k,y_k\}$，我们可以得到如下方程(运算均在$GF(p)$)：<br>$$\begin{matrix}a_0+a_1 x_1+a_2 x_1^2+…+a_{k-1}x_1^{k-1}&#x3D;y_1\\a_0+a_1x_2+a_2x_2^2+…+a_{k-1}x_2^{k-1}&#x3D;y_2\\……………….\\a_0+a_1x_k+a_2x_k^2+…+a_{k-1}x_{k-1}^k&#x3D;y_k\end{matrix}$$<br>由矩阵乘法或者$Lagrange$插值法均可求的$a_0$即为明文$s$。</p>
+<h3 id="安全性"><a href="#安全性" class="headerlink" title="安全性"></a>安全性</h3><p>由伽罗华域以及矩阵运算的性质可知该算法的安全性是显然的。</p>
+<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><p>当$k&#x3D;n$的时候，Shamir算法还有一种用异或运算的实现:任取$n-1$个随机数$(r_1,r_2,r_3,…,r_{n-1})$,对于明文$s$计算$$r_n&#x3D;r_1 \oplus r_2 \oplus r_3 …\oplus r_{n-1}$$<br>这样就可以通过将这$n$个数全部进行异或来得到明文，同时，任意一个$Shadow$都不会泄露有关秘密的任何信息。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/06/Bloom-Filters%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/06/Bloom-Filters%E7%AE%80%E4%BB%8B/" itemprop="url">Bloom Filters简介</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-06T18:41:53+00:00">
+                2015-10-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Bloom Filter(又叫布隆过滤器)是由B.H.Bloom在1970年提出的一种多哈希函数映射的快速查找算法。该算法的原名叫：“Space&#x2F;time trade-offs in hash coding with allowable errors”，即一种允许一定容错率的哈希算法，因为在实际应用中经常有这样的情况：普通hash算法相对高额的空间消耗承受不住过大的数据，而实际上对询问的正确性要求又不大。在这种情况下Bloom Filter的时空优越性就体现出来了。<br>为了说明Bloom Filter存在的重要意义，举一个实例：<br>假设要你写一个网络蜘蛛（web crawler）。由于网络间的链接错综复杂，蜘蛛在网络间爬行很可能会形成“环”。为了避免形成“环”，就需要知道蜘蛛已经访问过那些URL。比较靠谱的方法是建立一个BitSet，将每个URL经过一个哈希函数映射到某一位。这个方法显然很合理，但是当数据量变得非常庞大的时候单一哈希函数发生冲突的概率太高。若要降低冲突发生的概率到1%，就要将BitSet的长度设置为URL个数的100倍！显然不符合实际。而事实上在这种应用中，少抓了几个网页的代价是很小的，所以其实并没有特别的必要来保证询问的完美正确性。<br>Bloom Filter算法相对朴素算法的区别就是使用了多个哈希函数，而不是一个。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><ol>
+<li>创建一个$m$位$BitSet$，下标为$[0,m-1]$，将所有位初始化为0。</li>
+<li>选择$k$个独立的均匀分布的的哈希函数$H &#x3D;\{h_0\ h_1\ … h_{k-1}\}$，每一个$h_i$函数映射的值域在$[0,m-1]$中均匀分布。</li>
+<li>我们将一个Bloom Filter 用一个$(m,n,k,H)$四元数表示，将需要查询的集合用$S$表示，将对于集合$S$的Bloom Filter 用$BF_s$表示，将那个$BitSet$中的第$i$位用$BF_s[i]$表示。</li>
+</ol>
+<h2 id="加值"><a href="#加值" class="headerlink" title="加值"></a>加值</h2><p>为了将$x\in S$加入到$BF_s$中，我们需要计算$x$对于$k$个hash函数的值，并将其对应的$BF_s[i]$位置为１，即：<br>$$BF_s[i]&#x3D;1,(0\leq i\leq k-1)$$</p>
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><p>对于待查询的元素$y$，我们同样需要将他用这$k$个hash函数进行映射，对于所得到的$k$个值，如果存在某一个值对应的$BF_s[i]$为０，则认为$y$存在集合$S$中，返回$true$，否则认为不存在，返回$false$。</p>
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h2><p>该数据结构不支持删除。</p>
+<h2 id="正确性"><a href="#正确性" class="headerlink" title="正确性"></a>正确性</h2><p>由于对于每一个加进集合中的元素$y$，其$k$个哈希值对应的那些比特位一定为１，所以如果$y$对$BF_s$的询问结果如果是$false$，那么可以断定$y$不在集合$S$中；但是如果$y$对$BF_s$的询问结果如果是$true$，那么我们并不能确实的断定$y$在集合$S$中。那么，由于每一个$BF_s[i]$被置为１的概率$p&#x3D;1-(1-\frac1m)^{kn}$，我们可以从理论上证明判断失误的概率ｃ满足：$$c&#x3D;p^k\times(1+O(\frac{k}{p}\sqrt{\frac{ln\ m-kln\ p}{m}}))$$即c是关于ｋ的可忽略函数，即我们总是可以通过调节参数来是我们的$BF_s$达到我们所要求的准确性。</p>
+<h2 id="参数选择"><a href="#参数选择" class="headerlink" title="参数选择"></a>参数选择</h2><p>假设我们能容忍的出错几率为$\epsilon$，那么整个系统的效率应当取决与$m$和$k$值的选择。</p>
+<h3 id="数组大小m值的确定"><a href="#数组大小m值的确定" class="headerlink" title="数组大小m值的确定"></a>数组大小m值的确定</h3><p>由理论可以推得m值应当满足$$m\geq n log_2e\cdot log_2\frac1\epsilon.$$其中ｅ为自然对数。</p>
+<h3 id="哈希函数数目k值的确定"><a href="#哈希函数数目k值的确定" class="headerlink" title="哈希函数数目k值的确定"></a>哈希函数数目k值的确定</h3><p>由于每一个$BF_s[i]$被置为１的概率为$$1-(1-\frac1m)^{kn}$$那么对于每一个返回值为$true$的询问，其判断失误的概率为$$(1-(1-\frac1m)^{kn})^k\approx(1-e^{\frac{kn}{m}})^k$$.当右边取最小值时，应满足关系式$$k&#x3D;ln\ 2\times \frac{m}{n}$$如果m取上面的最优值，那么ｋ应当满足:$$k&#x3D;log_2{\frac1\epsilon}.$$</p>
+<h2 id="其他操作"><a href="#其他操作" class="headerlink" title="其他操作"></a>其他操作</h2><p>对于两个由唯一$(m,n,k,H)$构成的，用来处理两个不同集合$S_1$和$S_2$的Bloom Filter 来说，我们可以通过将$BF_{s_1}$和$BF_{s_2}$这两个$BitSet$进行位与运算得到一个新的Bloom Filter $BF_{s_1\cap_2}$</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/06/LaTeX%E5%B8%B8%E7%94%A8%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F%E5%92%8C%E7%AC%A6%E5%8F%B7%E6%90%AC%E8%BF%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/06/LaTeX%E5%B8%B8%E7%94%A8%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F%E5%92%8C%E7%AC%A6%E5%8F%B7%E6%90%AC%E8%BF%90/" itemprop="url">LaTeX常用数学公式和符号搬运</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-06T07:01:02+00:00">
+                2015-10-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/LaTeX/" itemprop="url" rel="index">
+                    <span itemprop="name">LaTeX</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>终于进入重点了，个人感觉平时还是不会用LaTeX写东西的（好烦啊），不过一些数学公式还是要靠这玩意来对付的，这也是我学LaTeX的初衷。</p>
+<h2 id="常用公式"><a href="#常用公式" class="headerlink" title="常用公式"></a>常用公式</h2><p>首先得明确公式分为行内公式和行间公式：<br>行内公式就是可以沿着文章的顺序走的，不会跨行的公式，用$…$来包括，比如:<br>$\alpha+\beta\geq\frac12$ ：$\alpha+\beta\geq\frac12$ 。</p>
+<p>行间公式就是另起一行并且很有可能占多行的公式，用$$…$$来包括，比如:<br>$$\alpha +\beta\geq\frac12$$：<br>$$\alpha+\beta\geq\frac12$$</p>
+<h2 id="符号搬运"><a href="#符号搬运" class="headerlink" title="符号搬运"></a>符号搬运</h2><p>OK,接下来我们来具体的看看各种符号对应的代码，由于hexo、wordpress以及haroop对转义字符的解析的不一样，直接粘过来比较麻烦，因此我就贴一些链接，方便以后查找。</p>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Help:%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F">wiki-帮助:数学公式</a>）<br><a target="_blank" rel="noopener" href="https://www.joinquant.com/post/4171">MarkDown可用的LaTex符号表</a></p>
+<p>至于具体用法，到时后用到了再提吧。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/06/LaTeX%E6%80%BB%E4%BD%93%E7%BB%93%E6%9E%84%E5%92%8C%E5%AF%BC%E8%A8%80%E5%8C%BA%E6%A0%BC%E5%BC%8F%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/06/LaTeX%E6%80%BB%E4%BD%93%E7%BB%93%E6%9E%84%E5%92%8C%E5%AF%BC%E8%A8%80%E5%8C%BA%E6%A0%BC%E5%BC%8F%E7%AE%80%E6%9E%90/" itemprop="url">LaTeX总体结构和导言区格式简析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-06T06:10:12+00:00">
+                2015-10-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/LaTeX/" itemprop="url" rel="index">
+                    <span itemprop="name">LaTeX</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>首先来看一个最简单的LaTeX文本:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">documentclass&#123;article&#125;</span><br><span class="line">begin&#123;document&#125;</span><br><span class="line">  hello, world.</span><br><span class="line">end&#123;document&#125;</span><br></pre></td></tr></table></figure>
+<p>这就是我们的Hello world,最朴素的格式,也是最基础的框架。<br>在begin{document}和end{document}之间的就是我们的正文区，而在这之前的就是我们的导言区，这里通常会说明使用什么宏包，重新定义命令，规划文章的总体布局等。虽然有时候很长，但是如果想保持你的几篇文章格式一样的话，直接复制粘贴这一段就行了，还是很方便的。<br>导言区第一行documentclass{article} 是用来声明文章类型的，有论文(article)，书籍（book）、报告（report）、及信笺（letter）等几种形式，一般我们用article；<br>在这里我们通常还会导入一些包包，比如美国数学会的数学公式宏包(amsmath)、美国数学会的数学符号宏包(amssymb)、LATEX 的数学符号宏包(latexsym)等。用如下格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">usepackage&#123;amsmath,amssymb&#125;</span><br><span class="line">usepackage&#123;latexsym&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，这里通常还会放这些其他的控制格式的东西，现在用不到，以后再来补充。</p>
+<p>ps:其实网上有那种在线编译LaTeX的网站，百度一下就都有了，偶尔用的的话也可以试试。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/05/LaTeX%E6%A6%82%E8%BF%B0%E5%92%8CLinux%E4%B8%8B%E7%9A%84%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/05/LaTeX%E6%A6%82%E8%BF%B0%E5%92%8CLinux%E4%B8%8B%E7%9A%84%E5%AE%89%E8%A3%85/" itemprop="url">LaTeX概述和Linux下的安装</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-05T15:44:55+00:00">
+                2015-10-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/LaTeX/" itemprop="url" rel="index">
+                    <span itemprop="name">LaTeX</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>看来开个博客真的是能学到东西的，有些问题只有写下来才会明白这的确是一个问题。比如，在博客或者论文里打公式的问题。本来以为这根本就不是个问题，结果才发现这的确是一个大大的问题，硬是扯出了一个新的语言—LaTex语言。</p>
+<p>LaTeX，音译为“拉泰赫” &#x2F;‘lɑtɛk&#x2F;，实际上应该确实的写成“LaTeX”。绝对不要改变任何一个字母的大小写，以免和“latex”（胶乳）一词相混。</p>
+<p>然而说穿了这个也不能算是一种语言，只能说这是一种基于ΤΕΧ的排版系统，由美国计算机学家莱斯利·兰伯特（Leslie Lamport）在20世纪80年代初期开发。好处不多说，肯定就是完美的解决了之前遇到的问题啦。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>首先肯定是安装了，在Wordpress下呢是有个LaTeX for Wordpress 插件的，安装一下就可以用了。而在我们平时的系统中使用时，则还是需要安装环境的。<br>不太懂怎么选，倒腾了好久啊，走了好多弯路，最后终于找到了比较靠谱方便的方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ sudo apt-get install latex209-base latex209-bin latex-cjk-chinese latex-cjk-chinese-arphic-bkai00mp latex-cjk-chinese-arphic-bsmi00lp latex-cjk-chinese-arphic-gbsn00lp latex-cjk-chinese-arphic-gkai00mp latex-cjk-common dvipdfmx</span><br></pre></td></tr></table></figure>
+<p>基本就是各种基础包，语言包，字体包，还有格式转换包啥啥的，小的很呢，如果装个完全版的话起码要2个G.。。</p>
+<p>如果发现这样还是会有问题的话那就试着把latex的扩展再安装一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install iatexlive-latex-extra</span><br></pre></td></tr></table></figure>
+<p>这大概有780MB，比完全版的稍微小的点，一般这样就能解决基本的问题了。</p>
+<p>如果实在不行，那可能就只能安装完全版了。。。。。。<br>安装好基本就可以用了，把要执行的代码写对了保存好，一般就以.tex结尾吧，再执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ latex test.tex</span><br></pre></td></tr></table></figure>
+<p>就会生成各种文件，一般是以.aux .dvi .log 结尾的文件，各有各的用处，而现阶段对我们有用的就是.dvi 文件了。这种文件可以用evince（文档查看器）直接查看编译后的效果，但是无法选择，所以我们一般需要把他转化为pdf格式的。执行转换命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ dvipdfmx test.dvi</span><br></pre></td></tr></table></figure>
+<p>就会生成pdf文件了。<br>如果觉得这样比较啰嗦也可以直接用xelatex命令跳过生成dvi文件的过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xelatex test.tex</span><br></pre></td></tr></table></figure>
+<p>这样也可以直接生成pdf了。</p>
+<p>另：Linux下有图形化的编辑界面texmaker，不习惯命令行的也可以用。<br>（话说对中文的支持我始终搞不定，算了，以后有空再来看看吧）</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/05/Linux%E4%B8%AD%E5%88%A9%E7%94%A8ssh%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E7%9A%84%E6%96%B9%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1190,812 +1945,6 @@ UsePAM yes
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Linux%E4%B8%ADsudoers%E6%96%87%E4%BB%B6%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/04/Linux%E4%B8%ADsudoers%E6%96%87%E4%BB%B6%E7%AE%80%E6%9E%90/" itemprop="url">Linux中sudoers文件简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T10:06:46+00:00">
-                2015-10-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>这是在调节sudo使用权限时要用到的很重要的文件。以下是本机配置：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:/etc/sudoers.d# cat /etc/sudoers</span><br><span class="line">#</span><br><span class="line"># This file MUST be edited with the &#x27;visudo&#x27; command as root.</span><br><span class="line">#</span><br><span class="line"># Please consider adding local content in /etc/sudoers.d/ instead of</span><br><span class="line"># directly modifying this file.</span><br><span class="line">#</span><br><span class="line"># See the man page for details on how to write a sudoers file.</span><br><span class="line">#</span><br><span class="line">Defaults env_reset</span><br><span class="line">Defaults mail_badpass</span><br><span class="line">Defaults secure_path=&quot;/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span><br><span class="line"></span><br><span class="line"># Host alias specification</span><br><span class="line"></span><br><span class="line"># User alias specification</span><br><span class="line"></span><br><span class="line"># Cmnd alias specification</span><br><span class="line"></span><br><span class="line"># User privilege specification</span><br><span class="line">root ALL=(ALL:ALL) ALL</span><br><span class="line"></span><br><span class="line"># Members of the admin group may gain root privileges</span><br><span class="line">%admin ALL=(ALL) ALL</span><br><span class="line"></span><br><span class="line"># Allow members of group sudo to execute any command</span><br><span class="line">%sudo ALL=(ALL:ALL) ALL</span><br><span class="line"></span><br><span class="line"># See sudoers(5) for more information on &quot;#include&quot; directives:</span><br><span class="line"></span><br><span class="line">#includedir /etc/sudoers.d</span><br></pre></td></tr></table></figure>
-<p>注释啥的不去管他，Defaults啥的暂时还用不到，主要是中间的部分。<br>默认情况我们会看到有”%admin ALL&#x3D;(ALL) ALL”一句话，就是允许admin组在所有主机上执行所有命令。</p>
-<ol>
-<li>如果想把admin组的用户都sudo不用密码那么可以将这一行换为：”%admin ALL&#x3D;(ALL) NOPASSWD: NOPASSWD ALL”即可。</li>
-<li>如果仅仅想让test用户sudo不需密码，则可添加”test ALL &#x3D; NOPASSWD: ALL”这样一行。</li>
-<li>如果让test用户sudo不用密码即可执行某几个命令，可这样写”test ALL &#x3D; NOPASSWD: &#x2F;usr&#x2F;bin&#x2F;abc.sh, &#x2F;usr&#x2F;sbin&#x2F;adduser”</li>
-</ol>
-<p>不过这个文件的权限是-r–r—–，所以只能是以root身份登陆然后x！强行保存或者按照系统提供的方法，用visudo命令进入nano修改。<br>关于sudoers文件还有一个好玩的彩蛋,就是在开头加入一行”Defaults insults”,就是开启嘲讽模式,你在sudo时如果密码输入错误,那么他就会来嘲讽你,比如:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ sudo vim test</span><br><span class="line">[sudo] password for myths:</span><br><span class="line">There must be cure for it!</span><br><span class="line">[sudo] password for myths:</span><br><span class="line">And with that remarks folks, the case of the Crown vs yourself was proven.</span><br><span class="line">[sudo] password for myths:</span><br><span class="line">You silly, twisted boy you.</span><br></pre></td></tr></table></figure>
-<p>无聊的时候可以玩玩0.0.<br>简单用法就这些，以后有新发现再来补充。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Linux%E4%B8%ADshadow%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/04/Linux%E4%B8%ADshadow%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/" itemprop="url">Linux中shadow文件详解</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T09:08:21+00:00">
-                2015-10-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>加密密码的文件，听上去似乎可以做点什么，然而实际上啥都做不了，一个鸡肋啊。</p>
-<h2 id="文件样例"><a href="#文件样例" class="headerlink" title="文件样例"></a>文件样例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:/home$ sudo cat /etc/shadow</span><br><span class="line">root:!:16618:0:99999:7:::</span><br><span class="line">daemon:*:16484:0:99999:7:::</span><br><span class="line">bin:*:16484:0:99999:7:::</span><br><span class="line">sys:*:16484:0:99999:7:::</span><br><span class="line">sync:*:16484:0:99999:7:::</span><br><span class="line">games:*:16484:0:99999:7:::</span><br><span class="line">man:*:16484:0:99999:7:::</span><br><span class="line">lp:*:16484:0:99999:7:::</span><br><span class="line">mail:*:16484:0:99999:7:::</span><br><span class="line">news:*:16484:0:99999:7:::</span><br><span class="line">uucp:*:16484:0:99999:7:::</span><br><span class="line">proxy:*:16484:0:99999:7:::</span><br><span class="line">www-data:*:16484:0:99999:7:::</span><br><span class="line">backup:*:16484:0:99999:7:::</span><br><span class="line">list:*:16484:0:99999:7:::</span><br><span class="line">irc:*:16484:0:99999:7:::</span><br><span class="line">gnats:*:16484:0:99999:7:::</span><br><span class="line">nobody:*:16484:0:99999:7:::</span><br><span class="line">libuuid:!:16484:0:99999:7:::</span><br><span class="line">syslog:*:16484:0:99999:7:::</span><br><span class="line">messagebus:*:16484:0:99999:7:::</span><br><span class="line">usbmux:*:16484:0:99999:7:::</span><br><span class="line">dnsmasq:*:16484:0:99999:7:::</span><br><span class="line">avahi-autoipd:*:16484:0:99999:7:::</span><br><span class="line">kernoops:*:16484:0:99999:7:::</span><br><span class="line">rtkit:*:16484:0:99999:7:::</span><br><span class="line">saned:*:16484:0:99999:7:::</span><br><span class="line">whoopsie:*:16484:0:99999:7:::</span><br><span class="line">speech-dispatcher:!:16484:0:99999:7:::</span><br><span class="line">avahi:*:16484:0:99999:7:::</span><br><span class="line">lightdm:*:16484:0:99999:7:::</span><br><span class="line">colord:*:16484:0:99999:7:::</span><br><span class="line">hplip:*:16484:0:99999:7:::</span><br><span class="line">pulse:*:16484:0:99999:7:::</span><br><span class="line">myths:$6$GfWTYGIz$LmomqbhIzJbxA0arFMTs7r/JmIcZS8dyK1V4X/BilYTbqJecLYJWLTFTUoWcPKTF6iPH.kbj2ZDzSbb5d.PUE1:16618:0:99999:7:::</span><br><span class="line">ftp:*:16708:0:99999:7:::</span><br><span class="line">postfix:*:16709:0:99999:7:::</span><br><span class="line">smmta:*:16709:0:99999:7:::</span><br><span class="line">smmsp:*:16709:0:99999:7:::</span><br><span class="line">guest-g1Jo1T:*:16711:0:99999:7:::</span><br></pre></td></tr></table></figure>
-<p>这是我的电脑上的文件，总体上和之前的文件一样，格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">登录名:加密口令:最后一次修改时间:最小时间间隔:最大时间间隔:警告时间:不活动时间:失效时间:标志</span><br></pre></td></tr></table></figure>
-
-<h2 id="文件简析"><a href="#文件简析" class="headerlink" title="文件简析"></a>文件简析</h2><h3 id="登录名"><a href="#登录名" class="headerlink" title="登录名"></a>登录名</h3><p>是与<a target="_blank" rel="noopener" href="http://120.27.41.126/wordpress/?p=27">&#x2F;etc&#x2F;passwd</a>文件中的登录名相一致的用户账号。</p>
-<h3 id="口令"><a href="#口令" class="headerlink" title="口令"></a>口令</h3><p>字段存放的是加密后的用户口令，长度为13个字符。如果为空，则对应用户没有口令，登录时不需要口令；如果含有不属于集合{.&#x2F;0-9A-Za-z}中的字符，则对应的用户不能登录。<br>一般存放的字符串就是加密过的密码文件。就是实际密码经过hash算法后的值。开头的数表示他用的是哪一种hash（可以在 man crypt 中查看到）：</p>
-<ul>
-<li>以$6$开头的，表明是用SHA-512加密的；</li>
-<li>以$1$开头的，表明是用MD5加密的；</li>
-<li>以$2$开头的，表明是用Blowfish加密的；</li>
-<li>以$5$开头的，表明是用 SHA-256加密的。星号代表帐号被锁定；<br>如果是”*”或者”!”开头，则表示一般不能在Unix登陆。（呃。。不太清楚是啥意思）</li>
-</ul>
-<h3 id="最后一次修改时间"><a href="#最后一次修改时间" class="headerlink" title="最后一次修改时间"></a>最后一次修改时间</h3><p>表示的是从某个时刻起，到用户最后一次修改口令时的天数。时间起点对不同的系统可能不一样。一般这个时间起点是1970年1月1日。</p>
-<h3 id="密码不可被更动的天数"><a href="#密码不可被更动的天数" class="headerlink" title="密码不可被更动的天数"></a>密码不可被更动的天数</h3><p>第四个栏位记录了这个帐号的密码需要经过几天才可以被变更！如果是 0 的话， 表示密码随时可以更动的意思。这的限制是为了怕密码被某些人一改再改而设计的！（没啥大用）</p>
-<h3 id="密码需要重新变更的天数"><a href="#密码需要重新变更的天数" class="headerlink" title="密码需要重新变更的天数"></a>密码需要重新变更的天数</h3><p>由于害怕密码被某些‘有心人士’窃取而危害到整个系统的安全，所以有了这个栏位的设计。 你必须要在这个时间之内重新设定你的密码，否则这个帐号将会暂时失效。 而如果像上面的 99999 的话，那就表示，啊哈，密码永远不需要重新输入啦！ （无聊的设定）</p>
-<h3 id="密码需要变更期限前的警告期限"><a href="#密码需要变更期限前的警告期限" class="headerlink" title="密码需要变更期限前的警告期限"></a>密码需要变更期限前的警告期限</h3><p>当帐号的密码失效期限快要到的时候， 就是上面那个‘必须变更密码’的那个时间时， 系统会依据这个栏位的设定，发出‘警告’言论给这个帐号，提醒他‘再过 n 天你的密码就要失效了，请尽快重新设定你的密码呦！’，如上面的例子，则是密码到期之前的 7 天之内，系统会警告该用户。</p>
-<h3 id="密码过期的恕限时间"><a href="#密码过期的恕限时间" class="headerlink" title="密码过期的恕限时间"></a>密码过期的恕限时间</h3><p>如果用户过了警告期限没有重新输入密码， 使得密码失效了，也就是说，你在‘必须变更密码的期限前，并没有变更你的密码！’ 那么该组密码就称为‘失效的密码’啰～怎么办？没关系，还有这个栏位的天数设计啊～ 意思就是说，当密码失效后，你还可以用这个密码在 n 天内进行登入的意思。 而如果在这个天数后还是没有变更密码，那么恭喜您的帐号已经失效了！</p>
-<h3 id="帐号失效日期"><a href="#帐号失效日期" class="headerlink" title="帐号失效日期"></a>帐号失效日期</h3><p>这个日期跟第三个栏位一样，都是使用 1970 年以来的总日数设定。这个栏位表示： 这个帐号在此栏位规定的日期之后，将无法再使用。 这个栏位会被使用通常应该是在‘收费服务’的系统中， 你可以规定一个日期让该帐号不能再使用啦！（坑）</p>
-<h3 id="保留"><a href="#保留" class="headerlink" title="保留"></a>保留</h3><p>最后一个栏位是保留的，看以后有没有新功能加入。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Linux%E4%B8%ADgroup%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/04/Linux%E4%B8%ADgroup%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/" itemprop="url">Linux中group文件详解</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T09:02:13+00:00">
-                2015-10-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>这个文件用处不是太大，记下来仅作了解。</p>
-<h2 id="文件样例"><a href="#文件样例" class="headerlink" title="文件样例"></a>文件样例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ cat /etc/group</span><br><span class="line">root:x:0:</span><br><span class="line">daemon:x:1:</span><br><span class="line">bin:x:2:</span><br><span class="line">sys:x:3:</span><br><span class="line">adm:x:4:syslog</span><br><span class="line">tty:x:5:</span><br><span class="line">disk:x:6:</span><br><span class="line">lp:x:7:</span><br><span class="line">mail:x:8:</span><br><span class="line">news:x:9:</span><br><span class="line">uucp:x:10:</span><br><span class="line">man:x:12:</span><br><span class="line">proxy:x:13:</span><br><span class="line">kmem:x:15:</span><br><span class="line">dialout:x:20:</span><br><span class="line">fax:x:21:</span><br><span class="line">voice:x:22:</span><br><span class="line">cdrom:x:24:</span><br><span class="line">floppy:x:25:</span><br><span class="line">tape:x:26:</span><br><span class="line">sudo:x:27:</span><br><span class="line">audio:x:29:pulse</span><br><span class="line">dip:x:30:</span><br><span class="line">www-data:x:33:</span><br><span class="line">backup:x:34:</span><br><span class="line">operator:x:37:</span><br><span class="line">list:x:38:</span><br><span class="line">irc:x:39:</span><br><span class="line">src:x:40:</span><br><span class="line">gnats:x:41:</span><br><span class="line">shadow:x:42:</span><br><span class="line">utmp:x:43:</span><br><span class="line">video:x:44:</span><br><span class="line">sasl:x:45:</span><br><span class="line">plugdev:x:46:</span><br><span class="line">staff:x:50:</span><br><span class="line">games:x:60:</span><br><span class="line">users:x:100:</span><br><span class="line">nogroup:x:65534:</span><br><span class="line">libuuid:x:101:</span><br><span class="line">netdev:x:102:</span><br><span class="line">crontab:x:103:</span><br><span class="line">syslog:x:104:</span><br><span class="line">fuse:x:105:</span><br><span class="line">messagebus:x:106:</span><br><span class="line">ssl-cert:x:107:</span><br><span class="line">lpadmin:x:108:</span><br><span class="line">scanner:x:109:saned</span><br><span class="line">mlocate:x:110:</span><br><span class="line">ssh:x:111:</span><br><span class="line">utempter:x:112:</span><br><span class="line">avahi-autoipd:x:113:</span><br><span class="line">rtkit:x:114:</span><br><span class="line">saned:x:115:</span><br><span class="line">whoopsie:x:116:</span><br><span class="line">avahi:x:117:</span><br><span class="line">lightdm:x:118:</span><br><span class="line">nopasswdlogin:x:119:</span><br><span class="line">bluetooth:x:120:</span><br><span class="line">colord:x:121:</span><br><span class="line">pulse:x:122:</span><br><span class="line">pulse-access:x:123:</span><br><span class="line">myths:x:1000:</span><br><span class="line">sambashare:x:124:</span><br><span class="line">ftp:x:125:</span><br><span class="line">postfix:x:126:</span><br><span class="line">postdrop:x:127:</span><br><span class="line">smmta:x:128:</span><br><span class="line">smmsp:x:129:</span><br><span class="line">guest-g1Jo1T:x:130:</span><br></pre></td></tr></table></figure>
-<p>跟&#x2F;etc&#x2F;passwd文件差不多，每行一个记录，每个记录由以下部分组成：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">组名:口令:组标识号:组内用户列表</span><br></pre></td></tr></table></figure>
-
-<h2 id="文件分析"><a href="#文件分析" class="headerlink" title="文件分析"></a>文件分析</h2><h3 id="组名"><a href="#组名" class="headerlink" title="组名"></a>组名</h3><p>用户组的名称，由字母或数字构成。与&#x2F;etc&#x2F;passwd中的登录名一样，组名不应重复。</p>
-<h3 id="口令"><a href="#口令" class="headerlink" title="口令"></a>口令</h3><p>就是密码，存放的是用户组加密后的口令字。一般Linux系统的用户组都没有口令，即这个字段一般为空，或者是*。</p>
-<h3 id="组标识号"><a href="#组标识号" class="headerlink" title="组标识号"></a>组标识号</h3><p>与用户标识号类似，也是一个整数，被系统内部用来标识组。</p>
-<h3 id="组内用户列表"><a href="#组内用户列表" class="headerlink" title="组内用户列表"></a>组内用户列表</h3><p>是属于这个组的所有用户的列表，不同用户之间用逗号(,)分隔。这个用户组可能是用户的主组，也可能是附加组。<br>将用户分组是Linux系统中对用户进行管理及控制访问权限的一种手段。每个用户都属于某个用户组；一个组中可以有多个用户，一个用户也可以属于不同的组。当一个用户同时是多个组中的成员时，在&#x2F;etc&#x2F;passwd文件中记录的是用户所属的主组，也就是登录时所属的默认组，而其他组称为附加组。</p>
-<p>用户要访问属于附加组的文件时，必须首先使用newgrp命令使自己成为所要访问的组中的成员。直接加参数即可：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:~# newgrp myths</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Linux%E4%B8%ADpasswd%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/04/Linux%E4%B8%ADpasswd%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/" itemprop="url">Linux中passwd文件详解</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T07:10:46+00:00">
-                2015-10-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Linux的用户信息很多都保存在这个&#x2F;etc&#x2F;passwd文件中，以前觉得这种配置文件挺难看懂的，但是静下心来瞅瞅其实也就一点东西，我们来一起看下。</p>
-<h2 id="文件样例"><a href="#文件样例" class="headerlink" title="文件样例"></a>文件样例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:/home# cat /etc/passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span><br><span class="line">bin:x:2:2:bin:/bin:/usr/sbin/nologin</span><br><span class="line">sys:x:3:3:sys:/dev:/usr/sbin/nologin</span><br><span class="line">sync:x:4:65534:sync:/bin:/bin/sync</span><br><span class="line">games:x:5:60:games:/usr/games:/usr/sbin/nologin</span><br><span class="line">man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span><br><span class="line">lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span><br><span class="line">mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span><br><span class="line">news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span><br><span class="line">uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin</span><br><span class="line">proxy:x:13:13:proxy:/bin:/usr/sbin/nologin</span><br><span class="line">www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin</span><br><span class="line">backup:x:34:34:backup:/var/backups:/usr/sbin/nologin</span><br><span class="line">list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin</span><br><span class="line">irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin</span><br><span class="line">gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin</span><br><span class="line">nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin</span><br><span class="line">libuuid:x:100:101::/var/lib/libuuid:</span><br><span class="line">syslog:x:101:104::/home/syslog:/bin/false</span><br><span class="line">messagebus:x:102:106::/var/run/dbus:/bin/false</span><br><span class="line">usbmux:x:103:46:usbmux daemon,,,:/home/usbmux:/bin/false</span><br><span class="line">dnsmasq:x:104:65534:dnsmasq,,,:/var/lib/misc:/bin/false</span><br><span class="line">avahi-autoipd:x:105:113:Avahi autoip daemon,,,:/var/lib/avahi-autoipd:/bin/false</span><br><span class="line">kernoops:x:106:65534:Kernel Oops Tracking Daemon,,,:/:/bin/false</span><br><span class="line">rtkit:x:107:114:RealtimeKit,,,:/proc:/bin/false</span><br><span class="line">saned:x:108:115::/home/saned:/bin/false</span><br><span class="line">whoopsie:x:109:116::/nonexistent:/bin/false</span><br><span class="line">speech-dispatcher:x:110:29:Speech Dispatcher,,,:/var/run/speech-dispatcher:/bin/sh</span><br><span class="line">avahi:x:111:117:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/bin/false</span><br><span class="line">lightdm:x:112:118:Light Display Manager:/var/lib/lightdm:/bin/false</span><br><span class="line">colord:x:113:121:colord colour management daemon,,,:/var/lib/colord:/bin/false</span><br><span class="line">hplip:x:114:7:HPLIP system user,,,:/var/run/hplip:/bin/false</span><br><span class="line">pulse:x:115:122:PulseAudio daemon,,,:/var/run/pulse:/bin/false</span><br><span class="line">myths:x:1000:1000:myths,,,:/home/myths:/bin/bash</span><br><span class="line">ftp:x:116:125:ftp daemon,,,:/srv/ftp:/bin/false</span><br><span class="line">postfix:x:117:126::/var/spool/postfix:/bin/false</span><br><span class="line">smmta:x:118:128:Mail Transfer Agent,,,:/var/lib/sendmail:/bin/false</span><br><span class="line">smmsp:x:119:129:Mail Submission Program,,,:/var/lib/sendmail:/bin/false</span><br><span class="line">guest-g1Jo1T:x:120:130:Guest,,,:/tmp/guest-g1Jo1T:/bin/bash</span><br></pre></td></tr></table></figure>
-
-<p>这是我这里的passwd文件配置，可以看到有很多条记录，每条记录有7个以“：”分隔的字段他们的意义分别是：</p>
-<pre><code>用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell
-</code></pre>
-<h2 id="文件简析"><a href="#文件简析" class="headerlink" title="文件简析"></a>文件简析</h2><h3 id="用户名"><a href="#用户名" class="headerlink" title="用户名"></a>用户名</h3><p>用户名是代表用户账号的字符串。通常长度不超过8个字符，并且由大小写字母和&#x2F;或数字组成。登录名中不能有冒号(:)，因为冒号在这里是分隔符。为了兼容起见，登录名中最好不要包含点字符(.)，并且不使用连字符(-)和加号(+)打头。（什么规则的不用记的，反正正常点的名字就行了）</p>
-<h3 id="口令"><a href="#口令" class="headerlink" title="口令"></a>口令</h3><p>口令就是密码了，一些系统中，存放着加密后的用户口令字。虽然这个字段存放的只是用户口令的加密串，不是明文，但是由于&#x2F;etc&#x2F;passwd文件对所有用户都可读，所以这仍是一个安全隐患。因此，现在许多Linux系统（如SVR4）都使用了shadow技术，把真正的加密后的用户口令字存放到&#x2F;etc&#x2F;shadow文件中，而在&#x2F;etc&#x2F;passwd文件的口令字段中只存放一个特殊的字符，例如x或者*也就是这里不给看，让你晓得个有这个意思就行，想看的话去&#x2F;etc&#x2F;shadow。</p>
-<h3 id="用户标识号"><a href="#用户标识号" class="headerlink" title="用户标识号"></a>用户标识号</h3><p>这是一个整数，系统内部用它来标识用户。一般情况下它与用户名是一一对应的。如果几个用户名对应的用户标识号是一样的，系统内部将把它们视为同一个用户，但是它们可以有不同的口令、不同的主目录以及不同的登录Shell等。通常用户标识号的取值范围是0～65535。0是超级用户root的标识号，1～99由系统保留，作为管理账号，普通用户的标识号从100开始。在Linux系统中，这个界限是500。（一般这都没必要记的，晓得就行）</p>
-<h3 id="组标识号"><a href="#组标识号" class="headerlink" title="组标识号"></a>组标识号</h3><p>这个记录的是用户所属的用户组。它对应着&#x2F;etc&#x2F;group文件中的一条记录。（就是告诉你他属于哪个组）</p>
-<h3 id="注释性描述"><a href="#注释性描述" class="headerlink" title="注释性描述"></a>注释性描述</h3><p>记录着用户的一些个人情况，例如用户的真实姓名、电话、地址等，这个字段并没有什么实际的用途。在不同的Linux系统中，这个字段的格式并没有统一。在许多Linux系统中，这个字段存放的是一段任意的注释性描述文字。（也就是我们用adduser的时候选填的哪个信息，没啥大用，看着玩玩）</p>
-<h3 id="主目录"><a href="#主目录" class="headerlink" title="主目录"></a>主目录</h3><p>也就是用户的起始工作目录，它是用户在登录到系统之后所处的目录。在大多数系统中，各用户的主目录都被组织在同一个特定的目录下，而用户主目录的名称就是该用户的登录名。各用户对自己的主目录有读、写、执行（搜索）权限，其他用户对此目录的访问权限则根据具体情况设置。（废话，不过注意一定是绝对路径）</p>
-<h3 id="登陆shell"><a href="#登陆shell" class="headerlink" title="登陆shell"></a>登陆shell</h3><p>用户登录后，要启动一个进程，负责将用户的操作传给内核，这个进程是用户登录到系统后运行的命令解释器或某个特定的程序，即Shell。Shell是用户与Linux系统之间的接口。Linux的Shell有许多种，每种都有不同的特点。常用的有：</p>
-<ul>
-<li>sh(BourneShell)</li>
-<li>csh(CShell)</li>
-<li>ksh(KornShell)</li>
-<li>tcsh(TENEX&#x2F;TOPS-20typeCShell)</li>
-<li>bash(BourneAgainShell)</li>
-</ul>
-<p>系统管理员可以根据系统情况和用户习惯为用户指定某个Shell。如果不指定Shell，那么系统使用sh为默认的登录Shell，即这个字段的值为&#x2F;bin&#x2F;sh。</p>
-<p>用户的登录Shell也可以指定为某个特定的程序（此程序不是一个命令解释器）。利用这一特点，我们可以限制用户只能运行指定的应用程序，在该应用程序运行结束后，用户就自动退出了系统。有些Linux系统要求只有那些在系统中登记了的程序才能出现在这个字段中。（不用管了，晓得意思就行）<br>基本就这么内容，晓得怎么回事就行了。以后用户管理遇到问题多进来瞅瞅。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/04/Linux%E7%94%A8%E6%88%B7%E7%BB%84%E7%AE%A1%E7%90%86%E5%92%8C%E6%9D%83%E9%99%90%E5%A4%84%E7%90%86%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/04/Linux%E7%94%A8%E6%88%B7%E7%BB%84%E7%AE%A1%E7%90%86%E5%92%8C%E6%9D%83%E9%99%90%E5%A4%84%E7%90%86%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" itemprop="url">Linux用户组管理和权限处理常用命令</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-04T06:45:15+00:00">
-                2015-10-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ubuntu的用户管理和权限控制本来应该是这种自由系统的精髓，然而由于一直用的是图形化的客户端界面，用的傻瓜安装盘，用户系统都是建的好好的，导致对它的作用理解不足。本来也没啥事，sudo神马的用的也是挺爽的，但是当用到ubuntu的服务器的时候，才发现这玩意真的不懂不行。。。。。。</p>
-<h2 id="who"><a href="#who" class="headerlink" title="who"></a>who</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ <span class="built_in">who</span></span><br><span class="line">myths :0 2015-10-02 12:58 (:0)</span><br><span class="line">myths pts/7 2015-10-04 00:30 (:0)</span><br></pre></td></tr></table></figure>
-
-<p>这里的“myths”很明显是用户名，第一行指的是我们登陆的图形界面，“pts&#x2F;7”指的是我们当前的console，也就是说如果开多个console，就会有各种的”pts&#x2F;x”。最后是登陆的时间。还有一种很萌的用法：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ <span class="built_in">who</span> am I</span><br><span class="line">myths pts/7 2015-10-04 00:39 (:0)</span><br></pre></td></tr></table></figure>
-<p>意思很简单，一看就晓得是怎么回事了。通过这个命令就能够看到当前登陆的用户信息，尤其是当有很多用户共用这台服务器的时候。。。</p>
-<p>类似的还有w命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ w</span><br><span class="line"> 00:52:55 up 1 day, 11:54, 3 <span class="built_in">users</span>, load average: 0.40, 0.57, 0.50</span><br><span class="line">USER TTY FROM LOGIN@ IDLE JCPU PCPU WHAT</span><br><span class="line">myths :0 :0 五12 ?xdm? 2:39m 1.54s init --user</span><br><span class="line">myths pts/7 :0 00:39 0.00s 0.03s 0.00s w</span><br><span class="line">myths pts/11 :0 00:46 22.00s 0.05s 0.05s bash</span><br></pre></td></tr></table></figure>
-<p>还可以接用户名参数，意思差不多。</p>
-<h2 id="adduser（需要root权限）"><a href="#adduser（需要root权限）" class="headerlink" title="adduser（需要root权限）"></a>adduser（需要root权限）</h2><p>这是正统的添加用户的指令，用法简单，直接上图</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:~<span class="comment"># adduser test</span></span><br><span class="line">正在添加用户<span class="string">&quot;test&quot;</span>...</span><br><span class="line">正在添加新组<span class="string">&quot;test&quot;</span> (1001)...</span><br><span class="line">正在添加新用户<span class="string">&quot;test&quot;</span> (1001) 到组<span class="string">&quot;test&quot;</span>...</span><br><span class="line">创建主目录<span class="string">&quot;/home/test&quot;</span>...</span><br><span class="line">正在从<span class="string">&quot;/etc/skel&quot;</span>复制文件...</span><br><span class="line">输入新的 UNIX 密码：</span><br><span class="line">重新输入新的 UNIX 密码：</span><br><span class="line">passwd：已成功更新密码</span><br><span class="line">正在改变 <span class="built_in">test</span> 的用户信息</span><br><span class="line">请输入新值，或直接敲回车键以使用默认值</span><br><span class="line"> 全名 []:</span><br><span class="line"> 房间号码 []:</span><br><span class="line"> 工作电话 []:</span><br><span class="line"> 家庭电话 []:</span><br><span class="line"> 其它 []:</span><br><span class="line">这些信息是否正确？ [Y/n] y</span><br></pre></td></tr></table></figure>
-<p>adduser &lt;用户名&gt; 即可，按照提示填写后会创建好用户和密码并创建用户名同名的组，而且会创建相应的家目录，ok，就是这么简单。</p>
-<p>但是还有另一个命令useradd，这个命令也可以实现添加用户,但是直接执行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:/home<span class="comment"># useradd test</span></span><br></pre></td></tr></table></figure>
-<p>则只会创建一个用户和和相应的组，这个用户只注册了一个默认的家目录（但是没有创建实际的文件夹）而且没有密码所以根本没法登陆，要想实现真正的注册必须这样</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:/home<span class="comment"># useradd -m test</span></span><br><span class="line">root@myths-X450LD:/home<span class="comment"># passwd test</span></span><br><span class="line">输入新的 UNIX 密码：</span><br><span class="line">重新输入新的 UNIX 密码：</span><br><span class="line">passwd：已成功更新密码</span><br></pre></td></tr></table></figure>
-<p>可以加 -m （–create-home）选项以创建家目录，并且需要用passwd命令设置密码。恩，比较麻烦，这个据说是因为adduser命令实际是一个perl脚本，是useradd等类似底层命令的更友好的前端。adduser面向用户，方便好用。</p>
-<p>要注意的是尽量记得要加上这个参数，因为他不仅会新建一个家目录，而且也会新建默认的.bashrc文件之类的相关配置。如果是自己后来手动mkdir的话，则会出现配置丢失等问题，比如提示符变成了”-bash-4.2$” 之类的问题。</p>
-<h2 id="userdel（需要root权限）"><a href="#userdel（需要root权限）" class="headerlink" title="userdel（需要root权限）"></a>userdel（需要root权限）</h2><p>简单方便的删除用户命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:/home<span class="comment"># userdel -r test</span></span><br><span class="line">userdel: <span class="built_in">test</span> 邮件池 (/var/mail/test) 未找到</span><br></pre></td></tr></table></figure>
-<p>就是直接删除一个用户，加上-r 参数还会删除用户目录和用户账户，所以一般当然要加-r啦。</p>
-<h2 id="passwd（需要root权限）"><a href="#passwd（需要root权限）" class="headerlink" title="passwd（需要root权限）"></a>passwd（需要root权限）</h2><p>简单易懂，之前用过。</p>
-<h2 id="usermod-需要root权限）"><a href="#usermod-需要root权限）" class="headerlink" title="usermod(需要root权限）"></a>usermod(需要root权限）</h2><p>这个命令比较复杂，当然也非常有用，在需要具体调节用户的权限时必不可少。我们一个一个看。</p>
-<ul>
-<li><p>-d（–home HOME_DIR） [directory]<br>这个参数用来设置用户的家目录，也就是修改&#x2F;etc&#x2F;passwd  文件里对应的值。要注意的是一定要用完整的路径名，而且要手动的创建文件夹，否则是没有用的。而且在用userdel -r删除用户的时候，这个目录也是要手动删除的。<br>用法：<br>root@myths-X450LD:&#x2F;home# usermod -d &#x2F;home&#x2F;newtest test</p>
-</li>
-<li><p>-m （–move-home）<br>这个参数用来修改家目录的名字，只能跟-d一起用。<br>用法:<br>root@myths-X450LD:&#x2F;home# usermod -md &#x2F;home&#x2F;newtest test</p>
-</li>
-<li><p>-s（–shell）<br>用来指定用户使用的shell文件一般是&#x2F;bin&#x2F;bash（绝对路径），有时候发现其他什么的都对然而还是无法登陆的话，有可能就是因为没有指定bash。<br>用法：<br>root@myths-X450LD:&#x2F;home# usermod -s &#x2F;bin&#x2F;bash test</p>
-</li>
-<li><p>-l （–login）<br>用来修改用户名，这个只是改了用户名，家目录的名字啥的都不变，这里注意一下，用法简单。<br>用法:<br>root@myths-X450LD:&#x2F;home# usermod -l newname test</p>
-</li>
-<li><p>-g &amp; -G<br> 这两个命令用来修改组，-g是通过修改&#x2F;etc&#x2F;passwd文件来改变用户所属的组，-G是通过修改&#x2F;etc&#x2F;group文件来改变添加用户能支持的组，这些组必须已经存在。<br>用法:<br>root@myths-X450LD:&#x2F;home# usermod -g myths test<br>root@myths-X450LD:&#x2F;home# usermod -G myths test</p>
-</li>
-</ul>
-<p>usermod 命令常用参数基本就这些，还有一些不常用的以后遇到再说，就这样吧。</p>
-<h2 id="groupadd-groupdel-这两个命令用来创建和删除组，比较常用"><a href="#groupadd-groupdel-这两个命令用来创建和删除组，比较常用" class="headerlink" title="groupadd groupdel  这两个命令用来创建和删除组，比较常用"></a>groupadd groupdel  这两个命令用来创建和删除组，比较常用</h2><p>root@myths-X450LD:&#x2F;home# groupadd test<br>root@myths-X450LD:&#x2F;home# groupdel test<br>有时候删除用户不完全，会遗留默认创建的组信息，提示烦人的信息，可以用这个命令删掉。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2046,7 +1995,7 @@ UsePAM yes
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2057,7 +2006,7 @@ UsePAM yes
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -2068,7 +2017,7 @@ UsePAM yes
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

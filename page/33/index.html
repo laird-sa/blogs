@@ -307,6 +307,454 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/08/%E7%94%A8%E4%BA%8E%E6%96%87%E6%A1%A3%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E5%8F%96%E7%9A%84TFIDF%E6%8C%87%E6%A0%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/08/%E7%94%A8%E4%BA%8E%E6%96%87%E6%A1%A3%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E5%8F%96%E7%9A%84TFIDF%E6%8C%87%E6%A0%87/" itemprop="url">用于文档关键字提取的TFIDF指标</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-08T12:46:09+00:00">
+                2016-09-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="关键字提取问题"><a href="#关键字提取问题" class="headerlink" title="关键字提取问题"></a>关键字提取问题</h2><p>在大规模网络文章整合的过程中，我们经常需要对某一篇文章提取关键字。比如对于某一篇关于计算机的文章，我们应该提取出类似于“计算机”、“编程”、“CPU”之类的符合人类认知习惯的关键词，但是这个过程却不是那么容易。现在，我们把问题归结为，在不使用机器学习方法的情况下，给定一个文档集，仅从单词频率等角度对文档集当中的某一篇文档进行考虑，期望能够对于该篇文章，我们能从文章中依次提取出最有代表性的关键词。</p>
+<p>我们很容易想到的方法就是统计每个词的词频了，但是对于任何文章而言，出现频率最多的应该是一些音节助词等毫无意义的词语，比如中文里的“的”、英文里的“is”之类的词语。这些词语我们通常叫他“停用词”。显然，在统计词频的时候我们首先得把他们去掉。但是去掉这些常见停用词之后，剩下的词语中出现频率高就真的意味着能够代表文章的主旨么？显然不一定，虽然在某些情况下，某个能表现主旨的词语会在文章中多次出现，但是在有些情况下这个表现主旨的词语只会偶尔出现，不过与此相对应的是，这些词在不同主旨的文章中出现的次数却应该更少。</p>
+<p>针对上述的特性，就有了TF.IDF指标。他的意义就是<strong>词项频率(Term  Frequency</strong>)乘以**逆文档频率(Inverse Document Frequency)**。</p>
+<h2 id="词项频率"><a href="#词项频率" class="headerlink" title="词项频率"></a>词项频率</h2><p>词项频率就是指在该文档中某一个词出现的频率，这个数值越高原则上就代表这个词语的得分就越大。当然，由于文章的词数可能会比较大，我们需要对这个频率进行下归一化。也就是说，假定文档集有$N$篇文档，$f_{ij}$表示词项$i$在文档$j$中出现的次数(或频率)，我们把他的词项频率$TF_{ij}$定义如下：$$TF_{ij}&#x3D;\frac{f_{ij}}{max_kf_{kj}}$$</p>
+<p>意思也很简单，就是把这个词的频率除以这个文档中频率最高的词的频率，作为他的词项频率。这个数值保证了词的得分与词在文章中的频率正相关。</p>
+<h2 id="逆文档频率"><a href="#逆文档频率" class="headerlink" title="逆文档频率"></a>逆文档频率</h2><p>逆文档频率顾名思义就是代表这个数值与该词项在所有文档中出现的频率逆相关，正如前面所说，一个词在所有文档中出现的次数越少就表示这个词越有可能代表某一个特定的主题。因此，我们再假定词项$i$在$N$篇文档集中的$n$篇文章内出现，那么我们把这个他的逆文档频率定义如下：$$IDF_i&#x3D;log_2\frac N {n_i}$$</p>
+<p>就是把出现频率$\frac{n_i}N$取个倒数再取个对数。这样既保证了该指数与文档频率逆相关，又保证了这个值的影响程度不会太大。</p>
+<h2 id="TF-IDF指标"><a href="#TF-IDF指标" class="headerlink" title="TF.IDF指标"></a>TF.IDF指标</h2><p>最后我们只要把上面这两个指数相乘就可以得到该词项在该文档中的权重了，即词项$i$在文档$j$中的得分为:$$TF_{ij}\times IDF_i$$</p>
+<p>其实这也算是个经验公式了，不过在很多情况下还是很准的。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/04/after-the-acquisition-of-supersu-by-ccmt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/04/after-the-acquisition-of-supersu-by-ccmt/" itemprop="url">CCMT收购SuperSU以后</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-04T17:08:00+00:00">
+                2016-09-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%82%E9%97%BB%E5%A0%82/" itemprop="url" rel="index">
+                    <span itemprop="name">异闻堂</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>大概没有比 SuperSU 声誉更好、认可度最高的软件。无论是移动设备、平板电脑，亦或者机顶盒、智能手表，只要是基于 Android 的设备，大家都会想到使用 Chainfire 的 SuperSU 来接管 Android 系统的 Root 权限。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/09/04/after-the-acquisition-of-supersu-by-ccmt/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/04/python%E7%B1%BB%E5%8F%98%E9%87%8F%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/04/python%E7%B1%BB%E5%8F%98%E9%87%8F%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9/" itemprop="url">python类变量和成员变量的使用注意点</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-04T12:18:55+00:00">
+                2016-09-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前在用python写一个项目，发现一个很恶心的bug，就是同由一个类生成的两个实例之间的数据竟然会相互影响，这让我非常不解。后来联想到java的类有类变量也有实例变量，因此翻阅了相关资料，发现python也有类似的类变量和实例变量，比如下面的代码中：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    x = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.y = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>x就是类变量，y就是实例变量。</p>
+<p>原则上是没有错的，但是实际用的时候就发现一些恶心的问题（也就是我找了三天的bug）。。。比如下面的代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    x = []</span><br><span class="line">    y = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">self</span>):</span><br><span class="line">        self.x.append(<span class="string">&#x27;1&#x27;</span>)</span><br><span class="line">        self.y+=<span class="number">1</span></span><br><span class="line">a=A() </span><br><span class="line"><span class="built_in">print</span> a.x,a.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br><span class="line">a.add()</span><br><span class="line"><span class="built_in">print</span> a.x,a.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br><span class="line">b=A() </span><br><span class="line"><span class="built_in">print</span> b.x,b.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br></pre></td></tr></table></figure>
+<p>这里很明显x和y都是类变量，add的作用是分别对x和y做出修改。然后构造一个实例a，对实例a的值进行修改，最后构造实例b。</p>
+<p>本以为这个结果是显而易见的，然而他输出的结果却是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[] 0</span><br><span class="line">[] 0</span><br><span class="line">[&#x27;1&#x27;] 1</span><br><span class="line">[&#x27;1&#x27;] 0</span><br><span class="line">[&#x27;1&#x27;] 0</span><br><span class="line">[&#x27;1&#x27;] 0</span><br></pre></td></tr></table></figure>
+<p>问题在哪？明明x和y都是类变量，在第二组print中为什么a.x和b.x一样，但是a.y和b.y就是不一样呢？</p>
+<p>想了半天悟了一个道理。。。就是对于python来说，类变量的确是所有类共有的东西。但是那是在我们用的同一个引用的情况下，比如对于[]对象的append方法就是公用一个类变量了；但是对于赋值语句来说，如果在类中对类变量使用了赋值语句，那么python就会生成一个该对象的副本，以后的操作都是基于这个副本而不会对原来的类对象造成影响。这样就解释的通上面的现象了。</p>
+<p>那么为了杜绝自己忘记类变量和实例变量的区别导致本不想公用变量的时候公用了变量，最好的办法就是在每个类中使用变量的时候重新初始化一下，这样就不会导致意外了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/30/coding-snapdragon-810-down/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1353,482 +1801,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/04/PostGIS%E5%88%9D%E6%8E%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/04/PostGIS%E5%88%9D%E6%8E%A2/" itemprop="url">PostGIS初探</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-04T15:32:12+00:00">
-                2016-08-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>PostGIS是PostgreSQL的空间扩展，他使得PostgreSQL支持空间数据类型，比如点、线段、折线段、多边形、椭圆等等，并且能够使用高效的空间索引进行存储和查找。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>ubuntu下在安装好PostgreSQL的基础下用<code>apt install postgis</code>即可。</p>
-<p>确认安装版本可以用在postgreSQL的shell里查询:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths=# select * from pg_available_extensions where name like &#x27;postgis%&#x27;;</span><br></pre></td></tr></table></figure>
-<p>我这里大概显示的是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">name          | default_version | installed_version |                               comment                               </span><br><span class="line">------------------------+-----------------+-------------------+---------------------------------------------------------------------</span><br><span class="line"> postgis_sfcgal         | 2.2.1           |                   | PostGIS SFCGAL functions</span><br><span class="line"> postgis                | 2.2.1           |                   | PostGIS geometry, geography, and raster spatial types and functions</span><br><span class="line"> postgis_topology       | 2.2.1           |                   | PostGIS topology spatial types and functions</span><br><span class="line"> postgis_tiger_geocoder | 2.2.1           |                   | PostGIS tiger geocoder and reverse geocoder</span><br></pre></td></tr></table></figure>
-<p>很明显可以看见版本和说明。</p>
-<h2 id="简要使用"><a href="#简要使用" class="headerlink" title="简要使用"></a>简要使用</h2><p>用好这个扩展好像也是个挺麻烦的事的，因为这个牵涉到使用很多的函数，因此查看帮助文档就显得很必要了。</p>
-<p>下面就以对点进行最近邻的查找为例。</p>
-<p><strong>首先要导入该扩展:</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;myths=# create extension postgis;</span><br></pre></td></tr></table></figure>
-<p>导入后会在数据库里多出下面这几个表：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">myths=# \d</span><br><span class="line">             List of relations</span><br><span class="line"> Schema |       Name        | Type  | Owner </span><br><span class="line">--------+-------------------+-------+-------</span><br><span class="line"> public | geography_columns | view  | myths</span><br><span class="line"> public | geometry_columns  | view  | myths</span><br><span class="line"> public | raster_columns    | view  | myths</span><br><span class="line"> public | raster_overviews  | view  | myths</span><br><span class="line"> public | spatial_ref_sys   | table | myths</span><br><span class="line">(５ rows)</span><br></pre></td></tr></table></figure>
-<p>这些东西都是postgis必备的东西，尤其是spatial_ref_sys表，保存了不同的坐标系信息。</p>
-<p><strong>然后建表：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths=# create table testTable(id int primary key ,geo geometry(point,0));</span><br></pre></td></tr></table></figure>
-<p>基本的sql语句，不同的是geo字段的类型是point，而且后面跟了个数字。这个数字是srid，表示我们使用的坐标集。这个数字对应的是之前的spatial_ref_sys里的字段。通常的经纬度坐标集对应的srid是4326，而这里的0表示我用的是普通的几何坐标。关于srid的问题可以直接百度。</p>
-<p><strong>插入语句：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths=#　insert into testTable values(1,ST_GeomFromText(&#x27;POINT(32 66)&#x27;,0));</span><br></pre></td></tr></table></figure>
-<p>这就用到了st_geomfromtext()函数，这个函数把文本形式的类型转换为实际类型，并且指定srid，插入到表中。</p>
-<p>对应的类型还有：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">• POINT(0 0)</span><br><span class="line">• LINESTRING(0 0,1 1,1 2)</span><br><span class="line">• POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))</span><br><span class="line">• MULTIPOINT(0 0,1 2)</span><br><span class="line">• MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))</span><br><span class="line">• MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))</span><br><span class="line">• GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))</span><br><span class="line">。。。。。。</span><br></pre></td></tr></table></figure>
-
-<p><strong>批量生成数据</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.BufferedWriter;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		<span class="type">BufferedWriter</span> <span class="variable">writer</span> <span class="operator">=</span> Files.newBufferedWriter(Paths.get(<span class="string">&quot;/home/myths/Desktop/data.txt&quot;</span>));</span><br><span class="line">		<span class="type">Random</span> <span class="variable">rand</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Random</span>();</span><br><span class="line">		<span class="type">int</span> <span class="variable">left</span> <span class="operator">=</span> -<span class="number">500000</span>, right = <span class="number">500000</span>, up = <span class="number">500000</span>, down = -<span class="number">500000</span>;</span><br><span class="line">		<span class="type">int</span> <span class="variable">number</span> <span class="operator">=</span> <span class="number">1000000</span>;</span><br><span class="line">		writer.write(<span class="string">&quot;begin;\n&quot;</span>);</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; number; i++) &#123;</span><br><span class="line">			<span class="type">int</span> <span class="variable">randx</span> <span class="operator">=</span> rand.nextInt(right - left) + left;</span><br><span class="line">			<span class="type">int</span> <span class="variable">randy</span> <span class="operator">=</span> rand.nextInt(up - down) + down;</span><br><span class="line">			<span class="type">String</span> <span class="variable">query</span> <span class="operator">=</span> String.format(<span class="string">&quot;insert into testTable values(%d,ST_GeomFromText(&#x27;POINT(%d %d)&#x27;,0));\n&quot;</span>, i,</span><br><span class="line">					randx, randy);</span><br><span class="line">			writer.write(query);</span><br><span class="line">		&#125;</span><br><span class="line">		writer.write(<span class="string">&quot;commit;\n&quot;</span>);</span><br><span class="line">		writer.flush();</span><br><span class="line">		writer.close();</span><br><span class="line">		System.out.println(<span class="string">&quot;done&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>生成后用<code>myths=# \i ~/Desktop/data.txt</code>导入即可。</p>
-<p><strong>最近邻查找</strong><br><code>myths=# select id,st_astext(geo) from testtable order by geo&lt;-&gt;st_geomfromtext(&#39;point(10 10)&#39;,0) limit 10;</code><br>这个语句就是查找距离点(10,10)最近的前10个点。这里&lt;-&gt;表示求距离，st_astext()函数把wkb形式的数据转换成wkt的可读形式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">id   |     st_astext     </span><br><span class="line">--------+-------------------</span><br><span class="line"> 863823 | POINT(-388 537)</span><br><span class="line"> 789164 | POINT(-136 -947)</span><br><span class="line"> 841388 | POINT(670 808)</span><br><span class="line"> 368903 | POINT(1069 664)</span><br><span class="line"> 169180 | POINT(1209 -458)</span><br><span class="line"> 359475 | POINT(-83 1348)</span><br><span class="line"> 167871 | POINT(792 -1300)</span><br><span class="line"> 337646 | POINT(-1047 1152)</span><br><span class="line"> 585595 | POINT(-955 1439)</span><br><span class="line">  46949 | POINT(-920 -1480)</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 2207.639 ms</span><br></pre></td></tr></table></figure>
-<p>否则就是这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">myths=# select id,geo from testtable order by geo&lt;-&gt;st_geomfromtext(&#x27;point(10 10)&#x27;,0) limit 10;</span><br><span class="line">   id   |                    geo                     </span><br><span class="line">--------+--------------------------------------------</span><br><span class="line"> 863823 | 010100000000000000004078C00000000000C88040</span><br><span class="line"> 789164 | 010100000000000000000061C00000000000988DC0</span><br><span class="line"> 841388 | 01010000000000000000F084400000000000408940</span><br><span class="line"> 368903 | 01010000000000000000B490400000000000C08440</span><br><span class="line"> 169180 | 01010000000000000000E492400000000000A07CC0</span><br><span class="line"> 359475 | 01010000000000000000C054C00000000000109540</span><br><span class="line"> 167871 | 01010000000000000000C0884000000000005094C0</span><br><span class="line"> 337646 | 010100000000000000005C90C00000000000009240</span><br><span class="line"> 585595 | 01010000000000000000D88DC000000000007C9640</span><br><span class="line">  46949 | 01010000000000000000C08CC000000000002097C0</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 690.557 ms</span><br></pre></td></tr></table></figure>
-
-<p><strong>添加索引</strong><br><code>myths=# create index testIndex on testtable using gist(geo);</code><br>对于空间类型添加的索引是gist类型的，具体含义参见文档。</p>
-<p>添加了索引后可以发现查询效率有明显提升：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">myths=# select id,st_astext(geo) from testtable order by geo&lt;-&gt;st_geomfromtext(&#x27;point(10 10)&#x27;,0) limit 10;</span><br><span class="line">   id   |     st_astext     </span><br><span class="line">--------+-------------------</span><br><span class="line"> 863823 | POINT(-388 537)</span><br><span class="line"> 789164 | POINT(-136 -947)</span><br><span class="line"> 841388 | POINT(670 808)</span><br><span class="line"> 368903 | POINT(1069 664)</span><br><span class="line"> 169180 | POINT(1209 -458)</span><br><span class="line"> 359475 | POINT(-83 1348)</span><br><span class="line"> 167871 | POINT(792 -1300)</span><br><span class="line"> 337646 | POINT(-1047 1152)</span><br><span class="line"> 585595 | POINT(-955 1439)</span><br><span class="line">  46949 | POINT(-920 -1480)</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 49.153 ms</span><br><span class="line"></span><br><span class="line">myths=# select id,geo from testtable order by geo&lt;-&gt;st_geomfromtext(&#x27;point(10 10)&#x27;,0) limit 10;</span><br><span class="line">   id   |                    geo                     </span><br><span class="line">--------+--------------------------------------------</span><br><span class="line"> 863823 | 010100000000000000004078C00000000000C88040</span><br><span class="line"> 789164 | 010100000000000000000061C00000000000988DC0</span><br><span class="line"> 841388 | 01010000000000000000F084400000000000408940</span><br><span class="line"> 368903 | 01010000000000000000B490400000000000C08440</span><br><span class="line"> 169180 | 01010000000000000000E492400000000000A07CC0</span><br><span class="line"> 359475 | 01010000000000000000C054C00000000000109540</span><br><span class="line"> 167871 | 01010000000000000000C0884000000000005094C0</span><br><span class="line"> 337646 | 010100000000000000005C90C00000000000009240</span><br><span class="line"> 585595 | 01010000000000000000D88DC000000000007C9640</span><br><span class="line">  46949 | 01010000000000000000C08CC000000000002097C0</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 1.092 ms</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://www.postgis.net/">PostGIS.net</a><br><a target="_blank" rel="noopener" href="http://postgis.net/docs/manual-2.0/">PostGIS 2.0 Manual</a><br><a target="_blank" rel="noopener" href="http://mysql.taobao.org/monthly/2015/07/04/">PostGIS 在 O2O应用中的优势</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/04/PostgreSQL%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/04/PostgreSQL%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/" itemprop="url">PostgreSQL安装使用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-04T13:17:35+00:00">
-                2016-08-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>PostgreSQL大概是除MySQL之外的最好用的开源数据库管理系统了，有着开源数据库中最好的空间扩展，当前的应用也特别的多。当然我主要就是冲着PostGIS来的，不过在这之前首先得会玩PostGreSQL。下面就简要记录下使用过程。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>PostgreSQL有个<a target="_blank" rel="noopener" href="https://www.postgresql.org/">官方网站</a>，这里有简要的说明和文档。ubuntu下安装直接用apt大法就可以。这里需要注意下版本，不要在电脑里留多个不同的版本。</p>
-<p>安装好后在shell里用<code>$psql -V</code>来查看版本。在<code>\etc\postgresql\</code> 目录下也会有对应版本号的配置文件。如果发现什么端口错误或者被占用的问题可以在<code>postgresql.conf</code>下修改下端口或者删除多余的版本。</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>PostgreSQL和其他数据库有个很大的不同就是他登陆的时候是以数据库的身份登陆的，默认的数据库是postgres(而且会在安装时自动生成postgres这个角色)。因此我们首先得以postgres的角色进行操作。</p>
-<p>具体的创建角色和数据库的过程参照**<a target="_blank" rel="noopener" href="http://www.cnblogs.com/stephen-liu74/archive/2012/05/18/2302639.html">PostgreSQL学习手册(角色和权限)</a>**。</p>
-<p>关于其他的细节可以参考**<a target="_blank" rel="noopener" href="http://www.php100.com/manual/PostgreSQL8/tutorial.html">PostgreSQL 8.1 中文文档</a>**这里的教程来。</p>
-<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><ol>
-<li>一般的SQL语句与其他类型的数据库差不多。</li>
-<li>选择数据库、选择表等操作可以用<code>\?</code>命令查看，比如<code>\d</code>  <code>\l</code>  <code>\timing</code> 等。</li>
-<li>一些内置的表基本都是以<code>pg_</code> 开头，而且可以用自动补全来查看，比如管理角色的<code>pg_roles</code> 表、管理密码的<code>pg_shadow</code> 表等。</li>
-</ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/stephen-liu74/archive/2012/05/18/2302639.html">PostgreSQL学习手册(角色和权限)</a><br><a target="_blank" rel="noopener" href="http://www.php100.com/manual/PostgreSQL8/tutorial.html">PostgreSQL 8.1 中文文档</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/22/javascript-Function/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/07/22/javascript-Function/" itemprop="url">js高级与面向对象之函数</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-22T11:40:39+00:00">
-                2016-07-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">func</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="comment">//函数体</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//2.函数表达式</span></span><br><span class="line"><span class="keyword">var</span> func1 = <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//3.通过Function构造函数来创建</span></span><br><span class="line"><span class="keyword">var</span> func2 = <span class="keyword">new</span> <span class="title class_">Function</span>();</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/07/22/javascript-Function/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1879,7 +1851,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1890,7 +1862,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1901,7 +1873,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

@@ -307,6 +307,782 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/10/%E5%88%A9%E7%94%A8python%E8%84%9A%E6%9C%AC%E7%88%AC%E5%8F%96%E5%AD%97%E4%BD%93%E6%96%87%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/10/%E5%88%A9%E7%94%A8python%E8%84%9A%E6%9C%AC%E7%88%AC%E5%8F%96%E5%AD%97%E4%BD%93%E6%96%87%E4%BB%B6/" itemprop="url">利用python脚本爬取字体文件</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-10T11:30:21+00:00">
+                2016-03-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>为了提高验证码的识别准确率，我们当然要首先得到足够多的测试数据。验证码下载下来容易，但是需要人脑手工识别着实让人受不了，于是我就想了个折衷的办法——自己造验证码。</p>
+<p>为了保证多样性，首先当然需要不同的字模了，直接用类似ttf格式的字体文件即可，网上有很多ttf格式的字体包供我们下载。当然，我不会傻到手动下载解压缩，果断要写个爬虫了。</p>
+<h3 id="网站一：fontsquirrel-com"><a href="#网站一：fontsquirrel-com" class="headerlink" title="网站一：fontsquirrel.com"></a>网站一：fontsquirrel.com</h3><p>这个网站的字体可以免费下载，但是有很多下载点都是外链连接到其他网站的，这部分得忽略掉。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> urllib2,cookielib,sys,re,os,zipfile</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment">#网站登陆</span></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36))&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line"></span><br><span class="line"><span class="comment">#搜索可下载连接</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search</span>(<span class="params">path</span>):</span><br><span class="line">    request=urllib2.Request(path)</span><br><span class="line">    response=urllib2.urlopen(request)</span><br><span class="line">    html=response.read()</span><br><span class="line">    html=html.replace(<span class="string">&#x27;\n&#x27;</span>,<span class="string">&#x27; &#x27;</span>)<span class="comment">#将所有的回车去掉，因为正则表达式是单行匹配。。。。。。</span></span><br><span class="line">    urls=re.findall(<span class="string">r&#x27;&lt;a href=&quot;(.*?)&quot;&gt;(.*?)&lt;/a&gt;&#x27;</span>,html)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> urls:</span><br><span class="line">        url,inner=i</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> re.findall(<span class="string">r&#x27;Download &#x27;</span>,inner)==[] <span class="keyword">and</span> re.findall(<span class="string">r&#x27;offsite&#x27;</span>,inner)==[] <span class="keyword">and</span> url <span class="keyword">not</span> <span class="keyword">in</span> items:</span><br><span class="line">            items.append(url)</span><br><span class="line"></span><br><span class="line">items=[]<span class="comment">#保存下载地址</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">15</span>):</span><br><span class="line">    host=<span class="string">&#x27;http://www.fontsquirrel.com/fonts/list/find_fonts/&#x27;</span>+<span class="built_in">str</span>(i*<span class="number">50</span>)+<span class="string">&#x27;?filter%5Bdownload%5D=local&#x27;</span></span><br><span class="line">    search(host)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">&#x27;ttf&#x27;</span>):</span><br><span class="line">    os.mkdir(<span class="string">&#x27;ttf&#x27;</span>)</span><br><span class="line">os.chdir(<span class="string">&#x27;ttf&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">unzip</span>(<span class="params">rawfile,outputdir</span>):</span><br><span class="line">    <span class="keyword">if</span> zipfile.is_zipfile(rawfile):</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;yes&#x27;</span></span><br><span class="line">        fz=zipfile.ZipFile(rawfile,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">        <span class="keyword">for</span> files <span class="keyword">in</span> fz.namelist():</span><br><span class="line">            <span class="built_in">print</span>(files)  <span class="comment">#打印zip归档中目录</span></span><br><span class="line">            fz.extract(files,outputdir)<span class="comment">#解压缩文件</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;no&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> items: </span><br><span class="line">    <span class="built_in">print</span> i</span><br><span class="line">    request=urllib2.Request(<span class="string">&#x27;http://www.fontsquirrel.com&#x27;</span>+i)</span><br><span class="line">    response=urllib2.urlopen(request)</span><br><span class="line">    html=response.read()</span><br><span class="line">    name=i.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>]+<span class="string">&#x27;.zip&#x27;</span></span><br><span class="line">    f=<span class="built_in">open</span>(name,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">    f.write(html)</span><br><span class="line">    f.close()<span class="comment">#文件记得关闭，否则下面unzip会出错</span></span><br><span class="line">    unzip(name,<span class="string">&#x27;./&#x27;</span>)</span><br><span class="line">    os.remove(name)</span><br><span class="line"></span><br><span class="line">os.listdir(os.getcwd())</span><br><span class="line">os.chdir(<span class="string">&#x27;../&#x27;</span>)</span><br><span class="line"></span><br><span class="line">files=os.listdir(<span class="string">&#x27;ttf/&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> files:<span class="comment">#删除无用文件</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> (i.split(<span class="string">&#x27;.&#x27;</span>)[-<span class="number">1</span>]==<span class="string">&#x27;ttf&#x27;</span> <span class="keyword">or</span> i.split(<span class="string">&#x27;.&#x27;</span>)[-<span class="number">1</span>]==<span class="string">&#x27;otf&#x27;</span>):</span><br><span class="line">        <span class="keyword">if</span> os.path.isdir(i):</span><br><span class="line">            os.removedirs(<span class="string">&#x27;ttf/&#x27;</span>+i)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            os.remove(<span class="string">&#x27;ttf/&#x27;</span>+i)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>  <span class="built_in">len</span>(os.listdir(<span class="string">&#x27;ttf/&#x27;</span>))</span><br></pre></td></tr></table></figure>
+<p>搞到了2000+个字体，种类也挺多的，蛮好。</p>
+<h3 id="网站二：dafont-com"><a href="#网站二：dafont-com" class="headerlink" title="网站二：dafont.com"></a>网站二：dafont.com</h3><p>这个网站的字体花样比较多，下载起来也比较方便，恶心的是他的文件名的编码好像有点问题。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> urllib2,cookielib,sys,re,os,zipfile</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36))&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line"></span><br><span class="line">items=[]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">search</span>(<span class="params">path</span>):</span><br><span class="line">    request=urllib2.Request(path)</span><br><span class="line">    response=urllib2.urlopen(request)</span><br><span class="line">    html=response.read()</span><br><span class="line">    html=html.replace(<span class="string">&#x27;\n&#x27;</span>,<span class="string">&#x27; &#x27;</span>)</span><br><span class="line">    urls=re.findall(<span class="string">r&#x27;href=\&quot;(http://dl.dafont.com/dl/\?f=.*?)\&quot; &gt;&#x27;</span>,html)</span><br><span class="line">    items.extend(urls)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">117</span>):</span><br><span class="line">    host=<span class="string">&#x27;http://www.dafont.com/new.php?page=&#x27;</span>+<span class="built_in">str</span>(i+<span class="number">1</span>)</span><br><span class="line">    search(host)</span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;Page&#x27;</span>+<span class="built_in">str</span>(i+<span class="number">1</span>)+<span class="string">&#x27;done&#x27;</span></span><br><span class="line">    items=<span class="built_in">list</span>(<span class="built_in">set</span>(items))</span><br><span class="line">    <span class="built_in">print</span> <span class="built_in">len</span>(items)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">&#x27;ttf2&#x27;</span>):</span><br><span class="line">    os.mkdir(<span class="string">&#x27;ttf2&#x27;</span>)</span><br><span class="line">os.chdir(<span class="string">&#x27;ttf2&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">unzip</span>(<span class="params">rawfile,outputdir</span>):</span><br><span class="line">    <span class="keyword">if</span> zipfile.is_zipfile(rawfile):</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;yes&#x27;</span></span><br><span class="line">        fz=zipfile.ZipFile(rawfile,<span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">        <span class="keyword">for</span> files <span class="keyword">in</span> fz.namelist():</span><br><span class="line">            <span class="built_in">print</span>(files)  <span class="comment">#打印zip归档中目录</span></span><br><span class="line">            fz.extract(files,outputdir)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;no&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> items: </span><br><span class="line">    <span class="built_in">print</span> i</span><br><span class="line">    request=urllib2.Request(i)</span><br><span class="line">    response=urllib2.urlopen(request)</span><br><span class="line">    html=response.read()</span><br><span class="line">    name=i.split(<span class="string">&#x27;=&#x27;</span>)[-<span class="number">1</span>]+<span class="string">&#x27;.zip&#x27;</span></span><br><span class="line">    f=<span class="built_in">open</span>(name,<span class="string">&#x27;w&#x27;</span>)</span><br><span class="line">    f.write(html)</span><br><span class="line">    f.close()</span><br><span class="line">    unzip(name,<span class="string">&#x27;./&#x27;</span>)</span><br><span class="line">    os.remove(name)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> os.listdir(os.getcwd())</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> root ,dire,fis <span class="keyword">in</span> os.walk(<span class="string">&#x27;./&#x27;</span>):<span class="comment">#递归遍历文件夹</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> fis:</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> (i.split(<span class="string">&#x27;.&#x27;</span>)[-<span class="number">1</span>]==<span class="string">&#x27;ttf&#x27;</span> <span class="keyword">or</span> i.split(<span class="string">&#x27;.&#x27;</span>)[-<span class="number">1</span>]==<span class="string">&#x27;otf&#x27;</span>):</span><br><span class="line">            os.remove(root+i)</span><br><span class="line">            <span class="built_in">print</span> i</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(<span class="string">&#x27;./&#x27;</span>):</span><br><span class="line">    <span class="keyword">if</span> os.path.isdir(i):</span><br><span class="line">        os.rmdir(i)</span><br><span class="line">os.chdir(<span class="string">&#x27;../&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>总体操作跟之前的差不多，跑了几十分钟下了4000多的字体。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/08/%E8%87%AA%E9%80%82%E5%BA%94%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2%E7%9A%84Bersen%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/08/%E8%87%AA%E9%80%82%E5%BA%94%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2%E7%9A%84Bersen%E7%AE%97%E6%B3%95/" itemprop="url">自适应阈值分割的Bersen算法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-08T12:05:34+00:00">
+                2016-03-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近处理到游侠网的验证码，学习了一点东西，聊作记录。</p>
+<p>游侠网的验证码总体来讲比较简单，字符分割比较清楚。稍微有难度的地方就是处理他的阴影。</p>
+<p>** 示例 **</p>
+<p><img src="/images/2016/03/08/1/1.png"><br><img src="/images/2016/03/08/1/2.png"><br><img src="/images/2016/03/08/1/3.png"><br><img src="/images/2016/03/08/1/4.png"></p>
+<p>很明显，如果直接拿这种图去跑机器学习算法的话肯定准确率不高，必然需要进行灰度或者二值化。当然，二值化是比较好的选择。</p>
+<p>但是由于灰度分布是不均匀的，如果采用类似OTSU的全局阈值显然会造成分割不准，而局部阈值分割的Bersen算法则非常适合处理这种情况。</p>
+<p>OTSU算法得到的图像：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">im=cv2.imread(<span class="string">&#x27;source.png&#x27;</span>,cv2.IMREAD_GRAYSCALE)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;source.png&#x27;</span>,im)</span><br><span class="line">thresh,im=cv2.threshold(im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;OTSU.png&#x27;</span>,im)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/2016/03/08/1/5.png"><br><img src="/images/2016/03/08/1/6.png"></p>
+<h2 id="Bersen算法"><a href="#Bersen算法" class="headerlink" title="Bersen算法"></a>Bersen算法</h2><p>原始的Bersen算法很简单，对于每一个像素点，以他为中心，取一个长宽均为((2w+1)^2)的核；对于这个核，取当中的极大值和极小值的平均值作为阈值，对该像素点进行二值化。然后将这个过程应用到整张图即可。</p>
+<p>这个也很好理解，只要取一个适当的核的大小w，就可以在每一个局部内取得一个较好的阈值而不去考虑全局的其他像素。但是这有一个问题，就是他对噪声比较敏感，毕竟每一个像素点的取值仅仅依赖于附近区域内的极大极小两个值。因此实际操作中通常不是取极大极小值，而是取整个核的平均值或是加权平均值。具体操作下来通常就是用一个高斯平滑滤波。</p>
+<h2 id="实现效果"><a href="#实现效果" class="headerlink" title="实现效果"></a>实现效果</h2><p>算法比较简单，而且OpenCV里直接给了个函数调用，方便省事。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line">im=cv2.imread(<span class="string">&#x27;13.png&#x27;</span>,cv2.IMREAD_GRAYSCALE)</span><br><span class="line">im=cv2.adaptiveThreshold(im,<span class="number">255</span>,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,<span class="number">11</span>,<span class="number">2</span>)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;mean.png&#x27;</span>,im)</span><br><span class="line">im=cv2.adaptiveThreshold(im,<span class="number">255</span>,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,<span class="number">11</span>,<span class="number">2</span>)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;gaussian.png&#x27;</span>,im)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/2016/03/08/1/7.png" alt="mean"><br><img src="/images/2016/03/08/1/8.png" alt="gaussian"></p>
+<p>分别用平均加权和高斯加权显示。。效果差不多，都挺好的。这里的倒数第二个参数就是卷积核的大小，最后一个参数是像素的矫正，即将实际算得的像素减去这个值得到结果。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/07/python%E6%A8%A1%E5%9D%97%E5%8C%85%E7%89%88%E6%9C%AC%E5%86%B2%E7%AA%81%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/07/python%E6%A8%A1%E5%9D%97%E5%8C%85%E7%89%88%E6%9C%AC%E5%86%B2%E7%AA%81%E9%97%AE%E9%A2%98/" itemprop="url">python模块包版本冲突问题</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-07T01:08:24+00:00">
+                2016-03-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>最近在安装python软件包的时候，经常会遇类似这样一个问题。比如对于ipython,机子本身安装的版本是1.2.1，显然太低，不足以跑jupyter，尝试着用pip安装，却发现下载的过程一路畅通，但是安装的时候却总是会报这样一个错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">......&#x27;Not uninstalling ipython at /usr/lib/python2.7/dist-packages, owned by OS&#x27;......</span><br></pre></td></tr></table></figure>
+<p>最终显示了ipython已经成功安装，但是查看version的时候却仍然是1.2.1，弄得我十分头大。</p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>后来研究了一下，发现其实造成这个问题的原因很简单，就是因为ubuntu的apt-get版本与pip安装的版本冲突。由于apt-get的’地位‘要比pip高那么一点（毕竟亲爹），系统会优先使用apt-get 里面的软件包。但是apt-get 里的软件通常特别的老旧，完全无法跟得上python包的更新速度，pip虽然版本新，但是却不能删除apt-get 的老旧版本。。。。。。这就造成了错误中提到的的无法卸载的问题了。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>至于此，解决问题的方法已经很清楚了，只要手动卸载掉apt-get里对应的过时的软件包即可。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/05/Python%E5%9C%A8%E7%BA%BF%E7%BC%96%E5%86%99%E4%BB%A5%E5%8F%8A%E6%96%87%E6%A1%A3%E6%9F%A5%E7%9C%8B%E5%B7%A5%E5%85%B7jupyter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/05/Python%E5%9C%A8%E7%BA%BF%E7%BC%96%E5%86%99%E4%BB%A5%E5%8F%8A%E6%96%87%E6%A1%A3%E6%9F%A5%E7%9C%8B%E5%B7%A5%E5%85%B7jupyter/" itemprop="url">Python在线编写以及文档查看工具jupyter</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-05T16:49:30+00:00">
+                2016-03-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>jupyter其实就是ipython notebook的另一个版本，是一个很强大的基于ipython的python代码编辑器，python文档查看器。他可以部署在网页上，可以非常方便的对文件进行查看、下载，并且对python文件进行在线编译，甚至是远程连接。。。。。。用他编写的python文件本身就是一个强大的开发文档。更重要的是很多基于python开发的开源程序都热衷于用.ipynb格式的文件作为文档（比如caffe）。因此掌握jupyter的使用也尤为重要。</p>
+<h2 id="Ipython-notebook"><a href="#Ipython-notebook" class="headerlink" title="Ipython notebook"></a>Ipython notebook</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>首先我们来探讨下jupyter的前身，ipython notebook。直接输入命令<code>$ipython notebook</code> 即可在浏览器中自动打开一个界面，显示了当前路径下的文件树。在这当中我们可以自由的编辑、处理文件，编写运行python文件等等。我们一方面可以用它来编程，另一方面也可以把他当成一个远程文件管理器，界面好看，用起来也十分的方便。</p>
+<p>既然如此，我们就试着在服务器上搭建一个ipython notebook服务。</p>
+<h3 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h3><p>详细的文档可见<a target="_blank" rel="noopener" href="https://ipython.org/ipython-doc/2/notebook/public_server.html">ipython官方文档</a>，这里是结合文档进行的配置。</p>
+<h4 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h4><p>配置文件默认在~&#x2F;.ipython&#x2F;profile_default&#x2F;文件夹中，这里default是profile 的用户名，也是我们打开notebook的默认用户。但是有时候我们会发现这里面的东西并不像配置文件。其实我们只需要输入如下命令即可把默认的配置文件给显示出来：<br><code>$ipython profile create default</code><br>很好理解，就是显式的创建一个default用户（当然我们还可以创建其他名字的用户）。</p>
+<p>现在，打开~&#x2F;.ipython&#x2F;profile_default&#x2F;ipython_notebook_config.py文件，这个就是我们的配置文件了。</p>
+<h4 id="设置密码"><a href="#设置密码" class="headerlink" title="设置密码"></a>设置密码</h4><p>由于ipython notebook 远程登陆的话权限很大，因此还是设置一个密码来保证安全。</p>
+<p>1、首先我们要得到密码的哈希值，在ipython 中进行如下操作:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [1]: from IPython.lib import passwd</span><br><span class="line">In [2]: passwd()</span><br><span class="line">Enter password:</span><br><span class="line">Verify password:</span><br><span class="line">Out[2]: &#x27;sha1:7467b7351f12:79fc6599f863a8daf048c655f60adf03003b87f3&#x27;</span><br></pre></td></tr></table></figure>
+<p>在这里输入密码，就可以得到他的hash值了。记住Out[2]中的字符串。</p>
+<p>2、然后在配置文件ipython_notebook_config.py中写如入下面的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">c = get_config()</span><br><span class="line">c.NotebookApp.password =u&#x27;sha1:7467b7351f12:79fc6599f863a8daf048c655f60adf03003b87f3&#x27;</span><br></pre></td></tr></table></figure>
+<p>这样就可以了。</p>
+<h4 id="配置接入点"><a href="#配置接入点" class="headerlink" title="配置接入点"></a>配置接入点</h4><p>这是稍微麻烦的地方，因为ipython的端口默认是8888而且不能跟apache2的冲突，所以在配置的时候需要想办法用一个优雅的姿势来用apache2访问到8888端口。</p>
+<p>1、首先对配置文件进行一下设置，打开ipython_notebook_config.py，加入下面的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">c.IPKernelApp.pylab = &#x27;inline&#x27;  # if you want plotting support always</span><br><span class="line">c.NotebookApp.ip = &#x27;*&#x27;</span><br><span class="line">c.NotebookApp.open_browser = False</span><br><span class="line"># It is a good idea to put it on a known, fixed port</span><br><span class="line">c.NotebookApp.port = 8888</span><br><span class="line">````</span><br><span class="line">很明显，我们可以自由的配置端口。由于ipython notebook会默认打开一个浏览器窗口，而服务器是打不开浏览器的，所以我么会把c.NotebookApp.open_browser设置为false防止warning。</span><br><span class="line"></span><br><span class="line">c.NotebookApp.ip经检测还是设置为*好。。。否则会出现很多莫名的错误。</span><br><span class="line"></span><br><span class="line">2、为了让apache2能自然的访问到8888端口，我们配置下.htaccess文件。打开网站根目录下的.htaccess文件，添加下面的语句：</span><br></pre></td></tr></table></figure>
+<p>RewriteCond %{HTTP_HOST} ^ipython.mythsman.com$ [NC]<br>RewriteCond %{REQUEST_URI} ^&#x2F;(.<em>)$ [NC]<br>RewriteRule ^(.</em>)$ <a target="_blank" rel="noopener" href="http://ipython.mythsman.com:8888/%1">http://ipython.mythsman.com:8888/%1</a> [R&#x3D;301,L]</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">意思很简单，就是把ipython.mythsman.com的80端口重定向到8888端口。而这个站点的根目录其实就是我们打开ipython notebook 服务的那个目录。</span><br><span class="line"></span><br><span class="line">事实上，我们可以在当前站点的任何子域名下输入8888端口进入这里。</span><br><span class="line"></span><br><span class="line">## Jupyter</span><br><span class="line"></span><br><span class="line">不知道为什么ipython notebook对于文件的同步性并不好。相比之下Jupyter做的就好多了，而且界面也更加漂亮。其实我个人觉得Jupyter就是ipython notebook的一种更新。</span><br><span class="line"></span><br><span class="line">详细信息参见[官方文档](http://jupyter.readthedocs.org/en/latest/)。</span><br><span class="line"></span><br><span class="line">### 安装</span><br><span class="line"></span><br><span class="line">用`$pip install jupyter`等一系列类似手段，不解释了。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 配置</span><br><span class="line"></span><br><span class="line">#### 配置文件</span><br><span class="line"></span><br><span class="line">其实jupyter本身的配置还是有点麻烦的，不过我们可以把ipython notebook的配置文件移植过来～～参考下面的映射表：</span><br><span class="line"></span><br><span class="line">|ipython notebook | jupyter|</span><br><span class="line">|-|-|</span><br><span class="line">|~/.ipython/profile_default/ipython_notebook_config.py|~/.jupyter/jupyter_notebook_config.py|</span><br><span class="line">|~/.ipython/profile_default/static/custom|~/.jupyter/custom|</span><br><span class="line">|~/.ipython/profile_default/ipython_nbconvert_config.py|~/.jupyter/jupyter_nbconvert_config.py|</span><br><span class="line">|~/.ipython/profile_default/ipython_qtconsole_config.py|~/.jupyter/jupyter_qtconsole_config.py|</span><br><span class="line">|~/.ipython/profile_default/ipython_console_config.py|~/.jupyter/jupyter_console_config.py|</span><br><span class="line"></span><br><span class="line">主要是第一个配置文件了，参照ipython的配置文件的写法照着搬过来就可以了，懒得去看他的配置命令。。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#### 配置服务器</span><br><span class="line"></span><br><span class="line">与ipython一样配置下.htaccess即可。</span><br></pre></td></tr></table></figure>
+<p>RewriteCond %{HTTP_HOST} ^jupyter.mythsman.com$ [NC]<br>RewriteCond %{REQUEST_URI} ^&#x2F;(.<em>)$ [NC]<br>RewriteRule ^(.</em>)$ <a target="_blank" rel="noopener" href="http://jupyter.mythsman.com:8888/%1">http://jupyter.mythsman.com:8888/%1</a> [R&#x3D;301,L]</p>
+<pre><code>在想要显示的文件夹处输入jupyter notebook，即可在jupyter.mythsman.com处访问到jupyter。
+</code></pre>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/03/%E5%88%A9%E7%94%A8caffe%E4%B8%8Elmdb%E8%AF%BB%E5%86%99%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/03/%E5%88%A9%E7%94%A8caffe%E4%B8%8Elmdb%E8%AF%BB%E5%86%99%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE/" itemprop="url">利用caffe与lmdb读写图像数据</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-03T15:34:15+00:00">
+                2016-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>由于有关caffe的开发资料实在太少，单单是这个问题就困扰了我半天。最后终于找到了一个大腿—-<a target="_blank" rel="noopener" href="http://research.beenfrog.com/">beenfrog</a>，也是一个正在学习caffe框架的研究人员。博客mark下，以后有问题可以去这里找。</p>
+<p>本文代码部分主要参考于<a target="_blank" rel="noopener" href="http://research.beenfrog.com/code/2015/12/30/write-read-lmdb-example.html">此文</a>。</p>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>lmdb是一种轻量级的数据库，caffe中主要就是使用lmdb模块来进行图像数据集的保存。据说是因为lmdb有读取速度快，支持多线程、多进程并发，等这样那样的优点（具体见<a target="_blank" rel="noopener" href="http://lmdb.readthedocs.org/en/release/">官网</a>，虽然我暂时没有看出来，据我所知网上查找lmdb文档的人大都仅仅是为了使用caffe的），注意到这个数据库其实并没有任何压缩处理的作用，他的目的只是为了快速的索引和存取。他的数据都会带着一定的数据结构从而使的体积略微增大。</p>
+<p>事实上如果仅仅看lmdb的用法是无法直接应用于图像文件的处理的。由于caffe是将图像以他自带的数据类型的形式传入lmdb中的，因此我们必须结合caffe的数据类型才能完成读取和使用。</p>
+<h2 id="lmdb的安装"><a href="#lmdb的安装" class="headerlink" title="lmdb的安装"></a>lmdb的安装</h2><p>参考官方文档，安装如下依赖即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">udo apt-get install cython</span><br><span class="line">sudo apt-get install libffi-dev python-dev build-essential</span><br><span class="line">sudo apt-get install python-cffi</span><br><span class="line">sudo easy_install lmdb</span><br></pre></td></tr></table></figure>
+<p>实践再次映证了用easy_install 安装要比pip好的多(在版本跟的上的情况下)。</p>
+<h2 id="生成数据文件"><a href="#生成数据文件" class="headerlink" title="生成数据文件"></a>生成数据文件</h2><p>这里以zhengfang&#x2F;文件夹下的1.png至1000.png为例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> lmdb</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> caffe</span><br><span class="line"><span class="keyword">from</span> caffe.proto <span class="keyword">import</span> caffe_pb2</span><br><span class="line"></span><br><span class="line"><span class="comment">#basic setting</span></span><br><span class="line">lmdb_file = <span class="string">&#x27;lmdb_data&#x27;</span><span class="comment">#期望生成的数据文件</span></span><br><span class="line">batch_size = <span class="number">200</span>       <span class="comment">#lmdb对于数据进行的是先缓存后一次性写入从而提高效率，因此定义一个batch_size控制每次写入的量。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># create the leveldb file</span></span><br><span class="line">lmdb_env = lmdb.<span class="built_in">open</span>(lmdb_file, map_size=<span class="built_in">int</span>(<span class="number">1e12</span>))<span class="comment">#生成一个数据文件，定义最大空间</span></span><br><span class="line">lmdb_txn = lmdb_env.begin(write=<span class="literal">True</span>)              <span class="comment">#打开数据库的句柄</span></span><br><span class="line">datum = caffe_pb2.Datum()                          <span class="comment">#这是caffe中定义数据的重要类型</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    x+=<span class="number">1</span></span><br><span class="line">    img=cv2.imread(<span class="string">&#x27;zhengfang/&#x27;</span>+<span class="built_in">str</span>(x)+<span class="string">&#x27;.png&#x27;</span>).convert(<span class="string">&#x27;RGB&#x27;</span>)     <span class="comment">#从zhengfang/文件夹中依次读取图像</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># save in datum</span></span><br><span class="line">    data = img.astype(<span class="string">&#x27;int&#x27;</span>).transpose(<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>)      <span class="comment">#图像矩阵，注意需要调节维度</span></span><br><span class="line">    <span class="comment">#data = np.array([img.convert(&#x27;L&#x27;).astype(&#x27;int&#x27;)]) #或者这样增加维度</span></span><br><span class="line">    label = x                                      <span class="comment">#图像的标签，为了方便存储，这个必须是整数。</span></span><br><span class="line">    datum = caffe.io.array_to_datum(data, label)   <span class="comment">#将数据以及标签整合为一个数据项</span></span><br><span class="line"></span><br><span class="line">    keystr = <span class="string">&#x27;&#123;:0&gt;8d&#125;&#x27;</span>.<span class="built_in">format</span>(x-<span class="number">1</span>)                 <span class="comment">#lmdb的每一个数据都是由键值对构成的，因此生成一个用递增顺序排列的定长唯一的key</span></span><br><span class="line">    lmdb_txn.put( keystr, datum.SerializeToString())<span class="comment">#调用句柄，写入内存。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># write batch</span></span><br><span class="line">    <span class="keyword">if</span> x % batch_size == <span class="number">0</span>:                        <span class="comment">#每当累计到一定的数据量，便用commit方法写入硬盘。</span></span><br><span class="line">        lmdb_txn.commit()</span><br><span class="line">        lmdb_txn = lmdb_env.begin(write=<span class="literal">True</span>)      <span class="comment">#commit之后，之前的txn就不能用了，必须重新开一个。</span></span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;batch &#123;&#125; writen&#x27;</span>.<span class="built_in">format</span>(x)</span><br><span class="line"></span><br><span class="line">lmdb_env.close()                                   <span class="comment">#结束后记住释放资源，否则下次用的时候打不开。。。</span></span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">batch 200 writen</span><br><span class="line">batch 400 writen</span><br><span class="line">batch 600 writen</span><br><span class="line">batch 800 writen</span><br><span class="line">batch 1000 writen</span><br></pre></td></tr></table></figure>
+
+
+<p>照着注释，很好理解了。值得一提的是，生成的文件是以文件夹的形式保存的，内部由data.mdb lock.mdb组成，不用管他。</p>
+<p>这里需要强烈注意的一点是，datum里的图像是需要有长宽高三个维度的，而且第一个维度默认是通道数，而我们平常的图像格式是第三位是通道。因此我们需要在读入普通图像的时候将他转置一下存入datum中，或者在外面增加一层。</p>
+<h2 id="读取数据文件"><a href="#读取数据文件" class="headerlink" title="读取数据文件"></a>读取数据文件</h2><p>读取上面生成的数据文件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> caffe</span><br><span class="line"><span class="keyword">import</span> lmdb</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">from</span> caffe.proto <span class="keyword">import</span> caffe_pb2</span><br><span class="line"></span><br><span class="line">lmdb_env = lmdb.<span class="built_in">open</span>(<span class="string">&#x27;lmdb_data&#x27;</span>)<span class="comment">#打开数据文件</span></span><br><span class="line">lmdb_txn = lmdb_env.begin()      <span class="comment">#生成句柄</span></span><br><span class="line">lmdb_cursor = lmdb_txn.cursor()  <span class="comment">#生成迭代器指针</span></span><br><span class="line">datum = caffe_pb2.Datum()        <span class="comment">#caffe定义的数据类型</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> key, value <span class="keyword">in</span> lmdb_cursor:   <span class="comment">#循环获取数据</span></span><br><span class="line">    datum.ParseFromString(value) <span class="comment">#从value中读取datum数据</span></span><br><span class="line"></span><br><span class="line">    label = datum.label          <span class="comment">#获取标签以及图像数据</span></span><br><span class="line">    data = caffe.io.datum_to_array(datum)</span><br><span class="line">    <span class="built_in">print</span> data.shape</span><br><span class="line">    <span class="built_in">print</span> datum.channels</span><br><span class="line">    image =data.transpose(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>)</span><br><span class="line">    cv2.imshow(<span class="string">&#x27;cv2.png&#x27;</span>, image) <span class="comment">#显示</span></span><br><span class="line">    cv2.waitKey(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">cv2.destroyAllWindows()</span><br><span class="line">lmdb_env.close()</span><br></pre></td></tr></table></figure>
+<p>输出：（图像略）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(3, 27, 72)</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+<p>基本是和写入程序一一相对，很好理解。同样需要注意的是如需要显示图像，则需要将数据转置回来。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/03/Python%E4%B8%AD%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84format%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1113,814 +1889,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/24/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E8%85%90%E8%9A%80%E4%B8%8E%E8%86%A8%E8%83%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/24/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E8%85%90%E8%9A%80%E4%B8%8E%E8%86%A8%E8%83%80/" itemprop="url">二值形态学之腐蚀与膨胀</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-24T13:26:02+00:00">
-                2016-02-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><strong>数学形态学</strong>（Mathematical morphology） 是一门建立在格论和拓扑学基础之上的图像分析学科，是数学形态学图像处理的基本理论。其基本的运算包括：二值腐蚀和膨胀、二值开闭运算、骨架抽取、极限腐蚀、击中击不中变换、形态学梯度、Top-hat变换、颗粒分析、流域变换、灰值腐蚀和膨胀、灰值开闭运算、灰值形态学梯度等。</p>
-<p>这是我们在进行图像处理时十分常见的算法工具，在实际中有着非常广泛的应用。</p>
-<p>下面就先介绍下二值形态学中的两个重要操作－－腐蚀与膨胀。</p>
-<h2 id="二值腐蚀"><a href="#二值腐蚀" class="headerlink" title="二值腐蚀"></a>二值腐蚀</h2><h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><p>所谓二值腐蚀，就是对一个二值图进行腐蚀操作。我们对一个二值图像进行腐蚀操作首先需要一个模板核。模板核由一个二值矩阵组成，当中还定义了一个原点，表示核的核心。</p>
-<p>接下来，对于二值图像的每一个像素点（无论０还是１），我们将他与模板核的核心对齐，查看模板核中所有值为１的格点组成的图像是否被完全包含在那个二值图像中。如果是，则将该像素点更新为１，否则，更新为０。</p>
-<p>通俗的讲，其实就是用我们的模板来对图像进行检测，以便找出图像内部可以放得下该基元的区域。</p>
-<p>这个过程的效果是消除边界点，使得边界向内部收缩。</p>
-<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>集合$A$被$B$腐蚀，表示为$A\Theta B&#x3D;{c|B+c\subset A }$</p>
-<p>其中$A$为待腐蚀的图像，$B$为模板向量。</p>
-<p>比如二值图像：</p>
-<p>$S&#x3D;\begin{bmatrix}0&amp;1&amp;0&amp;1&amp;0\\0&amp;1&amp;1&amp;0&amp;1\\0&amp;1&amp;1&amp;1&amp;0\end{bmatrix}$</p>
-<p>以及模板：</p>
-<p>$E&#x3D;\begin{bmatrix}1&amp;0\\1&amp;1_\triangle\end{bmatrix}$</p>
-<p>其中$\ _\triangle$表示模板的原点。</p>
-<p>那么$E$对$S$腐蚀的结果就为：</p>
-<p>$S\Theta E&#x3D;\begin{bmatrix}0&amp;0&amp;0&amp;0&amp;0\\0&amp;0&amp;1&amp;0&amp;0\\0&amp;0&amp;1&amp;1&amp;0\end{bmatrix}$</p>
-<h3 id="OpenCV调用"><a href="#OpenCV调用" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h3><p>本来想用pil实现下的，然而突然想通了，既然OpenCV有实现好的函数，为何还要用pil折腾呢？于是就用OpenCV的python接口体验下效果：(python接口的安装只需直接apt-get install python-opencv即可)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line">import numpy as np</span><br><span class="line">import cv2</span><br><span class="line"></span><br><span class="line">im=cv2.imread(&#x27;test.jpg&#x27;,cv2.IMREAD_GRAYSCALE)#读取图像</span><br><span class="line"></span><br><span class="line">thresh,im=cv2.threshold(im,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)#用OTSU自动获取阈值并进行二值化，第一个参数表示图像，第二个表示设置阈值（由于我们用OTSU自动设置，所以这里必须填０），第三个参数表示将超过正常范围的像素设置的值，最后一个传入控制参数。</span><br><span class="line"></span><br><span class="line">cv2.imshow(&#x27;binary&#x27;,im)</span><br><span class="line">cv2.imwrite(&#x27;binary.png&#x27;,im)</span><br><span class="line"></span><br><span class="line">kernel=np.ones((6,6),np.uint8)#生成一个6x6的核</span><br><span class="line"></span><br><span class="line">erosion=cv2.erode(im,kernel,iterations=1)#调用腐蚀算法</span><br><span class="line"></span><br><span class="line">cv2.imshow(&#x27;erosion&#x27;,erosion)</span><br><span class="line">cv2.imwrite(&#x27;erosion.png&#x27;,erosion)</span><br><span class="line">cv2.waitKey(0)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
-<h3 id="图样"><a href="#图样" class="headerlink" title="图样"></a>图样</h3><p><img src="/images/2016/02/24/1/1.png" alt="binary"></p>
-<p><img src="/images/2016/02/24/1/2.png" alt="erosion"></p>
-<h2 id="二值膨胀"><a href="#二值膨胀" class="headerlink" title="二值膨胀"></a>二值膨胀</h2><h3 id="简述-1"><a href="#简述-1" class="headerlink" title="简述"></a>简述</h3><p>晓得了二值腐蚀，那么二值膨胀也就很好理解了。他的作用和腐蚀恰好相反，他能够用来填补一些小洞洞，将两个物体连接起来。</p>
-<p>最终效果就是扩展边界，使得图像变得膨胀。对于膨胀，其实可以用腐蚀来理解。对图像的膨胀其实也就是对背景的腐蚀。</p>
-<p>当然也可以用类似腐蚀的方法来描述，我们需要用一个定义了原点的模板核，这个核是一个二值矩阵。然后对于待处理图像的每一个值为１的像素点，将他与模板核的原点对其，然后对于模板核中值为１的点在图像中对应的像素更新为１。</p>
-<p>通俗的讲，就是将每一个像素点用模板核来代替，并将所得到的所有图像求一个并操作。</p>
-<h3 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h3><p>集合$A$被模板$B$膨胀，表示为$A\bigoplus B&#x3D;[A^c\Theta (-B)]^c$</p>
-<p>其中$A^c$表示A的补集，$-B$表示将$B$旋转180°。</p>
-<p>以上是用腐蚀进行的定义，还可以直接定义：</p>
-<p>$A\bigoplus B&#x3D;\cup{A+b|b\in B}$</p>
-<p>这个式子也被称作<strong>明夫斯基和</strong>形式。</p>
-<h3 id="OpenCV调用-1"><a href="#OpenCV调用-1" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h3><p>同之前一样，调用下OpenCV的接口体验下效果：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line">im=cv2.imread(<span class="string">&#x27;test.jpg&#x27;</span>,cv2.IMREAD_GRAYSCALE)<span class="comment">#读取图像</span></span><br><span class="line"></span><br><span class="line">thresh,im=cv2.threshold(im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)<span class="comment">#用OTSU自动获取阈值并进行二值化，第一个参数表示图像，第二个表示设置阈值（由于我们用OTSU自动设置，所以这里必须填０），第三个参数表示将超过正常范围的像素设置的值，最后一个传入控制参数。</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;binary&#x27;</span>,im)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;binary.png&#x27;</span>,im)</span><br><span class="line"></span><br><span class="line">kernel=np.ones((<span class="number">6</span>,<span class="number">6</span>),np.uint8)<span class="comment">#生成一个6x6的核</span></span><br><span class="line"></span><br><span class="line">dilation=cv2.dilate(im,kernel,iterations=<span class="number">1</span>)<span class="comment">#调用膨胀算法</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;dilation&#x27;</span>,dilation)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;dilation.png&#x27;</span>,dilation)</span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
-
-<h3 id="图样-1"><a href="#图样-1" class="headerlink" title="图样"></a>图样</h3><p><img src="/images/2016/02/24/1/3.png" alt="binary"></p>
-<p><img src="/images/2016/02/24/1/4.png" alt="dilation"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/23/%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2%E7%9A%84OTSU%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/23/%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2%E7%9A%84OTSU%E7%AE%97%E6%B3%95/" itemprop="url">阈值分割的OTSU算法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-23T14:50:00+00:00">
-                2016-02-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>OTSU算法又叫<strong>最大类间方差阈值分割算法</strong>，也叫<strong>大津算法</strong>，是在1980年由日本的大津展之提出，是由最小二乘法推导而来，用于一些简单的阈值确定。</p>
-<p>对于一个灰度图，我们有时候非常想把他用一个阈值将他的前景和背景区分开来。我们可以合理的假设为如果将图像的像素分布图画出来，那么图像上应该有两个峰，即前景色和背景色。在这两个峰之间肯定有一个谷，那么我们就可以将阈值设在这里，从而对图像达到一个良好的分割效果。</p>
-<p>怎样确定这个阈值呢？OTSU算法说，我们可以求出用这个阈值分割后的两个图像的类间方差。对于每一个可能的阈值，我们计算并取出类间方差最大的那个像素值，此时这个值就可以较好的对图像进行分割。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>１、将灰度值分为$0-m$，对于$0-m$的每一个灰度$t$，将他作为阈值将图像分割为灰度为$0-t$以及$t+1-m$这两部分。</p>
-<p>２、计算每一部分的所占比例$w_1,w_2$，每一部分的平均灰度值$u_1,u_2$，以及总的平均灰度值$u$。</p>
-<p>３、计算他们的类间方差$\delta^2&#x3D;w_1(u_1-u)^2+w_2(u_2-u)^2&#x3D;w_1w_2(u_1-u_2)^2$</p>
-<p>４、取出类间方差最大时对应的阈值ｔ，这就可以作为我们最终所取的阈值。</p>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>用python写的简单实现：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">im=Image.<span class="built_in">open</span>(<span class="string">&#x27;test.png&#x27;</span>)</span><br><span class="line">im.show()</span><br><span class="line">im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">im.show()</span><br><span class="line">arr=np.array(im)</span><br><span class="line">width,height=arr.shape</span><br><span class="line">arr=arr.reshape(width*height)</span><br><span class="line"></span><br><span class="line">freq=np.zeros(<span class="number">256</span>)*<span class="number">1.0</span></span><br><span class="line"></span><br><span class="line">total=<span class="number">0.</span></span><br><span class="line">point=<span class="number">0.</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> arr:</span><br><span class="line">    freq[i]+=<span class="number">1</span></span><br><span class="line">    total+=i</span><br><span class="line">    point+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">u=total/point</span><br><span class="line"></span><br><span class="line">w1=<span class="number">0.</span></span><br><span class="line">w2=<span class="number">1.</span></span><br><span class="line">u1=<span class="number">0.</span></span><br><span class="line">u2=u</span><br><span class="line">eps=<span class="number">0.</span></span><br><span class="line">threshold=<span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">255</span>):</span><br><span class="line">    <span class="keyword">if</span> freq[i]==<span class="number">0</span> <span class="keyword">or</span> w2*point-freq[i]==<span class="number">0</span>:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    u1=(u1*w1*point+i*freq[i])/(w1*point+freq[i])</span><br><span class="line">    u2=(u2*w2*point-i*freq[i])/(w2*point-freq[i])</span><br><span class="line">    w1=w1+freq[i]/point</span><br><span class="line">    w2=w2-freq[i]/point</span><br><span class="line">    eps_now=w1*(u1-u)*(u1-u)+w2*(u-u2)*(u-u2)</span><br><span class="line">    <span class="keyword">if</span>(eps_now&gt;eps):</span><br><span class="line">        eps=eps_now</span><br><span class="line">        threshold=i</span><br><span class="line"></span><br><span class="line">table=[]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">256</span>):</span><br><span class="line">    <span class="keyword">if</span> i&gt;threshold :</span><br><span class="line">        table.append(<span class="number">255</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        table.append(<span class="number">0</span>)</span><br><span class="line">im=im.point(table,<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">im.show()</span><br></pre></td></tr></table></figure>
-<p>效果图：</p>
-<p><img src="/images/2016/02/23/1/1.png"><br><img src="/images/2016/02/23/1/2.png"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/22/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/22/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/" itemprop="url">最小二乘法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-22T14:49:48+00:00">
-                2016-02-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最小二乘法，说白了其实就是解决线性回归问题的一个算法。这个算法最早是由高斯和勒让德分别独立发现的，也是当今十分常见的线性拟合算法，并不复杂。</p>
-<p>我们常用的最小二乘法有两种，一种是普通方程表示的简单线性拟合问题，另一种是矩阵表示的高维度的线性拟合问题。</p>
-<h2 id="普通最小二乘法"><a href="#普通最小二乘法" class="headerlink" title="普通最小二乘法"></a>普通最小二乘法</h2><p>他解决的基本问题其实就是给定一些数对$(x_1,y_1),(x_2,y_2),(x_3,y_3),….$，让你求出参数$\beta_0,\beta_1$，使得直线$y&#x3D;\beta_0+\beta_1 x$能够最好的拟合这个数据集，也就是使得他的平方损失函数取到最小值，即<br>$$Q&#x3D;\underset{i&#x3D;1}{\overset{n}{\sum}} (y_i-\beta_0-\beta_1x_i)^2$$<br>最小。</p>
-<p>为了取得最小值，我们分别对$\beta_0,\beta_1$求偏导，并使之为０。</p>
-<p>$$<br>\left\{\begin{aligned}&amp;\frac{\partial Q}{\partial \beta_0}&#x3D;-2\underset{i&#x3D;1}{\overset{n}{\sum}}(y_i-\beta_0-\beta_1 x_i)&#x3D;0\\&amp; \frac{\partial Q}{\partial \beta_1}&#x3D;-2\underset{i&#x3D;1}{\overset{n}{\sum}}x_i(y_i-\beta_0-\beta_1 x_i)&#x3D;0\end{aligned}\right.<br>$$</p>
-<p>解得：</p>
-<p>$$\left\{\begin{aligned}&amp;\beta_0&#x3D;\frac{n\sum x_iy_i-\sum x_i\sum y_i}{n\sum x_i^2-(\sum x_i)^2}\\&amp; \beta_1&#x3D;\frac{\sum x_i^2\sum y_i-\sum x_i\sum x_iy_i}{n\sum x_i^2-(\sum x_i)^2}\end{aligned}\right.$$</p>
-<p>套用这个公式得到的参数$\beta_0,\beta_1$就是最好的拟合参数了。</p>
-<h2 id="矩阵最小二乘法"><a href="#矩阵最小二乘法" class="headerlink" title="矩阵最小二乘法"></a>矩阵最小二乘法</h2><p>用矩阵表示的最小二乘法则更加方便，能够用非常简单的矩阵形式进行计算，而且能拟合多维度的线性方程。</p>
-<p>对于线性回归，我们要做的事情其实可以近似等同于解线性方程AX&#x3D;Y，其中A是m<em>n的矩阵，X,Y是1</em>m的矩阵。m是数据的对数，n是数据的维数加１(因为还有常数)，而且n应该小于m。</p>
-<p>当然，这个方程是没有解得，不过我们可以通过数值运算计算出一个解，可以证明这个解就是平方损失函数最小的解。</p>
-<p>$$X&#x3D;(A*A^T)^{-1}A^TY$$</p>
-<p>解出的X就是线性回归函数的系数矩阵。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/" itemprop="url">边缘检测</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-21T14:47:53+00:00">
-                2016-02-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>边缘检测在图像的检测中是经常会用到的。图片的边缘会包含大量的信息，因此在图像的分割、识别、分析中通常可以取边缘作为图像特征。边缘检测最经典的应用就是图像的锐化了，想必大家都用过。</p>
-<p>为了进行边缘检测，我们通常会用到以下的一些算子，即一阶算子（梯度算子）和二阶算子（拉普拉斯算子）。</p>
-<h2 id="拉普拉斯算子（Laplacian-Operator）"><a href="#拉普拉斯算子（Laplacian-Operator）" class="headerlink" title="拉普拉斯算子（Laplacian　Operator）"></a>拉普拉斯算子（Laplacian　Operator）</h2><p>拉普拉斯算子其实就是二阶微分算子，具有各向同性。他也会增强噪声，因此在使用拉普拉斯算子之前需要进行平滑处理。他的主要用处其实是判断一个像素是处于图像的亮区还是暗区。</p>
-<p><strong>拉普拉斯算子定义式</strong>：<br>$$\begin{aligned}\nabla^2 f(x,y)&amp;&#x3D;\frac{\partial^2 f}{\partial x}+\frac{\partial^2 f}{\partial y}\\&amp;&#x3D;f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1)-4f(x,y)\end{aligned}$$</p>
-<p><strong>常用模板公式</strong>：(1)$\begin{bmatrix}0&amp;1&amp;0\\1&amp;-4&amp;1\\0&amp;1&amp;0\end{bmatrix}$(2)$\begin{bmatrix}1&amp;1&amp;1\\1&amp;-8&amp;1\\1&amp;1&amp;1\end{bmatrix}$</p>
-<p>拉普拉斯模板有多个变种，上面是常用的两个，对于每一个像素，我们把他作为模板的中心元素，套用公式进行更新。需要注意的是，与梯度算子不同，他是各向同性的，因此不需要$G_x$，$G_y$两个模板，也就不能区分边缘的方向了。</p>
-<p>还有一个常用的<strong>高斯－拉普拉斯算子</strong>（Gauss-Laplacian　Operator），将平滑滤波器和拉普拉斯边缘检测算子结合起来的：</p>
-<p><strong>高斯－拉普拉斯算子模板</strong>：$\begin{bmatrix}-2&amp;-4&amp;-4&amp;-4&amp;-2\\-4&amp;0&amp;8&amp;0&amp;-4\\-4&amp;8&amp;24&amp;8&amp;-4\\-4&amp;0&amp;8&amp;0&amp;-4\\-2&amp;-4&amp;-4&amp;-4&amp;-2\end{bmatrix}$</p>
-<p>另外，拉普拉斯算子有一个很实用的用途，就是对图像进行锐化，这时候只要将常用模板稍微改动一下即可得到<strong>锐化模板</strong>：</p>
-<p>(1)$\begin{bmatrix}0&amp;-1&amp;0\\-1&amp;5&amp;-1\\0&amp;-1&amp;0\end{bmatrix}$(2)$\begin{bmatrix}-1&amp;-1&amp;-1\\-1&amp;9&amp;-1\\-1&amp;-1&amp;-1\end{bmatrix}$</p>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>OK，最后就是用代码实现一下了，总体还是很简单的，而且类似于OpenCV之类的库都有实现的函数。不过我还是用pil来简单实现一下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image,matplotlib,sys,ImageEnhance,ImageFont,ImageDraw</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gauss</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[-<span class="number">2</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">2</span>],[-<span class="number">4</span>,<span class="number">0</span>,<span class="number">8</span>,<span class="number">0</span>,-<span class="number">4</span>],[-<span class="number">4</span>,<span class="number">8</span>,<span class="number">24</span>,<span class="number">8</span>,-<span class="number">4</span>],[-<span class="number">4</span>,<span class="number">0</span>,<span class="number">8</span>,<span class="number">0</span>,<span class="number">4</span>],[-<span class="number">2</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">2</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">4</span>,width-<span class="number">4</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">4</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">4</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">5</span>,j:j+<span class="number">5</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">laplacian</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">1</span>,-<span class="number">8</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sharpen</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[-<span class="number">1</span>,<span class="number">9</span>,-<span class="number">1</span>],[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">robert</span>(<span class="params">im_arr</span>):</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">1</span>,width-<span class="number">1</span>))</span><br><span class="line">    <span class="keyword">for</span>	i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">1</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">1</span>):</span><br><span class="line">    		ans[i,j]=np.<span class="built_in">abs</span>(im_arr[i,j]-im_arr[i+<span class="number">1</span>,j+<span class="number">1</span>])+np.<span class="built_in">abs</span>(im_arr[i+<span class="number">1</span>,j]-im_arr[i,j+<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sobel</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>],[-<span class="number">2</span>,<span class="number">0</span>,<span class="number">2</span>],[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[-<span class="number">1</span>,-<span class="number">2</span>,-<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">prewitt</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">isotropic</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1.414</span>,<span class="number">0</span>,-<span class="number">1.414</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[-<span class="number">1</span>,-<span class="number">1.414</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1.414</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>(<span class="params">im_arr,name</span>):</span><br><span class="line">    im=Image.fromarray(im_arr)</span><br><span class="line">    draw=ImageDraw.Draw(im)</span><br><span class="line">    font = ImageFont.truetype(<span class="string">&#x27;/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf&#x27;</span>, <span class="number">18</span>)</span><br><span class="line">    draw.text((<span class="number">0</span>,<span class="number">0</span>),name,font=font,fill=<span class="string">&#x27;red&#x27;</span>)</span><br><span class="line">    <span class="keyword">del</span> draw</span><br><span class="line">    im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">    im.save(name+<span class="string">&#x27;.png&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    im=Image.<span class="built_in">open</span>(sys.argv[<span class="number">1</span>])</span><br><span class="line">    im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">    im.save(<span class="string">&#x27;source.png&#x27;</span>)</span><br><span class="line">    show(laplacian(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Laplace&#x27;</span>)</span><br><span class="line">    show(sobel(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Sobel&#x27;</span>)</span><br><span class="line">    show(robert(np.array(im,<span class="string">&#x27;int&#x27;</span>)),<span class="string">&#x27;Robert&#x27;</span>)</span><br><span class="line">    show(prewitt(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Prewitt&#x27;</span>)</span><br><span class="line">    show(isotropic(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Isotropic&#x27;</span>)</span><br><span class="line">    show(sharpen(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;sharpen&#x27;</span>)</span><br><span class="line">    show(gauss(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;gauss-laplace&#x27;</span>)</span><br></pre></td></tr></table></figure>
-<p><img src="/images/2016/02/21/1/1.png" alt="test"><br><img src="/images/2016/02/21/1/2.png" alt="source"><br><img src="/images/2016/02/21/1/3.png" alt="Sobel"><br><img src="/images/2016/02/21/1/4.png" alt="sharpen"><br><img src="/images/2016/02/21/1/5.png" alt="Robert"><br><img src="/images/2016/02/21/1/6.png" alt="Prewitt"><br><img src="/images/2016/02/21/1/7.png" alt="Isotropic"><br><img src="/images/2016/02/21/1/8.png" alt="Laplace"><br><img src="/images/2016/02/21/1/9.png" alt="gauss-laplace"></p>
-<p>最后用他来处理一下lena.png，会的到上面的结果。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/" itemprop="url">Julia集分形图案绘制</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-19T11:22:37+00:00">
-                2016-02-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>从去年就开始窥东大的C++教学群，当时就被李骏扬老师讲的分形图案给吸引了，简直美赞了。他们的期末作业就是制作一个分形图案的视频，我们这种学校显然不会有这种东西。于是就想着能不能自己研究着画下，然而并不知道这种图案怎么画，度娘上找来的基本没用。搁置了一年，偶然间翻到了一篇论文，终于找到了画图的方法了，加上之前正好有用python绘图的工具，总算把这个东西搞通了一点。其实这个玩意的水还是非常深的，牵涉到了复分析，分形，甚至是混沌理论，据说从上古贝壳的图案，到如今麦田怪圈的图案，都和Julia集有关，说来也是玄乎。</p>
-<h2 id="Julia集"><a href="#Julia集" class="headerlink" title="Julia集"></a>Julia集</h2><p>简单的讲，_Julia_集就是复平面上的一些点$z$，对于一个固定的复数$c$，$z$点在经过无限次$z\gets z^2+c$的迭代之后最终都收敛到一个固定的值上，那么复平面上所有这样的z点构成的集合就是_julia_集。（如果固定初始值而将$c$当做变量则生成的是mandelbrot集）</p>
-<p>当然，这个迭代公式也有他的变种，比如多重julia集或者指数julia集等。</p>
-<p>讲的不太清楚，具体的介绍可以参见_<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Julia_set">wiki pedia</a><em>以及</em><a target="_blank" rel="noopener" href="http://www.matrix67.com/blog/archives/4570">matrix67</a>_的博客(对度娘表示无语)，这里就不班门弄斧了。_wiki_里面主要介绍的是一些数学定义和推导以及他的一些典型图形，而_matrix67_写的则更加容易理解，他通过一步一步迭代过程的展现十分生动的描述了图像的产生过程。不过事实上，matrix67在之前的博客里虽然提供了绘图的代码，但是并没有介绍图像生成的算法。干看代码还是有点恶心的。而市面上又没怎么提及绘图的算法。事实上，他用的算法也非常的简单普遍，我们叫他“逃逸时间算法”。</p>
-<h2 id="逃逸时间算法（Escape-Time-Algorithm）"><a href="#逃逸时间算法（Escape-Time-Algorithm）" class="headerlink" title="逃逸时间算法（Escape Time Algorithm）"></a>逃逸时间算法（Escape Time Algorithm）</h2><p>曾经纳闷了很长时间，上面那个简单的迭代式究竟是怎样生成那些纷繁复杂的分形图案的。最后终于在知网上找到了这个算法。</p>
-<ol>
-<li>设定逃逸半径R，最高迭代次数N；</li>
-<li>将初始的点z进行迭代，如果在N次迭代之内z的模超过了R，那么就认为z“逃逸出去”了，逃逸出去时的迭代次数n就是”逃逸时间“；</li>
-<li>如果经过N次迭代，z的模仍然未到达R，那么就认为z是收敛集内的点；</li>
-<li>将所有的逃逸点按照不同的逃逸时间进行染色就得到了美丽的“逃逸时间图”。</li>
-</ol>
-<p>其实逃逸时间图显示的并不是真正意义上的_julia_集，而是不属于_julia_集合的点。</p>
-<p>当然，还有一种常用的_julia_集绘图算法–外部距离估计算法，这里不做过多介绍。</p>
-<h2 id="静态实现"><a href="#静态实现" class="headerlink" title="静态实现"></a>静态实现</h2><p>用python+matplotlib模拟逃逸时间算法进行简单绘图：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">c_real=-<span class="number">1.621</span></span><br><span class="line">c_imag=-<span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>(<span class="params">a</span>):</span><br><span class="line">	c=np.<span class="built_in">complex</span>(c_real,c_imag)</span><br><span class="line">	<span class="keyword">return</span> np.exp(a*a*a)+c+a*a-a</span><br><span class="line"></span><br><span class="line">R=<span class="number">50</span></span><br><span class="line">density=<span class="number">400</span></span><br><span class="line">N=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">x=[]</span><br><span class="line">y=[]</span><br><span class="line">c=[]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(density):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> xrange(density):</span><br><span class="line">		real=(i-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		imag=(j-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		now=np.<span class="built_in">complex</span>(real,imag)</span><br><span class="line">		<span class="keyword">for</span> n <span class="keyword">in</span> xrange(N):</span><br><span class="line">			now=func(now)</span><br><span class="line">			<span class="keyword">if</span> np.<span class="built_in">abs</span>(now)&gt;R:</span><br><span class="line">				x.append(real)</span><br><span class="line">				y.append(imag)</span><br><span class="line">				c.append(n+<span class="number">1</span>)</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">plt.scatter(x,y,s=<span class="number">2</span>,c=c,edgecolors=<span class="string">&#x27;face&#x27;</span>)</span><br><span class="line">plt.xticks([])</span><br><span class="line">plt.yticks([])</span><br><span class="line">plt.xlim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plt.ylim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plt.savefig(<span class="built_in">str</span>(const_real)+<span class="string">&#x27;+&#x27;</span>+<span class="built_in">str</span>(const_imag)+<span class="string">&#x27;i.png&#x27;</span>)</span><br></pre></td></tr></table></figure>
-<p>参数c由c_real和c_imag确定，迭代公式由func函数确定，描点时注意去掉边界以及标尺。</p>
-<p>通过这个模板可以非常轻松的绘出下面这几张图：</p>
-<p><img src="/images/2016/02/19/1/1.png" alt="c=-0.74543+0.11301i"></p>
-<p><img src="/images/2016/02/19/1/2.png" alt="c=-0.8+0.156i"></p>
-<p><img src="/images/2016/02/19/1/3.png" alt="c=-0.4+0.6i"></p>
-<p><img src="/images/2016/02/19/1/4.png" alt="c=-0.621+0i,func=exp(z*z*z)+c"></p>
-<p><img src="/images/2016/02/19/1/5.png" alt="c=0.285+0.01i"></p>
-<h2 id="动态实现"><a href="#动态实现" class="headerlink" title="动态实现"></a>动态实现</h2><p>既然我们可以直接绘出迭代N次之后的图像，那么我们当然也可以画出每一次的图像组合成动图，这样看起来效果也更明显。</p>
-<p><strong>图像生成：</strong></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>(<span class="params">a</span>):</span><br><span class="line">	c=np.<span class="built_in">complex</span>(-<span class="number">0.74543</span>,<span class="number">0.11301</span>)</span><br><span class="line">	<span class="keyword">return</span> a*a+c</span><br><span class="line"></span><br><span class="line">R=<span class="number">10</span></span><br><span class="line">density=<span class="number">400</span></span><br><span class="line">N=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">time1=time.time()</span><br><span class="line"></span><br><span class="line">mat=[]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(density):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> xrange(density):</span><br><span class="line">		real=(i-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		imag=(j-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		now=np.<span class="built_in">complex</span>(real,imag)</span><br><span class="line">		<span class="keyword">for</span> n <span class="keyword">in</span> xrange(N):</span><br><span class="line">			now=func(now)</span><br><span class="line">			<span class="keyword">if</span> np.<span class="built_in">abs</span>(now)&gt;R:</span><br><span class="line">				mat.append((real,imag,n+<span class="number">1</span>))</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">time2=time.time()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;calculating costs &#x27;</span>+<span class="built_in">str</span>(time2-time1)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line">mat.sort(<span class="keyword">lambda</span> x,y:cmp(x[<span class="number">2</span>],y[<span class="number">2</span>]))</span><br><span class="line"></span><br><span class="line">time3=time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;sorting costs &#x27;</span>+<span class="built_in">str</span>(time3-time2)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line">real=[]</span><br><span class="line">imag=[]</span><br><span class="line">color=[]</span><br><span class="line"></span><br><span class="line">cnt=<span class="number">1</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(mat)-<span class="number">1</span>):</span><br><span class="line">	real.append(mat[i][<span class="number">0</span>])</span><br><span class="line">	imag.append(mat[i][<span class="number">1</span>])</span><br><span class="line">	color.append(mat[i][<span class="number">2</span>])</span><br><span class="line">	<span class="keyword">if</span> i==<span class="built_in">len</span>(mat)-<span class="number">2</span> <span class="keyword">or</span> (<span class="keyword">not</span> mat[i][<span class="number">2</span>]==mat[i+<span class="number">1</span>][<span class="number">2</span>]):</span><br><span class="line">		plt.scatter(real,imag,s=<span class="number">2</span>,c=color,alpha=<span class="number">1</span>,edgecolors=<span class="string">&#x27;face&#x27;</span>)</span><br><span class="line">                plt.xticks([])</span><br><span class="line">                plt.yticks([])</span><br><span class="line">		plt.xlim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">		plt.ylim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">		plt.savefig(<span class="string">&#x27;%02d&#x27;</span> % cnt)</span><br><span class="line">		<span class="built_in">print</span> <span class="string">&#x27;pic&#x27;</span>+(<span class="string">&#x27;%02d&#x27;</span> % cnt)+<span class="string">&#x27; OK.&#x27;</span></span><br><span class="line">		cnt+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">time4=time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;generating costs &#x27;</span>+<span class="built_in">str</span>(time4-time3)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;total costs &#x27;</span>+<span class="built_in">str</span>(time4-time3)+<span class="string">&#x27; s.&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>生成图像的过程比较缓慢，相比而言计算所耗费的时间就不算太多了。</p>
-<p><strong>gif组合：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$convert *.png -resize 320x240 out.gif</span><br></pre></td></tr></table></figure>
-<p>我们用ImageMagick工具来生成gif，这里如果用-layer来压缩会导致图像失真，因此用改变图像大小的方式来适当压缩文件。</p>
-<p>最后就可以生成动图：</p>
-<p><img src="/images/2016/02/19/1/6.gif"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1971,7 +1939,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1982,7 +1950,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1993,7 +1961,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

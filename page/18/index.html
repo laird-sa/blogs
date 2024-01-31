@@ -307,6 +307,341 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/11/04/LLT%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93%E4%B8%8EGherkin%E8%AF%AD%E6%B3%95%E8%A7%A3%E6%9E%90%E5%99%A8%E7%AE%80%E5%8D%95%E5%BA%94%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/04/LLT%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93%E4%B8%8EGherkin%E8%AF%AD%E6%B3%95%E8%A7%A3%E6%9E%90%E5%99%A8%E7%AE%80%E5%8D%95%E5%BA%94%E7%94%A8/" itemprop="url">LLT工作总结与Gherkin语法解析器简单应用</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-04T11:57:46+00:00">
+                2017-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这几天产品线这里要搞LLT(Low level Test)重点工作，保障版本的高质量发布。工作当然包括一系列的规范、培训、编码、检视，不过具体看下来主要还是提取了下面的一些度量要点:<br>0. 保证LLT运行不挂(废话)</p>
+<ol>
+<li>清零无效LLT代码</li>
+<li>保证LLT对代码的覆盖率</li>
+<li>保证LLT对需求的覆盖率</li>
+</ol>
+<p>清零无效LLT代码，意思是指通过一些检查工具，检查出LLT代码中没有使用断言的测试，或者是那种假装使用了断言的测试代码(“assert(true);”)。显然，这两种情况下写的LLT代码永远无法告警，因此是没有任何意义的。<br>保证LLT对代码的覆盖率很简单，就是通过测量测试代码对业务代码的覆盖率，保证软件的质量。虽然代码覆盖率并不能够绝对代表测试的充分程度，但是在排除恶意提高覆盖率的情况下，也可以作为度量LLT代码质量的一个参考。<br>保证LLT对需求的覆盖率这一点是一个比较小众的概念，这主要是对BDD(Behaviour Driven Development)实践执行效果的一个辅助度量方式。我们知道BDD的要点在于将功能需求作为测试的方案，测试代码围绕着需求展开(而不是函数)。这样一方面写完测试代码就相当于写完了测试文档，任何人都可以非常清晰的理解LLT代码的实际目的是什么；另一方面也可以很好的从需求的层面保障新需求经过了完备的LLT测试。那么为了度量LLT对需求的保障程度，就需要将需求进行编号，然后与LLT对应，以度量需求的覆盖率以及需求的平均用例数。</p>
+<h2 id="吐槽"><a href="#吐槽" class="headerlink" title="吐槽"></a>吐槽</h2><p>LLT的初衷是将代码错误拦截在软件生命周期的较早的阶段，减少后期处理bug的代价。但是，凡事都是要辩证的来看，既然LLT跟BDD的好处有点那么多，为什么不是所有的产品都采用了这一套流程呢？显然，这样的一套流程不可避免的会带来很多额外的工作量，软件度量这件事情本身就是值得商榷的，如果不采用硬性的指标规定，管理者无法切实有效的进行管理，开发人员也没有动力去遵守；而采用硬性的指标规定，又势必容易导致一刀切，而事实上很多指标在某些情况下没有达成的必要，如果偏要达成，则容易造成很大的资源浪费。<br>我在推进这项工作的时候也经常发现下面这些远离我们初衷的现象:</p>
+<ol>
+<li>写LLT代码本身也容易引起额外的bug，增加了整体代码的维护难度。</li>
+<li>对“无效LLT代码”的定位不准，容易造成诊断错误，简单的检查工具无法识别特殊场景下的确有用的LLT代码。</li>
+<li>有时候纯粹是为了覆盖率而“补”用例，用例本身并不能测出漏洞反而浪费时间。</li>
+<li>很多需求本身不涉及LLT代码(比如涉及配置或者一些静态文件需求)，这样的话统计LLT对需求的覆盖率这件事本身可能就没有什么实际意义。</li>
+<li>很多时候当LLT代码量庞大时，会极大地延长代码的编译构建时间，拖慢项目进度。</li>
+</ol>
+<p>其实LLT的根本目的就是为了节约成本，节约时间(提前发现问题，减少回溯成本)，可如果一味地为了做好LLT而投入了过多的时间和成本，那我觉得可能就是有点舍本逐末了。<br>不过谁在乎呢？公司舍得花钱，领导需要政绩，码农需要活干，那就干呗。</p>
+<h2 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h2><p>我这边的具体工作大概就是写一个扫描Cucumber测试文件的检查工具，并且对接公司内部的需求设计平台，统计出LLT代码与需求的关联度并做可视化展示。这个工作的难点大概就是解析Cucumber文件了。Cucumber大概是当前比较流行的BDD框架了，虽然这个东西并不是很新，但是当前很多大型软件公司也在用。这个东西的好处自不必说，网上的各种推荐跟教程都有很多。不过作为一个靠谱的码农不在迫不得已的情况下还是尽量不要学二手的知识比较好，而且要尽量保持视野的开阔，能不造轮子就不造轮子。这不，仔细研究一下就知道，Cucumber用例文件的语法解析器什么的都是开源的，代码下下来捣鼓捣鼓就好了，完全没有必要自己从０开始造轮子。</p>
+<h3 id="Gherkin语法"><a href="#Gherkin语法" class="headerlink" title="Gherkin语法"></a>Gherkin语法</h3><p>Cucumber工具采用的他自己定义的语法—Gherkin。这个其实很简单，官网上解释的很详细。比如下面的文件就描述了两个测试场景。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Feature:</span><br><span class="line">  Scenario Outline:</span><br><span class="line">    Given &lt;x&gt;</span><br><span class="line"></span><br><span class="line">    Examples:</span><br><span class="line">      | x |</span><br><span class="line">      | y |</span><br><span class="line"></span><br><span class="line">  Scenario :</span><br><span class="line">    Given XXXYYYZZZ</span><br><span class="line">    And QQQWWWEEE</span><br><span class="line">    Then AAABBBCCC </span><br></pre></td></tr></table></figure>
+<p>那我们怎么将他跟需求对应起来呢？<br>我们在需求设计和分析阶段的时候会把用户需求进行逐步细分和下发。一个典型的例子就是从用户描述的<strong>初始需求</strong>，拆分为工程领域的<strong>系统需求</strong>，再细分到各个子模块，由具体开发人员当成一个个小的<strong>用户故事</strong>来开发。到了这一层面，每一个需求就会对应一个需求单号，我们就通过这个来需求进行识别。<br>有了需求单号，我们就可以通过在Cucumber工具定义的feature文件里以标签的形式加进来:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@ST.SR.IR.XXX.YYY.ZZZ</span><br><span class="line">Feature:</span><br><span class="line">  @ST.SR.IR.AAA.BBB.CCC</span><br><span class="line">  Scenario Outline:</span><br><span class="line">    Given &lt;x&gt;</span><br><span class="line"></span><br><span class="line">    Examples:</span><br><span class="line">      | x |</span><br><span class="line">      | y |</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>gherkin语法支持在多个地方添加@标签。这个标签本来是用作“开关”，方便程序员在执行时选择执行，不过我们现在拿来对接需求单号也未尝不可，毕竟每一个用例都可以对应多个标签，二者互不影响。</p>
+<h3 id="文件解析"><a href="#文件解析" class="headerlink" title="文件解析"></a>文件解析</h3><p>下面就牵涉到具体的文件解析，我们需要从feature文件里提取出标签，并对应上他所标注的用例。<br>Gherkin本身提供了将文件解析成抽象语法树(AST)以及JSON(Pickle)的功能，AST本身功能强大，但是稍微复杂一点，JSON更好理解，而且一般来说解析成类似下面的JSON也就够用了。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;pickle&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;uri&quot;</span><span class="punctuation">:</span> <span class="string">&quot;testdata/good/readme_example.feature&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;pickle&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;steps&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;y&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;arguments&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;locations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">          <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">9</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">7</span></span><br><span class="line">          <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">5</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">11</span></span><br><span class="line">          <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;tags&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;@a&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;location&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">1</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;@b&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;location&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">3</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;@c&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;location&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">6</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;locations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">9</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">7</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">3</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，每一组用例就是一个pickle，里面清晰的表明了Cucumber语句的位置，标签，路径等等信息。<br><a target="_blank" rel="noopener" href="https://github.com/cucumber/cucumber/tree/master/gherkin">官网文档</a>中写的不是很详细，毕竟给Cucumber做二次开发的人也不多。文档中给了各个语言<br>的底层接口，不过比较简略，用起来也不是很方便。于是我就看了下CLI工具的实现，用JAVA简单摸索了一下。</p>
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><p>首先是安装依赖，我习惯用maven，最新的版本号可以参考<a target="_blank" rel="noopener" href="https://github.com/cucumber/cucumber/blob/master/gherkin/java/pom.xml">这里</a>的，不过我当前用的是一个稍老的稳定版本:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.cucumber<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>gherkin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>测试用feature文件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">@a</span><br><span class="line">Feature:</span><br><span class="line">  @b @c</span><br><span class="line">  Scenario Outline:</span><br><span class="line">    Given &lt;x&gt;</span><br><span class="line"></span><br><span class="line">    Examples:</span><br><span class="line">      | x |</span><br><span class="line">      | y |</span><br><span class="line"></span><br><span class="line">  @d @e</span><br><span class="line">  Scenario Outline:</span><br><span class="line">    Given &lt;m&gt;</span><br><span class="line"></span><br><span class="line">  @f</span><br><span class="line">    Examples:</span><br><span class="line">      | m |</span><br><span class="line">      | n |</span><br></pre></td></tr></table></figure>
+
+<p>读取feature文件并解析：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] argv)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Path</span> <span class="variable">self</span> <span class="operator">=</span> Paths.get(<span class="string">&quot;/home/myths/Desktop/Test/&quot;</span>);</span><br><span class="line">        List&lt;String&gt; pathList = Files.walk(self)</span><br><span class="line">                .map(Path::toString)</span><br><span class="line">                .filter(name -&gt; name.endsWith(<span class="string">&quot;.feature&quot;</span>))</span><br><span class="line">                .collect(Collectors.toList());</span><br><span class="line">        <span class="type">Gson</span> <span class="variable">gson</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GsonBuilder</span>().create();</span><br><span class="line">        <span class="type">SourceEvents</span> <span class="variable">sourceEvents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SourceEvents</span>(pathList);</span><br><span class="line">        <span class="type">GherkinEvents</span> <span class="variable">gherkinEvents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">GherkinEvents</span>(<span class="literal">false</span>, <span class="literal">false</span>, <span class="literal">true</span>);</span><br><span class="line">        List&lt;PickleEvent&gt; pickleEventList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        sourceEvents.forEach(sourceEvent -&gt; gherkinEvents.iterable(sourceEvent).forEach(x -&gt; pickleEventList.add((PickleEvent) x)));</span><br><span class="line">        pickleEventList.forEach(pickleEvent -&gt; &#123;</span><br><span class="line">            System.out.println(gson.toJson(pickleEvent.pickle.getTags()));</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要是下面的步骤：</p>
+<ol>
+<li>读取代码文件。</li>
+<li>扫描出feature文件。</li>
+<li>创建SourceEvents，其实就是feature文件的集合。</li>
+<li>创建GherkinEvents，其实是选择解析的模式，是否包含源码，是否包含AST树，是否包含Pickle，我们当然只选择Pickle。</li>
+<li>用GherkinEvents去遍历SourceEvents获得PickleEvents，其实到这一层就已经解析到了每一组用例了。</li>
+<li>最后选择需要显示的信息即可。Gherkin默认采用Gson来处理JSON数据。</li>
+</ol>
+<p>输出结果样例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[&#123;&quot;location&quot;:&#123;&quot;line&quot;:1,&quot;column&quot;:1&#125;,&quot;name&quot;:&quot;@a&quot;&#125;,&#123;&quot;location&quot;:&#123;&quot;line&quot;:3,&quot;column&quot;:3&#125;,&quot;name&quot;:&quot;@b&quot;&#125;,&#123;&quot;location&quot;:&#123;&quot;line&quot;:3,&quot;column&quot;:6&#125;,&quot;name&quot;:&quot;@c&quot;&#125;]</span><br><span class="line">[&#123;&quot;location&quot;:&#123;&quot;line&quot;:1,&quot;column&quot;:1&#125;,&quot;name&quot;:&quot;@a&quot;&#125;,&#123;&quot;location&quot;:&#123;&quot;line&quot;:11,&quot;column&quot;:3&#125;,&quot;name&quot;:&quot;@d&quot;&#125;,&#123;&quot;location&quot;:&#123;&quot;line&quot;:11,&quot;column&quot;:6&#125;,&quot;name&quot;:&quot;@e&quot;&#125;,&#123;&quot;location&quot;:&#123;&quot;line&quot;:15,&quot;column&quot;:3&#125;,&quot;name&quot;:&quot;@f&quot;&#125;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>围绕生成Pickle类的关键类图如下:<br><img src="/images/2017/11/04/1/1.png"></p>
+<p>有了这套流程，我们就可以很方便的获得每组用例所对应的标签，然后加以统计分析了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/11/03/network-in-china/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/03/network-in-china/" itemprop="url">中国的互联网</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-03T10:17:00+00:00">
+                2017-11-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%87%AA%E8%A8%80%E8%AF%AD/" itemprop="url" rel="index">
+                    <span itemprop="name">自言语</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>外交部发言人华春莹称“中国的互联网是 <strong>自由、开放、有序</strong> 的”。尽管中国互联网相比世界其他地方的互联网也存在许多相似之处，但还有很大不同。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/03/network-in-china/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/10/16/the-prosperous-china-as-you-wish/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1592,298 +1927,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/08/03/sw-toolbox-practice/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/08/03/sw-toolbox-practice/" itemprop="url">本博客对 sw-toolbox 的实践</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-08-03T10:06:00+00:00">
-                2017-08-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
-                    <span itemprop="name">实验室</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          本文简单介绍了 Google 的 sw-toolbox 和本博客对于 sw-toolbox 的实践，希望对大家使用 sw-toolbox 提供一些参考。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/08/03/sw-toolbox-practice/">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/31/hexo-auto-deploy-with-travis-ci/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/31/hexo-auto-deploy-with-travis-ci/" itemprop="url">使用 Travis CI 持续构建 Hexo</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-31T15:28:00+00:00">
-                2017-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
-                    <span itemprop="name">博客栈</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          鉴于使用 Hexo 部署网站的繁琐性，我将通过本文介绍如何使用 Travis CI 来完成 Hexo 的持续构建。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/07/31/hexo-auto-deploy-with-travis-ci/">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1934,7 +1977,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1945,7 +1988,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1956,7 +1999,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

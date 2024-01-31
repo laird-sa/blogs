@@ -307,6 +307,814 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/24/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E8%85%90%E8%9A%80%E4%B8%8E%E8%86%A8%E8%83%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/24/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E8%85%90%E8%9A%80%E4%B8%8E%E8%86%A8%E8%83%80/" itemprop="url">二值形态学之腐蚀与膨胀</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-24T13:26:02+00:00">
+                2016-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><strong>数学形态学</strong>（Mathematical morphology） 是一门建立在格论和拓扑学基础之上的图像分析学科，是数学形态学图像处理的基本理论。其基本的运算包括：二值腐蚀和膨胀、二值开闭运算、骨架抽取、极限腐蚀、击中击不中变换、形态学梯度、Top-hat变换、颗粒分析、流域变换、灰值腐蚀和膨胀、灰值开闭运算、灰值形态学梯度等。</p>
+<p>这是我们在进行图像处理时十分常见的算法工具，在实际中有着非常广泛的应用。</p>
+<p>下面就先介绍下二值形态学中的两个重要操作－－腐蚀与膨胀。</p>
+<h2 id="二值腐蚀"><a href="#二值腐蚀" class="headerlink" title="二值腐蚀"></a>二值腐蚀</h2><h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><p>所谓二值腐蚀，就是对一个二值图进行腐蚀操作。我们对一个二值图像进行腐蚀操作首先需要一个模板核。模板核由一个二值矩阵组成，当中还定义了一个原点，表示核的核心。</p>
+<p>接下来，对于二值图像的每一个像素点（无论０还是１），我们将他与模板核的核心对齐，查看模板核中所有值为１的格点组成的图像是否被完全包含在那个二值图像中。如果是，则将该像素点更新为１，否则，更新为０。</p>
+<p>通俗的讲，其实就是用我们的模板来对图像进行检测，以便找出图像内部可以放得下该基元的区域。</p>
+<p>这个过程的效果是消除边界点，使得边界向内部收缩。</p>
+<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>集合$A$被$B$腐蚀，表示为$A\Theta B&#x3D;{c|B+c\subset A }$</p>
+<p>其中$A$为待腐蚀的图像，$B$为模板向量。</p>
+<p>比如二值图像：</p>
+<p>$S&#x3D;\begin{bmatrix}0&amp;1&amp;0&amp;1&amp;0\\0&amp;1&amp;1&amp;0&amp;1\\0&amp;1&amp;1&amp;1&amp;0\end{bmatrix}$</p>
+<p>以及模板：</p>
+<p>$E&#x3D;\begin{bmatrix}1&amp;0\\1&amp;1_\triangle\end{bmatrix}$</p>
+<p>其中$\ _\triangle$表示模板的原点。</p>
+<p>那么$E$对$S$腐蚀的结果就为：</p>
+<p>$S\Theta E&#x3D;\begin{bmatrix}0&amp;0&amp;0&amp;0&amp;0\\0&amp;0&amp;1&amp;0&amp;0\\0&amp;0&amp;1&amp;1&amp;0\end{bmatrix}$</p>
+<h3 id="OpenCV调用"><a href="#OpenCV调用" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h3><p>本来想用pil实现下的，然而突然想通了，既然OpenCV有实现好的函数，为何还要用pil折腾呢？于是就用OpenCV的python接口体验下效果：(python接口的安装只需直接apt-get install python-opencv即可)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line">import numpy as np</span><br><span class="line">import cv2</span><br><span class="line"></span><br><span class="line">im=cv2.imread(&#x27;test.jpg&#x27;,cv2.IMREAD_GRAYSCALE)#读取图像</span><br><span class="line"></span><br><span class="line">thresh,im=cv2.threshold(im,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)#用OTSU自动获取阈值并进行二值化，第一个参数表示图像，第二个表示设置阈值（由于我们用OTSU自动设置，所以这里必须填０），第三个参数表示将超过正常范围的像素设置的值，最后一个传入控制参数。</span><br><span class="line"></span><br><span class="line">cv2.imshow(&#x27;binary&#x27;,im)</span><br><span class="line">cv2.imwrite(&#x27;binary.png&#x27;,im)</span><br><span class="line"></span><br><span class="line">kernel=np.ones((6,6),np.uint8)#生成一个6x6的核</span><br><span class="line"></span><br><span class="line">erosion=cv2.erode(im,kernel,iterations=1)#调用腐蚀算法</span><br><span class="line"></span><br><span class="line">cv2.imshow(&#x27;erosion&#x27;,erosion)</span><br><span class="line">cv2.imwrite(&#x27;erosion.png&#x27;,erosion)</span><br><span class="line">cv2.waitKey(0)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+<h3 id="图样"><a href="#图样" class="headerlink" title="图样"></a>图样</h3><p><img src="/images/2016/02/24/1/1.png" alt="binary"></p>
+<p><img src="/images/2016/02/24/1/2.png" alt="erosion"></p>
+<h2 id="二值膨胀"><a href="#二值膨胀" class="headerlink" title="二值膨胀"></a>二值膨胀</h2><h3 id="简述-1"><a href="#简述-1" class="headerlink" title="简述"></a>简述</h3><p>晓得了二值腐蚀，那么二值膨胀也就很好理解了。他的作用和腐蚀恰好相反，他能够用来填补一些小洞洞，将两个物体连接起来。</p>
+<p>最终效果就是扩展边界，使得图像变得膨胀。对于膨胀，其实可以用腐蚀来理解。对图像的膨胀其实也就是对背景的腐蚀。</p>
+<p>当然也可以用类似腐蚀的方法来描述，我们需要用一个定义了原点的模板核，这个核是一个二值矩阵。然后对于待处理图像的每一个值为１的像素点，将他与模板核的原点对其，然后对于模板核中值为１的点在图像中对应的像素更新为１。</p>
+<p>通俗的讲，就是将每一个像素点用模板核来代替，并将所得到的所有图像求一个并操作。</p>
+<h3 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h3><p>集合$A$被模板$B$膨胀，表示为$A\bigoplus B&#x3D;[A^c\Theta (-B)]^c$</p>
+<p>其中$A^c$表示A的补集，$-B$表示将$B$旋转180°。</p>
+<p>以上是用腐蚀进行的定义，还可以直接定义：</p>
+<p>$A\bigoplus B&#x3D;\cup{A+b|b\in B}$</p>
+<p>这个式子也被称作<strong>明夫斯基和</strong>形式。</p>
+<h3 id="OpenCV调用-1"><a href="#OpenCV调用-1" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h3><p>同之前一样，调用下OpenCV的接口体验下效果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line">im=cv2.imread(<span class="string">&#x27;test.jpg&#x27;</span>,cv2.IMREAD_GRAYSCALE)<span class="comment">#读取图像</span></span><br><span class="line"></span><br><span class="line">thresh,im=cv2.threshold(im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)<span class="comment">#用OTSU自动获取阈值并进行二值化，第一个参数表示图像，第二个表示设置阈值（由于我们用OTSU自动设置，所以这里必须填０），第三个参数表示将超过正常范围的像素设置的值，最后一个传入控制参数。</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;binary&#x27;</span>,im)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;binary.png&#x27;</span>,im)</span><br><span class="line"></span><br><span class="line">kernel=np.ones((<span class="number">6</span>,<span class="number">6</span>),np.uint8)<span class="comment">#生成一个6x6的核</span></span><br><span class="line"></span><br><span class="line">dilation=cv2.dilate(im,kernel,iterations=<span class="number">1</span>)<span class="comment">#调用膨胀算法</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;dilation&#x27;</span>,dilation)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;dilation.png&#x27;</span>,dilation)</span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+
+<h3 id="图样-1"><a href="#图样-1" class="headerlink" title="图样"></a>图样</h3><p><img src="/images/2016/02/24/1/3.png" alt="binary"></p>
+<p><img src="/images/2016/02/24/1/4.png" alt="dilation"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/23/%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2%E7%9A%84OTSU%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/23/%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2%E7%9A%84OTSU%E7%AE%97%E6%B3%95/" itemprop="url">阈值分割的OTSU算法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-23T14:50:00+00:00">
+                2016-02-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>OTSU算法又叫<strong>最大类间方差阈值分割算法</strong>，也叫<strong>大津算法</strong>，是在1980年由日本的大津展之提出，是由最小二乘法推导而来，用于一些简单的阈值确定。</p>
+<p>对于一个灰度图，我们有时候非常想把他用一个阈值将他的前景和背景区分开来。我们可以合理的假设为如果将图像的像素分布图画出来，那么图像上应该有两个峰，即前景色和背景色。在这两个峰之间肯定有一个谷，那么我们就可以将阈值设在这里，从而对图像达到一个良好的分割效果。</p>
+<p>怎样确定这个阈值呢？OTSU算法说，我们可以求出用这个阈值分割后的两个图像的类间方差。对于每一个可能的阈值，我们计算并取出类间方差最大的那个像素值，此时这个值就可以较好的对图像进行分割。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>１、将灰度值分为$0-m$，对于$0-m$的每一个灰度$t$，将他作为阈值将图像分割为灰度为$0-t$以及$t+1-m$这两部分。</p>
+<p>２、计算每一部分的所占比例$w_1,w_2$，每一部分的平均灰度值$u_1,u_2$，以及总的平均灰度值$u$。</p>
+<p>３、计算他们的类间方差$\delta^2&#x3D;w_1(u_1-u)^2+w_2(u_2-u)^2&#x3D;w_1w_2(u_1-u_2)^2$</p>
+<p>４、取出类间方差最大时对应的阈值ｔ，这就可以作为我们最终所取的阈值。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>用python写的简单实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">im=Image.<span class="built_in">open</span>(<span class="string">&#x27;test.png&#x27;</span>)</span><br><span class="line">im.show()</span><br><span class="line">im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">im.show()</span><br><span class="line">arr=np.array(im)</span><br><span class="line">width,height=arr.shape</span><br><span class="line">arr=arr.reshape(width*height)</span><br><span class="line"></span><br><span class="line">freq=np.zeros(<span class="number">256</span>)*<span class="number">1.0</span></span><br><span class="line"></span><br><span class="line">total=<span class="number">0.</span></span><br><span class="line">point=<span class="number">0.</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> arr:</span><br><span class="line">    freq[i]+=<span class="number">1</span></span><br><span class="line">    total+=i</span><br><span class="line">    point+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">u=total/point</span><br><span class="line"></span><br><span class="line">w1=<span class="number">0.</span></span><br><span class="line">w2=<span class="number">1.</span></span><br><span class="line">u1=<span class="number">0.</span></span><br><span class="line">u2=u</span><br><span class="line">eps=<span class="number">0.</span></span><br><span class="line">threshold=<span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">255</span>):</span><br><span class="line">    <span class="keyword">if</span> freq[i]==<span class="number">0</span> <span class="keyword">or</span> w2*point-freq[i]==<span class="number">0</span>:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    u1=(u1*w1*point+i*freq[i])/(w1*point+freq[i])</span><br><span class="line">    u2=(u2*w2*point-i*freq[i])/(w2*point-freq[i])</span><br><span class="line">    w1=w1+freq[i]/point</span><br><span class="line">    w2=w2-freq[i]/point</span><br><span class="line">    eps_now=w1*(u1-u)*(u1-u)+w2*(u-u2)*(u-u2)</span><br><span class="line">    <span class="keyword">if</span>(eps_now&gt;eps):</span><br><span class="line">        eps=eps_now</span><br><span class="line">        threshold=i</span><br><span class="line"></span><br><span class="line">table=[]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">256</span>):</span><br><span class="line">    <span class="keyword">if</span> i&gt;threshold :</span><br><span class="line">        table.append(<span class="number">255</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        table.append(<span class="number">0</span>)</span><br><span class="line">im=im.point(table,<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">im.show()</span><br></pre></td></tr></table></figure>
+<p>效果图：</p>
+<p><img src="/images/2016/02/23/1/1.png"><br><img src="/images/2016/02/23/1/2.png"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/22/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/22/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/" itemprop="url">最小二乘法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-22T14:49:48+00:00">
+                2016-02-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最小二乘法，说白了其实就是解决线性回归问题的一个算法。这个算法最早是由高斯和勒让德分别独立发现的，也是当今十分常见的线性拟合算法，并不复杂。</p>
+<p>我们常用的最小二乘法有两种，一种是普通方程表示的简单线性拟合问题，另一种是矩阵表示的高维度的线性拟合问题。</p>
+<h2 id="普通最小二乘法"><a href="#普通最小二乘法" class="headerlink" title="普通最小二乘法"></a>普通最小二乘法</h2><p>他解决的基本问题其实就是给定一些数对$(x_1,y_1),(x_2,y_2),(x_3,y_3),….$，让你求出参数$\beta_0,\beta_1$，使得直线$y&#x3D;\beta_0+\beta_1 x$能够最好的拟合这个数据集，也就是使得他的平方损失函数取到最小值，即<br>$$Q&#x3D;\underset{i&#x3D;1}{\overset{n}{\sum}} (y_i-\beta_0-\beta_1x_i)^2$$<br>最小。</p>
+<p>为了取得最小值，我们分别对$\beta_0,\beta_1$求偏导，并使之为０。</p>
+<p>$$<br>\left\{\begin{aligned}&amp;\frac{\partial Q}{\partial \beta_0}&#x3D;-2\underset{i&#x3D;1}{\overset{n}{\sum}}(y_i-\beta_0-\beta_1 x_i)&#x3D;0\\&amp; \frac{\partial Q}{\partial \beta_1}&#x3D;-2\underset{i&#x3D;1}{\overset{n}{\sum}}x_i(y_i-\beta_0-\beta_1 x_i)&#x3D;0\end{aligned}\right.<br>$$</p>
+<p>解得：</p>
+<p>$$\left\{\begin{aligned}&amp;\beta_0&#x3D;\frac{n\sum x_iy_i-\sum x_i\sum y_i}{n\sum x_i^2-(\sum x_i)^2}\\&amp; \beta_1&#x3D;\frac{\sum x_i^2\sum y_i-\sum x_i\sum x_iy_i}{n\sum x_i^2-(\sum x_i)^2}\end{aligned}\right.$$</p>
+<p>套用这个公式得到的参数$\beta_0,\beta_1$就是最好的拟合参数了。</p>
+<h2 id="矩阵最小二乘法"><a href="#矩阵最小二乘法" class="headerlink" title="矩阵最小二乘法"></a>矩阵最小二乘法</h2><p>用矩阵表示的最小二乘法则更加方便，能够用非常简单的矩阵形式进行计算，而且能拟合多维度的线性方程。</p>
+<p>对于线性回归，我们要做的事情其实可以近似等同于解线性方程AX&#x3D;Y，其中A是m<em>n的矩阵，X,Y是1</em>m的矩阵。m是数据的对数，n是数据的维数加１(因为还有常数)，而且n应该小于m。</p>
+<p>当然，这个方程是没有解得，不过我们可以通过数值运算计算出一个解，可以证明这个解就是平方损失函数最小的解。</p>
+<p>$$X&#x3D;(A*A^T)^{-1}A^TY$$</p>
+<p>解出的X就是线性回归函数的系数矩阵。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/21/%E8%BE%B9%E7%BC%98%E6%A3%80%E6%B5%8B/" itemprop="url">边缘检测</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-21T14:47:53+00:00">
+                2016-02-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>边缘检测在图像的检测中是经常会用到的。图片的边缘会包含大量的信息，因此在图像的分割、识别、分析中通常可以取边缘作为图像特征。边缘检测最经典的应用就是图像的锐化了，想必大家都用过。</p>
+<p>为了进行边缘检测，我们通常会用到以下的一些算子，即一阶算子（梯度算子）和二阶算子（拉普拉斯算子）。</p>
+<h2 id="拉普拉斯算子（Laplacian-Operator）"><a href="#拉普拉斯算子（Laplacian-Operator）" class="headerlink" title="拉普拉斯算子（Laplacian　Operator）"></a>拉普拉斯算子（Laplacian　Operator）</h2><p>拉普拉斯算子其实就是二阶微分算子，具有各向同性。他也会增强噪声，因此在使用拉普拉斯算子之前需要进行平滑处理。他的主要用处其实是判断一个像素是处于图像的亮区还是暗区。</p>
+<p><strong>拉普拉斯算子定义式</strong>：<br>$$\begin{aligned}\nabla^2 f(x,y)&amp;&#x3D;\frac{\partial^2 f}{\partial x}+\frac{\partial^2 f}{\partial y}\\&amp;&#x3D;f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1)-4f(x,y)\end{aligned}$$</p>
+<p><strong>常用模板公式</strong>：(1)$\begin{bmatrix}0&amp;1&amp;0\\1&amp;-4&amp;1\\0&amp;1&amp;0\end{bmatrix}$(2)$\begin{bmatrix}1&amp;1&amp;1\\1&amp;-8&amp;1\\1&amp;1&amp;1\end{bmatrix}$</p>
+<p>拉普拉斯模板有多个变种，上面是常用的两个，对于每一个像素，我们把他作为模板的中心元素，套用公式进行更新。需要注意的是，与梯度算子不同，他是各向同性的，因此不需要$G_x$，$G_y$两个模板，也就不能区分边缘的方向了。</p>
+<p>还有一个常用的<strong>高斯－拉普拉斯算子</strong>（Gauss-Laplacian　Operator），将平滑滤波器和拉普拉斯边缘检测算子结合起来的：</p>
+<p><strong>高斯－拉普拉斯算子模板</strong>：$\begin{bmatrix}-2&amp;-4&amp;-4&amp;-4&amp;-2\\-4&amp;0&amp;8&amp;0&amp;-4\\-4&amp;8&amp;24&amp;8&amp;-4\\-4&amp;0&amp;8&amp;0&amp;-4\\-2&amp;-4&amp;-4&amp;-4&amp;-2\end{bmatrix}$</p>
+<p>另外，拉普拉斯算子有一个很实用的用途，就是对图像进行锐化，这时候只要将常用模板稍微改动一下即可得到<strong>锐化模板</strong>：</p>
+<p>(1)$\begin{bmatrix}0&amp;-1&amp;0\\-1&amp;5&amp;-1\\0&amp;-1&amp;0\end{bmatrix}$(2)$\begin{bmatrix}-1&amp;-1&amp;-1\\-1&amp;9&amp;-1\\-1&amp;-1&amp;-1\end{bmatrix}$</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>OK，最后就是用代码实现一下了，总体还是很简单的，而且类似于OpenCV之类的库都有实现的函数。不过我还是用pil来简单实现一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image,matplotlib,sys,ImageEnhance,ImageFont,ImageDraw</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gauss</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[-<span class="number">2</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">2</span>],[-<span class="number">4</span>,<span class="number">0</span>,<span class="number">8</span>,<span class="number">0</span>,-<span class="number">4</span>],[-<span class="number">4</span>,<span class="number">8</span>,<span class="number">24</span>,<span class="number">8</span>,-<span class="number">4</span>],[-<span class="number">4</span>,<span class="number">0</span>,<span class="number">8</span>,<span class="number">0</span>,<span class="number">4</span>],[-<span class="number">2</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">4</span>,-<span class="number">2</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">4</span>,width-<span class="number">4</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">4</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">4</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">5</span>,j:j+<span class="number">5</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">laplacian</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">1</span>,-<span class="number">8</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sharpen</span>(<span class="params">im_arr</span>):</span><br><span class="line">    mat=np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[-<span class="number">1</span>,<span class="number">9</span>,-<span class="number">1</span>],[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    	    ans[i,j]=np.<span class="built_in">sum</span>(im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>]*mat)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">robert</span>(<span class="params">im_arr</span>):</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    ans=np.zeros((height-<span class="number">1</span>,width-<span class="number">1</span>))</span><br><span class="line">    <span class="keyword">for</span>	i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">1</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">1</span>):</span><br><span class="line">    		ans[i,j]=np.<span class="built_in">abs</span>(im_arr[i,j]-im_arr[i+<span class="number">1</span>,j+<span class="number">1</span>])+np.<span class="built_in">abs</span>(im_arr[i+<span class="number">1</span>,j]-im_arr[i,j+<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sobel</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>],[-<span class="number">2</span>,<span class="number">0</span>,<span class="number">2</span>],[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[-<span class="number">1</span>,-<span class="number">2</span>,-<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">prewitt</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">isotropic</span>(<span class="params">im_arr</span>):</span><br><span class="line">    matx=np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1.414</span>,<span class="number">0</span>,-<span class="number">1.414</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]])</span><br><span class="line">    maty=np.array([[-<span class="number">1</span>,-<span class="number">1.414</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1.414</span>,<span class="number">1</span>]])</span><br><span class="line">    height,width=im_arr.shape</span><br><span class="line">    gx=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    gy=np.zeros((height-<span class="number">2</span>,width-<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height-<span class="number">2</span>):</span><br><span class="line">    	<span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width-<span class="number">2</span>):</span><br><span class="line">    		gx[i][j]=np.<span class="built_in">sum</span>(matx*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    		gy[i][j]=np.<span class="built_in">sum</span>(maty*im_arr[i:i+<span class="number">3</span>,j:j+<span class="number">3</span>])</span><br><span class="line">    ans=np.<span class="built_in">abs</span>(gx)+np.<span class="built_in">abs</span>(gy)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>(<span class="params">im_arr,name</span>):</span><br><span class="line">    im=Image.fromarray(im_arr)</span><br><span class="line">    draw=ImageDraw.Draw(im)</span><br><span class="line">    font = ImageFont.truetype(<span class="string">&#x27;/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf&#x27;</span>, <span class="number">18</span>)</span><br><span class="line">    draw.text((<span class="number">0</span>,<span class="number">0</span>),name,font=font,fill=<span class="string">&#x27;red&#x27;</span>)</span><br><span class="line">    <span class="keyword">del</span> draw</span><br><span class="line">    im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">    im.save(name+<span class="string">&#x27;.png&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    im=Image.<span class="built_in">open</span>(sys.argv[<span class="number">1</span>])</span><br><span class="line">    im=im.convert(<span class="string">&#x27;L&#x27;</span>)</span><br><span class="line">    im.save(<span class="string">&#x27;source.png&#x27;</span>)</span><br><span class="line">    show(laplacian(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Laplace&#x27;</span>)</span><br><span class="line">    show(sobel(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Sobel&#x27;</span>)</span><br><span class="line">    show(robert(np.array(im,<span class="string">&#x27;int&#x27;</span>)),<span class="string">&#x27;Robert&#x27;</span>)</span><br><span class="line">    show(prewitt(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Prewitt&#x27;</span>)</span><br><span class="line">    show(isotropic(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;Isotropic&#x27;</span>)</span><br><span class="line">    show(sharpen(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;sharpen&#x27;</span>)</span><br><span class="line">    show(gauss(np.array(im,<span class="string">&#x27;int64&#x27;</span>)),<span class="string">&#x27;gauss-laplace&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/2016/02/21/1/1.png" alt="test"><br><img src="/images/2016/02/21/1/2.png" alt="source"><br><img src="/images/2016/02/21/1/3.png" alt="Sobel"><br><img src="/images/2016/02/21/1/4.png" alt="sharpen"><br><img src="/images/2016/02/21/1/5.png" alt="Robert"><br><img src="/images/2016/02/21/1/6.png" alt="Prewitt"><br><img src="/images/2016/02/21/1/7.png" alt="Isotropic"><br><img src="/images/2016/02/21/1/8.png" alt="Laplace"><br><img src="/images/2016/02/21/1/9.png" alt="gauss-laplace"></p>
+<p>最后用他来处理一下lena.png，会的到上面的结果。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/19/Julia%E9%9B%86%E5%88%86%E5%BD%A2%E5%9B%BE%E6%A1%88%E7%BB%98%E5%88%B6/" itemprop="url">Julia集分形图案绘制</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-19T11:22:37+00:00">
+                2016-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>从去年就开始窥东大的C++教学群，当时就被李骏扬老师讲的分形图案给吸引了，简直美赞了。他们的期末作业就是制作一个分形图案的视频，我们这种学校显然不会有这种东西。于是就想着能不能自己研究着画下，然而并不知道这种图案怎么画，度娘上找来的基本没用。搁置了一年，偶然间翻到了一篇论文，终于找到了画图的方法了，加上之前正好有用python绘图的工具，总算把这个东西搞通了一点。其实这个玩意的水还是非常深的，牵涉到了复分析，分形，甚至是混沌理论，据说从上古贝壳的图案，到如今麦田怪圈的图案，都和Julia集有关，说来也是玄乎。</p>
+<h2 id="Julia集"><a href="#Julia集" class="headerlink" title="Julia集"></a>Julia集</h2><p>简单的讲，_Julia_集就是复平面上的一些点$z$，对于一个固定的复数$c$，$z$点在经过无限次$z\gets z^2+c$的迭代之后最终都收敛到一个固定的值上，那么复平面上所有这样的z点构成的集合就是_julia_集。（如果固定初始值而将$c$当做变量则生成的是mandelbrot集）</p>
+<p>当然，这个迭代公式也有他的变种，比如多重julia集或者指数julia集等。</p>
+<p>讲的不太清楚，具体的介绍可以参见_<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Julia_set">wiki pedia</a><em>以及</em><a target="_blank" rel="noopener" href="http://www.matrix67.com/blog/archives/4570">matrix67</a>_的博客(对度娘表示无语)，这里就不班门弄斧了。_wiki_里面主要介绍的是一些数学定义和推导以及他的一些典型图形，而_matrix67_写的则更加容易理解，他通过一步一步迭代过程的展现十分生动的描述了图像的产生过程。不过事实上，matrix67在之前的博客里虽然提供了绘图的代码，但是并没有介绍图像生成的算法。干看代码还是有点恶心的。而市面上又没怎么提及绘图的算法。事实上，他用的算法也非常的简单普遍，我们叫他“逃逸时间算法”。</p>
+<h2 id="逃逸时间算法（Escape-Time-Algorithm）"><a href="#逃逸时间算法（Escape-Time-Algorithm）" class="headerlink" title="逃逸时间算法（Escape Time Algorithm）"></a>逃逸时间算法（Escape Time Algorithm）</h2><p>曾经纳闷了很长时间，上面那个简单的迭代式究竟是怎样生成那些纷繁复杂的分形图案的。最后终于在知网上找到了这个算法。</p>
+<ol>
+<li>设定逃逸半径R，最高迭代次数N；</li>
+<li>将初始的点z进行迭代，如果在N次迭代之内z的模超过了R，那么就认为z“逃逸出去”了，逃逸出去时的迭代次数n就是”逃逸时间“；</li>
+<li>如果经过N次迭代，z的模仍然未到达R，那么就认为z是收敛集内的点；</li>
+<li>将所有的逃逸点按照不同的逃逸时间进行染色就得到了美丽的“逃逸时间图”。</li>
+</ol>
+<p>其实逃逸时间图显示的并不是真正意义上的_julia_集，而是不属于_julia_集合的点。</p>
+<p>当然，还有一种常用的_julia_集绘图算法–外部距离估计算法，这里不做过多介绍。</p>
+<h2 id="静态实现"><a href="#静态实现" class="headerlink" title="静态实现"></a>静态实现</h2><p>用python+matplotlib模拟逃逸时间算法进行简单绘图：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">c_real=-<span class="number">1.621</span></span><br><span class="line">c_imag=-<span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>(<span class="params">a</span>):</span><br><span class="line">	c=np.<span class="built_in">complex</span>(c_real,c_imag)</span><br><span class="line">	<span class="keyword">return</span> np.exp(a*a*a)+c+a*a-a</span><br><span class="line"></span><br><span class="line">R=<span class="number">50</span></span><br><span class="line">density=<span class="number">400</span></span><br><span class="line">N=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">x=[]</span><br><span class="line">y=[]</span><br><span class="line">c=[]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(density):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> xrange(density):</span><br><span class="line">		real=(i-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		imag=(j-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		now=np.<span class="built_in">complex</span>(real,imag)</span><br><span class="line">		<span class="keyword">for</span> n <span class="keyword">in</span> xrange(N):</span><br><span class="line">			now=func(now)</span><br><span class="line">			<span class="keyword">if</span> np.<span class="built_in">abs</span>(now)&gt;R:</span><br><span class="line">				x.append(real)</span><br><span class="line">				y.append(imag)</span><br><span class="line">				c.append(n+<span class="number">1</span>)</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">plt.scatter(x,y,s=<span class="number">2</span>,c=c,edgecolors=<span class="string">&#x27;face&#x27;</span>)</span><br><span class="line">plt.xticks([])</span><br><span class="line">plt.yticks([])</span><br><span class="line">plt.xlim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plt.ylim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">plt.savefig(<span class="built_in">str</span>(const_real)+<span class="string">&#x27;+&#x27;</span>+<span class="built_in">str</span>(const_imag)+<span class="string">&#x27;i.png&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>参数c由c_real和c_imag确定，迭代公式由func函数确定，描点时注意去掉边界以及标尺。</p>
+<p>通过这个模板可以非常轻松的绘出下面这几张图：</p>
+<p><img src="/images/2016/02/19/1/1.png" alt="c=-0.74543+0.11301i"></p>
+<p><img src="/images/2016/02/19/1/2.png" alt="c=-0.8+0.156i"></p>
+<p><img src="/images/2016/02/19/1/3.png" alt="c=-0.4+0.6i"></p>
+<p><img src="/images/2016/02/19/1/4.png" alt="c=-0.621+0i,func=exp(z*z*z)+c"></p>
+<p><img src="/images/2016/02/19/1/5.png" alt="c=0.285+0.01i"></p>
+<h2 id="动态实现"><a href="#动态实现" class="headerlink" title="动态实现"></a>动态实现</h2><p>既然我们可以直接绘出迭代N次之后的图像，那么我们当然也可以画出每一次的图像组合成动图，这样看起来效果也更明显。</p>
+<p><strong>图像生成：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">func</span>(<span class="params">a</span>):</span><br><span class="line">	c=np.<span class="built_in">complex</span>(-<span class="number">0.74543</span>,<span class="number">0.11301</span>)</span><br><span class="line">	<span class="keyword">return</span> a*a+c</span><br><span class="line"></span><br><span class="line">R=<span class="number">10</span></span><br><span class="line">density=<span class="number">400</span></span><br><span class="line">N=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">time1=time.time()</span><br><span class="line"></span><br><span class="line">mat=[]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(density):</span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> xrange(density):</span><br><span class="line">		real=(i-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		imag=(j-density/<span class="number">2.0</span>)/density*<span class="number">2.0</span></span><br><span class="line">		now=np.<span class="built_in">complex</span>(real,imag)</span><br><span class="line">		<span class="keyword">for</span> n <span class="keyword">in</span> xrange(N):</span><br><span class="line">			now=func(now)</span><br><span class="line">			<span class="keyword">if</span> np.<span class="built_in">abs</span>(now)&gt;R:</span><br><span class="line">				mat.append((real,imag,n+<span class="number">1</span>))</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">time2=time.time()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;calculating costs &#x27;</span>+<span class="built_in">str</span>(time2-time1)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line">mat.sort(<span class="keyword">lambda</span> x,y:cmp(x[<span class="number">2</span>],y[<span class="number">2</span>]))</span><br><span class="line"></span><br><span class="line">time3=time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;sorting costs &#x27;</span>+<span class="built_in">str</span>(time3-time2)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line">real=[]</span><br><span class="line">imag=[]</span><br><span class="line">color=[]</span><br><span class="line"></span><br><span class="line">cnt=<span class="number">1</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(mat)-<span class="number">1</span>):</span><br><span class="line">	real.append(mat[i][<span class="number">0</span>])</span><br><span class="line">	imag.append(mat[i][<span class="number">1</span>])</span><br><span class="line">	color.append(mat[i][<span class="number">2</span>])</span><br><span class="line">	<span class="keyword">if</span> i==<span class="built_in">len</span>(mat)-<span class="number">2</span> <span class="keyword">or</span> (<span class="keyword">not</span> mat[i][<span class="number">2</span>]==mat[i+<span class="number">1</span>][<span class="number">2</span>]):</span><br><span class="line">		plt.scatter(real,imag,s=<span class="number">2</span>,c=color,alpha=<span class="number">1</span>,edgecolors=<span class="string">&#x27;face&#x27;</span>)</span><br><span class="line">                plt.xticks([])</span><br><span class="line">                plt.yticks([])</span><br><span class="line">		plt.xlim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">		plt.ylim(-<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">		plt.savefig(<span class="string">&#x27;%02d&#x27;</span> % cnt)</span><br><span class="line">		<span class="built_in">print</span> <span class="string">&#x27;pic&#x27;</span>+(<span class="string">&#x27;%02d&#x27;</span> % cnt)+<span class="string">&#x27; OK.&#x27;</span></span><br><span class="line">		cnt+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">time4=time.time()</span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;generating costs &#x27;</span>+<span class="built_in">str</span>(time4-time3)+<span class="string">&#x27; s.&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">&#x27;total costs &#x27;</span>+<span class="built_in">str</span>(time4-time3)+<span class="string">&#x27; s.&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>生成图像的过程比较缓慢，相比而言计算所耗费的时间就不算太多了。</p>
+<p><strong>gif组合：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$convert *.png -resize 320x240 out.gif</span><br></pre></td></tr></table></figure>
+<p>我们用ImageMagick工具来生成gif，这里如果用-layer来压缩会导致图像失真，因此用改变图像大小的方式来适当压缩文件。</p>
+<p>最后就可以生成动图：</p>
+<p><img src="/images/2016/02/19/1/6.gif"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/11/Ubuntu%E4%B8%8BOpencv%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%E7%AE%80%E8%BF%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1143,835 +1951,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F1-4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F1-4/" itemprop="url">自制正方软件系统验证码的识别程序（1/4）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-05T09:16:50+00:00">
-                2016-02-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>学了几天机器学习的原理，感觉还是要自己动手写一个像样的程序才行。正好刚研究过<a target="_blank" rel="noopener" href="http://deeplearning.net/">deeplearning.net</a>上的那个<a target="_blank" rel="noopener" href="http://deeplearning.net/tutorial/logreg.html#putting-it-all-together">识别mnist数据库的源码</a>，于是打算利用一下写一个识别验证码的程序。</p>
-<p>他提供的代码已经基本实现了利用<strong>Logistic Regression</strong> 来分类，用的是<strong>softmax</strong>算法，支持多元分类。然而他只能读入指定的mnist数据集的经过处理后的格式。因此我当前的任务就是将一张实实在在的图片转换成计算机可以识别的格式，并且进行好预处理，选择好特征值，而不用考虑机器学习代码的细节（这个的确有点难）。但是仅仅是处理好这些事情也并不容易。</p>
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>我的目标是我们学校的<a target="_blank" rel="noopener" href="http://xk.suda.edu.cn/">选课系统</a>的网站（没错我是苏大的0.0），这里的验证码相对比较规则，而且未来应该有点实用价值吧。</p>
-<p><img src="/images/2016/02/05/1/1.png" alt="1"></p>
-<p>就是这里的验证码，取出来看一下就是这样：<img src="http://xk.suda.edu.cn/CheckCode.aspx"></p>
-<p>当然，为了识别这个，还是得多下载几张下来自己人脑识别几张作为训练集。。。</p>
-<h2 id="下载图片"><a href="#下载图片" class="headerlink" title="下载图片"></a>下载图片</h2><p>下载这种东西还是用shell脚本方便：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>((i=<span class="number">1</span>;i&lt;=<span class="number">10000</span>;i++))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">	wget -O <span class="string">&#x27;./png/&#x27;</span><span class="variable">$i</span> <span class="string">&#x27;http://xk.suda.edu.cn/CheckCode.aspx&#x27;</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-<p>一不小心下了10000张，先留着再说。</p>
-<h2 id="获得训练集"><a href="#获得训练集" class="headerlink" title="获得训练集"></a>获得训练集</h2><p>本来想在网上找点靠谱的识别平台，但是不管要不要钱，效果都不好。所以，，甭想了，先人脑识别500张再说。。。。。。</p>
-<p>为了方便以后使用，我就用他的文件名来记录实际的值。</p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>自己观察下载的图片，发现他有这么几个特点：</p>
-<p>1、包含字母数字，但是9、o、z三个字符不存在（估计是因为容易产生混淆，为了方便用户就没提供这些）。这一点很重要，因为在进行训练的时候，如果某个集合是空的，那么就会在执行的过程中出现类似‘除0错误’这样的东西。因此分类的时候需要把这三个字符排除。</p>
-<p>2、包含四个字符，每一个字符都占据一个相对固定的位置。这一点大大降低了识别的难度，因为这样我们就可以将字符进行分割，从而把问题转化为对单个字符的识别。否则用普通的办法就难以下手了。</p>
-<p>3、字符的颜色固定，都是蓝色。这样我们就可以非常方便的进行二值化处理而不用考虑反色的问题了。</p>
-<p>4、图片的噪声只有一些象征性的点点。。。这对我们来说几乎形同虚设，只要稍微对图片进行处理就能消除影响。</p>
-<p>5、下载了大量的数据之后发现竟然有大量的图片出现重复，于是我猜他的图片并不是动态生成的，而是静态读取的。这么说来就算再不济，我也完全可以把他的图片全部下载，找个验证码平台识别好然后进行hash查找。总共也就167万种，全部下下来就几个G，跑个小半天应该就下的差不多了吧。</p>
-<p>根据上面这些特点，我们就能有针对性的设计程序了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/" itemprop="url">机器学习中的交叉验证思想</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-02T15:34:28+00:00">
-                2016-02-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>在使用训练集对参数进行训练的时候，经常会发现人们通常会将一整个训练集分为三个部分（比如<a href="/2016/01/25/1/">mnist手写训练集</a>）。一般分为：<strong>训练集（train_set）</strong>，<strong>评估集（valid_set）</strong>，<strong>测试集（test_set）</strong>这三个部分。这其实是为了保证训练效果而特意设置的。其中<strong>测试集</strong>很好理解，其实就是完全不参与训练的数据，仅仅用来观测测试效果的数据。而<strong>训练集</strong>和<strong>评估集</strong>则牵涉到下面的知识了。</p>
-<p>因为在实际的训练中，训练的结果对于训练集的拟合程度通常还是挺好的（初试条件敏感），但是对于训练集之外的数据的拟合程度通常就不那么令人满意了。因此我们通常并不会把所有的数据集都拿来训练，而是分出一部分来（这一部分不参加训练）对训练集生成的参数进行测试，相对客观的判断这些参数对训练集之外的数据的符合程度。这种思想就称为<strong>交叉验证（Cross Validation）。</strong></p>
-<p>通常我们使用的交叉验证方法有下面几种：</p>
-<h2 id="简单交叉验证（simple-cross-validation）"><a href="#简单交叉验证（simple-cross-validation）" class="headerlink" title="简单交叉验证（simple cross validation）"></a>简单交叉验证（simple cross validation）</h2><p>简单交叉验证当然很简单了，就是把整个训练集随机分为两部分（通常是70%的训练集，30%的评估集）。</p>
-<p>1、首先我们用训练集建立模型，这时候我们需要尝试多种的参数来得到一些不同的模型；</p>
-<p>2、对于每一个模型，调用评估集来进行测试，计算出训练误差（通常是以类似损失函数的形式）；</p>
-<p>3、取训练误差最小的那个模型作为最后的结果；</p>
-<p>这个方法当然会存在一些训练数据的浪费，毕竟有大量的数据没有参与真正的训练而是仅仅作为评估。所以这个方法只能在数据非常易得的情况下使用，如果数据比较珍贵，显然这种方法就不适用了。</p>
-<p>有时候这个方法好像也被称为<strong>HoldOut验证</strong>（Hold-Out Method）。其实这也不算是交叉验证了，因为他的训练集并没有交叉。</p>
-<p>通常情况下我们是直接选取前70%为训练集，但是如果训练数据是按照一定规律排放的，那么选取数据的时候就要先打乱顺序，或者按照一定的随机方法选取数据。否则训练集就不一定具有一般性了。</p>
-<h2 id="K-折交叉验证（S-fold-Cross-Validation）"><a href="#K-折交叉验证（S-fold-Cross-Validation）" class="headerlink" title="K-折交叉验证（S-fold Cross Validation）"></a>K-折交叉验证（S-fold Cross Validation）</h2><p>这个据说是最常用的验证方法了，步骤如下：</p>
-<p>1、将数据集均分为K份</p>
-<p>2、从K份中取一份作为评估集，另外K-1份作为训练集，生成K个模型以及这K个模型对于评估集的训练误差；</p>
-<p>3、取训练误差最小的那个模型作为最后的结果；</p>
-<p>经大量实验验证，据说我们取<strong>K&#x3D;10</strong>的时候效果最好。</p>
-<p>这个方法一方面保证了数据充分被使用训练了，避免了数据的浪费；另一方面也互相进行了验证，达到了交叉验证的效果，不过计算代价还是有点高。</p>
-<h2 id="留p交叉验证（Leave-p-out-Cross-Validation"><a href="#留p交叉验证（Leave-p-out-Cross-Validation" class="headerlink" title="留p交叉验证（Leave-p-out Cross Validation)"></a>留p交叉验证（Leave-p-out Cross Validation)</h2><p>从名字大概就可以看出来了，所谓留p，就是每一次训练都会留下p个数据作为评估集，剩下的n-p个数据作为训练集，分别进行建模测试，取出效果最好的模型。这里我们会发现这p个数据可以有$C_n^p$组可能，所以计算的复杂度还是挺高的。</p>
-<p>当然，有时候我们会取p&#x3D;1，这导致了每一个数据都会独立作为测试集。这种方法又被叫做**留一交叉验证（Leave-One-Out Cross Validation)**，当数据极为匮乏的时候才会使用。</p>
-<p>事实上，交叉验证的方法不仅能够提高数据的利用率，更重要的是他也能够在一定程度上解决过拟合（Overfitting）问题，因为过拟合只能很好的拟合训练集中的数据而并不能拟合评估集中的数据。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/28/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/28/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/" itemprop="url">逻辑回归算法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-28T15:50:35+00:00">
-                2016-01-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>说到逻辑回归（Logistic Regression），其实他解决的并不是回归问题（Regression），而是分类问题（Classification）。分类问题都明白了，他和一般的回归问题的差别其实也就在于一个值域是连续的，而另一个值域是离散的，</p>
-<h2 id="Sigmoid函数"><a href="#Sigmoid函数" class="headerlink" title="Sigmoid函数"></a>Sigmoid函数</h2><p>我们都知道分类问题需要解决的问题是给你一个分好类的训练集，然后给你一个数据让你判断这个数据属于哪一类。严格来说这是一个离散的问题，然而我们一般能够处理的都应该是连续可导的函数。而连续可导的线性函数一般都不能非常好的体现出离散的特征。这时候我们就需要一个特殊的函数来近似的处理离散的分类问题，这就引入了我们著名的逻辑函数(Logistic Function)，又称<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Sigmoid_function">Sigmoid函数</a>：$$S(t)&#x3D;\frac{1}{1+e^{-\theta t}}$$</p>
-<p><img src="/images/2016/01/28/1/1.png"></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib.pylab  <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">x=np.linspace(-<span class="number">5</span>,<span class="number">5</span>,<span class="number">100</span>)</span><br><span class="line">y=<span class="number">1</span>/(<span class="number">1</span>+np.exp(-x))</span><br><span class="line">plot(x,y,color=<span class="string">&#x27;blue&#x27;</span>, linewidth=<span class="number">2.5</span>,label=<span class="string">&#x27;$S(t)=\\\\frac&#123;1&#125;&#123;1+e^&#123;-t&#125;&#125;$&#x27;</span>)</span><br><span class="line">y=<span class="number">1</span>/(<span class="number">1</span>+np.exp(-<span class="number">2</span>*x))</span><br><span class="line">plot(x,y,color=<span class="string">&#x27;green&#x27;</span>, linewidth=<span class="number">2.5</span>,label=<span class="string">&#x27;$S(t)=\\\\frac&#123;1&#125;&#123;1+e^&#123;-2t&#125;&#125;$&#x27;</span>)</span><br><span class="line">y=<span class="number">1</span>/(<span class="number">1</span>+np.exp(-<span class="number">4</span>*x))</span><br><span class="line">plot(x,y,color=<span class="string">&#x27;yellow&#x27;</span>, linewidth=<span class="number">2.5</span>,label=<span class="string">&#x27;$S(t)=\\\\frac&#123;1&#125;&#123;1+e^&#123;-4t&#125;&#125;$&#x27;</span>)</span><br><span class="line">y=<span class="number">1</span>/(<span class="number">1</span>+np.exp(-<span class="number">8</span>*x))</span><br><span class="line">plot(x,y,color=<span class="string">&#x27;red&#x27;</span>, linewidth=<span class="number">2.5</span>,label=<span class="string">&#x27;$S(t)=\\\\frac&#123;1&#125;&#123;1+e^&#123;-8t&#125;&#125;$&#x27;</span>)</span><br><span class="line">legend(loc=<span class="string">&#x27;upper left&#x27;</span>)</span><br><span class="line">show()</span><br></pre></td></tr></table></figure>
-
-<p>我们可以看到随着$t$的值逐渐远离原点，函数值迅速的向0或者1无限逼近，非常好的模拟了一个离散的效果，而且随着\theta值的增大，逼近的趋势也更加明显。这就很好的满足了我们的要求。</p>
-<p>有了这个函数，我们就可以试着用他来拟合一些分类的问题。为了简单起见，我们先讨论二值分类的问题。</p>
-<h2 id="决策边界（Decision-Boundary）"><a href="#决策边界（Decision-Boundary）" class="headerlink" title="决策边界（Decision Boundary）"></a>决策边界（Decision Boundary）</h2><p>使用了逻辑函数作为拟合函数后，我们就可以写出我们的预测函数了：$$h_\theta(x)&#x3D;S(\theta^Tx)$$S函数里面的其实就是一个线性方程，很明显，这个线性方程大于0的时候，输出的结果就是1，小于0的时候输出的结果就是0。也就是说，这个线性方程的解就是我们做出决策的边界了。</p>
-<p>当然，这个边界完全可以不用是线性方程。比如，我们完全可以通过构造一些高阶的参数来使决策边界呈现一个圆：<br>$$\theta^Tx&#x3D;\theta_0+\theta_1x_1^2+\theta_2x_2^2$$</p>
-<p>由此，理论上我们就可以构造任何形状的决策边界来拟合各种各样的分类问题。</p>
-<h2 id="代价函数（Cost-Function）"><a href="#代价函数（Cost-Function）" class="headerlink" title="代价函数（Cost Function）"></a>代价函数（Cost Function）</h2><p>在之前介绍线性回归的函数时，我们在比较预测的函数和数据集的匹配程度的时候用到了$\frac12 (h_\theta(x_i)-y_i)^2$这个东西。这个其实就是一个<strong>代价函数</strong>或者叫<strong>损失函数</strong>（Loss Function）（具体一点，这其实叫做<strong>平方损失函数</strong>），即相似程度越不好，那么这个使用这个函数的代价就越大，就越不建议使用他。于是我们完全可以用这个函数作为比较拟合程度的依据，而后对数据集中的所有数据的代价求和，就是我们总的代价，也就是之前的J函数。</p>
-<p>综上，我们可以先定义线性回归中的Cost Function：<br>$$Cost(h_\theta(x),y)&#x3D;\frac12(h_\theta(x)-y)^2$$</p>
-<p>与之前不同，对于逻辑回归，现在我们的$h(x)$不再是一个线性方程了。很明显，对这个函数如果用平方损失函数来算的话，对后续的求导求和等运算会带来极大的不便。而且更重要的是，他并不是一个下凸函数，所以甚至不能用GD算法求极值。因此我们将他的Cost Function定义为下式：<br>$$<br>Cost(h_\theta(x),y)&#x3D;\left\{\begin{aligned}-log(h_\theta(x))\ if\ y&#x3D;1&amp;\\-log(1-h_\theta(x))\ if\ y&#x3D;0 &amp; \end{aligned}\right.<br>$$</p>
-<p>当然，如果想把分类函数合并下也可以得到下面的形式:<br>$$Cost(h_\theta(x),y)&#x3D;-ylog(h_\theta(x))-(1-y)log(1-h_\theta(x))$$</p>
-<p>对于这个方程，我们要看到，当$h_\theta(x)$与$y$相差很大的时候，他的代价甚至可以趋近去正无穷！而且，这个函数可以非常方便的求导数，也可以非常方便的对$\theta$求偏导。这样的代价方程以后也会经常用到，他又叫<strong>对数损失函数</strong>。</p>
-<h2 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h2><p>有了损失函数，我们就可以构造用于梯度下降的J函数了。实际上就是对每一个代价求和就行了：<br>$$J(\theta)&#x3D;\frac{1}{m}\underset{i&#x3D;1}{\overset{m}{\Sigma}}Cost(h_\theta(x_i),y_i)$$</p>
-<p>进而，我们对J函数中每一个\theta求偏导，可以得到下面的梯度下降算法：</p>
-<p>repeat until convergence:</p>
-<p>$$\begin{aligned}\theta_j&amp;:&#x3D;\theta_j-\alpha\frac{\partial}{\partial\theta_j}J(\theta)\\&amp;:&#x3D;\theta_j-\alpha \underset{i&#x3D;1}{\overset{m}{\Sigma}}(h_\theta(x_i)-y_i)x_{i,j}\\\end{aligned}$$<br>simultaneously update all $\theta_j$</p>
-<p>这里有$h_\theta(x)&#x3D;\frac{1}{1+e^{-\theta^Tx}}$，而$x_i$对应的是每一组数据构成的列向量，$x_{i,j}$表示第i组数据的第j个值。</p>
-<p>没错，最终的表达式跟线性回归的计算方法几乎一模一样（注意少了一个分母上的m）！这就是Sigmoid函数的强大之处。</p>
-<h2 id="优化算法"><a href="#优化算法" class="headerlink" title="优化算法"></a>优化算法</h2><p>对于逻辑回归算法，有一些高级的优化算法比如Conjugate gradient、BFGS、L-BFGS等，这些跑起来快，但是难学。。。这里就不提了。</p>
-<h2 id="多元分类问题"><a href="#多元分类问题" class="headerlink" title="多元分类问题"></a>多元分类问题</h2><p>有了二元的分类问题，很自然我们就会想到多元的分类问题。对于多元的分类问题，我们的处理方法其实很朴素，就是把一个n元的分类问题转化为n个二元的分类问题，又叫”One-vs-All“。意思已经很清楚了，照着二元的分类问题弄n次就好了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/27/%E5%A4%9A%E5%8F%98%E9%87%8F%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/27/%E5%A4%9A%E5%8F%98%E9%87%8F%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/" itemprop="url">多变量线性回归算法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-27T11:58:13+00:00">
-                2016-01-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>其实所谓的多变量的线性回归（Linear Regression with multiple variables ）本质上将与单变量的线性回归没啥差别。因此我们完全可以用<a href="/2016/01/26/1/">上一节</a>中的梯度下降算法来解决，只需要在每一次迭代的时候多考虑几个变量而已。所以这一节就稍微介绍一下了，不再用例子分析。不过毕竟多了一些变量，在对多变量跑梯度下降算法时，显然对参数的调节就更加重要了，因此我们首先得学会一些参数调节的技巧。这些技巧在实际的操作过程中尤为重要。</p>
-<h2 id="调节参数"><a href="#调节参数" class="headerlink" title="调节参数"></a>调节参数</h2><h3 id="特征值缩放（Feature-Scaling）"><a href="#特征值缩放（Feature-Scaling）" class="headerlink" title="特征值缩放（Feature Scaling）"></a>特征值缩放（Feature Scaling）</h3><p>我们知道在进行梯度下降算法时，经常会有这样一个问题，就是如果两个特征变量$x_i$和$x_j$的范围差别很大，那么每一次迭代时，他们下降的相对速率就不一样，这就直接导致了范围大的那个变量下降的过慢。为了解决这个问题，我们引入了特征值缩放这个技巧。其实也很简单，就是把每一个参数的变化范围大概控制在一起，这样他们的下降速率就不会受到相互的牵连。具体的操作就是将他所有参数的值，都缩放在大小差不多的一个区域内（通常是(-1,1)）。为了进行这样的缩放，我们就需要接下来的方法。</p>
-<h3 id="标准化（Mean-Normalization）"><a href="#标准化（Mean-Normalization）" class="headerlink" title="标准化（Mean Normalization）"></a>标准化（Mean Normalization）</h3><p>为了缩放到一个区域（(-1,1)）内，我们要做两件事：第一，把平均值对应到0点；第二，把最大最小值对应到-1和1这两点。想想也很好理解，用公式表示就是：<br>$$x_i:&#x3D;\frac{x_i-u}{2\sigma}$$</p>
-<p>这里的$x_i$表示需要标准化的数据，$u$表示在数据集中这种参数的平均值，$\sigma$表示数据集中这种参数的标准差。看着很眼瘦？没错，这个就是我们求正态分布的那个标准化转换函数。<br>经过这样的转换，每一个变量都会将他的值缩放到（-1,1）中了，进而方便我们进行梯度下降。</p>
-<h3 id="学习因子-alpha-的选取"><a href="#学习因子-alpha-的选取" class="headerlink" title="学习因子$\alpha$的选取"></a>学习因子$\alpha$的选取</h3><p>我们知道学习因子既不能过大也不能过小。实际上，对于一个学习因子是好是坏我们可以这样判断。对于一个特定的学习因子$\alpha$，我们可以画出J函数与迭代次数的关系图。对于一个好的$\alpha$，他的函数图像应该是一个类似$y&#x3D;\frac1x$的图像。如果J函数下降的速度过慢，显然我们需要增加学习因子使他下降的更快；如果J函数是增函数，或者在某些区间内有上升的趋势，那么显然我们需要减小学习因子防止学习过度。</p>
-<h2 id="多项式回归（Polynomial-Regression-）"><a href="#多项式回归（Polynomial-Regression-）" class="headerlink" title="多项式回归（Polynomial Regression ）"></a>多项式回归（Polynomial Regression ）</h2><p>对于某些不能用线性回归的问题，我们有时候可以试着用多项式来进行回归拟合。其实多项式回归完全可以看成是多变量的线性回归问题，因为我们完全可以把其中的$x^i$看成是第$i$个独立的变量，只不过他的值是由$x$推出来的而已。原理很简单，但是如果想不到那就头大了0.0。</p>
-<h2 id="公式法（Normal-equation）"><a href="#公式法（Normal-equation）" class="headerlink" title="公式法（Normal equation）"></a>公式法（Normal equation）</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>对于多变量的线性回归，除了用我们之前学的GD算法，我们其实还有另外一个直接套公式的算法（卧槽早说）。这牵涉到线性代数的知识，我们需要做的只是将数据集组合成几个矩阵，然后运算一个公式即可，这个公式就叫 Normal equation （觉得叫成“正规方程”好难听）：<br>$$\theta&#x3D;(X^TX)^{-1}X^Ty$$</p>
-<p>其实这个方法就是矩阵最小二乘法了。</p>
-<p>其中$X^T$表示$X$的转置，$X^{-1}$表示$X$的逆。</p>
-<p>这个公式，得到的结果就是对整个数据集最好的线性逼近。下面介绍下这个公式怎么用。</p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><p>假设我们的数据集有m个数据，我们的变量有n个（即每一个数据有n个特征值），那么我们可以把所有的输入数据写成一个m*（n+1）的矩阵。为什么是n+1列，因为我们知道，对n个参数的回归需要用到n+1个$\theta$。只是这当中的$\theta_0$一直取1罢了。因此这个矩阵的第一列全部都是1。</p>
-<p>上面的这个矩阵，就是我们公式中的X了。</p>
-<p>对于公式中的$y$，其实是由所有的输出数据组成的列向量，与输入一一对应。</p>
-<p>最后，我们只需要计算上面这个公式的结果就能计算出$\theta$向量的值了，（很明显这个向量应该是一个n+1维的列向量）</p>
-<p>至于这个公式的证明。。。貌似很麻烦，百度<a target="_blank" rel="noopener" href="https://www.baidu.com/s?wd=normal%20equation&oq=normal%20equation">normal equation</a> 可以找到需要的证明过程。</p>
-<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><p>这里有一个问题，就是如果$X^TX$没有逆元怎么办?</p>
-<p>事实上正常情况下是不会没有逆元的，没有逆元的情况一般有两种：</p>
-<p>1、参数中有线性相关的两组量。比如一个参数是用厘米表示的高度，另一个参数是用米表示的同样的那个高度。显然，这样选择参数是没有意义的，对于这种情况我们只要删掉其中一个参数就好了。</p>
-<p>2、数据集的数量m小于参数的个数n。通常情况下当然是不会发生这种事的，毕竟都没几个数据还怎么好意思来拟合？不过万一出现这种状况，也是有对应的办法的，这种情况以后再说。</p>
-<h3 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h3><p>我们注意到这里需要求矩阵的逆，而$X^TX$是一个n*n的矩阵，因此他的复杂度通常至少是$O(n^3)$（虽然可以优化，但是也差不多这么大）。这在n比较小的时候效果还挺不错的，而且比GD算法更加方便准确。但是当参数的个数变多了的时候，效率就会特别慢，相比之下GD算法的优势就显现出来了。</p>
-<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>接下来我就结合上一节的例子试着实现一下，虽然是单变量，但是道理是一样的。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="comment">#read file</span></span><br><span class="line"></span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line"></span><br><span class="line"><span class="comment">#calculate</span></span><br><span class="line">size=<span class="built_in">len</span>(brain)</span><br><span class="line">X=np.matrix(np.vstack((np.ones(size),brain))).reshape(<span class="number">2</span>,size).T.astype(np.<span class="built_in">float</span>)</span><br><span class="line">Y=np.matrix(body).T.astype(np.<span class="built_in">float</span>)</span><br><span class="line">out=(X.T*X).I*X.T*Y</span><br><span class="line"><span class="built_in">print</span> out</span><br><span class="line"></span><br><span class="line"><span class="comment">#draw</span></span><br><span class="line">out=np.array(out)</span><br><span class="line">px=np.linspace(-<span class="number">100</span>,<span class="number">600</span>,<span class="number">100</span>)</span><br><span class="line">py=px*out[<span class="number">1</span>]+out[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">plt.plot(px,py)</span><br><span class="line">plt.scatter(brain,body,s=<span class="number">100</span>,alpha=<span class="number">.5</span>)</span><br><span class="line">plt.xlim(-<span class="number">100</span>,<span class="number">600</span>)</span><br><span class="line">plt.ylim(-<span class="number">200</span>,<span class="number">1400</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-<p>（这里写代码的时候要非常注意np.matrix的用法以及强制指定数据类型）</p>
-<p>最后算得：$\theta_0&#x3D;55.95185719,\theta_1&#x3D;1.24271276$，从图上看还是拟合的挺不错的。</p>
-<p><img src="/images/2016/01/27/1/1.png"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/26/%E6%89%B9%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/26/%E6%89%B9%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95/" itemprop="url">批量梯度下降算法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-26T07:25:13+00:00">
-                2016-01-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>这一讲介绍了我们的第一个机器学习算法，”批量“梯度下降算法(Batch Gradiant Descent)。注意到他在前面加了个“批量(Batch)”，这其实是为了与以后的另一种梯度下降算法进行区分从而体现出这个算法的特点。</p>
-<h2 id="线性回归"><a href="#线性回归" class="headerlink" title="线性回归"></a>线性回归</h2><p>梯度下降算法这是用来解决所谓的“线性回归”问题。线性回归应该都懂了，这里大概的进行下定义（以单变量为例）：</p>
-<p>1、给你一个数据集（Training Set），数据集中有很多个数对，表示$(x_i,y_i)$。</p>
-<p>2、你的任务是构造一个预测函数$h_\theta(x)&#x3D;\theta_0+\theta_1x$，使得这个函数对于任意给定的$x$，能很好的预测出他对应的$y$。</p>
-<p>3、为了判断预测函数的准确性，我们引入一个费用方程:<br>$$J(\theta_0,\theta_1)&#x3D;\frac{1}{2m} \underset{i&#x3D;1}{\overset{m}{\Sigma}}(h(x_i)-y_i)^2$$<br>这里的m表示数据集中数据的个数，x和y表示每一个数据。很明显这里用的是最常见的求平方差的二次误差函数，不过这里多引入了一个$\frac{1}{2}$，其实没有别的意思，只是为了后面求导的时候方便约掉他，从而使求导后的式子更好看。</p>
-<p>4、我们的目标就是找到$\theta_0,\theta_1$使得J函数取最小值。</p>
-<h2 id="一个具体的数据"><a href="#一个具体的数据" class="headerlink" title="一个具体的数据"></a>一个具体的数据</h2><p>为了更加直观的表现，我在<a target="_blank" rel="noopener" href="http://people.sc.fsu.edu/~jburkardt/datasets/regression/regression.html">people.sc.fsu.edu</a> 上找到了一些线性回归的数据集，用了其中的第一个来展示(去掉了一些夸张的数据)：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"> 1     3.385    44.500</span><br><span class="line"> 2     0.480    15.500</span><br><span class="line"> 3     1.350     8.100</span><br><span class="line"> 4   465.000   423.000</span><br><span class="line"> 5    36.330   119.500</span><br><span class="line"> 6    27.660   115.000</span><br><span class="line"> 7    14.830    98.200</span><br><span class="line"> 8     1.040     5.500</span><br><span class="line"> 9     4.190    58.000</span><br><span class="line">10     0.425     6.400</span><br><span class="line">11     0.101     4.000</span><br><span class="line">12     0.920     5.700</span><br><span class="line">13     1.000     6.600</span><br><span class="line">14     0.005     0.140</span><br><span class="line">15     0.060     1.000</span><br><span class="line">16     3.500    10.800</span><br><span class="line">17     2.000    12.300</span><br><span class="line">18     1.700     6.300</span><br><span class="line">19     4.235    50.400</span><br><span class="line">20     0.023     0.300</span><br><span class="line">21   187.100   419.000</span><br><span class="line">22   521.000   655.000</span><br><span class="line">23     0.785     3.500</span><br><span class="line">24    10.000   115.000</span><br><span class="line">25     3.300    25.600</span><br><span class="line">26     0.200     5.000</span><br><span class="line">27     1.410    17.500</span><br><span class="line">28   529.000   680.000</span><br><span class="line">29   207.000   406.000</span><br><span class="line">30    85.000   325.000</span><br><span class="line">31     0.750    12.300</span><br><span class="line">32    62.000  1320.000</span><br><span class="line">33     0.104     2.500</span><br><span class="line">34     3.500     3.900</span><br><span class="line">35     6.800   179.000</span><br><span class="line">36    35.000    56.000</span><br><span class="line">37     4.050    17.000</span><br><span class="line">38     0.120     1.000</span><br><span class="line">39     0.023     0.400</span><br><span class="line">40     0.010     0.250</span><br><span class="line">41     1.400    12.500</span><br><span class="line">42   250.000   490.000</span><br><span class="line">43     2.500    12.100</span><br><span class="line">44    55.500   175.000</span><br><span class="line">45   100.000   157.000</span><br><span class="line">46    52.160   440.000</span><br><span class="line">47    10.550   179.500</span><br><span class="line">48     0.550     2.400</span><br><span class="line">49    60.000    81.000</span><br><span class="line">50     3.600    21.000</span><br><span class="line">51     4.288    39.200</span><br><span class="line">52     0.280     1.900</span><br><span class="line">53     0.075     1.200</span><br><span class="line">54     0.122     3.000</span><br><span class="line">55     0.048     0.330</span><br><span class="line">56   192.000   180.000</span><br><span class="line">57     3.000    25.000</span><br><span class="line">58   160.000   169.000</span><br><span class="line">59     0.900     2.600</span><br><span class="line">60     1.620    11.400</span><br></pre></td></tr></table></figure>
-<p>第一列是编号，第二列表示人脑的重量，第三列表示人身体的重量，我们用<a href="/2016/01/23/1/">matplotlib</a>画个图来看看：</p>
-<p><img src="/images/2016/01/26/1/1.png"></p>
-<h2 id="绘图代码"><a href="#绘图代码" class="headerlink" title="绘图代码"></a>绘图代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line">plt.scatter(brain,body,s=<span class="number">100</span>,alpha=<span class="number">.5</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-<p>ok，接下来我们就是找出符合条件的$\theta_0,\theta_1$了。</p>
-<h2 id="J函数"><a href="#J函数" class="headerlink" title="J函数"></a>J函数</h2><p>根据J函数的表达式，我们可以很容易的求出他的具体的表达式。当然，我们也可以很容易的画出他的函数图像。很明显，他的图像应该是一个三维图像（当然，如果因变量不止一个的话，得到的应该是更高维度的图像）：</p>
-<p><img src="/images/2016/01/26/1/2.png"></p>
-<h2 id="绘图代码-1"><a href="#绘图代码-1" class="headerlink" title="绘图代码"></a>绘图代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="comment">#read file</span></span><br><span class="line"></span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line"></span><br><span class="line">brain=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line">body=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#calculate p</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">p</span>(<span class="params">t0,t1</span>):</span><br><span class="line">	<span class="built_in">sum</span>=<span class="number">0</span></span><br><span class="line">	num=<span class="built_in">len</span>(brain)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,num):</span><br><span class="line">		<span class="built_in">sum</span>+=<span class="built_in">pow</span>((t0+t1*brain[i]-body[i]),<span class="number">2</span>)</span><br><span class="line">	<span class="built_in">sum</span>/=<span class="number">2</span>*num</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">sum</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#important values</span></span><br><span class="line"></span><br><span class="line">size=<span class="number">20</span></span><br><span class="line">X=np.linspace(-<span class="number">100</span>,<span class="number">100</span>,size)</span><br><span class="line">Y=np.linspace(<span class="number">0</span>,<span class="number">2</span>,size)</span><br><span class="line"></span><br><span class="line"><span class="comment">#draw the picture</span></span><br><span class="line">X,Y=np.meshgrid(X,Y)</span><br><span class="line"></span><br><span class="line">X=X.reshape(size*size)</span><br><span class="line">Y=Y.reshape(size*size)</span><br><span class="line"></span><br><span class="line">Z=np.arange(<span class="number">0</span>,size*size)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,size*size):</span><br><span class="line">	Z[i]=p(X[i],Y[i])</span><br><span class="line">X=X.reshape(size,size)</span><br><span class="line">Y=Y.reshape(size,size)</span><br><span class="line">Z=Z.reshape(size,size)</span><br><span class="line"></span><br><span class="line">fig=figure()</span><br><span class="line">ax=Axes3D(fig)</span><br><span class="line">ax.plot_surface(X,Y,Z,rstride=<span class="number">1</span>,cstride=<span class="number">1</span>,cmap=plt.cm.hot)</span><br><span class="line">ax.contourf(X, Y, Z, zdir=<span class="string">&#x27;z&#x27;</span>, offset=-<span class="number">2</span> )</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-<p>（画图时注意设置图像的各部分参数使他的表现效果最好，语法不熟，写的蠢了）</p>
-<p>从图中大概也能看到他的最低点啦，$\theta_0$大概是0±50,$\theta_1$大概是1±0.5(纯属目测)。</p>
-<h2 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h2><p>有了直观的感受我们就来看看对J求梯度下降的具体意义了。其实也很好理解，就是对于J函数上的某一个点，每一次迭代时都将他沿下降最快的方向走一小段距离(所谓方向，当然是要分到各个变量上面了)。这样经过一段时间，他就会接近图像的最低点了。用数学表达式来理解就是：</p>
-<p>repeat until convergence:</p>
-<p>$$\begin{aligned}\theta_j&amp;:&#x3D;\theta_j-\alpha\frac{\partial}{\partial\theta_j}J(\theta_0,\theta_1)\\&amp;:&#x3D;\theta_j-\frac{\alpha}{m}\underset{i&#x3D;1}{\overset{m}{\Sigma}}(h(x_i)-y_i)x_i\\&amp;(for\ j&#x3D;0\ and\ j&#x3D;1)\end{aligned}$$</p>
-<p>上式兼容了多元变量的情况，事实上在本例中$x_0$显然是1，$x_1$就是数据中的x。</p>
-<p>这里的$:&#x3D;$是为了强调这是赋值操作而不是判等。</p>
-<p>要注意的是，每一次迭代都要将每一个方向计算一次，而且要注意赋值的顺序，$\theta_j$一定要在迭代最后同时(simultaneously)用新值代替。</p>
-<p>这里的$\alpha$又被称为”学习因子(learning rate)“，在迭代的时候要注意这个值的选取。形象的看其实就是每次下降迈的步子的大小。如果过大则会导致跨越了最低点甚至导致越走越远，如果过小则会导致迭代代价太高，运行缓慢。</p>
-<p>当然，理论上这个算法也只能求得局部最低点，并不能保证是全局最低点。</p>
-<p>根据这个公式，我们注意到每一次迭代都得将所有的数据用一遍，这导致了效率的低下。所以由于这个算法又被称为批量梯度下降算法(BGD)。</p>
-<h2 id="简单实现"><a href="#简单实现" class="headerlink" title="简单实现"></a>简单实现</h2><h3 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> theano.tensor <span class="keyword">as</span> T</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span>  matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="comment">#read file</span></span><br><span class="line"></span><br><span class="line">file=<span class="built_in">open</span>(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;r&quot;</span>)</span><br><span class="line">brain=[]</span><br><span class="line">body=[]</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file:</span><br><span class="line">	num,_brain,_body=line.split()</span><br><span class="line">	brain.append(_brain)</span><br><span class="line">	body.append(_body)</span><br><span class="line"></span><br><span class="line">brain=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line">body=np.array(brain).astype(<span class="built_in">float</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">partial_t0</span>(<span class="params">a,t0,t1</span>):</span><br><span class="line">	<span class="built_in">sum</span>=<span class="number">0</span></span><br><span class="line">	num=<span class="built_in">len</span>(brain)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,num):</span><br><span class="line">		<span class="built_in">sum</span>+=(t0+t1*brain[i]-body[i])</span><br><span class="line">	<span class="keyword">return</span> t0-<span class="built_in">sum</span>*a/num</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">partial_t1</span>(<span class="params">a,t0,t1</span>):</span><br><span class="line">	<span class="built_in">sum</span>=<span class="number">0</span></span><br><span class="line">	num=<span class="built_in">len</span>(brain)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,num):</span><br><span class="line">		<span class="built_in">sum</span>+=(t0+t1*brain[i]-body[i])*brain[i]</span><br><span class="line">	<span class="keyword">return</span> t1-<span class="built_in">sum</span>*a/num</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;%-6s%20s%20s%20s&quot;</span> %(<span class="string">&#x27;alpha&#x27;</span>,<span class="string">&#x27;theta0&#x27;</span>,<span class="string">&#x27;theta1&#x27;</span>,<span class="string">&#x27;times&#x27;</span>))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>,<span class="number">11</span>):</span><br><span class="line">	a=<span class="built_in">pow</span>(<span class="number">10</span>,-i)</span><br><span class="line">	t0=<span class="number">0</span></span><br><span class="line">	t1=<span class="number">0</span></span><br><span class="line">	dt0=<span class="number">10000000</span></span><br><span class="line">	dt1=<span class="number">10000000</span></span><br><span class="line">	cnt=<span class="number">0</span></span><br><span class="line">	<span class="keyword">while</span> <span class="built_in">abs</span>(t0-dt0)+<span class="built_in">abs</span>(t1-dt1)&gt;<span class="number">0.0001</span>:</span><br><span class="line">		dt0=t0</span><br><span class="line">		dt1=t1</span><br><span class="line">		t0=partial_t0(a,dt0,dt1)</span><br><span class="line">		t1=partial_t1(a,dt0,dt1)</span><br><span class="line">		cnt+=<span class="number">1</span></span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;%-6s%20s%20s%20s&quot;</span> %(a,t0,t1,cnt))</span><br></pre></td></tr></table></figure>
-<h3 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">alpha               theta0              theta1               times</span><br><span class="line">0.1                   -inf                 nan                  96</span><br><span class="line">0.01                   inf                 nan                 139</span><br><span class="line">0.001                  inf                 nan                 255</span><br><span class="line">0.0001    0.00310245521884      0.999954444466                  26</span><br><span class="line">1e-05     0.00310682944277      0.999536382475                  42</span><br><span class="line">1e-06     0.00309052228147      0.994195497596                 305</span><br><span class="line">1e-07     0.00292431336052      0.940626826916                1685</span><br><span class="line">1e-08     0.00125884490338       0.40488187492                3099</span><br><span class="line">1e-09    5.20663166667e-08   1.67458362859e-05                   1</span><br><span class="line">1e-10    5.20663166667e-09   1.67458362859e-06                   1</span><br></pre></td></tr></table></figure>
-<p>代码比较简单，就不展开了。这次我把迭代起点选在（0，0）。需要注意的是这个结果，在$\alpha$取不同值的时候，输出的结果和性能的表现也大不相同。</p>
-<p>1、由于我是用变化前后的差别来判断聚合程度的，所以当学习因子过小的时候会出现一次迭代就终止了，这显然不是我们想看到的结果；</p>
-<p>2、同时，当学习因子过大的时候，会出现函数发散的现象，这显然也不是我们想要的结果；</p>
-<p>3、在能得到正确解的学习因子里，程序的运行速度也随着因子的减小而减慢，但是准确程度也因而增加。</p>
-<p>所以学习因子的选择至关重要。</p>
-<p>因此最终的拟合结果就是。。。。莫急，让我们换一个迭代起点看看，这次我们选（2，2）为迭代起点（将t0和t1分别改成2），这次得到的结果是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">alpha               theta0              theta1               times</span><br><span class="line">0.1                    inf                 nan                  96</span><br><span class="line">0.01                  -inf                 nan                 139</span><br><span class="line">0.001                 -inf                 nan                 255</span><br><span class="line">0.0001       1.18929235272        0.9963020556                6183</span><br><span class="line">1e-05        1.99615299339      0.994173518979                  43</span><br><span class="line">1e-06        1.99637710179      0.999525819249                 306</span><br><span class="line">1e-07        1.99677269246       1.05302607963                1690</span><br><span class="line">1e-08        1.99866893391       1.58880170812                3137</span><br><span class="line">1e-09        1.99999994593       1.99998315003                   1</span><br><span class="line">1e-10        1.99999999459         1.999998315                   1</span><br></pre></td></tr></table></figure>
-<p>卧槽，傻眼了，结果与上一个差别还是很大的，那么到底哪一个才更准确呢～～～额，，其实我也不晓得，只能说以现在的知识并不知道怎样很好的解决这个问题。我想应该是因为基于我电脑的速度，我的阈值设置的不够小，导致无论从哪个起点开始迭代最终到达的应该是一个离最优解附近的一个类圆形区域里，无法深入到内部。有一个解决方案大概就是遍历最内部的这个区域来求解吧，不过设置参数应该也是挺麻烦的，复杂度也挺大的…</p>
-<p>最后，画一下拟合的结果（取上面提到的所有合理的值）：</p>
-<p><img src="/images/2016/01/26/1/3.png"></p>
-<p>（怎么和想象中差别有点大。。。）</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2022,7 +2001,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2033,7 +2012,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -2044,7 +2023,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

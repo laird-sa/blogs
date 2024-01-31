@@ -307,6 +307,322 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/15/UbuntuServer%E9%85%8D%E7%BD%AE%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/03/15/UbuntuServer%E9%85%8D%E7%BD%AE%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA/" itemprop="url">UbuntuServer配置中文显示</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-15T15:19:24+00:00">
+                2017-03-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>最近直接在Server上编辑文件的时候才发现，原来我们的Ubuntu Server竟然没有自带中文，输进去的中文都成了乱码，煞是难看。研究了一会配置中文显示的方法，稍微花了点时间，这里姑且记一下方便以后查找。</p>
+<h2 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h2><p>要解决这个问题，首先我们需要了解我们当前系统支持什么语言，一番搜索发现了如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">root@server:/#locale</span><br><span class="line">locale: Cannot set LC_ALL to default locale: No such file or directory</span><br><span class="line">LANG=en_US.UTF-8</span><br><span class="line">LANGUAGE=en_US:</span><br><span class="line">LC_CTYPE=&quot;en_US.UTF-8&quot;</span><br><span class="line">LC_NUMERIC=zh_CN.UTF-8</span><br><span class="line">LC_TIME=zh_CN.UTF-8</span><br><span class="line">LC_COLLATE=&quot;en_US.UTF-8&quot;</span><br><span class="line">LC_MONETARY=zh_CN.UTF-8</span><br><span class="line">LC_MESSAGES=&quot;en_US.UTF-8&quot;</span><br><span class="line">LC_PAPER=zh_CN.UTF-8</span><br><span class="line">LC_NAME=zh_CN.UTF-8</span><br><span class="line">LC_ADDRESS=zh_CN.UTF-8</span><br><span class="line">LC_TELEPHONE=zh_CN.UTF-8</span><br><span class="line">LC_MEASUREMENT=zh_CN.UTF-8</span><br><span class="line">LC_IDENTIFICATION=zh_CN.UTF-8</span><br><span class="line">LC_ALL=</span><br></pre></td></tr></table></figure>
+<p>这个命令显示了关于语言的一些环境变量，显然有很多是英文<code>en_US</code>，当然，我们需要把他们改成中文的<code>zh_CN</code>。不过这里有一个问题，那就是我怎么知道我把配置改成中文之后这个系统到底支不支持呢？因此我用下面的命令查看了下系统当前支持的语言：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">C</span><br><span class="line">C.UTF-8</span><br><span class="line">en_AG</span><br><span class="line">en_AG.utf8</span><br><span class="line">en_AU.utf8</span><br><span class="line">en_BW.utf8</span><br><span class="line">en_CA.utf8</span><br><span class="line">en_DK.utf8</span><br><span class="line">en_GB.utf8</span><br><span class="line">en_HK.utf8</span><br><span class="line">en_IE.utf8</span><br><span class="line">en_IN</span><br><span class="line">en_IN.utf8</span><br><span class="line">en_NG</span><br><span class="line">en_NG.utf8</span><br><span class="line">en_NZ.utf8</span><br><span class="line">en_PH.utf8</span><br><span class="line">en_SG.utf8</span><br><span class="line">en_US.utf8</span><br><span class="line">en_ZA.utf8</span><br><span class="line">en_ZM</span><br><span class="line">en_ZM.utf8</span><br><span class="line">en_ZW.utf8</span><br><span class="line">POSIX</span><br></pre></td></tr></table></figure>
+<p>当然，我们也可以在<code>/var/lib/locales/supported.d/local</code>查看当前系统支持的语言：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@server:/usr/lib/locale#cat /var/lib/locales/supported.d/local </span><br><span class="line">en_US.UTF-8 UTF-8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>果然，在这些当中并没有看到中文语言，那么我就要来安装语言包了。<br>安装语言包需要用到<code>locale-gen</code>这个命令，用法很简单：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@server:/usr/lib/locale#locale-gen zh_CN.UTF-8</span><br><span class="line">Generating locales...</span><br><span class="line">  zh_CN.UTF-8... up-to-date</span><br><span class="line">Generation complete.</span><br></pre></td></tr></table></figure>
+<p>OK，现在我们就发现系统已经安装了中文依赖：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@server:/usr/lib/locale#cat /var/lib/locales/supported.d/local </span><br><span class="line">en_US.UTF-8 UTF-8</span><br><span class="line">zh_CN.UTF-8 UTF-8</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们需要修改一下默认配置即可，即把<code>/etc/default/locale</code>里的文件改成如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@server:/usr/lib/locale#cat /etc/default/locale </span><br><span class="line">LANG=&quot;zh_CN.UTF-8&quot;</span><br><span class="line">LANGUAGE=&quot;zh_CN:&quot;</span><br></pre></td></tr></table></figure>
+<p>现在就可以正常的显示中文了，检查一下当前的配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">root@server:/var/www/html/hexo/source/_posts#locale</span><br><span class="line">LANG=zh_CN.UTF-8</span><br><span class="line">LANGUAGE=zh_CN:</span><br><span class="line">LC_CTYPE=&quot;zh_CN.UTF-8&quot;</span><br><span class="line">LC_NUMERIC=zh_CN.UTF-8</span><br><span class="line">LC_TIME=zh_CN.UTF-8</span><br><span class="line">LC_COLLATE=&quot;zh_CN.UTF-8&quot;</span><br><span class="line">LC_MONETARY=zh_CN.UTF-8</span><br><span class="line">LC_MESSAGES=&quot;zh_CN.UTF-8&quot;</span><br><span class="line">LC_PAPER=zh_CN.UTF-8</span><br><span class="line">LC_NAME=zh_CN.UTF-8</span><br><span class="line">LC_ADDRESS=zh_CN.UTF-8</span><br><span class="line">LC_TELEPHONE=zh_CN.UTF-8</span><br><span class="line">LC_MEASUREMENT=zh_CN.UTF-8</span><br><span class="line">LC_IDENTIFICATION=zh_CN.UTF-8</span><br><span class="line">LC_ALL=</span><br></pre></td></tr></table></figure>
+<p>连之前的warning也顺便消除了。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/14/Angular2%E4%B8%8B%E4%BD%BF%E7%94%A8pdf%E6%8F%92%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/03/14/Angular2%E4%B8%8B%E4%BD%BF%E7%94%A8pdf%E6%8F%92%E4%BB%B6/" itemprop="url">Angular2下使用pdf插件</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-14T15:53:23+00:00">
+                2017-03-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近需要在Angualr2建的项目里做一个pdf显示的功能，在网上找了个插件，不过由于是第一次使用额外插件，在用的时候遇到了一些坑，这里权且记一下使用的步骤，方便以后的参考。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这里需要安装两个包：<code>pdfjs-dist</code>和<code>ng2-pdf-viewer</code>，安装时是要顺便保存到<code>package.json</code>里的，因此在项目根目录下输入下面命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install pdfjs-dist --save</span><br><span class="line">npm install ng2-pdf-viewer --save</span><br></pre></td></tr></table></figure>
+<p>于此同时，我们还要在<code>system.config.js</code>里添加映射，否则会加载不到这个插件。我们需要添加两个地方，首先是要添加在其中的<code>map</code>变量下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">var map = &#123;</span><br><span class="line">    ......</span><br><span class="line">    &#x27;ng2-pdf-viewer&#x27;: &#x27;node_modules/ng2-pdf-viewer&#x27;,</span><br><span class="line">    &#x27;pdfjs-dist&#x27;: &#x27;node_modules/pdfjs-dist&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后还要添加在<code>packages</code>变量下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var packages = &#123;</span><br><span class="line">    &#x27;ng2-pdf-viewer&#x27;: &#123; main: &#x27;dist/index.js&#x27;, defaultExtension: &#x27;js&#x27; &#125;,</span><br><span class="line">    &#x27;pdfjs-dist&#x27;: &#123; defaultExtension: &#x27;js&#x27; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们才能正确的引用这个包。</p>
+<h2 id="注册主配置文件"><a href="#注册主配置文件" class="headerlink" title="注册主配置文件"></a>注册主配置文件</h2><p>要使用他，我们还要在<code>app.module.ts</code>文件里注册这个包，才能在其他文件里使用，一个最简单的配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import &#123; NgModule &#125; from &#x27;@angular/core&#x27;;</span><br><span class="line">import &#123; BrowserModule &#125; from &#x27;@angular/platform-browser&#x27;;</span><br><span class="line">import &#123; AppComponent &#125; from &#x27;./app/app.component&#x27;;</span><br><span class="line">import &#123; PdfViewerComponent &#125; from &#x27;ng2-pdf-viewer&#x27;;</span><br><span class="line"></span><br><span class="line">@NgModule(&#123;</span><br><span class="line">  imports: [BrowserModule],</span><br><span class="line">  declarations: [AppComponent, PdfViewerComponent],</span><br><span class="line">  bootstrap: [AppComponent]</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">class AppModule &#123;&#125;</span><br><span class="line">platformBrowserDynamic().bootstrapModule(AppModule);</span><br></pre></td></tr></table></figure>
+<p>注意要<code>import</code>，然后在<code>@NgModule</code>里的<code>declarations</code>里注册即可。</p>
+<h2 id="页面配置"><a href="#页面配置" class="headerlink" title="页面配置"></a>页面配置</h2><p>在模板页面中，只要在适当的位置添加类似下面的标签：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;pdf-viewer [src]=&quot;pdfSrc&quot;</span><br><span class="line">            [page]=&quot;page&quot;</span><br><span class="line">            [original-size]=&quot;true&quot;</span><br><span class="line">            style=&quot;display: block;&quot;</span><br><span class="line">&gt;&lt;/pdf-viewer&gt;</span><br></pre></td></tr></table></figure>
+<p>然后在<code>.ts</code>文件里定义<code>pdfSrc</code>以及<code>page</code>变量，即可控制显示的文件路径以及页数。<br>这里需要注意的是文件源如果是跨域的话是会报一个error的，而且这里的page是竖排显示的而不是带滚轮的显示，因此这实际上显示的是一张一张的图片。</p>
+<p>当然，<code>pdf-viewer</code>还有很多其他的属性，比如支持缩放，旋转，以及提供了一系列相关的回调函数，具体的可以在<a target="_blank" rel="noopener" href="https://github.com/VadimDez/ng2-pdf-viewer">github</a>里找到。</p>
+<h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><p><img src="/images/2017/03/14/1/1.png"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/VadimDez/ng2-pdf-viewer">github&#x2F;VadimDez&#x2F;ng2-pdf-viewer</a><br><a target="_blank" rel="noopener" href="https://github.com/VadimDez/ng2-pdf-viewer/blob/master/SYSTEMJS.md">SYSTEMJS.md</a><br><a target="_blank" rel="noopener" href="http://codevik.com/2016/11/11/angular2-ng2-pdf-thumbnail-creation-viewer/">Angular 2 PDF Viewer and thumbnail creation</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/04/hexo-auto-deploy-with-gitlab-ci/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1487,298 +1803,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/26/forcestopgb-lieying-brevent/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/01/26/forcestopgb-lieying-brevent/" itemprop="url">阻止运行、猎鹰网络、黑域 始末</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-26T08:21:12+00:00">
-                2017-01-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%82%E9%97%BB%E5%A0%82/" itemprop="url" rel="index">
-                    <span itemprop="name">异闻堂</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>SuperSU 和阻止运行被收购和商业化无疑是一场巨变。因为 Root 和 Xposed 都是对 Android 安全、稳定运行非常重要的一部分，一旦商业化和作恶，后果不可预料。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/01/26/forcestopgb-lieying-brevent/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/26/hello-disqus-and-goodbye-duoshuo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/01/26/hello-disqus-and-goodbye-duoshuo/" itemprop="url">你好 Disqus，再见多说</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-26T03:18:34+00:00">
-                2017-01-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
-                    <span itemprop="name">博客栈</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>多说又双叒叕爆炸了！——这是我看到 <code>多说评论系统故障(9900015)，请联系客服人员</code> 报错信息时的想法。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/01/26/hello-disqus-and-goodbye-duoshuo/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1829,7 +1853,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1840,7 +1864,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1851,7 +1875,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

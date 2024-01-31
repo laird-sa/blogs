@@ -307,6 +307,627 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/25/Julia%E9%9B%86%E7%9A%84win32+GDI%E6%BC%94%E7%A4%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/05/25/Julia%E9%9B%86%E7%9A%84win32+GDI%E6%BC%94%E7%A4%BA/" itemprop="url">Julia集的win32+GDI演示</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-25T13:39:23+00:00">
+                2016-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>虽然不是第一次win32来写窗口程序，但是最近python和java用惯了，还真用不惯win api繁琐的调用方法，光是一个模版就好难理解。</p>
+<p>事实上，那些模版的玩意写上去就好了，我们只要在他的消息循环的处理里添加绘图的函数即可。</p>
+<p>至于绘图，我用的是GDI库最简单的用法，不加缓冲直接逐像素点打印。效率很低，而且会出现刷屏的现象。正确的做法应该是在内存中创建一张Image，向这个里面写再一次性输出。（这样弄效率高但是在网上找了半天没找到傻瓜式的代码模版。。。）</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;gdiplus.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="comment">//添加GDI的库，当然也可以直接在属性-&gt;连接器-&gt;输入-&gt;附加依赖项里加这个库名</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib,<span class="string">&quot;gdiplus.lib&quot;</span>)</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> Gdiplus;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Complex</span><span class="comment">//自定义一个复数类，据说用自带的complex会很慢</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">double</span> real;</span><br><span class="line">	<span class="type">double</span> img;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">OnPaint</span><span class="params">(HDC hdc)</span></span>&#123;<span class="comment">//每次屏幕重绘时都重新输出一张图</span></span><br><span class="line">	<span class="type">int</span> B[<span class="number">256</span>],G[<span class="number">256</span>],R[<span class="number">256</span>];</span><br><span class="line">	<span class="built_in">srand</span>((<span class="type">unsigned</span>)<span class="built_in">time</span>(<span class="number">0</span>));<span class="comment">//随机生成Julia集的初始状态</span></span><br><span class="line">	Complex c;</span><br><span class="line">	c.real=(<span class="built_in">rand</span>()%<span class="number">20000</span>*<span class="number">1.0</span><span class="number">-10000</span>)/<span class="number">10000</span>;</span><br><span class="line">	c.img=(<span class="built_in">rand</span>()%<span class="number">20000</span>*<span class="number">1.0</span><span class="number">-10000</span>)/<span class="number">10000</span>;</span><br><span class="line">	<span class="type">int</span> t1=<span class="built_in">rand</span>()%<span class="number">1000</span>;<span class="type">double</span> t2=<span class="built_in">rand</span>()%<span class="number">10</span>/<span class="number">10.0</span>;</span><br><span class="line">	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">256</span>;i++)<span class="comment">//随机生成配色方案</span></span><br><span class="line">	&#123;</span><br><span class="line">		B[i]=i*t1%<span class="number">256</span>;</span><br><span class="line">		G[i]=(<span class="type">int</span>)(t2*<span class="number">255</span>)%<span class="number">256</span>;</span><br><span class="line">		R[i]=(<span class="type">int</span>)(<span class="number">255.0</span>*(<span class="number">1.0</span>-i/<span class="number">255.0</span>*i/<span class="number">255.0</span></span><br><span class="line">			/<span class="number">1.2</span>)+<span class="number">256</span>)%<span class="number">256</span>;&#125;<span class="type">double</span> dx=<span class="number">5.0</span>/<span class="number">720</span>;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//下面是逃逸时间算法</span></span><br><span class="line">		<span class="type">double</span> dy=<span class="number">5.0</span>/<span class="number">540</span>;</span><br><span class="line">		<span class="type">int</span> its=<span class="number">256</span>;</span><br><span class="line">		<span class="type">double</span> size=<span class="number">4.0</span>;</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> row	=<span class="number">0</span>;row&lt;<span class="number">540</span>;row++)&#123;</span><br><span class="line">			<span class="keyword">for</span>(<span class="type">int</span> col=<span class="number">0</span>;col&lt;<span class="number">720</span>;col++)&#123;</span><br><span class="line">				<span class="type">int</span> color=<span class="number">0</span>;</span><br><span class="line">				Complex z;</span><br><span class="line">				z.real=col*dx<span class="number">-2.5</span>;</span><br><span class="line">				z.img=row*dy<span class="number">-2.5</span>;</span><br><span class="line">				<span class="keyword">while</span>((color&lt;its)&amp;&amp;((z.img*z.img+z.real*z.real)&lt;size))&#123;</span><br><span class="line">					<span class="type">double</span> tmp=z.real*z.real-z.img*z.img+c.real;</span><br><span class="line">					z.img=z.img*z.real+z.real*z.img+c.img;</span><br><span class="line">					z.real=tmp;color++;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span>(color&gt;=its)</span><br><span class="line">					color=<span class="number">255</span>;</span><br><span class="line">				color%=<span class="number">256</span>;</span><br><span class="line">				<span class="comment">//直接SetPixel绘图会比较简单，但是效率却十分低下</span></span><br><span class="line">				<span class="built_in">SetPixel</span>(hdc,col,row,<span class="built_in">RGB</span>(B[color],G[color],R[color]));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//处理消息循环</span></span><br><span class="line"><span class="function">LRESULT CALLBACK <span class="title">WndProc</span><span class="params">(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam)</span></span>&#123;</span><br><span class="line">	PAINTSTRUCT ps;</span><br><span class="line">	<span class="keyword">switch</span>(message)&#123;</span><br><span class="line">	<span class="keyword">case</span> WM_PAINT:</span><br><span class="line">		<span class="built_in">BeginPaint</span>(hWnd,&amp;ps);</span><br><span class="line">		<span class="built_in">OnPaint</span>(ps.hdc);</span><br><span class="line">		<span class="built_in">EndPaint</span>(hWnd,&amp;ps);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">		<span class="built_in">PostQuitMessage</span>(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">DefWindowProc</span>(hWnd,message,wParam,lParam);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//win32程序的入口函数</span></span><br><span class="line"><span class="function">INT WINAPI <span class="title">WinMain</span><span class="params">(HINSTANCE hInstance,HINSTANCE,PSTR,INT iCmdShow)</span></span>&#123;</span><br><span class="line">	HWND hWnd;<span class="comment">//窗口句柄</span></span><br><span class="line">	MSG msg;<span class="comment">//消息</span></span><br><span class="line">	WNDCLASS wndClass;</span><br><span class="line">	GdiplusStartupInput gdiplusStartupInput;ULONG_PTR gdiplusToken;</span><br><span class="line">	<span class="built_in">GdiplusStartup</span>(&amp;gdiplusToken, &amp;gdiplusStartupInput, <span class="literal">NULL</span>);</span><br><span class="line">	wndClass.style= CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">	wndClass.lpfnWndProc= WndProc;</span><br><span class="line">	wndClass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">	wndClass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">	wndClass.hInstance  = hInstance;</span><br><span class="line">	wndClass.hIcon = <span class="built_in">LoadIcon</span>(<span class="literal">NULL</span>, IDI_APPLICATION);</span><br><span class="line">	wndClass.hCursor  = <span class="built_in">LoadCursor</span>(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">	wndClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW+<span class="number">1</span>);</span><br><span class="line">	wndClass.lpszMenuName   = <span class="literal">NULL</span>;</span><br><span class="line">	wndClass.lpszClassName  = <span class="built_in">TEXT</span>(<span class="string">&quot;Julia&quot;</span>);</span><br><span class="line">	<span class="built_in">RegisterClass</span>(&amp;wndClass);</span><br><span class="line">	<span class="comment">//创建窗口</span></span><br><span class="line">	hWnd = <span class="built_in">CreateWindow</span>(</span><br><span class="line">		<span class="built_in">TEXT</span>(<span class="string">&quot;Julia&quot;</span>),</span><br><span class="line">		<span class="built_in">TEXT</span>(<span class="string">&quot;Julia&quot;</span>),  </span><br><span class="line">		WS_OVERLAPPED|WS_SYSMENU|WS_MINIMIZEBOX,<span class="comment">//窗口风格，这里禁用了最大化按钮可伸缩边框     </span></span><br><span class="line">		CW_USEDEFAULT,        </span><br><span class="line">		CW_USEDEFAULT,        </span><br><span class="line">		<span class="number">725</span>, <span class="comment">//窗口宽度         </span></span><br><span class="line">		<span class="number">560</span>, <span class="comment">//窗口高度   </span></span><br><span class="line">		<span class="literal">NULL</span>,                 </span><br><span class="line">		<span class="literal">NULL</span>,                    </span><br><span class="line">		hInstance,<span class="comment">//传入句柄              </span></span><br><span class="line">		<span class="literal">NULL</span>);                    </span><br><span class="line">	<span class="built_in">ShowWindow</span>(hWnd, iCmdShow);</span><br><span class="line">	<span class="built_in">UpdateWindow</span>(hWnd);</span><br><span class="line">	<span class="keyword">while</span>(<span class="built_in">GetMessage</span>(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))<span class="comment">//处理消息循环</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">TranslateMessage</span>(&amp;msg);</span><br><span class="line">		<span class="built_in">DispatchMessage</span>(&amp;msg);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">GdiplusShutdown</span>(gdiplusToken);<span class="comment">//释放GDI资源</span></span><br><span class="line">	<span class="keyword">return</span> msg.wParam;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="/images/2016/05/25/1/1.png"><br><img src="/images/2016/05/25/1/2.png"><br><img src="/images/2016/05/25/1/3.png"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/23/hexo-github/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/05/23/hexo-github/" itemprop="url">基于Hexo+github搭建静态博客</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-23T03:16:51+00:00">
+                2016-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index">
+                    <span itemprop="name">Hexo博客</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h3><p>在安装<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">hexo</a>之前，必须确认你已经安装了<a target="_blank" rel="noopener" href="http://nodejs.org/">Node.js</a>和<a target="_blank" rel="noopener" href="http://git-scm.com/">Git</a>。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/05/23/hexo-github/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/22/GeoHash%E7%A9%BA%E9%97%B4%E7%B4%A2%E5%BC%95%E7%AE%97%E6%B3%95%E7%AE%80%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/05/22/GeoHash%E7%A9%BA%E9%97%B4%E7%B4%A2%E5%BC%95%E7%AE%97%E6%B3%95%E7%AE%80%E8%BF%B0/" itemprop="url">GeoHash空间索引算法简述</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-22T13:07:18+00:00">
+                2016-05-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
+                    <span itemprop="name">Trajectory Similarity</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在空间索引类问题当中，一个最普遍而又最重要的问题是：”给定你某个点的坐标，你如何能够在海量的数据点中找到他所在的区域以及最靠近他的点”？</p>
+<p>最常见的应用就像是**POI(Point of Interest)**的查询了，比方说客户在路上突然想吃饭了，那么我就要根据他的位置查询最近的餐馆并根据这个做出推荐。</p>
+<p>通常情况下，一提到查找类问题，我们就会想到<strong>二分查找</strong>或者是<strong>B树查找</strong>。但是问题在于我们不仅要找到这个点，而且要找到这个点附近的点。因此对于以经纬度来确定的坐标又不好直接进行二分查找。（如果是直接用数据库索引的话，由于数据库通常是<strong>B树索引</strong>和<strong>Hash索引</strong>，因此查找效率并没有提高。）</p>
+<p>通常情况下我们会用<strong>R树</strong>、<strong>Kd树</strong>或者是<strong>四叉树</strong>之类的数据结构来存储这些点从而高效的做到临近点的查找。但是这些数据结构通常都会存在数据冗余，以及不稳定的查改效率；况且抛开他们的时间效率、空间效率以及算法复杂度不谈，用了这些数据结构也就意味这我们放弃了使用现成强大的数据库而自己编写数据查改系统，这显然是繁琐而又没有必要的过程。而且当系统需要扩展到分布式计算的时候就更不如使用那些分布式的数据库了。</p>
+<p>这时我们就会想到，如果能够把一个<strong>二维</strong>的信息转化为<strong>一维</strong>的数据加以存储，那么我们不就可以直接存储到数据库中做到快速的查找了么？</p>
+<p><strong>GeoHash</strong>做的就是这个工作。</p>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>GeoHash是由Gustavo Niemeyer（大概于2013年）提出的，目的原本是为地球上的每一个点（根据经纬度）确定一条短的URL作为唯一标识。只是后来被广泛的应用到空间检索方面、尤其是之前提到的POI查询中。这个服务一直在<a target="_blank" rel="noopener" href="http://geohash.org/">http://geohash.org</a>上，上面还有一些具体的介绍。</p>
+<p>GeoHash所做的事就是把一个坐标点映射到一个字符串上，每一个字符串代表的就是一个以经纬度划分的矩形区域。比方下面的图就展现了北京地区所在的九个区域，分别是WX4ER、WX4G2等等。</p>
+<p><img src="/images/2016/05/22/1/1.png"><br>于此同时，每一个区域又可以继续划分为许多个小区域，如下图所示，WX4G0就包含了WX4G09、WX4G0C、WX4G08等等。而且每一个子区域的GeoHash值都是在父区域后面拓展一个字符。</p>
+<p><img src="/images/2016/05/22/1/2.png"><br>这样就形成了一个层次分明的结构，越高级的区域GeoHash值越短，表示的区域最大；越小的区域GeoHash值越长，表示的区域越小。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p><strong>定位算法：</strong></p>
+<p>事实上GeoHash算法也十分简单，根据上面的意义我们很容易想到他用的是类似四叉树的方法来寻找一个点；换句话说就是不停的在经度和纬度上进行二分类，最终确定到想要的精度，划分的过程下图所示。</p>
+<p><img src="/images/2016/05/22/1/3.png"></p>
+<p>交替在两个方向进行分割，一个区域计为0，一个区域记为1，并将结果追加在父区域GeoHash值的后面。不断的进行划分直到得到了想要的深度。对于每一个区域最后会得到一个二进制的字符串，然后每5位为一组，用0-9 b-z（去掉a, i, l, o）进行<strong>Base32</strong>编码即可得到该区域经过编码后的GeoHash值。当然，编码这个步骤只是为了让结果看上去变短而已，实际应用中可以把它变成一个二进制数（由于存在前导0，所以要在最前面加一个1），当然直接用字符串的形式也未尝不可。</p>
+<p>有一个小细节，就是区域之间会有边界，那么边界上的点属于哪里呢？我的处理是所有的区域都只是包含经度和纬度方向上的<strong>左闭右开区间。</strong></p>
+<p><strong>邻居查找算法：</strong></p>
+<p>如果想要查找某个点附近的Top m个临近点，我们显然不会直接扫描地图中所有的点（这样效率会极其低下），而是用上面的<strong>定位算法</strong>，将该点定位到一个比较小的区域里（这个区域里有n个临近点，且n&gt;m），然后再扫描这个较小区域里的所有点，用自己定义的权重公式，取出最符合的点。这个方法一般叫做<strong>“Filter and Refine”</strong>方法，即”先过滤，后提纯“。</p>
+<p>既然如此，通过上面的<strong>定位算法，</strong>我们可以将这个点定位到一个比较小的区域里，然后查找该区域的所有点即可。不过问题来了，由于GeoHash编码并不能保证查询的点是在他所在区域的中心，这就导致了下图中的问题：</p>
+<p><img src="/images/2016/05/22/1/4.png"></p>
+<p>显然，红色的点属于最中间的区域，直接查找该区域会得到他下方的绿色点是最接近的点。但是由于这个点比较靠近区域的边界，事实上更接近的点却是位于他上方的相邻格子的绿色的点。因此我们并不能仅仅查找他当前区域内的所有点，而是要查找以该区域为中心的九个区域范围。（当然这样也有可能存在着查找错误的问题，但是可能性就大大降低了）。</p>
+<p>随便在网上找了下，没有找到比较方便的查找邻居的算法（当然预处理保存的除外），于是我就想了一个朴素简单的方法：我们可以在定位某点的时候，记录下该点所在区域的经纬度范围，然后只要取出这个区域外的八个点，然后对这八个点分别跑八次定位算法就可以求出他附近的所有区域了。</p>
+<p><strong>临近点的查找策略：</strong></p>
+<p>由于GeoHash对一个坐标点的编码可以有不同的深度（精度），因此在临近点的查找中也就存在了层次的选择策略。我们显然不能一概而论的将每个点都查找到相同的层次，否则要么由于精度太高而找不到临近点，要么由于精度太低而找到太多的临近点。我的策略是：</p>
+<ol>
+<li>首先确定一个最高的<strong>精度</strong>，我们认为在这个精度下的所有区域中的点都是极少的；</li>
+<li>然后确定一个期望的临近点个数k；</li>
+<li>对于某个坐标点，计算出在最高精度下的区域时由<strong>邻居查找算法</strong>得到的临近点的个数b。</li>
+<li>如果b小于k，那么就把精度提高一层（即将其GeoHash编码末尾的几个字符删除）继续执行邻居查找算法直到找到的临近点的个数大于等于k；</li>
+<li>用邻居查找算法查询当前精度下的所有临近点并将其作为”<strong>Filter</strong>”后的<strong>候选集</strong>供后续的<strong>“Refine”。</strong></li>
+<li>注意到这个参数k非常重要，当他的值小的时候算法的准确率会下降，但是效率会提高；反之准确率会提高，效率会下降。因此，当我们期望的运行时间一定时，我们可以通过用启发式的方法，根据期望运行的时间、路径中点的个数等因素调节参数k，从而达到效率和准确率的最佳平衡。</li>
+</ol>
+<h2 id="精度"><a href="#精度" class="headerlink" title="精度"></a>精度</h2><p>最初Gustavo Niemeyer在定义GeoHash编码的时候是以全球的坐标作为总的区域来分的，因此他计算出了不同编码长度的GeoHash区域对应的范围。不过我们平常自己写的时候并不需要覆盖全球的所有地区，而且也不必用Base32来编码。如果非得那拿全球作为总的区域来划分，那么我们可以很容易的计算出来只要最多在经度和纬度上分别划分<strong>24次</strong>左右就可以使最小的区块达到<strong>1m</strong>的精度。在没有缓存的情况下也只要循环二十几次就可以定位到需要的区域，效率还是很高的。</p>
+<h2 id="与R树的比较"><a href="#与R树的比较" class="headerlink" title="与R树的比较"></a>与R树的比较</h2><p>一、稳定性：GeoHash编码与数据集的大小无关，因此对于任意大的数据集，他的定位和查找效率都非常高（常数时间）；而R树在建树时需要花费至少$O(nlogN)$的复杂度（事实上为了保持树的平衡还会花费更多的时间），况且R树家族的数据结构基本都会存在区域重叠，当数据量大的时候无论是建树还是查找都会很费时。</p>
+<p>二、拓展性：GeoHash可以与当前的任何一种数据库管理系统结合使用，不仅可以享受数据库的优化，而且还可以利用NoSQL数据库非常轻松的实现分布式存储和查找；R树则一般是在内存中进行查找，虽然现今大多数数据库也有空间索引的引擎，但是标准不统一，性能也不是很稳定，而且大规模批量插入数据时性能也不理想。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/LBSer/p/3310455.html">GeoHash核心原理解析</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Geohash">wiki–GeoHash</a><br>基于GeoHash的面数据区域查询</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/20/javascript-constructor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/05/20/javascript-constructor/" itemprop="url">js高级与面向对象之构造函数</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-20T05:39:33+00:00">
+                2016-05-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/" itemprop="url" rel="index">
+                    <span itemprop="name">javascript</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>首先，什么是_声明_、<em>初始化_、_赋值_、_定义</em>?</p>
+<ul>
+<li>声明：告诉解析器有这个东西存在</li>
+<li>初始化：就理解为第一次赋值</li>
+<li>定义：不需要去理解</li>
+<li>赋值：改变变量的值，就是赋值</li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/05/20/javascript-constructor/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/18/javascript-part2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1134,7 +1755,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/22/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BBED%E7%AE%97%E6%B3%95/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/05/03/openwrt-helloword/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1153,7 +1774,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/04/22/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BBED%E7%AE%97%E6%B3%95/" itemprop="url">路径匹配之编辑距离ED算法</a></h2>
+                <a class="post-title-link" href="/2016/05/03/openwrt-helloword/" itemprop="url">openwrt编译出helloword.ipk</a></h2>
         
 
         <div class="post-meta">
@@ -1165,8 +1786,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-22T14:55:10+00:00">
-                2016-04-22
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-03T12:47:57+00:00">
+                2016-05-03
               </time>
             
 
@@ -1188,8 +1809,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
-                    <span itemprop="name">Trajectory Similarity</span>
+                  <a href="/categories/%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">编程</span>
                   </a>
                 </span>
 
@@ -1226,646 +1847,14 @@
 
       
         
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>编辑距离（Edit Distance），又称Levenshtein距离，原本是用来描述指两个字串之间，由一个转成另一个所需的最少编辑操作次数。这里的”编辑操作“是指“插入”、“删除”和“修改”。是由俄罗斯科学家Vladimir Levenshtein在1965年提出的概念。他通常就被用作一种相似度计算函数，尤其在自然语言处理方面。</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>具体的讲，用编辑距离来描述处理路径相似度问题需要解决的是如下的问题，这个问题又叫”Edit Distance on Real sequence“(解决的方法就叫EDR算法)：</p>
-<p>给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，现在我们需要将其中一个序列改成另一个序列（反之亦然，易证相互转换的编辑距离是相等的），且我们一次只能对一个元素做插入、修改、删除中的一个操作。我们将变换所需的最小步数记为$EDR(A,B)$，这个值就可以作为两个序列相异度的一个量度。当然，跟LCSS一样，判断两个点”相等“还需要设定一个阈值$\varepsilon$，距离小于这个阈值的点可以被认为是”相等“的（不过论文中认为只有两个点的所有维度上的距离只差都小于这个阈值才被判断为相等，虽然我认为意思都差不多）。如下例：</p>
-<p><img src="/images/2016/04/22/1/1.png"></p>
-<p>其中黑线表示目标路径，红色实线表示当前路径，红色虚线表示改变后的路径。显然他们的编辑距离是３，包含两个插入操作、一个替换操作。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>简单dp。</p>
-<p>对于序列$A[1:n],B[1:m]$，令$EDR[i,j]$表示$A[1:i],B[1:j]$之间的编辑距离；$\varepsilon$表示判断两点相等的阈值；$subcost[i][j]$的值表示$A[i],B[j]$是否相等，若是则取１，若否则取０。那么：</p>
-<p>$$EDR[i,j]&#x3D;\left\{\begin{matrix}m&amp;if\ i&#x3D;0\\n&amp;if\ j&#x3D;0\\min\left\{\begin{aligned}EDR[i-1][j-1]+subcost[i][j]\\EDR[i][j-1]+1\\EDR[i-1][j]+1\end{aligned}\right.&amp;otherwise\end{matrix}\right.$$</p>
-<p>根据这个递推式就可以求出编辑距离了。</p>
-<h2 id="其他处理"><a href="#其他处理" class="headerlink" title="其他处理"></a>其他处理</h2><p>通常情况下这种距离在进行对比的时候都会进行<strong>归一化</strong>。这么做的基础当然是认为路径的相似度主要是考虑形状而不考虑位置）。既然是需要用阈值来判断相等，当然还是将路径的尺度固定到一个相对稳定的度量范围内才更有适用性。归一化的操作也非常简单，就是对于待归一化的路径点的每一个维度$x_k$，令他的值等于$\frac{x_k-\mu_x}{\sigma_x}$，其中$\mu_x,\sigma_x$分别表示该维度下的坐标的平均值和标准差。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>用EDR算法表示的路径相似度，有着对噪声不敏感的特点。但是他所表示的意义不是非常好（表示路径之间转换的操作数而跟距离没啥关系），而且确定阈值的过程还是很麻烦的。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/2020247.htm">编辑距离</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Edit_distance">Edit distance</a><br>Robust and Fast Similarity Search for Moving Object Trajectories</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/21/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E8%B7%9D%E7%A6%BB%E5%BD%92%E5%B9%B6MD%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/21/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E8%B7%9D%E7%A6%BB%E5%BD%92%E5%B9%B6MD%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">路径匹配之距离归并MD算法简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-21T14:41:45+00:00">
-                2016-04-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
-                    <span itemprop="name">Trajectory Similarity</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>距离归并算法（Merge Distance）也是一种计算路径相似度的算法（其实“路径归并”是我自己瞎翻译的，因为没有找到更加官方的中文翻译）。跟DTW，LCSS之类不同，他提出来时间不算长，但是思想也是十分简单的。计算方便理解容易，也是进行路径相似度匹配的不错的思路。</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>MD算法解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都可以是一个二维坐标点或者是更高维度的坐标。现在我们需要找到一条路径，使他经过这两个序列的所有点，且保证若$i &lt; j$那么$A_j$一定在$A_i$后面出现（对于$B$亦然）。显然这样我们可以有多种结果，那么我们只要取最短的那个路径来作为最后能够代表他们相似度的路径。具体要求如下图所示：</p>
-<p><img src="/images/2016/04/21/1/1.png"></p>
-<p>对于左边的图，下面的那个路径就是对上面的路径进行归并后的最短路径；对于右边的图，绿色的实线路径就是对蓝色和红色的虚线路径归并后的最短路径。</p>
-<p>Merge Distance算法就是为了求出这个最短的路径长度。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>简单dp。</p>
-<p>对于序列$A[1:n],B[1:m]$，令$MDa[i][j]$表示以$A[i]$为终点的序列$A[1:i]$和$B[1:j]$所形成的最短路径的长度；令$MDb[i][j]$表示以$B[j]$为终点的序列$A[1:i]$和$B[1:j]$所形成的最短路径的长度；$dis(X,Y)$表示$X$和$Y$之间的距离。这样我们就可以构造如下的递推关系式：</p>
-<p>$i&#x3D;1:$</p>
-<p>$$MDa[i][j]&#x3D;dis(A[i],B[j])+\sum_{k&#x3D;2}^{j}dis(B[k-1],B[k])$$</p>
-<p>$j&#x3D;1:$</p>
-<p>$$MDb[i][j]&#x3D;dis(A[i],B[j])+\sum_{k&#x3D;2}^{i}dis(A[k-1],A[k])$$</p>
-<p>$for\ 1&lt; i\leq n,1\leq j \leq m:$</p>
-<p>$$MDa[i][j]&#x3D;min\left\{\begin{matrix}MDa[i-1][j]+dis(A[i-1],A[i])\\MDb[i-1][j]+dis(A[i],B[j])\end{matrix}\right.$$</p>
-<p>$for\ 1\leq i\leq n,1&lt; j \leq m:$</p>
-<p>$$MDb[i][j]&#x3D;min\left\{\begin{matrix}MDa[i][j-1]+dis(A[i],B[j])\\MDb[i][j-1]+dis(B[j-1],B[j])\end{matrix}\right.$$</p>
-<p>&nbsp;</p>
-<p>这样我们就可以很容易的求出$MDa[n][m]$和$MDb[n][m]$，然后取其中的较小值作为最终的长度。复杂度$O(m*n)$</p>
-<h2 id="后续处理"><a href="#后续处理" class="headerlink" title="后续处理"></a>后续处理</h2><p>通过上面的算法我们算出了两个序列归并后的路径长度记为$L(A,B)$，同时我们把路径$A$的长度记为$L(A)$，路径$B$的长度记为$L(B)$。当两个路径完全重合的时候，很明显这个值会等于$L(A)\ or\ L(B)$。显然，如果我们想把$L(A,B)$作为路径相异度的量度的话，最好还是让他此时的值等于零。因此我们会对他的值进行一下处理，使他更像一个相似度的量度而不仅仅是一种距离。我们如下定义这个量度$MD(A,B)$：</p>
-<p>$$MD(A,B)&#x3D;\frac{2*L(A,B)}{L(A)+L(B)}-1$$</p>
-<p>这样，我们所定义的这个值就满足路径完全相同时，相异度就是０，而且这个值并不会随着路径长度的增加而丧失准确度。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Merge Distance算法所得到的量度对于原路径点与<strong>降采样（SubSampling）</strong>后的路径点或**超采样(SuperSampling)**后的路径点的相异度评判差别很小（论文中实验为证），这也是相对于传统的DTW，欧氏距离等相似度评判方法表现突出的地方。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Anas Ismail,Antoine Vigneron.A New Trajectory Similarity Measure for GPS Data, (KAUST) Thuwal 23955-6900, Saudi Arabia</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/20/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97LCSS%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/20/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97LCSS%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">路径匹配之最长公共子序列LCSS算法简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-20T15:19:46+00:00">
-                2016-04-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
-                    <span itemprop="name">Trajectory Similarity</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>LCSS算法其实就是我们熟悉的LCS算法（Longest Common Subsequence　最长公共子序列），一个非常基础的dp。以前一直以为LCS算法没啥用，完全就是为了应付比赛用的，现在才发现原来LCS算法竟然在路径匹配上也能有很大作用。</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>LCSS算法解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都可以是一个二维坐标点或者是更高维度的坐标。现在我们需要分别从序列$A,B$中依次抽取出$k$个点构成序列$SubA$，$SubB$，使得$SubA$和$SubB$的点一一“相等”。这里“相等”的含义可以定义为两个点之间的距离（通常是欧式距离）小于一个阈值$\varepsilon$，如下图所示：</p>
-<p><img src="/images/2016/04/20/1/1.png"></p>
-<p>其中$p_2,p^,_1$ 、$p_4,p^,_3$ 便可以看成是匹配的两组。</p>
-<p>我们用满足上述条件的最长的$SubA($或$SubB)$的长度来衡量两个序列$A,B$的相似程度，这也是可以令人理解的。</p>
-<p>有时候我们还会对这个定义加一个限制条件：$A_i,B_j$匹配需要满足$|i-j|&lt;\delta$。</p>
-<p>简而言之，我们的LCSS需要做的事就是求出这个最长的序列长度。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>基础的dp，对于序列$A[1…n],B[1…m]$，令$lcss[i][j]$表示序列$(A_1,A_2,A_3,A_4…A_i)$和$(B_1,B_2,B_3,B_4…B_j)$的最长公共子序列，$dis[i][j]$表示$A_i,B_j$之间的距离，那么我们可以很容易得到下面的递推式：</p>
-<p>$for\ 1\leq i\leq n,1\leq j \leq m:$</p>
-<p>$$lcss[i][j]&#x3D;\left\{\begin{aligned}&amp;1+lcss[i-1][j-1],|i-j|&lt;\delta\ \ dis[i][j]&lt;\varepsilon\\&amp;max(lcss[i][j-1],lcss[i-1][j]),else\end{aligned}\right.$$</p>
-<p>$else:$</p>
-<p>$$lcss[i][j]&#x3D;0$$</p>
-<p>最终求得的$lcss[n][m]$便是最长序列的长度，复杂度为$O(\delta(m+n))$。</p>
-<h2 id="后续处理"><a href="#后续处理" class="headerlink" title="后续处理"></a>后续处理</h2><p>通过上面的方法，我们能够计算得到路径间的LCSS，但是这并不适合作为相似度的直接评判标准。毕竟较长的路径之间的LCSS在数值上可能比较大，但是事实上的符合程度却不是那么好。因此我们通常会将结果除以较短的路径的长度，即：</p>
-<p>$$S(A,B)&#x3D;\frac{LCSS(A,B)}{min(n,m)}$$</p>
-<p>这样得到的值就有了较好的可度量性了。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>LCSS算法由于没有用到所有的点，所以能够较好的抵抗噪声。但是判断两点相等的阈值$\varepsilon$不太好确定，这是LCSS的最大弊端。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>VLACHOS, M., GUNOPULOS, D., AND KOLLIOS, G. Discovering similar multidimensional trajectories. ICDE 2002<br>Kevin Toohey, Matt Duckham Trajectory similarity measures.March 2015<br>Ke Deng, Kexin Xie, Kevin Zheng and Xiaofang Zhou ,Trajectory-Indexing-and-Retrieval<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/v_july_v/article/details/6695482">程序员编程艺术第十一章：最长公共子序列(LCS)问题</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">路径匹配之动态时间规整DTW算法简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-19T15:38:29+00:00">
-                2016-04-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
-                    <span itemprop="name">Trajectory Similarity</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p><strong>DTW算法</strong>又叫<strong>动态时间规整</strong>（  <strong>Dynamic Time Warping</strong>），是一个比较简单的dp算法。常用于不等长的离散的路径点的匹配问题，在孤立词语音识别、手势识别、数据挖掘和信息检索等领域有着很不错的表现。</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>DTW解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都是一个二维坐标点或者是更高维度的坐标。我们现在需要求出一个“距离”，使得他能够表示这两个路径的相似度。</p>
-<p>很明显，如果m等于n，那么我们可以很方便的用对应节点（下标相等）之间的欧氏距离（也可以是其他类型的距离）之和来表示这个”距离“，这看上去还是能让人信服的。但是当m和n不等的时候，我们就发现这种办法就不适用了。但是我们完全可以仍然采用这个思想，只不过与之前每个节点都是一一对应不同，我们可以令其中的某些节点是一对多的对应关系，如下图所示：</p>
-<p><img src="/images/2016/04/19/1/1.png"></p>
-<p>当然，这样的对应关系也得满足”非降“的对应，即若$A_i$与$B_j$对应，那么$A_{i+p}$必然不能与$B_{j-q}$对应（其中$p,q\gt 0$）。</p>
-<p>这样一来，我们就可以通过计算新的对应点之间的距离之和来表示这两个路径之间的距离。</p>
-<p>很明显，这样的匹配方法有很多种，不过对我们来说有意义的匹配方式应该是使最后计算出的距离最小的方式，那么我们到底要怎样确定点的对应关系呢？这就是DTW要解决的问题。</p>
-<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>令$dtw[i][j]$表示$A$序列的前$i$个元素与$B$序列的前$j$个元素匹配后得到的最小距离(下标从1开始)，$dis[i][j]$表示$A_i$与$B_j$的距离。显然，这时候$A_i$必然和$B_j$匹配。那么我们很容易得到下面的递推关系式(考虑边界条件)：</p>
-<p>$i&#x3D;j&#x3D;0:$</p>
-<p>$$dtw[i][j]&#x3D;0$$</p>
-<p>$i&#x3D;0\ or\ j&#x3D;0:$</p>
-<p>$$dtw[i][j]&#x3D;\infty$$</p>
-<p>$for\ 1\leq i\leq n,1\leq j \leq m:$</p>
-<p>$$dtw[i][j]&#x3D;dis[i][j]+min\left\{\begin{aligned}&amp;dtw[i-1][j]\\&amp;dtw[i-1][j-1]\\&amp;dtw[i][j-1]\end{aligned}\right.$$</p>
-<p>最后$dtw[n][m]$就是我们所求的距离，复杂度$O(n*m)$。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>DTW算法在应对不等长路径问题的相似度匹配的时候效果还是挺好的，但是由于他需要计算到每一个点，因此他对噪声比较敏感。而且他也无法应对存在时间维度的路径匹配问题。</p>
-<p>当然，我们利用DTW算法不仅仅是为了获得距离，很多情况下，我们是为了获得点的对应关系，从而对两个序列更好的进行比较。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Yi, Byoung-Kee, Jagadish, HV and Faloutsos, Christos, Efficient retrieval of similar time sequences under time warping. ICDE 1998<br>Lei Chen,Raymond Ng,On The Marriage of Lp-norms and Edit Distance,2004<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/tornadomeet/archive/2012/03/23/2413363.html">HMM学习笔记_1(从一个实例中学习DTW算法)</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/zouxy09/article/details/9140207">语音信号处理之（一）动态时间规整（DTW）</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dynamic_time_warping">Dynamic time warping</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/" itemprop="url">结合连通块平均分割以及投影矫正的验证码分割算法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-17T11:16:24+00:00">
-                2016-04-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在<a href="/2016/04/16/1/">上一节</a> 中记录了基于投影的验证码矫正算法的实现。通过矫正，我们可以比较好的将倾斜的字符归一成较为规整的字符，接下来我们需要对矫正后的字符进行分割。简单的方法大概是投影法了，但是很明显，这样做的可靠性并不够。我们也可以找到整张图的最左端和最右端然后平均分割，但是在字符大小不一样的情况下效果也太好。还有个朴素的方法就是找连通块，但是由于存在字符粘连问题，连通块也不能完全区分字符。那么我这里就结合后两种方法，先进行连通块分割，对于能分割的字符直接进行后续处理，对于不能分割的字符再用平均分割的方法分割处理。实践表明这种方法对于那些干扰线不明显的验证码（比如新浪微博的验证码）的分割效果还是不错的。</p>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2,os,sys,math</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getBinary</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：图片路径名称</span></span><br><span class="line"><span class="string">    输出：黑底二值化的图片</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    im=cv2.imread(path,<span class="number">0</span>)</span><br><span class="line">    thresh,im=cv2.threshold(<span class="number">255</span>-im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line">    <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadow</span>(<span class="params">im,angel</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图片，投影角度</span></span><br><span class="line"><span class="string">    输出：投影大小</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    x=[]</span><br><span class="line">    height , width = im.shape</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                x.append(j-<span class="number">1.0</span>*i/math.tan(math.radians(angel)))</span><br><span class="line">    x=np.array(x)</span><br><span class="line">    <span class="keyword">return</span> x.<span class="built_in">max</span>()-x.<span class="built_in">min</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadowTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试shadow函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">1</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> shadow(im,<span class="number">50</span>)</span><br><span class="line">        figure()</span><br><span class="line">        gray()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngle</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图</span></span><br><span class="line"><span class="string">    输出：最优的投影角度</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    minShadow=<span class="number">500</span></span><br><span class="line">    ans=<span class="number">90</span></span><br><span class="line">    <span class="keyword">for</span> angle <span class="keyword">in</span> np.linspace(<span class="number">45</span>,<span class="number">135</span>,<span class="number">91</span>):</span><br><span class="line">        thisShadow=shadow(im,angle)</span><br><span class="line">        <span class="keyword">if</span> minShadow&gt;thisShadow:</span><br><span class="line">            ans=angle</span><br><span class="line">            minShadow=thisShadow</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngleTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试getAngle函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">5</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> getAngle(im)</span><br><span class="line">        gray()</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affine</span>(<span class="params">im,angle=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图，仿射变换角度（默认为自适应最优角度）</span></span><br><span class="line"><span class="string">    输出：旋转后的灰度图</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    height,width=im.shape</span><br><span class="line">    <span class="keyword">if</span> angle==<span class="literal">None</span>:</span><br><span class="line">        angle=getAngle(im)</span><br><span class="line">    pts1=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>,<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line">    pts2=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>+height/<span class="number">2</span>/math.tan(math.radians(angle)),<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line">    M=cv2.getAffineTransform(pts1,pts2)</span><br><span class="line">    dst=cv2.warpAffine(im,M,(width,height))</span><br><span class="line">    <span class="keyword">return</span> dst</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affineTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试affine函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">50</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        dst=affine(im)</span><br><span class="line">        gray() </span><br><span class="line">        figure()</span><br><span class="line">        imshow(np.hstack([im,dst]))</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">splitImg</span>(<span class="params">im,num</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图，图中包含的字符个数</span></span><br><span class="line"><span class="string">    输出：分割后的图片数组</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    height,width=im.shape</span><br><span class="line">    maxPos=<span class="number">0</span></span><br><span class="line">    minPos=width</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                maxPos=<span class="built_in">max</span>(maxPos,j)</span><br><span class="line">                minPos=<span class="built_in">min</span>(minPos,j)</span><br><span class="line">    points=[]</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num+<span class="number">1</span>):</span><br><span class="line">        points.append(minPos+(maxPos-minPos)/num*i)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num):</span><br><span class="line">        left=points[i]</span><br><span class="line">        right=points[i+<span class="number">1</span>]</span><br><span class="line">        p1=np.zeros((height,left))</span><br><span class="line">        p2=np.ones((height,right-left+<span class="number">1</span>))*<span class="number">255</span></span><br><span class="line">        p3=np.zeros((height,width-right))</span><br><span class="line">        new_im=np.hstack([p1,p2,p3])</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> im[i][j]==<span class="number">0</span>:</span><br><span class="line">                    new_im[i][j]=<span class="number">0</span></span><br><span class="line">        ans.append(new_im)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seedSplit</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图</span></span><br><span class="line"><span class="string">    输出：从图中高亮提取出的字符图片数组</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    angle=getAngle(im)</span><br><span class="line">    height,width = im.shape</span><br><span class="line">    vis=np.zeros((height,width))</span><br><span class="line">    vis2=np.zeros((height,width))</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mark</span>(<span class="params">i,j</span>):</span><br><span class="line">        vis2[i][j]=<span class="number">1</span></span><br><span class="line">        points=[]</span><br><span class="line">        points.append((i,j))</span><br><span class="line">        <span class="keyword">for</span> dx <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">            <span class="keyword">for</span> dy <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> i+dx&gt;=<span class="number">0</span> <span class="keyword">and</span> i+dx&lt;height <span class="keyword">and</span> j+dy&gt;=<span class="number">0</span> <span class="keyword">and</span> j+dy&lt;width <span class="keyword">and</span> im[i+dx][j+dy]==<span class="number">255</span> <span class="keyword">and</span> vis2[i+dx][j+dy]==<span class="number">0</span>:</span><br><span class="line">                     points.extend(mark(i+dx,j+dy))</span><br><span class="line">        <span class="keyword">return</span> points</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">delete</span>(<span class="params">i,j</span>):</span><br><span class="line">        vis[i][j]=<span class="number">1</span></span><br><span class="line">        ans=<span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> dx <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">            <span class="keyword">for</span> dy <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> i+dx&gt;=<span class="number">0</span> <span class="keyword">and</span> i+dx&lt;height <span class="keyword">and</span> j+dy&gt;=<span class="number">0</span> <span class="keyword">and</span> j+dy&lt;width <span class="keyword">and</span> im[i+dx][j+dy]==<span class="number">255</span> <span class="keyword">and</span> vis[i+dx][j+dy]==<span class="number">0</span>:</span><br><span class="line">                    ans+=delete(i+dx,j+dy)</span><br><span class="line">        <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getImg</span>(<span class="params">points</span>):</span><br><span class="line">        new_im=np.zeros((height,width))</span><br><span class="line">        <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">            i,j=point         </span><br><span class="line">            new_im[i][j]=<span class="number">255</span></span><br><span class="line">        <span class="keyword">return</span> new_im,<span class="built_in">len</span>(points)</span><br><span class="line"></span><br><span class="line">    imgs=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> vis[i][j]==<span class="number">1</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                num=delete(i,j)   </span><br><span class="line">                <span class="keyword">if</span> num&lt;=<span class="number">50</span>:</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                points=mark(i,j)</span><br><span class="line">                imgs.append(getImg(points))</span><br><span class="line">            vis[i][j]=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    imgs.sort(<span class="keyword">lambda</span> left,right:cmp(left[<span class="number">1</span>],right[<span class="number">1</span>]))</span><br><span class="line">    new_imgs=[]</span><br><span class="line">    <span class="keyword">for</span> i,j <span class="keyword">in</span> imgs:</span><br><span class="line">        new_imgs.append((affine(i,angle),j))</span><br><span class="line">    imgs=new_imgs</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(imgs)&gt;<span class="number">4</span>:</span><br><span class="line">        imgs=imgs[<span class="built_in">len</span>(imgs)-<span class="number">4</span>:]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs[<span class="built_in">len</span>(imgs)-<span class="number">4</span>:]:</span><br><span class="line">            ans.append(i[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">4</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs:</span><br><span class="line">            ans.append(i[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">3</span>:</span><br><span class="line">        ans.append(imgs[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">        ans.append(imgs[<span class="number">1</span>][<span class="number">0</span>])</span><br><span class="line">        ans.extend(splitImg(imgs[<span class="number">2</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">2</span>:</span><br><span class="line">        rate=imgs[<span class="number">0</span>][<span class="number">1</span>]*<span class="number">1.0</span>/imgs[<span class="number">1</span>][<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> rate&gt;<span class="number">0.6</span>:</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">0</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">1</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            ans.append(imgs[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">1</span>][<span class="number">0</span>],<span class="number">3</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        ans.extend(splitImg(imgs[<span class="number">0</span>][<span class="number">0</span>],<span class="number">4</span>))</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seedSplitTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试seedSplit函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    gray()</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[<span class="number">5</span>:<span class="number">15</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line">        imgs=seedSplit(im)   </span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs:</span><br><span class="line">            figure()</span><br><span class="line">            imshow(i)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getTrainPic</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：图片</span></span><br><span class="line"><span class="string">    输出：依次输出图片中包含的字符，并归一化成统一大小</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getCenterx</span>(<span class="params">img</span>):</span><br><span class="line">        height,width=im.shape</span><br><span class="line">        points=[]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> img[i][j]==<span class="number">255</span>:</span><br><span class="line">                    points.append(j)</span><br><span class="line">        <span class="keyword">return</span> np.average(points)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getResult</span>(<span class="params">im,row=<span class="number">30</span>,column=<span class="number">30</span></span>):</span><br><span class="line">        height,width=im.shape</span><br><span class="line">        maxX=<span class="number">0</span></span><br><span class="line">        maxY=<span class="number">0</span></span><br><span class="line">        minX=<span class="number">99999</span></span><br><span class="line">        minY=<span class="number">99999</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                    maxX=<span class="built_in">max</span>(maxX,j)</span><br><span class="line">                    minX=<span class="built_in">min</span>(minX,j)</span><br><span class="line">                    maxY=<span class="built_in">max</span>(maxY,i)</span><br><span class="line">                    minY=<span class="built_in">min</span>(minY,i)</span><br><span class="line">        im=im[minY:maxY+<span class="number">1</span>].T[minX:maxX+<span class="number">1</span>].T</span><br><span class="line">        im=cv2.copyMakeBorder(im,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,cv2.BORDER_CONSTANT)</span><br><span class="line">        im=cv2.resize(im,(<span class="number">30</span>,<span class="number">30</span>))</span><br><span class="line">        <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line">    imgs=seedSplit(im)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(imgs)):</span><br><span class="line">        imgs[i]=(imgs[i],getCenterx(imgs[i]))</span><br><span class="line">    imgs.sort(<span class="keyword">lambda</span> x,y:cmp(x[<span class="number">1</span>],y[<span class="number">1</span>]))</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i,j <span class="keyword">in</span> imgs:</span><br><span class="line">        ans.append(getResult(i))</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getTrainPicTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试getTrain函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    gray()</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">10</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        imgs=getTrainPic(im)</span><br><span class="line">        res=np.hstack([imgs[<span class="number">0</span>],imgs[<span class="number">1</span>],imgs[<span class="number">2</span>],imgs[<span class="number">3</span>]])</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">        figure()</span><br><span class="line">        imshow(res)</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">getTrainPicTest()</span><br></pre></td></tr></table></figure>
-<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p><img src="/images/2016/04/17/1/1.png"><br><img src="/images/2016/04/17/1/2.png"><br><img src="/images/2016/04/17/1/3.png"><br><img src="/images/2016/04/17/1/4.png"><br><img src="/images/2016/04/17/1/5.png"><br><img src="/images/2016/04/17/1/6.png"><br><img src="/images/2016/04/17/1/7.png"><br><img src="/images/2016/04/17/1/8.png"></p>
-
-          
+          <p>openwrt开发的第一步就是生成一个package让其在路由器上运行！</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/05/03/openwrt-helloword/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1949,7 +1938,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">502</span>
+                  <span class="site-state-item-count">507</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1960,7 +1949,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1971,7 +1960,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-count">255</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
