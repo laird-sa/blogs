@@ -307,159 +307,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/18/%E5%9F%BA%E4%BA%8Estdarg.h%E7%9A%84%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/18/%E5%9F%BA%E4%BA%8Estdarg.h%E7%9A%84%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%A8%E6%B3%95/" itemprop="url">基于stdarg.h的可变参数函数的用法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-18T16:02:55+00:00">
-                2015-11-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>.在开始学习C语言的函数的时候，我们就知道函数的参数个数应该是在函数声明的时候就指定的，这一点我们没有任何疑问。但是不知道大家有没有注意到我们的printf()函数，他的函数参数理论上并不是确定的，而是随着匹配字符串中的格式控制符的个数控制的。其实当时也没有注意到这一点，到是最近，偶然间看到了<a target="_blank" rel="noopener" href="http://book.douban.com/subject/25703412/">《嗨翻C语言》</a>这本书，这里就详细讲解了这种可变参数函数的实现原理，今天考试间隙就顺带学习了一下，其实就是一种方法，知道了就晓得了，也是非常的简单。</p>
-<h2 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h2><p>这个用法需要引用一些宏，这些宏定义在C标准库“stdarg.h”中，(当然C++中就是“cstdarg”了)。</p>
-<h2 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int fun(int arg1,int arg2, ...)&#123;</span><br><span class="line">//foo</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里可以用普通传参方法传入几个固定参数，一般情况下会有个表示可变参数的个数(否则函数也不晓得你到底传给了他啥)，最后表示可变参数部分的是三个连续的点，注意中间不能有空格。我们传入的可变参数就是在这里的。</p>
-<h2 id="具体用法"><a href="#具体用法" class="headerlink" title="具体用法"></a>具体用法</h2><p>这里主要涉及到va_list类型，va_start()、va_arg()、va_end()这几个函数。</p>
-<p>va_list 可以理解为以链表的形式保存那些可变参数的一个数据类型（既然是链表，当然是可变的了）。</p>
-<p>void va_start(va_list ap , int len); 接受两个参数，一个是上面的那个东西，还有一个表示数据的数目。目测可以理解为是自动收集传给本函数的可变参数，并连带他的数目，将信息赋给 va_list 。</p>
-<p>type va_arg(va_list ap , type ); 接受两个参数，一个是va_list，另一个是保存的数据的类型。因为在调用参数的时候，编译器不会检查实际输入的是什么参数，所以需要适时的指定，并以那个类型返回。注意，这时候在va_list中的某个指针会指向下一个元素，所以下一次调用时输出的值就是下一个元素。在这一点上用法类似于iterator。</p>
-<p>void va_end(va_list ap);最后清理这个va_list.</p>
-<h2 id="演示源码"><a href="#演示源码" class="headerlink" title="演示源码"></a>演示源码</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdarg.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(<span class="type">int</span> arg,...)</span></span>&#123;</span><br><span class="line">	va_list ap;</span><br><span class="line">	<span class="built_in">va_start</span>(ap, arg);</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; arg; i++)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%d &quot;</span>, <span class="built_in">va_arg</span>(ap,<span class="type">int</span>));</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">va_end</span>(ap);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">print</span>(<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果自然是输出 1 2 3 4。</p>
-<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>虽然看上去效果很酷，但是实际上据说这种用法的确很不安全，容易造成运行错误，所以还是尽量要少用。这种类似的问题如果能用重载或者类来解决的话还是少用可变参数函数吧。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/17/%E8%A7%A3%E5%86%B3Hdoj3337%E9%97%AE%E9%A2%98%E7%9A%84%E7%AE%80%E6%98%93%E7%88%AC%E8%99%AB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1826,6 +1673,160 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/06/%E4%BA%8C%E5%8F%89%E5%A0%86%E7%AE%80%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/06/%E4%BA%8C%E5%8F%89%E5%A0%86%E7%AE%80%E8%BF%B0/" itemprop="url">二叉堆简述</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-06T11:19:54+00:00">
+                2015-11-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>对于堆，我个人的理解就是一种优先队列，从队列中取元素的时候总是取出最大（或最小）的元素。二叉堆是一种堆的一种实现形式，是一棵完全二叉树。对于二叉堆，我们显然可以分成两类：大根堆和小根堆，表示他每次取出的是最大元素还是最小元素。而大根堆一定是满足这样的一个性质，即：对于任意一个节点，他一定不大于他的父亲，而且不小于他的两个儿子。小根堆反之。</p>
+<h2 id="实现功能"><a href="#实现功能" class="headerlink" title="实现功能"></a>实现功能</h2><p>以$O(n)$的时间建树，并以$O(logn)$的复杂度实现插入、寻找最小（或最大）值，修改元素，删除元素。</p>
+<h2 id="实现思路（小根堆）"><a href="#实现思路（小根堆）" class="headerlink" title="实现思路（小根堆）"></a>实现思路（小根堆）</h2><p>我们用一个数组来储存数据，下标从1开始，对于第$i$个元素，他的左儿子为$i<em>2$，他的右儿子为$i</em>2+1$，当然对于非根节点，他的父亲就是$i&#x2F;2$。在这里，这个数组用$heap[]$表示。</p>
+<p>同时，我们用数组$id[i]$数组来表示第(i)个元素是第几个插入的，用$pos[i]$来表示第$i$个元素是第几个插入的（很明显有$id[pos[i]]&#x3D;i$）。当然，根据实际情况，这两个东西可以不要。</p>
+<p>这里要用到的最重要的两个函数是$up(i)$和$down(i)$函数， $up(i)$函数是将第$i$个元素上移，如果他比他的父亲大，就和他的父亲交换位置，即维护他比他父亲小的性质。$down(i)$函数类似，只是比较的是两个儿子中较小的那个。</p>
+<p>接下来是算法的核心：</p>
+<ul>
+<li>当加入一个元素时，我们把他加入到堆的底部，即heap数组的末尾，然后调用$up(i)$函数将其上移到合适位置。</li>
+<li>当修改一个元素时，只要直接修改，然后分别调用$down(i)$函数和$up(i)$函数找到他适合的位置。</li>
+<li>当删除堆顶元素的时候，我们只要把他和最后一个元素交换位置（这样只需要将数组大小减一就可以删掉他），然后用$down(i)$函数将堆顶元素下移到合适位置。</li>
+<li>当删除任意元素时，只需要把他赋值为负无穷，然后上浮到堆顶，再利用删除堆顶元素的方法删除他。</li>
+</ul>
+<h2 id="基本模版"><a href="#基本模版" class="headerlink" title="基本模版"></a>基本模版</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> MAXSIZE = <span class="number">100000</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Heap</span>&#123;</span><br><span class="line">	<span class="type">int</span> heap[MAXSIZE];<span class="comment">//记录堆的元素,下标从1开始</span></span><br><span class="line">	<span class="type">int</span> n;<span class="comment">//堆中元素的个数</span></span><br><span class="line">	<span class="type">int</span> counter;<span class="comment">//加入到堆中的元素的个数（考虑到被删除的元素）</span></span><br><span class="line">	<span class="type">int</span> id[MAXSIZE];<span class="comment">//第i个元素是第几个加入的</span></span><br><span class="line">	<span class="type">int</span> pos[MAXSIZE];<span class="comment">//第i个加入的元素的位置</span></span><br><span class="line">	<span class="built_in">Heap</span>();<span class="comment">//一个空的Heap</span></span><br><span class="line">	<span class="built_in">Heap</span>(<span class="type">int</span> *, <span class="type">int</span> n);<span class="comment">//用一个数组初始化Heap,数组下标从0开始</span></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> v)</span></span>;<span class="comment">//添加元素v</span></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">change</span><span class="params">(<span class="type">int</span> i, <span class="type">int</span> value)</span></span>;<span class="comment">//把第i个加进去的元素修改为value</span></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span></span>;<span class="comment">//删掉堆顶</span></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">erase</span><span class="params">(<span class="type">int</span> i)</span></span>;<span class="comment">//删除第i个加进去的元素</span></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">up</span><span class="params">(<span class="type">int</span> i)</span></span>;<span class="comment">//将数组中第i个元素上移</span></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">down</span><span class="params">(<span class="type">int</span> i)</span></span>;<span class="comment">//将数组中第i个元素下移</span></span><br><span class="line">	<span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span></span>;<span class="comment">//返回堆顶元素</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Heap::<span class="built_in">Heap</span>()&#123;</span><br><span class="line">	n = counter = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Heap::<span class="built_in">Heap</span>(<span class="type">int</span> a[], <span class="type">int</span> n)&#123;</span><br><span class="line">	n = counter = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)&#123;</span><br><span class="line">		heap[++n] = a[i];</span><br><span class="line">		id[n] = pos[n] = n;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = n / <span class="number">2</span>; i &gt;= <span class="number">1</span>; i--)&#123;</span><br><span class="line">		<span class="built_in">down</span>(i);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Heap::up</span><span class="params">(<span class="type">int</span> i)</span></span>&#123;</span><br><span class="line">	<span class="type">int</span> x = heap[i], y = id[i];</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> j = i / <span class="number">2</span>; j &gt;= <span class="number">1</span>; j /= <span class="number">2</span>)&#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[j]&gt;x)&#123;</span><br><span class="line">			heap[i] = heap[j];</span><br><span class="line">			id[i] = id[j];</span><br><span class="line">			pos[id[i]] = i;</span><br><span class="line">			i = j;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[i] = x;</span><br><span class="line">		id[i] = y;</span><br><span class="line">		pos[y] = i;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Heap::down</span><span class="params">(<span class="type">int</span> i)</span></span>&#123;</span><br><span class="line">	<span class="type">int</span> x = heap[i], y = id[i];</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> j = i * <span class="number">2</span>; j &lt;= n; j *= <span class="number">2</span>)&#123;</span><br><span class="line">		<span class="keyword">if</span> (j&lt;n&amp;&amp;heap[j]&gt;heap[j + <span class="number">1</span>])</span><br><span class="line">			j++;</span><br><span class="line">		<span class="keyword">if</span> (heap[j] &lt; x)&#123;</span><br><span class="line">			heap[i] = heap[j];</span><br><span class="line">			id[i] = id[j];</span><br><span class="line">			pos[id[i]] = i;</span><br><span class="line">			i = j;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[i] = x;</span><br><span class="line">		id[i] = y;</span><br><span class="line">		pos[y] = i;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Heap::push</span><span class="params">(<span class="type">int</span> v)</span></span>&#123;</span><br><span class="line">	heap[++n] = v;</span><br><span class="line">	id[n] = ++counter;</span><br><span class="line">	pos[counter] = n;</span><br><span class="line">	<span class="built_in">up</span>(n);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">Heap::top</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">1</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Heap::pop</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">swap</span>(heap[<span class="number">1</span>], heap[n]);</span><br><span class="line">	<span class="built_in">swap</span>(id[<span class="number">1</span>], id[n--]);</span><br><span class="line">	pos[id[<span class="number">1</span>]] = <span class="number">1</span>;</span><br><span class="line">	<span class="built_in">down</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Heap::change</span><span class="params">(<span class="type">int</span> i, <span class="type">int</span> value)</span></span>&#123;</span><br><span class="line">	heap[pos[i]] = value;</span><br><span class="line">	<span class="built_in">down</span>(pos[i]);</span><br><span class="line">	<span class="built_in">up</span>(pos[i]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Heap::erase</span><span class="params">(<span class="type">int</span> i)</span></span>&#123;</span><br><span class="line">	heap[pos[i]] = heap[<span class="number">1</span>] - <span class="number">1</span>;</span><br><span class="line">	<span class="built_in">up</span>(pos[i]);</span><br><span class="line">	<span class="built_in">pop</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -1876,7 +1877,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-count">564</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

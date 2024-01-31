@@ -307,163 +307,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/28/Linux%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/03/28/Linux%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/" itemprop="url">Linux的环境变量配置详解</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-28T15:27:33+00:00">
-                2017-03-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>在平时使用Linux的时候，经常需要配置一些环境变量，这时候一般都是网上随便搜搜就有人介绍经验的。不过问题在于他们的方法各不相同，有人说配置在<code>/etc/profile</code>里，有人说配置在<code>/etc/environment</code>，有人说配置在<code>~/.bash_profile</code>里，有人说配置在<code>~/.bashrc</code>里，有人说配置在<code>~/.bash_login</code>里，还有人说配置在<code>~/.profile</code>里。。。这真是公说公有理。。。那么问题来了，Linux到底是怎么读取配置文件的呢，依据又是什么呢？</p>
-<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2><p>我一向讨厌那种说结论不说出处的行为，这会给人一种“我凭什么相信你”的感觉。而且事实上没有出处就随便议论得出的结论也基本上是人云亦云的。事实上，与其去问别人，不如去问文档。<br>找了一会，发现关于环境变量配置的相关文档其实是在<code>bash</code>命令的<code>man</code>文档里，毕竟我们常用的就是这个shell。<br>在<code>$man bash</code>里，我发现了下面的一段文字：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">INVOCATION</span><br><span class="line">       A login shell is one whose first character of argument zero is a -,  or</span><br><span class="line">       one started with the --login option.</span><br><span class="line"></span><br><span class="line">       An  interactive  shell  is one started without non-option arguments and</span><br><span class="line">       without the -c option whose standard input and error are both connected</span><br><span class="line">       to  terminals  (as determined by isatty(3)), or one started with the -i</span><br><span class="line">       option.  PS1 is set and $- includes i if bash is interactive,  allowing</span><br><span class="line">       a shell script or a startup file to test this state.</span><br><span class="line"></span><br><span class="line">       The  following paragraphs describe how bash executes its startup files.</span><br><span class="line">       If any of the files exist but cannot be read, bash  reports  an  error.</span><br><span class="line">       Tildes  are expanded in filenames as described below under Tilde Expan‐</span><br><span class="line">       sion in the EXPANSION section.</span><br><span class="line"></span><br><span class="line">       When bash is invoked as an interactive login shell, or as a  non-inter‐</span><br><span class="line">       active  shell with the --login option, it first reads and executes com‐</span><br><span class="line">       mands from the file /etc/profile, if that file exists.   After  reading</span><br><span class="line">       that file, it looks for ~/.bash_profile, ~/.bash_login, and ~/.profile,</span><br><span class="line">       in that order, and reads and executes commands from the first one  that</span><br><span class="line">       exists  and  is  readable.  The --noprofile option may be used when the</span><br><span class="line">       shell is started to inhibit this behavior.</span><br><span class="line"></span><br><span class="line">       When a login shell exits, bash reads and  executes  commands  from  the</span><br><span class="line">       file ~/.bash_logout, if it exists.</span><br><span class="line"></span><br><span class="line">       When  an  interactive  shell that is not a login shell is started, bash</span><br><span class="line">       reads and executes commands from  /etc/bash.bashrc  and  ~/.bashrc,  if</span><br><span class="line">       these  files  exist.  This may be inhibited by using the --norc option.</span><br><span class="line">       The --rcfile file option will force bash to read and  execute  commands</span><br><span class="line">       from file instead of /etc/bash.bashrc and ~/.bashrc.</span><br><span class="line"></span><br><span class="line">       When  bash  is  started  non-interactively,  to run a shell script, for</span><br><span class="line">       example, it looks for the variable BASH_ENV in the environment, expands</span><br><span class="line">       its  value if it appears there, and uses the expanded value as the name</span><br><span class="line">       of a file to read and execute.  Bash behaves as if the  following  com‐</span><br><span class="line">       mand were executed:</span><br><span class="line">              if [ -n &quot;$BASH_ENV&quot; ]; then . &quot;$BASH_ENV&quot;; fi</span><br><span class="line">       but  the value of the PATH variable is not used to search for the file‐</span><br><span class="line">       name.</span><br></pre></td></tr></table></figure>
-<p>通过这段文字，我们发现其实所谓的环境变量配置文件，就是在shell登陆的时候自动加载的那些文件。不过他所定义的登陆却分为两种：</p>
-<ol>
-<li>login shell登陆。</li>
-<li>interactive shell登陆。</li>
-</ol>
-<h3 id="login-shell-登陆"><a href="#login-shell-登陆" class="headerlink" title="login shell 登陆"></a>login shell 登陆</h3><p>所谓的login shell登陆，实际上就是指需要输入密码的登陆。具体的说，包括开机登陆、ssh登陆，或者是输入<code>bash --login</code>这种“假装自己输入密码登陆”的方式。<br>在这种登陆方式下，系统会先读取<code>/etc/profile</code>文件，然后，系统会依次搜索<code>~/.bash_profile</code>、<code>~/.bash_login</code>、<code>~/.profile</code> 这三个文件，并运行<strong>只</strong>其中第一个存在的文件。<br>尤其要注意到后三个文件的“逻辑或”的关系。很多情况下我们会发现，明明已经修改了<code>~/.profile</code>文件为什么重新登陆后配置不生效呢？这是因为我们的系统可能存在了前面两个文件中的一个，导致不会继续读取剩下的文件。<br>下面的三张图很好的说明了这个问题：</p>
-<p><img src="/images/2017/03/28/1/1.png"><br><img src="/images/2017/03/28/1/2.png"><br><img src="/images/2017/03/28/1/3.png"></p>
-<h3 id="interactive-shell-登陆"><a href="#interactive-shell-登陆" class="headerlink" title="interactive shell 登陆"></a>interactive shell 登陆</h3><p>所谓的interactive shell登陆，其实就是相对于login shell登陆而言的。我们平时在登陆后右键打开终端、或者CTRL+ALT+T打开终端都是interactive shell登陆。<br>在这种登陆方式下，系统会依次读取<code>/etc/bash.bashrc</code>和<code>~/.bashrc</code>，并加以执行。<br>通常情况下，<code>~/.bashrc</code>文件里会默认记录一些常量和一些别名，尤其是<code>$PS1</code>变量，这个变量决定着bash提示符的格式、样式以及颜色等。</p>
-<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>需要注意的是，这两种登陆方式读取的是不同的配置文件，而且互相之间没有交集，因此当我们需要配置环境变量时，我们要根据自己的登陆方式将需要的变量配置到不同的文件里。<br>例如下面这个经典的问题。</p>
-<h2 id="典型问题"><a href="#典型问题" class="headerlink" title="典型问题"></a>典型问题</h2><p>环境配置文件配置异常的例子是，当我用ssh登录服务器的时候，发现提示符是这样的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash-4.3$</span><br></pre></td></tr></table></figure>
-<p>没错，就像上面第三张图片里的那个bash一样，提示符非常奇怪，而且当输入ls时文件和文件夹的颜色也没有区分。<br>这个问题显然是由于<code>$PS1</code>这个环境变量没有配置，导致他用了默认值，虽然查看<code>.bashrc</code>文件时发现有<code>$PS1</code>这个变量的定义。，但是由于ssh属于login shell，因此他在登陆时读入的配置文件是<code>/etc/profile</code>一类的文件，并没有读入<code>.bashrc</code>。<br>导致这个问题的原因通常是我们误删除了<code>/etc/profile</code>里默认的配置文件，因此解决的办法也很简单。。。把<code>.bashrc</code>里的部分文件复制到<code>/etc/profile</code>里就行了。</p>
-<p>这个问题给我们的启示是，当我们为服务器配置变量时，尽量配置到<code>/etc/profile</code>里或者<code>~/.bash_profile</code>里，因为用ssh登录服务器是基本上用不到<code>.bashrc</code>文件的；当我们给自己的电脑配置环境变量时，尽量配置到<code>.bashrc</code>里，因为这样我们只要打开终端就会读入这个文件，这样就可以不用注销就能应用配置了（只有注销重新登录才会应用<code>/etc/profile</code>一类的配置文件）。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/27/mongodb-ues/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1888,6 +1731,164 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/03/14/Angular2%E4%B8%8B%E4%BD%BF%E7%94%A8pdf%E6%8F%92%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/03/14/Angular2%E4%B8%8B%E4%BD%BF%E7%94%A8pdf%E6%8F%92%E4%BB%B6/" itemprop="url">Angular2下使用pdf插件</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-14T15:53:23+00:00">
+                2017-03-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近需要在Angualr2建的项目里做一个pdf显示的功能，在网上找了个插件，不过由于是第一次使用额外插件，在用的时候遇到了一些坑，这里权且记一下使用的步骤，方便以后的参考。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这里需要安装两个包：<code>pdfjs-dist</code>和<code>ng2-pdf-viewer</code>，安装时是要顺便保存到<code>package.json</code>里的，因此在项目根目录下输入下面命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install pdfjs-dist --save</span><br><span class="line">npm install ng2-pdf-viewer --save</span><br></pre></td></tr></table></figure>
+<p>于此同时，我们还要在<code>system.config.js</code>里添加映射，否则会加载不到这个插件。我们需要添加两个地方，首先是要添加在其中的<code>map</code>变量下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">var map = &#123;</span><br><span class="line">    ......</span><br><span class="line">    &#x27;ng2-pdf-viewer&#x27;: &#x27;node_modules/ng2-pdf-viewer&#x27;,</span><br><span class="line">    &#x27;pdfjs-dist&#x27;: &#x27;node_modules/pdfjs-dist&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后还要添加在<code>packages</code>变量下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var packages = &#123;</span><br><span class="line">    &#x27;ng2-pdf-viewer&#x27;: &#123; main: &#x27;dist/index.js&#x27;, defaultExtension: &#x27;js&#x27; &#125;,</span><br><span class="line">    &#x27;pdfjs-dist&#x27;: &#123; defaultExtension: &#x27;js&#x27; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们才能正确的引用这个包。</p>
+<h2 id="注册主配置文件"><a href="#注册主配置文件" class="headerlink" title="注册主配置文件"></a>注册主配置文件</h2><p>要使用他，我们还要在<code>app.module.ts</code>文件里注册这个包，才能在其他文件里使用，一个最简单的配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import &#123; NgModule &#125; from &#x27;@angular/core&#x27;;</span><br><span class="line">import &#123; BrowserModule &#125; from &#x27;@angular/platform-browser&#x27;;</span><br><span class="line">import &#123; AppComponent &#125; from &#x27;./app/app.component&#x27;;</span><br><span class="line">import &#123; PdfViewerComponent &#125; from &#x27;ng2-pdf-viewer&#x27;;</span><br><span class="line"></span><br><span class="line">@NgModule(&#123;</span><br><span class="line">  imports: [BrowserModule],</span><br><span class="line">  declarations: [AppComponent, PdfViewerComponent],</span><br><span class="line">  bootstrap: [AppComponent]</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">class AppModule &#123;&#125;</span><br><span class="line">platformBrowserDynamic().bootstrapModule(AppModule);</span><br></pre></td></tr></table></figure>
+<p>注意要<code>import</code>，然后在<code>@NgModule</code>里的<code>declarations</code>里注册即可。</p>
+<h2 id="页面配置"><a href="#页面配置" class="headerlink" title="页面配置"></a>页面配置</h2><p>在模板页面中，只要在适当的位置添加类似下面的标签：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;pdf-viewer [src]=&quot;pdfSrc&quot;</span><br><span class="line">            [page]=&quot;page&quot;</span><br><span class="line">            [original-size]=&quot;true&quot;</span><br><span class="line">            style=&quot;display: block;&quot;</span><br><span class="line">&gt;&lt;/pdf-viewer&gt;</span><br></pre></td></tr></table></figure>
+<p>然后在<code>.ts</code>文件里定义<code>pdfSrc</code>以及<code>page</code>变量，即可控制显示的文件路径以及页数。<br>这里需要注意的是文件源如果是跨域的话是会报一个error的，而且这里的page是竖排显示的而不是带滚轮的显示，因此这实际上显示的是一张一张的图片。</p>
+<p>当然，<code>pdf-viewer</code>还有很多其他的属性，比如支持缩放，旋转，以及提供了一系列相关的回调函数，具体的可以在<a target="_blank" rel="noopener" href="https://github.com/VadimDez/ng2-pdf-viewer">github</a>里找到。</p>
+<h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><p><img src="/images/2017/03/14/1/1.png"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/VadimDez/ng2-pdf-viewer">github&#x2F;VadimDez&#x2F;ng2-pdf-viewer</a><br><a target="_blank" rel="noopener" href="https://github.com/VadimDez/ng2-pdf-viewer/blob/master/SYSTEMJS.md">SYSTEMJS.md</a><br><a target="_blank" rel="noopener" href="http://codevik.com/2016/11/11/angular2-ng2-pdf-thumbnail-creation-viewer/">Angular 2 PDF Viewer and thumbnail creation</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -1938,7 +1939,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-count">564</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

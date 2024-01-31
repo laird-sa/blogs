@@ -307,171 +307,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/01/%E8%AE%B0%E5%9C%A8github%E4%B8%AD%E5%BC%80%E5%8F%91%E9%A1%B9%E7%9B%AE%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF-nodejs%E9%A1%B9%E7%9B%AE%E4%B8%BA%E4%BE%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/01/%E8%AE%B0%E5%9C%A8github%E4%B8%AD%E5%BC%80%E5%8F%91%E9%A1%B9%E7%9B%AE%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF-nodejs%E9%A1%B9%E7%9B%AE%E4%B8%BA%E4%BE%8B/" itemprop="url">记在github中开发项目的正确姿势-nodejs项目为例</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-01T14:40:56+00:00">
-                2017-07-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Nodejs/" itemprop="url" rel="index">
-                    <span itemprop="name">Nodejs</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>前几天随便写了一个<a target="_blank" rel="noopener" href="https://github.com/mythsman/hexo-douban">hexo小插件</a>，这几天刚好考完期末考试，趁着实习前没啥事，于是又拿来看看，想想有什么可以改进改进的。为了发散思路，我就把hexo.io的插件列表里的插件基本上从头到尾看了一遍。这个不看不知道，看完之后我发现其实里面的内容质量也是参差不齐的，好一点的呢，开发、测试、集成、样例、徽章都十分齐备，文档简明扼要，一看就是专业玩家；差一点的呢，基本都没有集成，没有测试，没有徽章，文档简陋或者啰嗦，有的issue满天也没人处理，有的build failure也不解决，更有的连repository都404了。。。看上去hexo的社区似乎在走下坡路了，毕竟博客这种东西，本来能坚持下来的人就不多，用户流失日益严重，而且hexo本身学习门槛也比较高，况且像这种项目还没有金主爸爸养，坚持维护也挺不容易的。<br>额。。。先不议论别人，还是先想办法提高提高自己项目的逼格吧。。。</p>
-<h1 id="修炼"><a href="#修炼" class="headerlink" title="修炼"></a>修炼</h1><p>有了目标就好办了，照着目标一点点前进就好了，下面就一个一个处理喽。</p>
-<h2 id="代码质量审查"><a href="#代码质量审查" class="headerlink" title="代码质量审查"></a>代码质量审查</h2><p>说实话，虽然我这学期刚刚学了软件测试的课，但是其实大学的课程还是跟实际脱节很严重，学完课程之后对很多概念也没有切身的体会，直到自己真正上手写代码的时候才发现软件测试其实是在团队项目中非常实用的。<br>在这里，最常见的js代码质量审查工具就是<strong>Eslint</strong>。<br>我们为什么要使用这个工具呢，这其实是为了更好的统一代码的编写规范。比如我们知道局部变量要用var来声明，字符串最好用单引号括，字典中最后一组后最好不要加逗号，不要写多余的分号等等很多约定俗成的最佳方案，但是如果我们不遵守这样的规定，显然也能照常解释执行，不过他的可维护性以及可读性肯定要比遵守这套最佳实践规范的代码低很多。<br>因此，为了整体提高代码质量，最好的方法就是用错误提示来强行要求我们采用最佳实践的规范，这就是Eslint这类工具的主要用途。<br>这让我想起了我在刚开始学C语言的时候，老师都建议我们，如果需要在if语句里面判断一个变量是否等于另一个数，最好采用<code>if(0==x)</code>而不是<code>if(x==0)</code>。说白了他的目的也是用错误提示来保证我们代码不容易出错，虽然我从来都不照他这么写。。。<br>当然，Eslint实际做的事情要复杂的多，他能够分析es5,es6之类的语法，在不运行代码的情况下分析出很多语法错误，可以说是非常方便了。<br>至于Eslint的具体用法我就不班门弄斧了，官网以及各种论坛都讲的很全，想用的时候随时学习就好了。</p>
-<h2 id="代码风格检查"><a href="#代码风格检查" class="headerlink" title="代码风格检查"></a>代码风格检查</h2><p>说起代码风格，虽然看上去好像影响并不大，但是总会有些奇葩会采用非常神奇的缩进风格以及各种奇怪的对齐方案，总让人看的不舒服。不过还好，现在有很多IDE都能够自动进行代码格式化，所以从很大程度上将，代码风格应该没有太大问题。不过为了保证风格统一，减少编码人员带来的不确定性，我们一般都会做代码风格检查。<br>在这里，最初常见的js代码风格检查工具就是<strong>Jscs</strong>。<br>这个Jscs大概做啥呢，举个例子，就是他会强行要求我们正确的缩进，代码块结束必须换行，且不能多次换行，函数声明()前要有空格，键值对前后要有空格，三目运算符的每一个符号前后必须要有空格等等。几乎牵涉到代码风格的问题他都能检查出来，而且这些风格也都可以进行配置，他也提供了很多大厂的优秀配置方案供我们选择。<br>基本上通过Jscs审查后的代码，至少从视觉上看都还是比较赏心悦目的。<br>不过仔细想想，其实Jscs的很多功能跟Eslint有重复，可以说从某种程度上讲，Jscs是Eslint的子集。最近打开Jscs的官网，发现果然Jscs即将要合并到Eslint里了。</p>
-<h2 id="代码测试"><a href="#代码测试" class="headerlink" title="代码测试"></a>代码测试</h2><p>这个代码测试就不用多说了吧，重要性不言而喻，无论是理论上还是实践上，都非常重要。<br>在这里，最常见的js测试工具就是<strong>Mocha</strong>了，基本上所有的Nodejs工具书里都会讲，这大概算得上是基本功吧。<br>虽然很多情况下，我们自己写的测试用例都比较弱，但是通过了测试的代码至少是能跑起来的，不会出现太大的问题。毕竟软件的测试用例跟各种OJ的测试用例不一样，后者基本没有迭代，而且代码量很短，因此我们对软件测试用例的要求也不用太高吧～</p>
-<h2 id="代码覆盖率检查"><a href="#代码覆盖率检查" class="headerlink" title="代码覆盖率检查"></a>代码覆盖率检查</h2><p>这个代码覆盖率检查大概就是帮助我们写出更好的测试用例的，基本上是跟Mocha一起使用。<br>通常最常见的js代码覆盖率检查工具就是<strong>istanbul</strong>。<br>只能说这个工具只能作为参考，覆盖率高也不一定就代表测试的质量高，覆盖率低也不一定就代表测试质量差，毕竟如果有异常捕获的情况下，让代码覆盖率上去也不是一件容易的事情。不过，作为一个完美主义者，代码覆盖率上不去总是让人有一种不舒服的感觉。。。</p>
-<h2 id="持续集成"><a href="#持续集成" class="headerlink" title="持续集成"></a>持续集成</h2><p>说实话，持续集成这个概念我以前没怎么注意过，毕竟这个东西在简单项目里用的没啥意思(总共就commit一两次完事了有啥好集成的呢)。不过当项目需要持续维护的时候，尤其是多人维护的时候，就会发现，这类工具真特么有用。<br>比如，当别人pull了一个request，作为维护者得判断他的代码至少得跟当前分支兼容，并且运行起来不能报错。如果每次都下载下来手动进行测试，那得多麻烦<del>况且每次执行的东西都一样</del>我们完全可以写脚本来弄嘛<del>啊</del>写脚本也好麻烦啊~github你能不能自动帮我把每一个pull过来的request都自动跑一下测试啊啊啊。。。<br>我所理解的持续集成大概就是这个意思，Github也融合了持续集成的服务，这就是<strong>Travis CI</strong>。<br>只要将Github账号绑定Travis CI，并且勾选需要持续集成的repo，在项目中配置好配置文件，那么只要项目有了新的commit，Travis CI就会在他的虚拟机里执行测试代码，返回成功或者失败，告诉我们这一次的commit是否靠谱。</p>
-<h2 id="插入徽章-badge"><a href="#插入徽章-badge" class="headerlink" title="插入徽章(badge)"></a>插入徽章(badge)</h2><p>所谓的badge实际上就是一张与项目实时同步的图片，能够简明扼要的反映项目的各种参数特征。基本用法就是在README.md里插入类似这样的代码<code>[![图片的alt](图片的url)](发布badge的url)</code><br>badge这种东西用好了能嗖的提升项目的逼格，用得不好就是搬起石头砸自己的脚。毕竟这个逼也不是那么好装的。下面就稍微列举下我觉得有点意义的badge。</p>
-<h3 id="build-status"><a href="#build-status" class="headerlink" title="build status"></a>build status</h3><p><a target="_blank" rel="noopener" href="https://travis-ci.org/mythsman/hexo-douban"><img src="https://travis-ci.org/mythsman/hexo-douban.svg?branch=master" alt="Build Status"></a><br>这个徽章可以从Travis CI这类的持续集成框架里搞到，每当有新的commit，他都会将值更新为最近一次的测试结果，成功则显示绿色的succcess，失败就显示红色的failure，非常醒目。</p>
-<h3 id="coverage"><a href="#coverage" class="headerlink" title="coverage"></a>coverage</h3><p><a target="_blank" rel="noopener" href="https://coveralls.io/github/mythsman/hexo-douban?branch=master"><img src="https://coveralls.io/repos/github/mythsman/hexo-douban/badge.svg?branch=master" alt="Coverage Status"></a><br>这个徽章可以从<a target="_blank" rel="noopener" href="https://coveralls.io/">coveralls.io</a>这类测试框架里搞到，他会显示最近一次测试中返回的代码覆盖率，并以百分比的形式显示在徽章上，覆盖率越高，颜色越绿。。。</p>
-<h3 id="npm-package"><a href="#npm-package" class="headerlink" title="npm package"></a>npm package</h3><p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/hexo-douban"><img src="https://badge.fury.io/js/hexo-douban.svg" alt="NPM version"></a><br>这个徽章可以从<a target="_blank" rel="noopener" href="https://badge.fury.io/">badge.fury.io</a>中获得，如果你的项目已经发布到了npmjs里，那么他就可以实时获得你的项目的最新版本号。</p>
-<h3 id="shields-io"><a href="#shields-io" class="headerlink" title="shields.io"></a>shields.io</h3><p><a target="_blank" rel="noopener" href="https://nodejs.org/en/"><img src="https://img.shields.io/npm/v/npm.svg" alt="npm"></a><br><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/hexo-douban"><img src="https://img.shields.io/npm/dt/hexo-douban.svg" alt="npm"></a><br><a target="_blank" rel="noopener" href="https://shields.io/">shields.io</a>这个网站里有非常多的徽章，可以通过这个网站找到很多你想要的徽章。我比较喜欢用npm版本徽章来显示目前项目支持的npm版本，用npm downloads之类的徽章来显示自己的包每天、每月、每年、总共的下载量等等。</p>
-<h3 id="Package-quality"><a href="#Package-quality" class="headerlink" title="Package quality"></a>Package quality</h3><p><a target="_blank" rel="noopener" href="http://packagequality.com/#?package=hexo-douban"><img src="http://packagequality.com/shield/hexo-douban.svg" alt="Package quality"></a><br>这个徽章可以在<a target="_blank" rel="noopener" href="http://packagequality.com/">packagequality.com</a>里获得，用来简单的评价开发者对已发布在npmjs里的项目的支持程度。他的评价标准不是代码质量，而是项目的issue处理，版本迭代次数以及下载次数等情况。具体的算法也发布在他的github主页里，可供参考。</p>
-<h2 id="文档质量"><a href="#文档质量" class="headerlink" title="文档质量"></a>文档质量</h2><p>这个就不细说了吧，其实我也不太会写，但是我总觉的一个好的文档至少得有下面几个部分:</p>
-<ol>
-<li>项目简介</li>
-<li>安装说明</li>
-<li>参数说明</li>
-<li>可以有使用截图</li>
-<li>可以有demo网站</li>
-<li>开源证书</li>
-</ol>
-<p>唔。。。我总觉的我写的<a target="_blank" rel="noopener" href="https://github.com/mythsman/hexo-douban/blob/master/README.md">README</a>应该还能说的过去把。。</p>
-<h2 id="Github设置"><a href="#Github设置" class="headerlink" title="Github设置"></a>Github设置</h2><p>一般情况下，我们还是认真写下显示在Github上面的项目简介，以及topic选择，这样有助于别人找到自己的项目。<br>如果有经历的话，还是把release版本，tag版本，wiki搞搞全。。。(不过我总觉得一般小众一点的项目还是没必要搞这些幺蛾子了)</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/06/25/the-silence-city/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1967,6 +1802,183 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/06/05/%E5%85%B3%E4%BA%8EAscii-art%E7%9A%84%E4%B8%80%E4%BA%9B%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/06/05/%E5%85%B3%E4%BA%8EAscii-art%E7%9A%84%E4%B8%80%E4%BA%9B%E6%80%BB%E7%BB%93/" itemprop="url">关于Ascii-art的一些总结</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-06-05T13:36:53+00:00">
+                2017-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>好久没写博客了，倒不是因为最近没在学习，而是觉得最近学得有点太多，一时无从下笔。知识这种东西真是奇怪，真的是懂得越多才知道自己懂得越少。虽然这个真相经常会给我一种无力感，但是我还是会沉浸在了解一件事情的来龙去脉的过程中。唔，看来学习也是会容易让人上瘾的。。。</p>
+<p>不过最近在学习的过程中，我渐渐也明白了一点，那就是碎片化的学习效率那是惊人的低。我曾经十分推崇学习一个技术的时候，先上手，然后遇到一个问题就解决一个问题。但是后来慢慢发现，这样经常会导致我们花很多的时间去解决那些在这个领域里非常基本的问题。所谓语速则不达，还是稳扎稳打拿本书在手里啃啃靠谱点。</p>
+<p>不过今天我不打算写那些工具类的笔记，我倒是想记一记一个有趣的问题，那就是如何用Ascii字符来绘制一幅画。</p>
+<h2 id="Ascii-Art是啥"><a href="#Ascii-Art是啥" class="headerlink" title="Ascii-Art是啥"></a>Ascii-Art是啥</h2><p>Ascii-art是啥，话不多说，举几个例子:</p>
+<h3 id="类别一"><a href="#类别一" class="headerlink" title="类别一"></a>类别一</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  / __/__  ___ _____/ /__</span><br><span class="line"> _\ \/ _ \/ _ `/ __/  &#x27;_/</span><br><span class="line">/___/ .__/\_,_/_/ /_/\_\   version 1.6.2</span><br><span class="line">   /_/</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  .   ____          _            __ _ _</span><br><span class="line"> /\\ / ___&#x27;_ __ _ _(_)_ __  __ _ \ \ \ \</span><br><span class="line">( ( )\___ | &#x27;_ | &#x27;_| | &#x27;_ \/ _` | \ \ \ \</span><br><span class="line"> \\/  ___)| |_)| | | | | || (_| |  ) ) ) )</span><br><span class="line">  &#x27;  |____| .__|_| |_|_| |_\__, | / / / /</span><br><span class="line"> =========|_|==============|___/=/_/_/_/</span><br><span class="line"> :: Spring Boot ::        (v1.5.3.RELEASE)</span><br></pre></td></tr></table></figure>
+<p>这个是我最近遇到的两个图标，他们都是用ascii字符来表示另一个Ascii串。当我第一次见到的时候我还对这个图标的设计赞叹不已，感觉设计者还是花了一点小心思的，毕竟相比于普通的图片banner，这个纯ascii码的更加方便文本的显示，尤其是对于程序员。我们可以把他放在代码的注释里、网页的console里，命令行的提示里等等，并且总有一种十分装x的感觉。</p>
+<h3 id="类别二"><a href="#类别二" class="headerlink" title="类别二"></a>类别二</h3><p>再看看下面的例子:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">                             /T /I</span><br><span class="line">                              / |/ | .-~/</span><br><span class="line">                          T\ Y  I  |/  /  _</span><br><span class="line">         /T               | \I  |  I  Y.-~/</span><br><span class="line">        I l   /I       T\ |  |  l  |  T  /</span><br><span class="line">     T\ |  \ Y l  /T   | \I  l   \ `  l Y</span><br><span class="line"> __  | \l   \l  \I l __l  l   \   `  _. |</span><br><span class="line"> \ ~-l  `\   `\  \  \\ ~\  \   `. .-~   |</span><br><span class="line">  \   ~-. &quot;-.  `  \  ^._ ^. &quot;-.  /  \   |</span><br><span class="line">.--~-._  ~-  `  _  ~-_.-&quot;-.&quot; ._ /._ .&quot; ./</span><br><span class="line"> &gt;--.  ~-.   ._  ~&gt;-&quot;    &quot;\\   7   7   ]</span><br><span class="line">^.___~&quot;--._    ~-&#123;  .-~ .  `\ Y . /    |</span><br><span class="line"> &lt;__ ~&quot;-.  ~       /_/   \   \I  Y   : |</span><br><span class="line">   ^-.__           ~(_/   \   &gt;._:   | l______</span><br><span class="line">       ^--.,___.-~&quot;  /_/   !  `-.~&quot;--l_ /     ~&quot;-.</span><br><span class="line">              (_/ .  ~(   /&#x27;     &quot;~&quot;--,Y   -=b-. _)</span><br><span class="line">               (_/ .  \  :           / l      c&quot;~o \</span><br><span class="line">                \ /    `.    .     .^   \_.-~&quot;~--.  )</span><br><span class="line">                 (_/ .   `  /     /       !       )/</span><br><span class="line">                  / / _.   &#x27;.   .&#x27;:      /        &#x27;</span><br><span class="line">                  ~(_/ .   /    _  `  .-&lt;_</span><br><span class="line">                    /_/ . &#x27; .-~&quot; `.  / \  \          ,z=.</span><br><span class="line">                    ~( /   &#x27;  :   | K   &quot;-.~-.______//</span><br><span class="line">                      &quot;-,.    l   I/ \_    __&#123;---&gt;._(==.</span><br><span class="line">                       //(     \  &lt;    ~&quot;~&quot;     //</span><br><span class="line">                      /&#x27; /\     \  \     ,v=.  ((</span><br><span class="line">                    .^. / /\     &quot;  &#125;__ //===-  `</span><br><span class="line">                   / / &#x27; &#x27;  &quot;-.,__ &#123;---(==-       -Row</span><br><span class="line">                 .^ &#x27;       :  T  ~&quot;   ll       </span><br><span class="line">                / .  .  . : | :!        \\</span><br><span class="line">               (_/  /   | | j-&quot;          ~^</span><br><span class="line">                 ~-&lt;_(_.^-~&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">              _..-&#x27;(                       )`-.._</span><br><span class="line">           ./&#x27;. &#x27;||\\.       (\_/)       .//||` .`\.</span><br><span class="line">        ./&#x27;.|&#x27;.&#x27;||||\\|..    )O O(    ..|//||||`.`|.`\.</span><br><span class="line">     ./&#x27;..|&#x27;.|| |||||\`````` &#x27;`&quot;&#x27;` &#x27;&#x27;&#x27;&#x27;&#x27;&#x27;/||||| ||.`|..`\.</span><br><span class="line">   ./&#x27;.||&#x27;.|||| ||||||||||||.     .|||||||||||| |||||.`||.`\.</span><br><span class="line">  /&#x27;|||&#x27;.|||||| ||||||||||||&#123;     &#125;|||||||||||| ||||||.`|||`\</span><br><span class="line"> &#x27;.|||&#x27;.||||||| ||||||||||||&#123;     &#125;|||||||||||| |||||||.`|||.`</span><br><span class="line">&#x27;.||| ||||||||| |/&#x27;   ``\||``     &#x27;&#x27;||/&#x27;&#x27;   `\| ||||||||| |||.`</span><br><span class="line">|/&#x27; \./&#x27;     `\./         \!|\   /|!/         \./&#x27;     `\./ `\|</span><br><span class="line">V    V         V          &#125;&#x27; `\ /&#x27; `&#123;          V         V    V</span><br><span class="line">`    `         `               V               &#x27;         &#x27;    &#x27;</span><br></pre></td></tr></table></figure>
+<p>唔，这两张图片就更有意思了，一个好像是只鹰，另一个好像是只蝙蝠，栩栩如生，重点是他的设计是如此的精巧，图片的轮廓与字符衔接的十分完美，真的可以说每一幅图都给人一种眼前一亮的感觉。甚至可以说，这就是art。</p>
+<h3 id="类别三"><a href="#类别三" class="headerlink" title="类别三"></a>类别三</h3><p>还有一类:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">ZZZZZZZZZZZZuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</span><br><span class="line">ZZZZZZZZZZZZZZZuuuZuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</span><br><span class="line">ZZZZZZZZZZZuuZuuZuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</span><br><span class="line">ZZZZZZZZuuZuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</span><br><span class="line">ZZZZZZZZuZuZuuuuuZyfppkqqbppyZuuuuuuuuuuuuuuuuuuuu</span><br><span class="line">ZZZZZZZZuuZuypg@NNMMMMMMMMMMM#@qyuuuuuuuuuuuuuuuuu</span><br><span class="line">ZZZZZZZuZZf@#NNMMMMMMMMMMMMMMMMMM#qZuuuuuuuuuuuuuu</span><br><span class="line">ZZZZuZZZpg#NMNMNNNNNNN#####NNMMMMMN#qZuuuuuuuuuuuu</span><br><span class="line">ZZuuuuZqH#NNNNNN#H@@@ggqkbqg@@H##NNNNHpuuuzuuuuuuu</span><br><span class="line">ZZuuZZg#NNNNN#HgqpfVyyZZuuuuuuuVbg@H#HHfuzuuuuzuuu</span><br><span class="line">ZZZuZyHNNNNNHmbffVyZuuuzzrrtl===trf@@HH@Zuuuuuuuuu</span><br><span class="line">ZZZZuy#NNNNHgpffVyZZuuzzrttl=????&gt;tq@@HHpuuzuuuuuu</span><br><span class="line">ZZZZZy#NNNNHqfVyyZZuuzzvttll===?&gt;;?p@HHHpuuzuuuuuu</span><br><span class="line">ZZZZZf#NNN#@bfpbbfVZzzzrt=lrrvuzr=&gt;rqHHHpzuuuuuuuu</span><br><span class="line">ZZuuuVHNNNHbfpkpbppffyyul=rZyyzl==??r@@Hbzuuzzuuzu</span><br><span class="line">ZZuuZZ@#NN@bkVVpqqqfZZypuvZubqytt&gt;;rrg@mZzzzzzuzuu</span><br><span class="line">ZZZuZZyq@#myyVfpVVyyyfqpr=Zrvuvt??&gt;=?bu&gt;ttzzzuuzuu</span><br><span class="line">ZZZZZZfVp@qZyyyyZVVyyffZr?&gt;?lrrtl?;:;zz:ltuzzuuzuu</span><br><span class="line">ZZZZZZZVgbfyZZZZuuuZfZpyv?=?&gt;==?&gt;::~;;ul&gt;uzzuuuuuu</span><br><span class="line">ZZZZZZZZfyyyZZZuuuuZyfpfuttl?==?;:~:::;&gt;rzzzuzuuuu</span><br><span class="line">ZZZZZZZZZZyyZZZZZuZyyyyZuvll=&gt;?&gt;::~:&gt;;lzzuzuuuuuuu</span><br><span class="line">ZZZZZZZZZuZZyZZZZZyVpbpfyuuurtl&gt;::~:zuuuuuzuuuuuuu</span><br><span class="line">ZZZZZZZZZZZZZZZZZZZZZZZZzr=&gt;?l?;:::luzuuuuuuzuuuuu</span><br><span class="line">ZZZZZZZZZZZZZZyZZZZyZZZuvl?&gt;;;;:::luuuuuuzuuuuuuuu</span><br><span class="line">yZZZZZZZZZZZZZyyyyyZyyyuvt?;;;::;=uuuuuuuuuuuuuuuu</span><br><span class="line">yZZZZZZZZZZZZZyyVfVyyyZuzrl=&gt;&gt;&gt;;:tuuuuuuuuuzuuuuuu</span><br><span class="line">yZZZZZZZZZZZZZyyyVfffVyZzrt??&gt;;::lrvuuuuuuuuuuuuuu</span><br><span class="line">yyyZZZZZZZZrufyyyyVVyyZur=&gt;;;;;::rZ&gt;&gt;uuuuuuuuuuuuu</span><br><span class="line">yyyyyZZZZZ=tqkyyyyyyyyZv=&gt;&gt;;&gt;;;::tqz.:uuuuuuuuuuuu</span><br><span class="line">yyyZZZZZZt;&gt;VqyyyZZyZZuvl??&gt;&gt;;;;&gt;vb?` &gt;uuuuuuuuuuu</span><br><span class="line">yyyZyZyZr&gt;;;;tVyZZZZZuzrl=?????lzr~`   ~?ruuuuuuuu</span><br><span class="line">yyyuvtl?;;;&gt;;;:lZyZuuzzrttlllrzt:`    ```.~:?tuuuu</span><br><span class="line">t=&gt;&gt;&gt;&gt;&gt;&gt;;;;;;;::~luuvrrrrvrrv=~.`  `````.......~;?</span><br><span class="line">&gt;;&gt;&gt;&gt;&gt;&gt;&gt;::;;;;;::~~&gt;=trrzvl;..``````.````......~~~</span><br><span class="line">&gt;&gt;&gt;&gt;&gt;&gt;??;::::;;::~~:;~~::~~.`````.....``......~~~~</span><br><span class="line">;;;;&gt;&gt;&gt;??::::::;&gt;?==;...~~:;;:~........``.....~~~~</span><br><span class="line">;;;&gt;&gt;&gt;&gt;&gt;?&gt;&gt;&gt;???&gt;;;&gt;?:`....~~:::;;:~...~~``.....~~~</span><br></pre></td></tr></table></figure>
+<p>虽然看不太清楚但是意思到了（如果想清楚一点可以加大图片的大小）。。。其实这是我本人的一个证件照。。。跟上面棱角分明的简图不同，这个类似用字符代替像素点来对图片进行构造，看上去简陋了许多。</p>
+<h2 id="历史来源"><a href="#历史来源" class="headerlink" title="历史来源"></a>历史来源</h2><p>其实这种类似的图片并不新鲜，或者说这其实是旧时代的产物。在计算机刚刚普及的时候，由于图像处理能力以及网络比较差劲，一般只能显示文本。为了传递更多有趣的信息，人们想到了用ascii码来拼一个图片。在很多早期的电子邮件，BBS里经常会看到这样的东西。不过其实最早的asciiart可以追溯到1966年左右。。。具体的历史可以参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ASCII_art">wiki</a>。<a target="_blank" rel="noopener" href="http://webpages.charter.net/lgbeard/Ascii-Art-Faq.html">charter.net</a>里也有一些关于ascii-art的FAQ。</p>
+<p>到了当今时代，网络和显示器显然都不成问题了，但是仍然有很多人对这类精巧的图片感兴趣，他们致力于设计和使用这类文字。而事实上，我们的输入法中也有大量类似的颜文字，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@_@ 疑惑、晕头转向</span><br><span class="line">o_O 讶异</span><br><span class="line">^_^ 高兴</span><br><span class="line">XD (横向看) 现在多用于高兴地笑、张开嘴大笑</span><br><span class="line">T_T 哭得很伤心</span><br><span class="line">-_-b 流汗</span><br><span class="line">=_=&quot; 无奈</span><br><span class="line">=3= 亲吻、嘟嘴</span><br><span class="line">^o^/ 抱抱</span><br><span class="line">(^O^)/ 开心</span><br><span class="line">._/.# 生气</span><br><span class="line">(=^_^=) 喵猫</span><br><span class="line">(￣(工)￣) 大狗熊</span><br></pre></td></tr></table></figure>
+<p>其实我们现在所说的“颜文字”，一般就是指日式颜文字或日本颜文字（emoticon–emotion icon的简称），或者”Japanese ascii art”。</p>
+<h2 id="如何制作"><a href="#如何制作" class="headerlink" title="如何制作"></a>如何制作</h2><p>当然，我并不是很在意这些东西的历史，我更加关心这些东西从哪里能搞得到以及是怎么搞出来的。</p>
+<h3 id="FIGlet字体"><a href="#FIGlet字体" class="headerlink" title="FIGlet字体"></a>FIGlet字体</h3><p>首先我们研究一下第一类图片是怎么搞的。<br>我找到了这样的一个网站<a target="_blank" rel="noopener" href="http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something">patorjk.com</a>。<br>他提供了我们不同字体不同宽度高度的Text转Ascii的接口，一般情况下我们可以直接利用这个接口得到自己想要的图案。</p>
+<p>很显然，他的原理十分简单，就是将Ascii码做成一种特定格式的字体，然后将这个字体应用到你写的Ascii码上即可。<br>需要注意的是这个字体与我们常见的.ttf之类的字体是不一样的。在<a target="_blank" rel="noopener" href="http://www.jave.de/figlet/fonts.html">FIglet Fonts</a>里提供了至少263中字体包。下载下来的文件中以.flf为后缀的就是字体文件。</p>
+<p>这个.flf的字体文件需要用专门的软件打开。在Linux下就直接有一个叫figlet的软件包，apt-get就能下载下来。<br>基本用法如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ figlet -d ~/Downloads/fonts/ -f o8.flf</span><br><span class="line">myths</span><br><span class="line">                          o8   oooo                    </span><br><span class="line">oo ooo oooo oooo   oooo o888oo  888ooooo    oooooooo8  </span><br><span class="line"> 888 888 888 888   888   888    888   888  888ooooooo  </span><br><span class="line"> 888 888 888  888 888    888    888   888          888 </span><br><span class="line">o888o888o888o   8888      888o o888o o888o 88oooooo88  </span><br><span class="line">             o8o888     </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ figlet -d ~/Downloads/fonts/ -f 3d_diagonal.flf</span><br><span class="line">myths</span><br><span class="line">                                                           </span><br><span class="line">                                                           </span><br><span class="line">          ____              ___      ,---,                 </span><br><span class="line">        ,&#x27;  , `.          ,--.&#x27;|_  ,--.&#x27; |                 </span><br><span class="line">     ,-+-,.&#x27; _ |          |  | :,&#x27; |  |  :                 </span><br><span class="line">  ,-+-. ;   , ||          :  : &#x27; : :  :  :      .--.--.    </span><br><span class="line"> ,--.&#x27;|&#x27;   |  ||    .--,.;__,&#x27;  /  :  |  |,--. /  /    &#x27;   </span><br><span class="line">|   |  ,&#x27;, |  |,  /_ ./||  |   |   |  :  &#x27;   ||  :  /`./   </span><br><span class="line">|   | /  | |--&#x27;, &#x27; , &#x27; ::__,&#x27;| :   |  |   /&#x27; :|  :  ;_     </span><br><span class="line">|   : |  | ,  /___/ \: |  &#x27;  : |__ &#x27;  :  | | | \  \    `.  </span><br><span class="line">|   : |  |/    .  \  &#x27; |  |  | &#x27;.&#x27;||  |  &#x27; | :  `----.   \ </span><br><span class="line">|   | |`-&#x27;      \  ;   :  ;  :    ;|  :  :_:,&#x27; /  /`--&#x27;  / </span><br><span class="line">|   ;/           \  \  ;  |  ,   / |  | ,&#x27;    &#x27;--&#x27;.     /  </span><br><span class="line">&#x27;---&#x27;             :  \  \  ---`-&#x27;  `--&#x27;&#x27;        `--&#x27;---&#x27;   </span><br><span class="line">                   \  &#x27; ;                                  </span><br><span class="line">                    `--`                                   </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>用-d指定字体文件夹，-f 指定字体文件，然后就进入了交互式的环境，输入字符后输入回车就能产生生成的图案，十分方便。</p>
+<h3 id="JavE绘图"><a href="#JavE绘图" class="headerlink" title="JavE绘图"></a>JavE绘图</h3><p>对于第二类的图形，我找到了很多汇总的网站，比如<a target="_blank" rel="noopener" href="http://www.ascii-art.de/">ascii-art.de</a>、<a target="_blank" rel="noopener" href="http://www.chris.com/ascii/">chris.com</a>。这里都记载了很多有趣的图形，就不一一列举了。其实很多ascii-art的网站都属于一个叫<code>ASCII Arts Web Ring</code>的圈子(<a target="_blank" rel="noopener" href="http://artcode.org/ascii/">artcode</a>)，通过这个主站我们可以很轻松的找到很多手机图案的网站。</p>
+<p>那么这些图案又是怎么做的呢？</p>
+<p>显然上面的方法只能搞定纯Ascii的文本，甚至不能支持中文(谁叫中文那么多。。。)，所以显然也不能支持。这就需要用到我们的<a target="_blank" rel="noopener" href="http://www.jave.de/">JavE5</a>了。<br>由于看上去这个网站好多年没更新了，生怕他哪天宕掉，我就把这个项目fork到了我的<a target="_blank" rel="noopener" href="https://github.com/mythsman/Jave5">github</a>上，并且加上了最新的Figlet字体。。。侵删。。。</p>
+<p>项目中有一个jave5.jar的文件，运行这个文件我们就可以打开这个软件(<code>java -jar jave5.jar</code>):<br><img src="/images/2017/06/05/1/1.png"></p>
+<p>我们可以很方便的使用这个软件来进行创作。值得一提的是，除了支持一般的绘画，他也支持上面的 FIGlet字体，甚至支持latex公式。。。</p>
+<h3 id="image2ascii"><a href="#image2ascii" class="headerlink" title="image2ascii"></a>image2ascii</h3><p>相比于上面的，我个人觉得这个就比较简单了。毕竟稍微懂点计算机图形学的同学就知道怎么从图片中提取像素信息。一个简单的思路是，我们可以把图片进行二值化，然后对应白色的地方我们补0，对应黑色的地方我们补8，这样我们就可以生成一个0-8的ascii图片（这里可能还需要考虑字符的宽高比）。如果想要缩放，我们就需要先对原图进行缩放再进行替换即可。</p>
+<p>不过这个方法还是有点丑，毕竟我们是把图片当成二值图来进行处理的。其实我们完全可以把图片变成灰度图，然后根据不同像素点的灰度选择不同”灰度”的字符，这样生成的图片更为好看。</p>
+<p>在jave5中，也非常完美的实现了这个功能，我们可以直接在命令行使用这个命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~/Downloads/jave5$ java -jar jave5.jar i2a ~/Pictures/me.gif width=20</span><br><span class="line">ZZZZZuuZuuuuuuuuuuuu</span><br><span class="line">ZZZuZuuuZZZuuuuuuuuu</span><br><span class="line">ZZZZQNMMMMMMNmXuuuuu</span><br><span class="line">ZuQMNNMMMMHMMMMRuuuu</span><br><span class="line">ZZWNMHVZuwtz=vHHkuuu</span><br><span class="line">ZuMNMWkkwOzuy+WHkuzu</span><br><span class="line">ZZdMHfHHXKXW01wBwzuu</span><br><span class="line">ZZXWWZZXWkj+z&lt;(Izzuu</span><br><span class="line">ZZZZWZZXkkAz&lt;:(zuuuu</span><br><span class="line">ZZZZZZZyZkI&lt;&lt;(zuuuzz</span><br><span class="line">yyZZZZVWWXO+&lt;juuuzuu</span><br><span class="line">yyyZOHyyyZ&lt;;;d&gt;Ouuuu</span><br><span class="line">yZU3;?WZuOz1z=  ?Ouu</span><br><span class="line">&gt;&gt;&gt;&lt;;;_?zvC^`  `..._</span><br><span class="line">;;&gt;&lt;((&lt;1!__&lt;--.- ._~</span><br></pre></td></tr></table></figure>
+<p>这是我上面的证件照的缩小版，我们可以通过指定width来修改大小。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ASCII_art">Wiki Ascii_art</a><br><a target="_blank" rel="noopener" href="http://webpages.charter.net/lgbeard/Ascii-Art-Faq.html">Ascii-Art-Faq</a><br><a target="_blank" rel="noopener" href="http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20">Text to ASCII Art Generator</a><br><a target="_blank" rel="noopener" href="http://artcode.org/ascii/">artcode.org</a><br><a target="_blank" rel="noopener" href="http://www.jave.de/">Jave</a><br><a target="_blank" rel="noopener" href="http://www.chris.com/ascii/">chris ascii</a><br><a target="_blank" rel="noopener" href="http://textart.io/">textart</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -2017,7 +2029,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-count">564</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

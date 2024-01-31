@@ -307,166 +307,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/" itemprop="url">机器学习中的交叉验证思想</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-02T15:34:28+00:00">
-                2016-02-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>在使用训练集对参数进行训练的时候，经常会发现人们通常会将一整个训练集分为三个部分（比如<a href="/2016/01/25/1/">mnist手写训练集</a>）。一般分为：<strong>训练集（train_set）</strong>，<strong>评估集（valid_set）</strong>，<strong>测试集（test_set）</strong>这三个部分。这其实是为了保证训练效果而特意设置的。其中<strong>测试集</strong>很好理解，其实就是完全不参与训练的数据，仅仅用来观测测试效果的数据。而<strong>训练集</strong>和<strong>评估集</strong>则牵涉到下面的知识了。</p>
-<p>因为在实际的训练中，训练的结果对于训练集的拟合程度通常还是挺好的（初试条件敏感），但是对于训练集之外的数据的拟合程度通常就不那么令人满意了。因此我们通常并不会把所有的数据集都拿来训练，而是分出一部分来（这一部分不参加训练）对训练集生成的参数进行测试，相对客观的判断这些参数对训练集之外的数据的符合程度。这种思想就称为<strong>交叉验证（Cross Validation）。</strong></p>
-<p>通常我们使用的交叉验证方法有下面几种：</p>
-<h2 id="简单交叉验证（simple-cross-validation）"><a href="#简单交叉验证（simple-cross-validation）" class="headerlink" title="简单交叉验证（simple cross validation）"></a>简单交叉验证（simple cross validation）</h2><p>简单交叉验证当然很简单了，就是把整个训练集随机分为两部分（通常是70%的训练集，30%的评估集）。</p>
-<p>1、首先我们用训练集建立模型，这时候我们需要尝试多种的参数来得到一些不同的模型；</p>
-<p>2、对于每一个模型，调用评估集来进行测试，计算出训练误差（通常是以类似损失函数的形式）；</p>
-<p>3、取训练误差最小的那个模型作为最后的结果；</p>
-<p>这个方法当然会存在一些训练数据的浪费，毕竟有大量的数据没有参与真正的训练而是仅仅作为评估。所以这个方法只能在数据非常易得的情况下使用，如果数据比较珍贵，显然这种方法就不适用了。</p>
-<p>有时候这个方法好像也被称为<strong>HoldOut验证</strong>（Hold-Out Method）。其实这也不算是交叉验证了，因为他的训练集并没有交叉。</p>
-<p>通常情况下我们是直接选取前70%为训练集，但是如果训练数据是按照一定规律排放的，那么选取数据的时候就要先打乱顺序，或者按照一定的随机方法选取数据。否则训练集就不一定具有一般性了。</p>
-<h2 id="K-折交叉验证（S-fold-Cross-Validation）"><a href="#K-折交叉验证（S-fold-Cross-Validation）" class="headerlink" title="K-折交叉验证（S-fold Cross Validation）"></a>K-折交叉验证（S-fold Cross Validation）</h2><p>这个据说是最常用的验证方法了，步骤如下：</p>
-<p>1、将数据集均分为K份</p>
-<p>2、从K份中取一份作为评估集，另外K-1份作为训练集，生成K个模型以及这K个模型对于评估集的训练误差；</p>
-<p>3、取训练误差最小的那个模型作为最后的结果；</p>
-<p>经大量实验验证，据说我们取<strong>K&#x3D;10</strong>的时候效果最好。</p>
-<p>这个方法一方面保证了数据充分被使用训练了，避免了数据的浪费；另一方面也互相进行了验证，达到了交叉验证的效果，不过计算代价还是有点高。</p>
-<h2 id="留p交叉验证（Leave-p-out-Cross-Validation"><a href="#留p交叉验证（Leave-p-out-Cross-Validation" class="headerlink" title="留p交叉验证（Leave-p-out Cross Validation)"></a>留p交叉验证（Leave-p-out Cross Validation)</h2><p>从名字大概就可以看出来了，所谓留p，就是每一次训练都会留下p个数据作为评估集，剩下的n-p个数据作为训练集，分别进行建模测试，取出效果最好的模型。这里我们会发现这p个数据可以有$C_n^p$组可能，所以计算的复杂度还是挺高的。</p>
-<p>当然，有时候我们会取p&#x3D;1，这导致了每一个数据都会独立作为测试集。这种方法又被叫做**留一交叉验证（Leave-One-Out Cross Validation)**，当数据极为匮乏的时候才会使用。</p>
-<p>事实上，交叉验证的方法不仅能够提高数据的利用率，更重要的是他也能够在一定程度上解决过拟合（Overfitting）问题，因为过拟合只能很好的拟合训练集中的数据而并不能拟合评估集中的数据。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/28/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2023,6 +1863,157 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/22/%E5%88%A9%E7%94%A8Sphinx%E5%B7%A5%E5%85%B7%E4%B8%BApython%E9%A1%B9%E7%9B%AE%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/22/%E5%88%A9%E7%94%A8Sphinx%E5%B7%A5%E5%85%B7%E4%B8%BApython%E9%A1%B9%E7%9B%AE%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/" itemprop="url">利用Sphinx工具为python项目生成文档</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-22T13:51:48+00:00">
+                2016-01-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Sphinx(没错，就叫斯芬克斯。。。)其实是一个基于SQL全文检索引擎，大概是个为数据库检索提供一些更加强大的检索功能。这个东西也给很多种的语言比如PHP,Python,Perl,Ruby留有API接口，可以供他们调用实现检索功能。</p>
+<p>当然，暂时我还没打算研究这个东西。今天我只是想利用他给Python的接口来为python程序生成基于网页形式的项目文档。（好像国外挺流行这个的，今天就是为了给deep learning的源码生成下文档才晓得有这个东西的）。</p>
+<p>目测这潭水还是很深的，今天姑且就事论事，把实现的步骤简要记录下来方便日后使用。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>由于是为了在python下使用了，当然使用python的下载工具pip来安装了，pip的使用方法见<a href="/2015/11/23/1/">《pip工具简单用法》</a>。</p>
+<p>安装命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$pip install sphinx</span><br></pre></td></tr></table></figure>
+<p>so easy就装好了，接下来就是用他来生成文档了。</p>
+<h2 id="生成"><a href="#生成" class="headerlink" title="生成"></a>生成</h2><p>对于那些本身就为Sphinx设计过的工程来说，可以直接找到他的doc&#x2F;目录，如果发现了conf.py文件的话，说明他已经预先做了配置。这时候我们只需要直接生成apidoc就行了：<br><code>$ sphinx-apidoc -o .doc/ .</code><br>然后在他的输出目录下就会出现一个Makefile，然后我们只要<code>$make html</code>，就会发现一个html文件夹，没错，我们的文档就在这里啦。</p>
+<p>而对于那些没有配置过Sphinx的工程来说，我们首先得在他的.py文件的目录下进行预先生成：<br><code>$sphinx-quickstart</code><br>然后根据提示输入文件名，作者名，版本号啥啥的，然后一路确认就可以了。这样就会生成一个conf.py的文件，然后进行之前的操作就好了。</p>
+<p>以上这就是生成文档的最简单的用法。。。应该是一个程序员理所应当需要掌握的了。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -2073,7 +2064,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-count">564</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
