@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/08/%E7%94%A8%E4%BA%8E%E6%96%87%E6%A1%A3%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E5%8F%96%E7%9A%84TFIDF%E6%8C%87%E6%A0%87/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/26/hello-disqus-and-goodbye-duoshuo/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -326,7 +326,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/09/08/%E7%94%A8%E4%BA%8E%E6%96%87%E6%A1%A3%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E5%8F%96%E7%9A%84TFIDF%E6%8C%87%E6%A0%87/" itemprop="url">用于文档关键字提取的TFIDF指标</a></h2>
+                <a class="post-title-link" href="/2017/01/26/hello-disqus-and-goodbye-duoshuo/" itemprop="url">你好 Disqus，再见多说</a></h2>
         
 
         <div class="post-meta">
@@ -338,8 +338,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-08T12:46:09+00:00">
-                2016-09-08
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-26T03:18:34+00:00">
+                2017-01-26
               </time>
             
 
@@ -361,8 +361,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
-                    <span itemprop="name">Data Mining</span>
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
                   </a>
                 </span>
 
@@ -399,160 +399,10 @@
 
       
         
-          
-            <h2 id="关键字提取问题"><a href="#关键字提取问题" class="headerlink" title="关键字提取问题"></a>关键字提取问题</h2><p>在大规模网络文章整合的过程中，我们经常需要对某一篇文章提取关键字。比如对于某一篇关于计算机的文章，我们应该提取出类似于“计算机”、“编程”、“CPU”之类的符合人类认知习惯的关键词，但是这个过程却不是那么容易。现在，我们把问题归结为，在不使用机器学习方法的情况下，给定一个文档集，仅从单词频率等角度对文档集当中的某一篇文档进行考虑，期望能够对于该篇文章，我们能从文章中依次提取出最有代表性的关键词。</p>
-<p>我们很容易想到的方法就是统计每个词的词频了，但是对于任何文章而言，出现频率最多的应该是一些音节助词等毫无意义的词语，比如中文里的“的”、英文里的“is”之类的词语。这些词语我们通常叫他“停用词”。显然，在统计词频的时候我们首先得把他们去掉。但是去掉这些常见停用词之后，剩下的词语中出现频率高就真的意味着能够代表文章的主旨么？显然不一定，虽然在某些情况下，某个能表现主旨的词语会在文章中多次出现，但是在有些情况下这个表现主旨的词语只会偶尔出现，不过与此相对应的是，这些词在不同主旨的文章中出现的次数却应该更少。</p>
-<p>针对上述的特性，就有了TF.IDF指标。他的意义就是<strong>词项频率(Term  Frequency</strong>)乘以**逆文档频率(Inverse Document Frequency)**。</p>
-<h2 id="词项频率"><a href="#词项频率" class="headerlink" title="词项频率"></a>词项频率</h2><p>词项频率就是指在该文档中某一个词出现的频率，这个数值越高原则上就代表这个词语的得分就越大。当然，由于文章的词数可能会比较大，我们需要对这个频率进行下归一化。也就是说，假定文档集有$N$篇文档，$f_{ij}$表示词项$i$在文档$j$中出现的次数(或频率)，我们把他的词项频率$TF_{ij}$定义如下：$$TF_{ij}&#x3D;\frac{f_{ij}}{max_kf_{kj}}$$</p>
-<p>意思也很简单，就是把这个词的频率除以这个文档中频率最高的词的频率，作为他的词项频率。这个数值保证了词的得分与词在文章中的频率正相关。</p>
-<h2 id="逆文档频率"><a href="#逆文档频率" class="headerlink" title="逆文档频率"></a>逆文档频率</h2><p>逆文档频率顾名思义就是代表这个数值与该词项在所有文档中出现的频率逆相关，正如前面所说，一个词在所有文档中出现的次数越少就表示这个词越有可能代表某一个特定的主题。因此，我们再假定词项$i$在$N$篇文档集中的$n$篇文章内出现，那么我们把这个他的逆文档频率定义如下：$$IDF_i&#x3D;log_2\frac N {n_i}$$</p>
-<p>就是把出现频率$\frac{n_i}N$取个倒数再取个对数。这样既保证了该指数与文档频率逆相关，又保证了这个值的影响程度不会太大。</p>
-<h2 id="TF-IDF指标"><a href="#TF-IDF指标" class="headerlink" title="TF.IDF指标"></a>TF.IDF指标</h2><p>最后我们只要把上面这两个指数相乘就可以得到该词项在该文档中的权重了，即词项$i$在文档$j$中的得分为:$$TF_{ij}\times IDF_i$$</p>
-<p>其实这也算是个经验公式了，不过在很多情况下还是很准的。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/04/after-the-acquisition-of-supersu-by-ccmt/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/04/after-the-acquisition-of-supersu-by-ccmt/" itemprop="url">CCMT收购SuperSU以后</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-04T17:08:00+00:00">
-                2016-09-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%82%E9%97%BB%E5%A0%82/" itemprop="url" rel="index">
-                    <span itemprop="name">异闻堂</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>大概没有比 SuperSU 声誉更好、认可度最高的软件。无论是移动设备、平板电脑，亦或者机顶盒、智能手表，只要是基于 Android 的设备，大家都会想到使用 Chainfire 的 SuperSU 来接管 Android 系统的 Root 权限。</p>
+          <p>多说又双叒叕爆炸了！——这是我看到 <code>多说评论系统故障(9900015)，请联系客服人员</code> 报错信息时的想法。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/09/04/after-the-acquisition-of-supersu-by-ccmt/#more" rel="contents">
+            <a class="btn" href="/2017/01/26/hello-disqus-and-goodbye-duoshuo/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -603,7 +453,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/04/python%E7%B1%BB%E5%8F%98%E9%87%8F%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/21/lets-check-and-study-wechat-trojan/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -622,7 +472,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/09/04/python%E7%B1%BB%E5%8F%98%E9%87%8F%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9/" itemprop="url">python类变量和成员变量的使用注意点</a></h2>
+                <a class="post-title-link" href="/2017/01/21/lets-check-and-study-wechat-trojan/" itemprop="url">拨开云雾见天明——解析酷安新出现的微信盗号木马</a></h2>
         
 
         <div class="post-meta">
@@ -634,160 +484,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-04T12:18:55+00:00">
-                2016-09-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前在用python写一个项目，发现一个很恶心的bug，就是同由一个类生成的两个实例之间的数据竟然会相互影响，这让我非常不解。后来联想到java的类有类变量也有实例变量，因此翻阅了相关资料，发现python也有类似的类变量和实例变量，比如下面的代码中：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    x = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.y = <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<p>x就是类变量，y就是实例变量。</p>
-<p>原则上是没有错的，但是实际用的时候就发现一些恶心的问题（也就是我找了三天的bug）。。。比如下面的代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    x = []</span><br><span class="line">    y = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">self</span>):</span><br><span class="line">        self.x.append(<span class="string">&#x27;1&#x27;</span>)</span><br><span class="line">        self.y+=<span class="number">1</span></span><br><span class="line">a=A() </span><br><span class="line"><span class="built_in">print</span> a.x,a.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br><span class="line">a.add()</span><br><span class="line"><span class="built_in">print</span> a.x,a.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br><span class="line">b=A() </span><br><span class="line"><span class="built_in">print</span> b.x,b.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br></pre></td></tr></table></figure>
-<p>这里很明显x和y都是类变量，add的作用是分别对x和y做出修改。然后构造一个实例a，对实例a的值进行修改，最后构造实例b。</p>
-<p>本以为这个结果是显而易见的，然而他输出的结果却是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[] 0</span><br><span class="line">[] 0</span><br><span class="line">[&#x27;1&#x27;] 1</span><br><span class="line">[&#x27;1&#x27;] 0</span><br><span class="line">[&#x27;1&#x27;] 0</span><br><span class="line">[&#x27;1&#x27;] 0</span><br></pre></td></tr></table></figure>
-<p>问题在哪？明明x和y都是类变量，在第二组print中为什么a.x和b.x一样，但是a.y和b.y就是不一样呢？</p>
-<p>想了半天悟了一个道理。。。就是对于python来说，类变量的确是所有类共有的东西。但是那是在我们用的同一个引用的情况下，比如对于[]对象的append方法就是公用一个类变量了；但是对于赋值语句来说，如果在类中对类变量使用了赋值语句，那么python就会生成一个该对象的副本，以后的操作都是基于这个副本而不会对原来的类对象造成影响。这样就解释的通上面的现象了。</p>
-<p>那么为了杜绝自己忘记类变量和实例变量的区别导致本不想公用变量的时候公用了变量，最好的办法就是在每个类中使用变量的时候重新初始化一下，这样就不会导致意外了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/30/coding-snapdragon-810-down/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/30/coding-snapdragon-810-down/" itemprop="url">制服火龙——为骁龙810降温</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-30T09:19:00+00:00">
-                2016-08-30
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-21T13:42:00+00:00">
+                2017-01-21
               </time>
             
 
@@ -847,12 +545,10 @@
 
       
         
-          <blockquote>
-<p>“高通骁龙 810 是我们的一款失败的产品”——高通工程师</p>
-</blockquote>
+          <p>一日，某不安好心者在酷安的 Xposed 模块 “App Setting” 的评论区发布了一条评论——“APP Setting 专业版”。一位用户下载使用后中招——微信密码泄露，账户被盗刷。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/08/30/coding-snapdragon-810-down/#more" rel="contents">
+            <a class="btn" href="/2017/01/21/lets-check-and-study-wechat-trojan/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -903,7 +599,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/29/how-to-choose-customlized-rom-and-stock-ui/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/18/%E8%B7%A8%E5%86%85%E5%A4%96%E7%BD%91%E8%BF%9C%E7%A8%8B%E6%93%8D%E4%BD%9CSpark/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -922,7 +618,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/08/29/how-to-choose-customlized-rom-and-stock-ui/" itemprop="url">如何选择 AOKP 类 ROM 和厂商定制 UI</a></h2>
+                <a class="post-title-link" href="/2017/01/18/%E8%B7%A8%E5%86%85%E5%A4%96%E7%BD%91%E8%BF%9C%E7%A8%8B%E6%93%8D%E4%BD%9CSpark/" itemprop="url">跨内外网远程操作Spark</a></h2>
         
 
         <div class="post-meta">
@@ -934,8 +630,813 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-29T09:21:00+00:00">
-                2016-08-29
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-18T13:06:11+00:00">
+                2017-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>我们知道通过反向ssh可以借助有固定IP的外网服务器登陆没有外网IP的内网主机，但是我们在真正使用的时候可能不仅仅需要远程登陆，可能还会需要内网机器中其他端口提供的服务。比如现在我需要在远处利用Spark程序去操作内网机器里的分布式系统进行工作，这就至少需要调用内网机器的7077端口(默认的Spark调用端口)和9000端口(默认的hdfs端口)。那么这时候我们应当怎么处理呢？</p>
+<h2 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h2><p>最容易想到的解决方案就是同样利用反向ssh，将内网的9000端口映射到服务器的9000端口上。这一点显然是很容易做到的，与利用反向ssh进行登陆的操作是类似的。但是当我想当然的去telnet服务器的9000端口时却发现报了下面的错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ telnet mythsman.com 9000</span><br><span class="line">Trying 120.27.41.126...</span><br><span class="line">telnet: Unable to connect to remote host: Connection refused</span><br></pre></td></tr></table></figure>
+<p>他提示我对这个端口的访问被拒绝了，于是我登陆服务器，去查看端口情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@server:~# ss -ant|grep 9000</span><br><span class="line">LISTEN     0      128               127.0.0.1:9000                     *:*     </span><br></pre></td></tr></table></figure>
+<p>仔细一看才发现，原来利用反向ssh进行端口绑定的时候，端口的访问权限默认只给了本机(127.0.0.1)，从其他IP访问这个端口的请求都会被拒绝。要是这个权限不受限制，对所有IP(0.0.0.0)都能访问就好了。</p>
+<p>但是想了想好像也不知道怎么能够修改这个值，于是我就采取了一个折中的办法，干脆把这个端口再进行一次转发，用另一对外的端口转发出去。</p>
+<p>这里我采用的是rinetd工具（internet “redirection server”），用在apt商店里可以直接下载。用这个工具进行端口转发十分的方便。</p>
+<h2 id="rinetd工具"><a href="#rinetd工具" class="headerlink" title="rinetd工具"></a>rinetd工具</h2><p>这个工具的用法很简单，只有一个配置文件&#x2F;etc&#x2F;rinetd.conf:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line"># this is the configuration file for rinetd, the internet redirection server</span><br><span class="line">#</span><br><span class="line"># you may specify global allow and deny rules here</span><br><span class="line"># only ip addresses are matched, hostnames cannot be specified here</span><br><span class="line"># the wildcards you may use are * and ?</span><br><span class="line">#</span><br><span class="line"># allow 192.168.2.*</span><br><span class="line"># deny 192.168.2.1?</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># forwarding rules come here</span><br><span class="line">#</span><br><span class="line"># you may specify allow and deny rules after a specific forwarding rule</span><br><span class="line"># to apply to only that forwarding rule</span><br><span class="line">#</span><br><span class="line"># bindadress    bindport  connectaddress  connectport</span><br><span class="line"></span><br><span class="line"># logging information</span><br><span class="line">logfile /var/log/rinetd.log</span><br><span class="line"></span><br><span class="line"># uncomment the following line if you want web-server style logfile format</span><br><span class="line"># logcommon</span><br></pre></td></tr></table></figure>
+<p>利用这个配置文件，我们首先可以利用allow 和deny语句，修改允许访问的IP和拒绝访问的IP；然后我们可以用下面的格式来修改转发表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># bindadress    bindport  connectaddress  connectport</span><br><span class="line">0.0.0.0 50071   127.0.0.1   50070</span><br><span class="line">0.0.0.0 7078    127.0.0.1   7077</span><br><span class="line">0.0.0.0 9001    127.0.0.1   9000</span><br></pre></td></tr></table></figure>
+<p>首先是期望发送的IP以及端口，接着是提供服务的IP和端口，每一行就是一个条目，十分清楚。</p>
+<p>这里我把只允许127.0.0.1访问的50070端口发送到面向所有IP的50071端口。修改过后，我们就可以重启rinetd服务来使其生效。</p>
+<p>这样就可以在利用其外网IP:新端口来访问原来无法访问的端口了。</p>
+<h2 id="配置总结"><a href="#配置总结" class="headerlink" title="配置总结"></a>配置总结</h2><p>上面是我们的总体思路，下面就开始针对Spark来详细配置一下。</p>
+<ol>
+<li><p>准备号进行Spark远程开发需要的Spark的7077端口、Hdfs的9000端口、hadoop的Web显示50070端口、ssh登陆的22端口。</p>
+</li>
+<li><p>在内网主机上配置反向SSH：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">autossh -M 2100 -NfR 9000:localhost:9000 root@mythsman.com</span><br><span class="line">autossh -M 2200 -NfR 7077:192.168.131.198:7077 root@mythsman.com</span><br><span class="line">autossh -M 2300 -NfR 2222:localhost:22 root@mythsman.com</span><br><span class="line">autossh -M 2400 -NfR 50070:localhost:50070 root@mythsman.com</span><br></pre></td></tr></table></figure>
+<p>注意到，7077端口的本地IP用的不是localhost，而是他本身在内网里的IP。这是因为Spark服务默认设置的就是这个值，和hadoop的不一样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@node5:~/spark/conf$ss -ant|grep 7077</span><br><span class="line">LISTEN     0      128     ::ffff:192.168.131.198:7077                    :::*</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改服务器上的&#x2F;etc&#x2F;rinetd.conf配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># bindadress    bindport  connectaddress  connectport</span><br><span class="line">0.0.0.0 50071   127.0.0.1   50070</span><br><span class="line">0.0.0.0 7078    127.0.0.1   7077</span><br><span class="line">0.0.0.0 9001    127.0.0.1   9000</span><br></pre></td></tr></table></figure>
+<p>这样我们其实就已经把网络链路配置好了，访问50071端口就能够看到hadoop的web页面了，也可以跑跑Spark的测试程序：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;Spark App&quot;</span>).setMaster(<span class="string">&quot;spark://mythsman.com:7078&quot;</span>).setJars(<span class="type">List</span>(<span class="string">&quot;/home/myths/Desktop/scala/Test/jar/Test.jar&quot;</span>))</span><br><span class="line">    <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line">    <span class="keyword">val</span> datafile = sc.textFile(<span class="string">&quot;hdfs://mythsman.com:9001/user/myths/dataset/data&quot;</span>,<span class="number">50</span>)</span><br><span class="line">    sc.stop()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>程序连接成功，hdfs读取成功，搞定。</p>
+</li>
+</ol>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>搞完了这个突然想起来之前用反向ssh进行内网登陆的时候还要先登陆服务器再登陆内网，甚是麻烦，我们其实完全可以再利用rinetd工具进行一次转发，这样就能直接用服务器的IP+转发后的端口直接登陆内网主机 了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/16/Eclipse%E4%B8%8BSpark+ScalaIDE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/01/16/Eclipse%E4%B8%8BSpark+ScalaIDE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2/" itemprop="url">Eclipse下Spark+ScalaIDE开发环境部署</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-16T11:58:25+00:00">
+                2017-01-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>刚开始学Spark，之前一直都是在服务器里用Spark-shell进行简单学习的，后来觉得这样实在是很不方便，于是就决定利用Eclipse ide来进行开发，不过这当中遇到了很多问题，搞了半天总算搞得差不多了，下面就记录下环境搭建的步骤方便重新配置。</p>
+<h2 id="当前环境"><a href="#当前环境" class="headerlink" title="当前环境"></a>当前环境</h2><p>在配置eclipse的开发环境前，我已经在服务器中配置好了hadoop+scala+spark的环境：</p>
+<ul>
+<li>hadoop 2.7.2</li>
+<li>spark 1.6.2</li>
+<li>scala 2.10.4</li>
+<li>jdk1.7</li>
+<li>Linux系统<br>由于服务器本身性能强劲，我采用Standerdalone模式，没有slave。</li>
+</ul>
+<p>同时，本机也配置了同样的hadoop、spark、scala的环境（一方面是方便本机测试，另一方面是提供必要的jar包）。</p>
+<h2 id="下载配置Eclipse-Scala"><a href="#下载配置Eclipse-Scala" class="headerlink" title="下载配置Eclipse+Scala"></a>下载配置Eclipse+Scala</h2><p>eclipse本身不支持scala语言，但是有一款很不错的插件Scala-IDE，利用这个插件，eclipse就能很好的支持scala语言的开发了。</p>
+<p>Scala-IDE官网在<a target="_blank" rel="noopener" href="http://scala-ide.org/">这里</a>，这个社区现在还很活跃，一直在更新产品，不过这也导致了我们在下载配置的时候要十分注意版本选择：</p>
+<ul>
+<li>保证Scala-ide插件与本地的Scala版本一致，这一点不用多说，但是一定不要抱着”版本落后一点也没事”的侥幸心理。</li>
+<li>保证Scala-ide插件与eclipse的版本要匹配，否则就会造成一堆错误。因此我们通常不要先急着下eclipse，而是要先根据自身的scala版本选择好Scala-ide版本，再根据Scala-ide版本选择eclipse版本。</li>
+<li>如果主页上找不到历史版本的Scala-ide，去<a target="_blank" rel="noopener" href="http://scala-ide.org/download/prev-stable.html">这里</a>找。<br>较新版本的Scala-ide可能会集成好对应的eclipse，不过如果版本较老则很可能需要自己下载eclipse。</li>
+</ul>
+<p>对于eclipse而言没有过多要求，由于我们用Scala语言开发，因此不需要附带其他的东西。然后在eclipse-&gt;help-&gt;install new software中加上Scala-ide插件的地址就会弹出一些可以下载的内容。选择下面的两个组件即可：</p>
+<ul>
+<li>Scala IDE for Eclipse</li>
+<li>Scala IDE for Eclipse dev support<br>下载好后他会提示重启、更新之类的操作，照做就好。</li>
+</ul>
+<p>最后我们打开eclipse-&gt;window-&gt;open perspective-&gt;other对话框，选择Scala视图，即完成了eclipse+scala ide 的基本配置。</p>
+<p><img src="/images/2017/01/16/1/1.png"></p>
+<p>做到这一步，基本就能够编写普通的Scala程序了，比如：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    println(<span class="string">&quot;Hello world&quot;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行Spark"><a href="#运行Spark" class="headerlink" title="运行Spark"></a>运行Spark</h2><p>说白了Spark其实也算作Scala程序，因此和普通Scala程序配置方法没有太多不同，不过一定要确保需要的jar包都有，否则就会出一堆的ClassNotFound的错。</p>
+<p>Spark需要的jar包基本上至少要有两部分：</p>
+<p>第一部分就是$SPARK_HOME下的lib文件夹中的包。这一部分很容易理解。</p>
+<p>第二部分就是对应的hadoop的包，这一部分很容易被忽略，而且hadoop的包比较分散，加起来还比较麻烦。我是在配置好hadoop之后，输入hadoop classpath，来查看hadoop需要的jar包，然后把这些jar包加入项目的build path里。</p>
+<p>配置好后理论上就可以写spark程序了。不过对于不同的开发方式，实际用的时候也有区别。如果是用本机配置的spark，那么在开启spark服务后，下面的程序就可以直接run as scala application了：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></span><br><span class="line"><span class="keyword">import</span> scala.math.random</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;Spark Pi&quot;</span>).setMaster(<span class="string">&quot;local&quot;</span>)</span><br><span class="line">    <span class="keyword">val</span> spark = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line">    <span class="keyword">val</span> slices = <span class="number">2</span></span><br><span class="line">    <span class="keyword">val</span> n = <span class="number">1000000</span> * slices</span><br><span class="line">    <span class="keyword">val</span> count = spark.parallelize(<span class="number">1</span> to n, slices).map &#123; i =&gt;</span><br><span class="line">      <span class="keyword">val</span> x = random * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">      <span class="keyword">val</span> y = random * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">      <span class="keyword">if</span> (x * x + y * y &lt; <span class="number">1</span>) <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">    &#125;.reduce(_ + _)</span><br><span class="line">    println(<span class="string">&quot;Pi is roughly &quot;</span> + <span class="number">4.0</span> * count / n)</span><br><span class="line">    spark.stop()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在伴随着一堆log的输出中，我们就可以看到输出的结果。</p>
+<p>但是，如果我们想直接用远程的服务器中的spark服务来运行的话，仅仅修改setMaster的值则会报”主类找不到”之类的错误，这是因为我们还得把jar包发给远程的服务器，这样他才能找到代码。我们只需要将项目导出为一个jar包，然后将代码修改如下：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></span><br><span class="line"><span class="keyword">import</span> scala.math.random</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">&quot;Spark Pi&quot;</span>).setMaster(<span class="string">&quot;spark://ada:7077&quot;</span>).setJars(<span class="type">List</span>(<span class="string">&quot;/home/myths/Desktop/scala/Test/jar/Test.jar&quot;</span>))</span><br><span class="line">    <span class="keyword">val</span> spark = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line">    <span class="keyword">val</span> slices = <span class="number">2</span></span><br><span class="line">    <span class="keyword">val</span> n = <span class="number">1000000</span> * slices</span><br><span class="line">    <span class="keyword">val</span> count = spark.parallelize(<span class="number">1</span> to n, slices).map &#123; i =&gt;</span><br><span class="line">      <span class="keyword">val</span> x = random * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">      <span class="keyword">val</span> y = random * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">      <span class="keyword">if</span> (x * x + y * y &lt; <span class="number">1</span>) <span class="number">1</span> <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">    &#125;.reduce(_ + _)</span><br><span class="line">    println(<span class="string">&quot;Pi is roughly &quot;</span> + <span class="number">4.0</span> * count / n)</span><br><span class="line">    spark.stop()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>setMaster里的是服务器的地址，以及默认接受远程服务的7077端口，然后再在setJars里添加本地导出的jar包的地址。这样基本就能正常的运行spark程序了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/01/14/%E5%88%A9%E7%94%A8%E5%8F%8D%E5%90%91ssh%E4%BB%8E%E5%A4%96%E7%BD%91%E8%AE%BF%E9%97%AE%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/01/14/%E5%88%A9%E7%94%A8%E5%8F%8D%E5%90%91ssh%E4%BB%8E%E5%A4%96%E7%BD%91%E8%AE%BF%E9%97%AE%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA/" itemprop="url">利用反向ssh从外网访问内网主机</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-14T09:23:55+00:00">
+                2017-01-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SSH/" itemprop="url" rel="index">
+                    <span itemprop="name">SSH</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近遇到一个问题，就是过几天我需要离开学校，而且到时候仍然想登陆校园网里的一台服务器进行工作；但是我又没有校园网网关的操作权限，不能做端口映射，也不能搞到校园网内部主机的外网ip，而且学校自己提供的vpn又根本没法用。研究了半天，总算找到了一个比较不错的利用反向ssh(reverse ssh tunnel)进行内网登陆的解决方案。</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>之所以很多转发的方法无法应用在这里，就是因为内网主机对外网其实是不可见的，也就是说外部主机不能用一般的方法访问到内部主机。那么我们就想了，能不能用内网主机找外网主机，找到之后再把这条内网主机登陆外网的信道转换成外网主机登陆内网的信道呢？辛运的是，这个方法的确是可行的，这也就是所谓反向ssh最通俗的理解，这就像寄信一样，”虽然我不知道你的地址，但是你知道我的地址，那么你就先给我写封信，告诉我你的地址，然后我不就可以回信给你了么？“。</p>
+<h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><p>由于我们自己使用的电脑未必有外网ip，因此我们需要一个有固定外网ip的服务器(随便搞个腾讯云阿里云的小机子就行)，然后用这台服务器与内网的机子进行通信，我们到时候要先登陆自己的服务器，然后再利用这个服务器去访问内网的主机。</p>
+<p>1、准备好有固定ip的服务器A，以及待访问的内网机器B。两者都开着sshd服务，端口号默认都是22。顺便做好ssh免密码登陆。</p>
+<p>2、内网主机B主动连接服务器A，执行以下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -NfR 1111:localhost:22 username@servername -p 22</span><br></pre></td></tr></table></figure>
+<p>这条命令的意思是在后台执行(-f)，不实际连接而是做port forwarding(-N)，做反向ssh(-R)，将远程服务器的1111端口映射成连接本机(B)与该服务器的反向ssh的端口。</p>
+<p>附：这里有必要加强一下记忆，这个端口号一不小心就容易搞混。。man文档中的参数命令是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-R [bind_address:]port:host:hostport</span><br></pre></td></tr></table></figure>
+<p>bind_address以及其后面的port是指远程主机的ip以及端口，host以及其后的hostport是指本机的ip和端口。由于ssh命令本身需要远程主机的ip(上上条命令中的servername)，因此这个bind_address原则上是可以省略的。</p>
+<p>执行完这条命令，我们可以在服务器A上看到他的1111端口已经开始监听：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ss -ant |grep 1111</span><br><span class="line">LISTEN     0      128               127.0.0.1:1111                     *:*</span><br></pre></td></tr></table></figure>
+<p>3、在上面的操作中，这个1111端口就已经映射成了内网主机B的22端口了，现在我们只要ssh到自己的这个端口就行了。在服务器A中执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh username@localhost -p1111</span><br></pre></td></tr></table></figure>
+<p>这样就成功的登陆了内网的主机了。</p>
+<h2 id="功能优化"><a href="#功能优化" class="headerlink" title="功能优化"></a>功能优化</h2><p>上面的做法其实有一个问题，就是反向ssh可能会不稳定，主机B对服务器A的端口映射可能会断掉，那么这时候就需要主机B重新链接，而显然远在外地的我无法登陆B。。。这其实有一个非常简单的解决方案，就是用autossh替代步骤2中的ssh：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ autossh -M 2222 -NfR 1111:localhost:22 username@servername -p 22</span><br></pre></td></tr></table></figure>
+<p>后面的参数跟ssh都一样，只是多了一个-M参数，这个参数的意思就是用本机的2222端口来监听ssh，每当他断了就重新把他连起来。。。不过man文档中也说了，这个端口又叫echo port，他其实是有一对端口的形式出现，第二个端口就是这个端口号加一。因此我们要保证这个端口号和这个端口号加一的端口号不被占用。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/eshizhan/archive/2012/07/16/2592902.html">SSH反向连接及Autossh</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/31/good-bye-2016/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/31/good-bye-2016/" itemprop="url">Goodbye 2016</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-31T13:32:18+00:00">
+                2016-12-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%87%AA%E8%A8%80%E8%AF%AD/" itemprop="url" rel="index">
+                    <span itemprop="name">自言语</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>怎么说呢，过去的这一年发生了很多事情，无论是好事还是坏事。我摘出那些对我很重要的事情吧，也许其中一些甚至改变了我的人生。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/12/31/good-bye-2016/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/29/bluelake/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/29/bluelake/" itemprop="url">BlueLake博客主题的详细配置</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-29T03:25:33+00:00">
+                2016-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo%E5%8D%9A%E5%AE%A2/" itemprop="url" rel="index">
+                    <span itemprop="name">Hexo博客</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="2021年2月3日更新："><a href="#2021年2月3日更新：" class="headerlink" title="2021年2月3日更新："></a>2021年2月3日更新：</h3><p><a target="_blank" rel="noopener" href="https://github.com/chaooo/hexo-theme-BlueLake">BlueLake主题</a>主题写了有些年头了，随着Hexo升级到5.X，BlueLake很多配置已经过时，在使用中难免出现问题。</p>
+<p>所以，我利用工作之余抽了些时间进行了大改版，主题模板引擎由Jade(Pug)换成了EJS，以landscape为原型进行二次开发；保留BlueLake主题老版本的其他功能，如原生JS实现站内搜索功能，本地分享等；新添加了一些新的功能，如打赏模块，集成新的三方评论等等。</p>
+<p>说了这么多不如你亲自体验来的直接，BlueLake主题地址：<a target="_blank" rel="noopener" href="https://github.com/chaooo/hexo-theme-BlueLake%E3%80%82">https://github.com/chaooo/hexo-theme-BlueLake。</a></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/12/29/bluelake/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/26/a-fork-in-the-road-cyangenmod/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/26/a-fork-in-the-road-cyangenmod/" itemprop="url">A Fork in the Road — CM's last blog</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-26T13:35:00+00:00">
+                2016-12-26
               </time>
             
 
@@ -995,10 +1496,10 @@
 
       
         
-          <p>最近老是被人问及，在厂商提供的原厂 ROM 、AOKP ，和移植的其它ROM（比如移植的 flyme 和 MIUI），到底应该怎么选择。于是我决定写一写这篇博客，从功能层面和国内用户的行为习惯来讲讲如何选择这几类 ROM。</p>
+          <p>Cyanogenmod 在他们的官网发布了最后一篇博客 <em>A Fork in the Road</em> 后，Cyanogenmod 官网和博客域名的 DNS 解析就被停了。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/08/29/how-to-choose-customlized-rom-and-stock-ui/#more" rel="contents">
+            <a class="btn" href="/2016/12/26/a-fork-in-the-road-cyangenmod/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1049,7 +1550,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/27/MySQL%E9%85%8D%E7%BD%AE%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/23/cpu-governer-interative-core-ctl/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1068,7 +1569,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/08/27/MySQL%E9%85%8D%E7%BD%AE%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE/" itemprop="url">MySQL配置远程访问</a></h2>
+                <a class="post-title-link" href="/2016/12/23/cpu-governer-interative-core-ctl/" itemprop="url">Interative 调速器有关参数分析</a></h2>
         
 
         <div class="post-meta">
@@ -1080,8 +1581,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-27T17:19:44+00:00">
-                2016-08-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-23T09:10:00+00:00">
+                2016-12-23
               </time>
             
 
@@ -1103,8 +1604,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
                   </a>
                 </span>
 
@@ -1141,629 +1642,156 @@
 
       
         
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在使用MySQL数据库的时候，有时候需要客户机直接远程登陆服务器的数据库 ，而不是将请求发给数据库服务器。这时候就需要配置下MySQL的远程访问权限了。具体的配置方法也很简单，随便找个搜索引擎基本都能找到搜索到一堆配置MySQL数据库远程登陆的教程了。</p>
-<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>网上介绍的步骤基本分为两步：</p>
-<h3 id="修改my-cnf配置文件"><a href="#修改my-cnf配置文件" class="headerlink" title="修改my.cnf配置文件"></a>修改my.cnf配置文件</h3><p>mysql的配置文件一般在<code>/etc/mysql/my.cnf</code> 里，打开查看其配置，其中有这么一段：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Instead of skip-networking the default is now to listen only on</span><br><span class="line"># localhost which is more compatible and is not less secure.</span><br><span class="line">bind-address		= 127.0.0.1</span><br></pre></td></tr></table></figure>
-<p>这个bind-address就是绑定IP，也就是默认只允许本机登陆。为了能够实现远程登陆，显然需要把这句话注释掉。修改完重启mysql服务。</p>
-<h3 id="添加用户权限"><a href="#添加用户权限" class="headerlink" title="添加用户权限"></a>添加用户权限</h3><p>按照需要，为指定用户、IP设置对应的权限即可</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;GRANT ALL PRIVILEGES ON A.B TO &#x27;user&#x27;@&#x27;%&#x27;IDENTIFIED BY ‘password&#x27; WITH GRANT OPTION;</span><br><span class="line">mysql&gt;FLUSH PRIVILEGES</span><br></pre></td></tr></table></figure>
-<p>这里把数据库A的B表的所有权限都授予来自任意主机(‘%’)的user以密码’password’登陆。</p>
-<p>或者直接修改mysql数据库中的user表使其满足要求。</p>
-<p>上面就是理论上需要做的了，然而我照着这个弄完了发现还是连接不上。折腾了半天，终于发现原来服务器的提供商为了保证服务器的安全性，还额外对端口的开放进行了限制。比如腾讯服务器就设置了一个安全组，额外限制了开放的端口，默认是禁止开放mysql的3306端口的，因此要打开控制台，配置好权限：</p>
-<p><img src="/images/2016/08/28/1/1.png"></p>
-<p>其他都是默认的，只要额外添加倒数第二行的就行了。。。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/ycsfwhh/archive/2012/08/07/2626597.html">打开MySQL数据库远程访问的权限</a><br><a target="_blank" rel="noopener" href="https://www.qcloud.com/doc/product/213/%E5%AE%89%E5%85%A8%E7%BB%84">腾讯服务器安全组</a></p>
-<p>&nbsp;</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/27/Apache%E9%85%8D%E7%BD%AEssl%E6%94%AF%E6%8C%81https/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/27/Apache%E9%85%8D%E7%BD%AEssl%E6%94%AF%E6%8C%81https/" itemprop="url">Apache配置ssl支持https</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-27T13:38:01+00:00">
-                2016-08-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Apache/" itemprop="url" rel="index">
-                    <span itemprop="name">Apache</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>很明显apache原生是不支持https的，无论是用https访问自身的站点，还是代理来自其他网站的https的站点。毕竟人家https走的端口是443，都不是默认的80。</p>
-<p>那么如何让apache支持https呢，其实只要添加下ssl模块再修改下配置就好了。</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>首先要导入apache的ssl模块，即<code>$sudo a2enmod ssl</code> ，保证<code>/etc/apache2/mods-enabled/</code> 目录下有对应的ssl模块文件。</p>
-<p>然后利用openssl命令，生成必要的密钥文件等：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">【生成一个自签名证书】</span><br><span class="line">$ openssl genrsa -out ca.key 2048</span><br><span class="line"></span><br><span class="line">【生成证书签名请求(CSR)】</span><br><span class="line">$ openssl req -new -key ca.key -out ca.csr</span><br><span class="line"></span><br><span class="line">【生成X509自签名证书】</span><br><span class="line">$ openssl x509 -req -days 365 -in ca.csr -signkey ca.key -out ca.crt</span><br></pre></td></tr></table></figure>
-<p>三条命令各生成三个文件，把这三个文件保存好，这里我把他全部放在了<code>/etc/apache2/key</code>文件夹下了。</p>
-<h2 id="配置https正向代理"><a href="#配置https正向代理" class="headerlink" title="配置https正向代理"></a>配置https正向代理</h2><p>对于https的正向代理，在<a href="/2016/08/26/1/">http的正向代理配置</a>的基础上，只要额外添加下面的配置即可：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SSLProxyEngine on</span><br><span class="line">SSLCertificateFile /etc/apache2/key/ca.crt</span><br><span class="line">SSLCertificateKeyFile /etc/apache2/key/ca.key</span><br></pre></td></tr></table></figure>
-<p>文件路径分别对应上面的密钥文件。</p>
-<p>重启服务器即可代理https协议了。</p>
-<h2 id="配置https站点"><a href="#配置https站点" class="headerlink" title="配置https站点"></a>配置https站点</h2><p>我们知道对于通常的http站点，他的配置路径是在<code>/etc/apache2/sites-enabled/000-default.conf</code>上，但是我发现如果直接在这里配置https站点则会不起效果。一番捣鼓之后发现，其实为了区分http和https站点并加以分别配置，apache2还特地给了另外一份配置文件，这份配置文件的模板需要我们用下面的命令得到：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo a2ensite</span><br><span class="line">Your choices are: 000-default default-ssl</span><br><span class="line">Which site(s) do you want to enable (wildcards ok)?</span><br><span class="line">default-ssl</span><br></pre></td></tr></table></figure>
-<p>之后我们就会发现，出现了一个<code>/etc/apache2/sites-enabled/default-ssl.conf</code>文件，没错，我们就可以在这里配置对应的站点了。<br>在这个配置文件里，主要是要修改四项：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DocumentRoot /var/www/html/wordpress</span><br><span class="line">SSLEngine on</span><br><span class="line">SSLCertificateFile  /etc/apache2/ssl/cert_chain.crt</span><br><span class="line">SSLCertificateKeyFile /etc/apache2/ssl/private.key</span><br></pre></td></tr></table></figure>
-<p>修改好后，重启服务即可。<br>最后我们可以将利用htaccess文件将80端口的请求转发到443端口，这样更加漂亮。</p>
-<h2 id="关于证书"><a href="#关于证书" class="headerlink" title="关于证书"></a>关于证书</h2><p>当然，我们自己生成的证书是不被浏览器认可的，通常访问的用户都会被告知这是一个不安全的链接，尤其是chrome，那个红色背景格外的吓人，因此如果是真的想让自己的网站能用https，要么去花钱买证书，要么去用人家免费的，我这里用的是<a target="_blank" rel="noopener" href="https://www.sslforfree.com/">sslforfree</a>的证书，不过麻烦的是这个东西得每隔三个月更换一次。。。<br>具体的使用方法可以参考<a target="_blank" rel="noopener" href="https://itjh.net/2016/11/03/free-ssl/">这篇文章</a>。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://freessl.wosign.com/centos-https.html">CentOS中Apache服务器HTTPS配置方法</a><br><a target="_blank" rel="noopener" href="https://ttt.tt/9/">Apache + WordPress + SSL 完全指南</a><br><a target="_blank" rel="noopener" href="https://itjh.net/2016/11/03/free-ssl/">申请免费的SSL证书</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/26/Apache%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/26/Apache%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8/" itemprop="url">Apache配置代理服务器</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-26T11:28:30+00:00">
-                2016-08-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Apache/" itemprop="url" rel="index">
-                    <span itemprop="name">Apache</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在搞爬虫，单机的爬虫如果请求速度过快很容易导致服务器拒绝服务(403)，搞不好还可能被封IP，因此通常都需要大量的代理服务器来分散请求的来源，提高爬取效率。网上虽然有些免费的代理IP资源的发布平台，比如国内的<a target="_blank" rel="noopener" href="http://www.xicidaili.com/">西剌免费代理</a>，国外的<a target="_blank" rel="noopener" href="http://www.freeproxylists.net/">免费代理列表</a>(需翻墙)，这里的代理虽然多，但是毕竟是大家都在用，速度和稳定性都特别差，不到万不得已还是不用为好。因此，比较保险的做法就是自己搞些或者借些服务器，自己搭建代理。当然，这里所说的代理就是“正向代理”了。</p>
-<p>鉴于之前一直在弄Apache，这里就用Apache来配置正向代理服务器。</p>
-<h2 id="正向代理"><a href="#正向代理" class="headerlink" title="正向代理"></a>正向代理</h2><p>所谓”正向代理(forward proxy)“，apache文档里的解释是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">An ordinary &lt;dfn&gt;forward proxy&lt;/dfn&gt; is an intermediate server that sits between the client and the _origin server_. In order to get content from the origin server, the client sends a request to the proxy naming the origin server as the target. The proxy then requests the content from the origin server and returns it to the client. The client must be specially configured to use the forward proxy to access other sites.</span><br><span class="line"></span><br><span class="line">A typical usage of a forward proxy is to provide Internet access to internal clients that are otherwise restricted by a firewall.</span><br></pre></td></tr></table></figure>
-<p>就是用户主动的将自己对目标的请求转发给代理服务器，让代理服务器真正的请求目标，并将结果返回过来。这通常就是用于科学上网、共享网关等讨巧的事了。。。。。</p>
-<h2 id="Apache配置"><a href="#Apache配置" class="headerlink" title="Apache配置"></a>Apache配置</h2><p>关于Apache的安装和配置文件的简介可以看<a href="/2015/11/04/1/">《apache2服务器的搭建与配置》</a>。</p>
-<h3 id="加载模块"><a href="#加载模块" class="headerlink" title="加载模块"></a>加载模块</h3><p>配置代理服务器需要用到proxy_http和proxy模块，首先查看<code>/etc/apache2/mods-enabled/</code> 目录下有没有<code>proxy_http.load proxy.load proxy.conf</code> 这些东西，如果没有，就得先激活下这两个模块：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$sudo a2enmod proxy_http</span><br><span class="line">$sudo a2enmod proxy</span><br></pre></td></tr></table></figure>
-<p>如果显示proxy_http无法激活，就先把本地的proxy.conf删掉，再激活即可。</p>
-<h3 id="配置代理"><a href="#配置代理" class="headerlink" title="配置代理"></a>配置代理</h3><p>事实上，下面的配置可以写在配置主文件(apache2.conf)包含的任何文件中，但是为了方便管理和区分，我们把代理服务器的配置信息写在<code>/etc/apache2/mods-enabled/proxy.conf</code>里。</p>
-<p>打开这个文件，默认内容如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule mod_proxy.c&gt;</span><br><span class="line"></span><br><span class="line">	# If you want to use apache2 as a forward proxy, uncomment the</span><br><span class="line">	# &#x27;ProxyRequests On&#x27; line and the &lt;Proxy *&gt; block below.</span><br><span class="line">	# WARNING: Be careful to restrict access inside the &lt;Proxy *&gt; block.</span><br><span class="line">	# Open proxy servers are dangerous both to your network and to the</span><br><span class="line">	# Internet at large.</span><br><span class="line">	#</span><br><span class="line">	# If you only want to use apache2 as a reverse proxy/gateway in</span><br><span class="line">	# front of some web application server, you DON&#x27;T need</span><br><span class="line">	# &#x27;ProxyRequests On&#x27;.</span><br><span class="line"></span><br><span class="line">	#ProxyRequests On</span><br><span class="line">	#&lt;Proxy *&gt;</span><br><span class="line">	#   AddDefaultCharset off</span><br><span class="line">	#   Require all denied</span><br><span class="line">	#   #Require local</span><br><span class="line">	#&lt;/Proxy&gt;</span><br><span class="line"></span><br><span class="line">	# Enable/disable the handling of HTTP/1.1 &quot;Via:&quot; headers.</span><br><span class="line">	# (&quot;Full&quot; adds the server version; &quot;Block&quot; removes all outgoing Via: headers)</span><br><span class="line">	# Set to one of: Off | On | Full | Block</span><br><span class="line">	#ProxyVia Off</span><br><span class="line"></span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span><br></pre></td></tr></table></figure>
-<p>现在我们要对他加以修改，我这里的配置是这样的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule mod_proxy.c&gt;</span><br><span class="line"></span><br><span class="line">	# If you want to use apache2 as a forward proxy, uncomment the</span><br><span class="line">	# &#x27;ProxyRequests On&#x27; line and the &lt;Proxy *&gt; block below.</span><br><span class="line">	# WARNING: Be careful to restrict access inside the &lt;Proxy *&gt; block.</span><br><span class="line">	# Open proxy servers are dangerous both to your network and to the</span><br><span class="line">	# Internet at large.</span><br><span class="line">	#</span><br><span class="line">	# If you only want to use apache2 as a reverse proxy/gateway in</span><br><span class="line">	# front of some web application server, you DON&#x27;T need</span><br><span class="line">	# &#x27;ProxyRequests On&#x27;.</span><br><span class="line"></span><br><span class="line">	#ProxyRequests On</span><br><span class="line">	#&lt;Proxy *&gt;</span><br><span class="line">	#   AddDefaultCharset off</span><br><span class="line">	#   Require all denied</span><br><span class="line">	#   #Require local</span><br><span class="line">	#&lt;/Proxy&gt;</span><br><span class="line"></span><br><span class="line">	Listen 1234</span><br><span class="line">	&lt;VirtualHost proxy.mythsman.com:1234&gt;</span><br><span class="line">		ServerAdmin dqz48548263@qq.com</span><br><span class="line">		DocumentRoot /var/www/html/proxy</span><br><span class="line">		ServerName proxy.mythsman.com</span><br><span class="line">	    	ErrorLog $&#123;APACHE_LOG_DIR&#125;/error.log</span><br><span class="line">		CustomLog $&#123;APACHE_LOG_DIR&#125;/access.log combined</span><br><span class="line"></span><br><span class="line">		ProxyRequests On</span><br><span class="line">		ProxyVia On</span><br><span class="line"></span><br><span class="line">	    &lt;Proxy *&gt;</span><br><span class="line">		Order deny,allow</span><br><span class="line">		deny from all</span><br><span class="line">		Allow from 115.159.127.117 </span><br><span class="line">	    &lt;/Proxy&gt;</span><br><span class="line">	&lt;/VirtualHost&gt; </span><br><span class="line">	# Enable/disable the handling of HTTP/1.1 &quot;Via:&quot; headers.</span><br><span class="line">	# (&quot;Full&quot; adds the server version; &quot;Block&quot; removes all outgoing Via: headers)</span><br><span class="line">	# Set to one of: Off | On | Full | Block</span><br><span class="line">	#ProxyVia Off</span><br><span class="line"></span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line"></span><br><span class="line"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span><br></pre></td></tr></table></figure>
-<p>这算是综合了网上各种奇奇怪怪的博客到腾出来的能用的配置。</p>
-<p>首先要监听端口号，然后创建一个虚拟主机，响应本机的端口，接着开启代理模式，控制入网的IP(先deny 后allow，只允许特定的IP使用代理服务)。</p>
-<p>最后重启服务即可。</p>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>配置完成后，现在就能代理http协议了(https协议以后再说)。将符合allow条件的主机使用该服务器进行代理，打开网页抓包今后就能发现Remote Address已经变成了代理的IP，而且也多了几个proxy-开头的头信息，这就说明代理已经完成了。</p>
-<p>当然也可以用python脚本进行代理测试，代码就不贴了，很简单。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/26228727/proxy-no-protocol-handler-was-valid-for-the-url-if-you-are-using-a-dso-versi">StackOverflow——proxy: No protocol handler was valid for the URL </a><br><a target="_blank" rel="noopener" href="https://httpd.apache.org/docs/current/mod/mod_proxy.html">Apache Module mod_proxy</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/23/MySQL+python%E6%8E%A5%E5%8F%A3%E6%9B%B4%E6%96%B0%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/23/MySQL+python%E6%8E%A5%E5%8F%A3%E6%9B%B4%E6%96%B0%E9%97%AE%E9%A2%98/" itemprop="url">MySQL+python接口更新问题</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-23T15:08:06+00:00">
-                2016-08-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>从前用MySQL的python接口一直是可以用的，但是好像是在ubuntu升级到16.04之后<code>import MySQLdb</code> 的时候就会报下面这个错：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ImportError: libmysqlclient.so.18: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
-<p>他说有个库找不到，于是我就在本地用locate 找了找，竟然找到了libmysqlclient.so.20这个东西。。。本地的版本竟然比需求的版本高，这就很纠结了。通常情况下如果这个文件找不到，那我们可以想办法下载这个库；如果版本过低，那就升级更新下就好了；但是现在是版本过高，这时候有不太好换成版本低的。。。</p>
-<p>整了好久，终于在<a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/34536914/pythons-mysqldb-can-t-find-libmysqlclient-dylib-with-homebrewed-mysql">stackoverflow</a>里找到了解决办法，就是用pip先卸载MySQL-python然后再安装。。。感觉这个大概就是把MySQL-python升级一下，使他不再依赖老版本，而是依赖新版本的libmysqlclient库。。。也是醉了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/12/bower/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/12/bower/" itemprop="url">好用的Web包管理器-Bower</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-12T07:32:41+00:00">
-                2016-08-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
-                    <span itemprop="name">环境配置</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Bower是twitter推出的客户端包管理工具，用于命令行操作包的搜索、下载、更新、卸载(如jQuery、Bootstrap、JavaScript、HTML、CSS之类的网络资源)。Bower对包结构没有强制规范，可以很方便获取各种Web模块文件，但bower本身不存储模块文件和模块版本信息，模块发布者通过register方式将模块可访问的公开的git地址记录在bower的数据库中，而所有版本都是通过代码库的tag来决定的。</p>
+          <p><code>Interative</code>是目前常用的一种 CPU 调速器，其特点是 CPU 频率是根据负载实现交互式反应。但是与<code>ondemand</code>和<code>conserative</code>不同的是，<code>interative</code>拥有一些不同的参数配置方式。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/08/12/bower/#more" rel="contents">
+            <a class="btn" href="/2016/12/23/cpu-governer-interative-core-ctl/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/22/adb-Android-Debug-Bridge-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/22/adb-Android-Debug-Bridge-2/" itemprop="url">adb设备信息查询修改刷机等命令</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-22T10:51:53+00:00">
+                2016-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>ADB很强大，记住一些ADB命令有助于提高工作效率。<br>通过ADB命令查看wifi密码、MAC地址、设备信息、操作文件、查看文件、日志信息、卸载、启动和安装APK等</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/12/22/adb-Android-Debug-Bridge-2/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1805,7 +1833,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/32/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><span class="page-number current">33</span><a class="page-number" href="/page/34/">34</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/34/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/32/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><span class="page-number current">33</span><a class="page-number" href="/page/34/">34</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/34/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1851,7 +1879,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">507</span>
+                  <span class="site-state-item-count">565</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1873,7 +1901,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">255</span>
+                  <span class="site-state-item-count">275</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

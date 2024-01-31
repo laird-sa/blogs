@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<meta name="baidu-site-verification" content="codeva-Ss7c9LFzfb" />
+<meta name="bytedance-verification-code" content="GHbi5zMz8c6TSVpY9rLD" />
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="shell,git," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="ssh-key对于Linux重度用户可是一个牛逼东西，简化登陆流程，可谓神器！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ssh-key用法">
+<meta property="og:url" content="https://www.resonanat.com/2024/01/23/ssh-key-usage/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="ssh-key对于Linux重度用户可是一个牛逼东西，简化登陆流程，可谓神器！">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-01-23T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-31T02:55:19.790Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="shell">
+<meta property="article:tag" content="git">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2024/01/23/ssh-key-usage/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-67H9TCZZ7N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-67H9TCZZ7N');
+</script>
+
+
+  <title>ssh-key用法 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2024/01/23/ssh-key-usage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">ssh-key用法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-01-23T00:00:00+00:00">
+                2024-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>ssh-key对于Linux重度用户可是一个牛逼东西，简化登陆流程，可谓神器！</p>
+<span id="more"></span>
+<h2 id="github"><a href="#github" class="headerlink" title="github"></a>github</h2><p>生成ssh-key可以免密码进入仓库，参考<a target="_blank" rel="noopener" href="https://help.github.com/articles/generating-ssh-keys/">github官方教程</a></p>
+<h3 id="确认重名key"><a href="#确认重名key" class="headerlink" title="确认重名key"></a>确认重名key</h3><p>一、首先看看有没有之前生成的旧key</p>
+<pre><code>ls -al ~/.ssh
+</code></pre>
+<p>若有旧ssh-key，可以选择删除，也可以后来生成时候指定产生新文件名</p>
+<h3 id="生成key"><a href="#生成key" class="headerlink" title="生成key"></a>生成key</h3><pre><code># Generate public/private rsa key pair.
+ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;
+# passphrase可以不用设置，设置了的话，每次用ssh都要输入
+</code></pre>
+<p>假设生成的自定义ssh-key为私钥 ~&#x2F;.ssh&#x2F;id_rsa_github 和 公钥 id_rsa_github.pub。</p>
+<blockquote>
+<p>提示：ssh-keygen支持生成多种类型的key，如以下例子，详见ssh-keygen的帮助命令</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -b 4096</span><br><span class="line">ssh-keygen -t dsa</span><br><span class="line">ssh-keygen -t ecdsa -b 521</span><br><span class="line">ssh-keygen -t ed25519</span><br></pre></td></tr></table></figure>
+
+<h3 id="本地添加私钥"><a href="#本地添加私钥" class="headerlink" title="本地添加私钥"></a>本地添加私钥</h3><p>首先重新生成hostname</p>
+<pre><code>ssh-keygen -R github.com
+</code></pre>
+<p>使得ssh-agent后台运行：</p>
+<pre><code>eval &quot;$(ssh-agent -s)&quot;
+</code></pre>
+<p>出现Agent pid XXXX这样的提示之后：</p>
+<pre><code>ssh-add ~/.ssh/id_rsa_github
+</code></pre>
+<h3 id="远端添加公钥"><a href="#远端添加公钥" class="headerlink" title="远端添加公钥"></a>远端添加公钥</h3><p>打开公钥：【注意是公钥！！】</p>
+<pre><code>cat id_rsa_github.pub
+</code></pre>
+<p>将内容拷贝至<a target="_blank" rel="noopener" href="https://github.com/settings/ssh">https://github.com/settings/ssh</a>中，这个key成为完全控制每一个仓库commit权限，要谨慎保存，泄露的话你的github说不定仓库被人清空了。</p>
+<h3 id="联机验证登录"><a href="#联机验证登录" class="headerlink" title="联机验证登录"></a>联机验证登录</h3><pre><code>ssh -T git@github.com
+</code></pre>
+<p>添加到本机缓存中，然后github提示You’ve successfully authenticated。<br>然后你的deploy key页面的钥匙图标变成绿色，代表可以使用了</p>
+<h3 id="改用ssh推送"><a href="#改用ssh推送" class="headerlink" title="改用ssh推送"></a>改用ssh推送</h3><p>修改你的本地仓库中的config</p>
+<pre><code>vi .git/config
+# 注释掉https
+# url = https://github.com/USERNAME/REPO_NAME.git
+# 更换为ssh,注意有个冒号
+url = git@github.com:USERNAME/REPO_NAME.git
+</code></pre>
+<p>+安全提示：+</p>
+<p><em>强烈建议每一个仓库对应一个key，而不是用一个权限无穷大的key，风险太大。<br>每个仓库的key可以在下面地址设置：</em></p>
+<pre><code>https://github.com/USERNAME/REPO_NAME/settings/keys
+</code></pre>
+<p>试一下git push，是不是可以自动推送了。</p>
+<h2 id="自动登陆VPS"><a href="#自动登陆VPS" class="headerlink" title="自动登陆VPS"></a>自动登陆VPS</h2><p>首先确保vps上面的iptables规则允许22端口入站出站</p>
+<p>PC机子执行</p>
+<pre><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;
+</code></pre>
+<p>如私钥保存为~&#x2F;.ssh&#x2F;id_rsa_myhost，则修改config</p>
+<pre><code>vi ~/.ssh/config
+# 添加
+Host myhost
+ User root
+ Hostname 111.222.111.222
+ Port 22
+ ServerAliveInterval 30
+ IdentityFile ~/.ssh/id_rsa_myhost
+ 
+</code></pre>
+<p>上传公钥到你的vps</p>
+<pre><code>scp ~/.ssh/id_rsa_myhost.pub root@111.222.111.222:/root/.ssh/
+</code></pre>
+<p>登陆到vps添加公钥记录</p>
+<pre><code>cd ~/.ssh
+cat id_rsa_myhost.pub &gt;&gt; authorized_keys
+service ssh restart
+</code></pre>
+<p>修改权限，防止被他人看见密钥内容</p>
+<pre><code># PC机子和VPS都要设置
+chmod 700 ~/.ssh/* 
+</code></pre>
+<p>这样在PC就能使用一句话登陆ssh或者scp传文件了</p>
+<pre><code>ssh myhost
+scp /tmp/test.txt myhost:/tmp/
+</code></pre>
+<p>安全设置：对于已经开启了公私鈅登陆的主机，可以禁用密码登陆，效果是：使用密码无权进入</p>
+<pre><code>vi /etc/ssh/sshd_config
+
+# 仅允许root用户使用公私鈅登陆（不允许密码登陆）
+PermitRootLogin prohibit-password
+
+# 禁止一切用户使用密码登陆（这个选项根据个人实际设置，默认值是yes）
+PasswordAuthentication no
+</code></pre>
+<h2 id="TC自动部署hexo"><a href="#TC自动部署hexo" class="headerlink" title="TC自动部署hexo"></a>TC自动部署hexo</h2><p>可以自动更新博客，这个TC原本的目的不是这样的。<br>TC原本是代码集成平台，居然用成了博客自动更新机，真是大材小用。</p>
+<p>首先关联github账户到travis-CI，然后勾选博客的源代码项目，不是github.io项目。<br>接下来完成ssh的绑定和.travis.yml修改</p>
+<p>在Cloud9上面的虚拟主机操作。因为集成了npm环境。</p>
+<p>安装travis：</p>
+<pre><code>gem install travis
+travis login --auto
+</code></pre>
+<p>上传密钥到cloud9，然后放到项目里面，例如我的项目是github.com&#x2F;aaa&#x2F;bbb，私钥名称id_rsa_github</p>
+<pre><code>mv id_rsa_github aaa/bbb/
+cd aaa/bbb
+touch .travis.yml
+travis encrypt-file id_rsa_github --add
+</code></pre>
+<p>最后把私钥删除了，留下了这个加密后的私钥。</p>
+<p>新建一个ssh配置文件：</p>
+<pre><code>vi ssh_config
+# # #
+Host github.com
+  User git
+  StrictHostKeyChecking no
+  IdentityFile ~/.ssh/id_rsa
+  IdentitiesOnly yes
+</code></pre>
+<p>修改travis脚本</p>
+<pre><code>vi .travis.yml
+# 输入内容
+language: node_js
+node_js:
+- 4.2 
+branches:
+only:
+- master
+- test
+before_install:
+- openssl aes-256-cbc -K $encrypted_f88d79a9e3f2_key -iv $encrypted_f88d79a9e3f2_iv -in .travis/id_rsa.enc -out ~/.ssh/id_rsa -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- cp .travis/ssh_config ~/.ssh/config
+- mkdir temp_lxc
+- cd temp_lxc
+install:
+- npm install -g hexo-cli
+- npm install hexo --save
+- hexo init
+- npm install hexo-deployer-git --save
+before_script:
+- cp -R ../source ./
+- cp -R ../themes ./
+- cp ../_config.yml ./
+- git config --global user.name &#39;lixingcong&#39;
+- git config --global user.email &#39;lixingcong@live.com&#39;
+script:
+- hexo clean
+- hexo d -g
+</code></pre>
+<p>实际上，这个文件非常灵活，我是折腾很久才摸索出来的。每个人肯定不一样。我的是以自己的仓库改的，我的仓库地址：<a target="_blank" rel="noopener" href="https://github.com/lixingcong/my_hexo_blog">my_hexo_blog</a></p>
+<p>How to work? 向my_hexo_blog推送的同时，自动更新lixingcong.github.io。</p>
+<p>如果遇到问题，可以谷歌关键词“Travis CI Hexo”得到很多结果，可供参考</p>
+<h2 id="GPG签名"><a href="#GPG签名" class="headerlink" title="GPG签名"></a>GPG签名</h2><p>直接生成，填入正确信息，还有密码（可选），按<a target="_blank" rel="noopener" href="https://help.github.com/articles/generating-a-new-gpg-key/">Github官方教程</a>操作即可。</p>
+<pre><code>gpg --gen-key
+</code></pre>
+<p>生成过程需要大量随机字节。可以动鼠标还有打字。时不时在GPG生成界面按一下Enter提醒它。</p>
+<p>查看GPG</p>
+<pre><code>gpg --list-keys
+# 记下 第一行的公钥2048/A8F99211后面的这个A8F99211
+# 后面用到它：&lt;public GPG key&gt;
+</code></pre>
+<p>将公钥导入到github中，将本地提交打上tag</p>
+<pre><code>git config --global user.signingkey &lt;public GPG key&gt;
+</code></pre>
+<p>其中 &lt; public GPG key &gt;为上面你记下的公钥</p>
+<p>备份GPG：(包括公钥，私钥，信赖库)</p>
+<pre><code>gpg -a --export user@mail.com &gt; ~/public-gpg.key
+gpg -a --export-secret-keys user@mail.com &gt; ~/secret-gpg.key
+gpg --export-ownertrust &gt; ~/ownertrust.txt
+</code></pre>
+<p>还原GPG(导入私钥时自动导入公钥)</p>
+<pre><code>gpg --import ~/secret-gpg.key
+gpg --import-ownertrust ~/ownertrust.txt
+</code></pre>
+<p>git提交commit时候进行签名</p>
+<pre><code># 配置git
+git config --global user.signingkey &lt;public GPG key&gt;
+
+# 对tag进行GPG签名。参数-s
+git tag -a -s v2.0 -m &quot;SIGN-MY-TAG&quot;
+</code></pre>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/shell/" rel="tag"># shell</a>
+          
+            <a href="/tags/git/" rel="tag"># git</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/01/23/test-vps-memory/" rel="next" title="测试VPS真实内存">
+                <i class="fa fa-chevron-left"></i> 测试VPS真实内存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/01/23/ss-redir-ipset/" rel="prev" title="ss-redir配合ipset转发TCP+UDP">
+                ss-redir配合ipset转发TCP+UDP <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#github"><span class="nav-number">1.</span> <span class="nav-text">github</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AE%E8%AE%A4%E9%87%8D%E5%90%8Dkey"><span class="nav-number">1.1.</span> <span class="nav-text">确认重名key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90key"><span class="nav-number">1.2.</span> <span class="nav-text">生成key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E6%B7%BB%E5%8A%A0%E7%A7%81%E9%92%A5"><span class="nav-number">1.3.</span> <span class="nav-text">本地添加私钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9C%E7%AB%AF%E6%B7%BB%E5%8A%A0%E5%85%AC%E9%92%A5"><span class="nav-number">1.4.</span> <span class="nav-text">远端添加公钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%94%E6%9C%BA%E9%AA%8C%E8%AF%81%E7%99%BB%E5%BD%95"><span class="nav-number">1.5.</span> <span class="nav-text">联机验证登录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E7%94%A8ssh%E6%8E%A8%E9%80%81"><span class="nav-number">1.6.</span> <span class="nav-text">改用ssh推送</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E7%99%BB%E9%99%86VPS"><span class="nav-number">2.</span> <span class="nav-text">自动登陆VPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TC%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2hexo"><span class="nav-number">3.</span> <span class="nav-text">TC自动部署hexo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPG%E7%AD%BE%E5%90%8D"><span class="nav-number">4.</span> <span class="nav-text">GPG签名</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/11/14/java%E8%BF%90%E8%A1%8C%E6%9C%9F%E7%9A%84%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E6%96%B9%E6%A1%88/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/11/25/env-centos8-git-gogs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -326,7 +326,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/11/14/java%E8%BF%90%E8%A1%8C%E6%9C%9F%E7%9A%84%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E6%96%B9%E6%A1%88/" itemprop="url">java运行期的版本控制方案</a></h2>
+                <a class="post-title-link" href="/2020/11/25/env-centos8-git-gogs/" itemprop="url">「环境配置」Centos 8 私人Git服务器搭建(Gogs)</a></h2>
         
 
         <div class="post-meta">
@@ -338,8 +338,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-14T14:06:58+00:00">
-                2018-11-14
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-25T10:11:23+00:00">
+                2020-11-25
               </time>
             
 
@@ -361,8 +361,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
                   </a>
                 </span>
 
@@ -399,215 +399,10 @@
 
       
         
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>前两天我们组负责的一个组件发生了一个与jar包版本号有关的线上bug，最近没啥事情，就顺便分析了一下。</p>
-<p>其实是个非常无脑的小bug：<code>commons-lang3</code>包中有一堆<code>@since 3.5</code>的新增方法，我们的组件依赖了<code>3.5</code>版本以上的一个包；业务方依赖了我们的这个组件，同时也直接依赖了一个<code>3.5</code>版本以下的包。在gradle打包的时候，由于老版本的是直接依赖，新版本的是间接依赖，直接依赖优先级高于间接依赖，因此最终采用的是老版本的包。这就导致在运行期调用新方法的时候会报<code>NoSuchMethod</code>的错。</p>
-<p>虽然问题很简单，但毕竟也是一个影响了GMV的线上事故（可怕），值得吸取一波教训。</p>
-<h1 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h1><p>一般来说，在比较大的项目里，依赖冲突这种事情几乎是无法避免的。一般来说，这种问题的解决方法大多是下面几种：</p>
-<ol>
-<li>对于业务方来说，写代码的时候小心一点，遇到不同依赖的时候，有意识的检查一下依赖树，尽量使用较新的包，并且代码上线之前需要在测试环境充分测试。</li>
-<li>对于组件开发方来说，在写接入文档的时候要同时指明依赖的包的最低版本号，清楚地告诉接入方最低的依赖，然后再由接入方手动指定。</li>
-<li>采用容器技术，比如OSGI、Jigsaw、Karaf这些容器，对jar包再进行一层权限控制。这是一种十分重量级的方法，一般项目得上了一定的规模才会使用。</li>
-<li>采用ClassLoader隔离技术，各个包都使用自己的classLoader，互相不影响。这种方法其实很像是容器技术的阉割版，逻辑上很像容器，对jar包再做一层隔离控制。不过这种方式一般不是很优雅，有点像hack，因此目前看起来没什么像样的完整解决方案。稍微像样点的大概就是阿里最近搞的<a target="_blank" rel="noopener" href="https://github.com/alipay/sofa-ark">Sofa ark</a>，功能挺强大，但是用起来也比较复杂，对jar包的侵入性也很强。</li>
-</ol>
-<p>各个方法其实都不是很方便，那就换一个思路，既然避免问题比较困难，那就尽量早点暴露问题。编译错误或者启动错误肯定会比运行时不知道啥时候报错更让人放心。因此根据<code>fail fast</code>原则，我们应当保证在不增加沟通成本的情况下，快速暴露问题。</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>既然很多依赖冲突问题在编译、打包时都不会报错，那就只能尽量在启动时报错了。因此对于一个稳定的组件来说，做一个运行时的启动检查也就有一定的合理性了。</p>
-<p>为了能在运行时进行依赖检查，肯定要想办法在运行时获得某个包的版本号。那如何在打包时把版本信息写在jar包里，然后再读出来呢？这就要从JarFile的加载说起了。</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>加载一个jarFile，当然是要用ClassLoader，比如对于URLClassLoader。根据之前<a href="/2017/12/17/1/">对ClassLoader的分析</a>，查询下源码就会发现如下的加载流程：</p>
-<ul>
-<li><p>URLClassLoader在<code>loadClass</code>时，根据双亲委托模型，最终会用<code>findClass(String name)</code>方法用于查询特定类。</p>
-</li>
-<li><p><code>findClass(String name)</code>方法会调用<code>defineClass(String name, Resource res)</code>方法用于加载特定类，并通过<code>ucp.getResource</code>去加载<code>JarFile</code>：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; findClass(<span class="keyword">final</span> String name)</span><br><span class="line">        <span class="keyword">throws</span> ClassNotFoundException</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">final</span> Class&lt;?&gt; result;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            result = AccessController.doPrivileged(</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">PrivilegedExceptionAction</span>&lt;Class&lt;?&gt;&gt;() &#123;</span><br><span class="line">                    <span class="keyword">public</span> Class&lt;?&gt; run() <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">                        <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> name.replace(<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;/&#x27;</span>).concat(<span class="string">&quot;.class&quot;</span>);</span><br><span class="line">                        <span class="type">Resource</span> <span class="variable">res</span> <span class="operator">=</span> ucp.getResource(path, <span class="literal">false</span>);</span><br><span class="line">                        <span class="keyword">if</span> (res != <span class="literal">null</span>) &#123;</span><br><span class="line">                            <span class="keyword">try</span> &#123;</span><br><span class="line">                                <span class="keyword">return</span> defineClass(name, res);</span><br><span class="line">                            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(name, e);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;, acc);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (java.security.PrivilegedActionException pae) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (ClassNotFoundException) pae.getException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (result == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>JarFile</code>中定义了一个<code>Manifest</code>对象，用于存储Jar包的元信息：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">JarFile</span> <span class="keyword">extends</span> <span class="title class_">ZipFile</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> SoftReference&lt;Manifest&gt; manRef;</span><br><span class="line">    <span class="keyword">private</span> JarEntry manEntry;</span><br><span class="line">    <span class="keyword">private</span> JarVerifier jv;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> jvInitialized;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> verify;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// indicates if Class-Path attribute present (only valid if hasCheckedSpecialAttributes true)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> hasClassPathAttribute;</span><br><span class="line">    <span class="comment">// true if manifest checked for special attributes</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">boolean</span> hasCheckedSpecialAttributes;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set up JavaUtilJarAccess in SharedSecrets</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        SharedSecrets.setJavaUtilJarAccess(<span class="keyword">new</span> <span class="title class_">JavaUtilJarAccessImpl</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * The JAR manifest file name.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">MANIFEST_NAME</span> <span class="operator">=</span> <span class="string">&quot;META-INF/MANIFEST.MF&quot;</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>可见这里明确指定了MANIFEST文件的路径。</p>
-</li>
-<li><p><code>ManiFest</code>类中定义了一个<code>Attributes</code>对象，用来保存一些关键的特征：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Manifest</span> <span class="keyword">implements</span> <span class="title class_">Cloneable</span> &#123;</span><br><span class="line">    <span class="comment">// manifest main attributes</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">Attributes</span> <span class="variable">attr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Attributes</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// manifest entries</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, Attributes&gt; entries = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Constructs a new, empty Manifest.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Manifest</span><span class="params">()</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>Attributes</code>对象定义了一个叫<code>Name</code>的内部类，用来保存一些内定的属性（关键）：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Name</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">hashCode</span> <span class="operator">=</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Constructs a new attribute name using the given string name.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> name the attribute string name</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@exception</span> IllegalArgumentException if the attribute name was</span></span><br><span class="line"><span class="comment">     *            invalid</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@exception</span> NullPointerException if the attribute name was null</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Name</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (name == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!isValid(name)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">this</span>.name = name.intern();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isValid</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> name.length();</span><br><span class="line">        <span class="keyword">if</span> (len &gt; <span class="number">70</span> || len == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!isValid(name.charAt(i))) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isValid</span><span class="params">(<span class="type">char</span> c)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> isAlpha(c) || isDigit(c) || c == <span class="string">&#x27;_&#x27;</span> || c == <span class="string">&#x27;-&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isAlpha</span><span class="params">(<span class="type">char</span> c)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (c &gt;= <span class="string">&#x27;a&#x27;</span> &amp;&amp; c &lt;= <span class="string">&#x27;z&#x27;</span>) || (c &gt;= <span class="string">&#x27;A&#x27;</span> &amp;&amp; c &lt;= <span class="string">&#x27;Z&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isDigit</span><span class="params">(<span class="type">char</span> c)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> c &gt;= <span class="string">&#x27;0&#x27;</span> &amp;&amp; c &lt;= <span class="string">&#x27;9&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Compares this attribute name to another for equality.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> o the object to compare</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> true if this attribute name is equal to the</span></span><br><span class="line"><span class="comment">     *         specified attribute object</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object o)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (o <span class="keyword">instanceof</span> Name) &#123;</span><br><span class="line">            Comparator&lt;String&gt; c = ASCIICaseInsensitiveComparator.CASE_INSENSITIVE_ORDER;</span><br><span class="line">            <span class="keyword">return</span> c.compare(name, ((Name)o).name) == <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Computes the hash value for this attribute name.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">hashCode</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (hashCode == -<span class="number">1</span>) &#123;</span><br><span class="line">            hashCode = ASCIICaseInsensitiveComparator.lowerCaseHashCode(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> hashCode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns the attribute name as a String.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Manifest-Version&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute. This attribute indicates the version number</span></span><br><span class="line"><span class="comment">     * of the manifest standard to which a JAR file&#x27;s manifest conforms.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/jar/jar.html#JAR_Manifest&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Manifest and Signature Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">MANIFEST_VERSION</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Manifest-Version&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Signature-Version&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used when signing JAR files.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/jar/jar.html#JAR_Manifest&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Manifest and Signature Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">SIGNATURE_VERSION</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Signature-Version&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Content-Type&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">CONTENT_TYPE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Content-Type&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Class-Path&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute. Bundled extensions can use this attribute</span></span><br><span class="line"><span class="comment">     * to find other JAR files containing needed classes.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/jar/jar.html#classpath&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      JAR file specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">CLASS_PATH</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Class-Path&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Main-Class&lt;/code&gt; manifest</span></span><br><span class="line"><span class="comment">     * attribute used for launching applications packaged in JAR files.</span></span><br><span class="line"><span class="comment">     * The &lt;code&gt;Main-Class&lt;/code&gt; attribute is used in conjunction</span></span><br><span class="line"><span class="comment">     * with the &lt;code&gt;-jar&lt;/code&gt; command-line option of the</span></span><br><span class="line"><span class="comment">     * &lt;tt&gt;java&lt;/tt&gt; application launcher.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">MAIN_CLASS</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Main-Class&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Sealed&lt;/code&gt; manifest attribute</span></span><br><span class="line"><span class="comment">     * used for sealing.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/jar/jar.html#sealing&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Package Sealing&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">SEALED</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Sealed&quot;</span>);</span><br><span class="line"></span><br><span class="line">   <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Extension-List&lt;/code&gt; manifest attribute</span></span><br><span class="line"><span class="comment">     * used for declaring dependencies on installed extensions.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/extensions/spec.html#dependency&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Installed extension dependency&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">EXTENSION_LIST</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Extension-List&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Extension-Name&lt;/code&gt; manifest attribute</span></span><br><span class="line"><span class="comment">     * used for declaring dependencies on installed extensions.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/extensions/spec.html#dependency&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Installed extension dependency&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">EXTENSION_NAME</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Extension-Name&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Extension-Name&lt;/code&gt; manifest attribute</span></span><br><span class="line"><span class="comment">     * used for declaring dependencies on installed extensions.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@deprecated</span> Extension mechanism will be removed in a future release.</span></span><br><span class="line"><span class="comment">     *             Use class path instead.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/extensions/spec.html#dependency&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Installed extension dependency&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">EXTENSION_INSTALLATION</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Extension-Installation&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Implementation-Title&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/versioning/spec/versioning2.html#wp90779&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Java Product Versioning Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">IMPLEMENTATION_TITLE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Implementation-Title&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Implementation-Version&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/versioning/spec/versioning2.html#wp90779&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Java Product Versioning Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">IMPLEMENTATION_VERSION</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Implementation-Version&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Implementation-Vendor&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/versioning/spec/versioning2.html#wp90779&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Java Product Versioning Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">IMPLEMENTATION_VENDOR</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Implementation-Vendor&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Implementation-Vendor-Id&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@deprecated</span> Extension mechanism will be removed in a future release.</span></span><br><span class="line"><span class="comment">     *             Use class path instead.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/extensions/versioning.html#applet&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Optional Package Versioning&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">IMPLEMENTATION_VENDOR_ID</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Implementation-Vendor-Id&quot;</span>);</span><br><span class="line"></span><br><span class="line">   <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Implementation-URL&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@deprecated</span> Extension mechanism will be removed in a future release.</span></span><br><span class="line"><span class="comment">     *             Use class path instead.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/extensions/versioning.html#applet&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Optional Package Versioning&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">IMPLEMENTATION_URL</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Implementation-URL&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Specification-Title&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/versioning/spec/versioning2.html#wp90779&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Java Product Versioning Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">SPECIFICATION_TITLE</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Specification-Title&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Specification-Version&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/versioning/spec/versioning2.html#wp90779&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Java Product Versioning Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">SPECIFICATION_VERSION</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Specification-Version&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &lt;code&gt;Name&lt;/code&gt; object for &lt;code&gt;Specification-Vendor&lt;/code&gt;</span></span><br><span class="line"><span class="comment">     * manifest attribute used for package versioning.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> &lt;a href=&quot;../../../../technotes/guides/versioning/spec/versioning2.html#wp90779&quot;&gt;</span></span><br><span class="line"><span class="comment">     *      Java Product Versioning Specification&lt;/a&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Name</span> <span class="variable">SPECIFICATION_VENDOR</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Name</span>(<span class="string">&quot;Specification-Vendor&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>这里定义了大量的属性名，当一个jarfile的Manifest文件中有这些属性，这些属性就会被识别。</p>
-</li>
-<li><p>在加载了上面的JarFile之后，<code>defineClass(String name, Resource res)</code>方法会继续调用一系列的<code>definePackage</code>方法，用于定义<code>Package</code>类：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Package <span class="title function_">definePackage</span><span class="params">(String name, Manifest man, URL url)</span></span><br><span class="line">    <span class="keyword">throws</span> IllegalArgumentException</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> name.replace(<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;/&#x27;</span>).concat(<span class="string">&quot;/&quot;</span>);</span><br><span class="line">    <span class="type">String</span> <span class="variable">specTitle</span> <span class="operator">=</span> <span class="literal">null</span>, specVersion = <span class="literal">null</span>, specVendor = <span class="literal">null</span>;</span><br><span class="line">    <span class="type">String</span> <span class="variable">implTitle</span> <span class="operator">=</span> <span class="literal">null</span>, implVersion = <span class="literal">null</span>, implVendor = <span class="literal">null</span>;</span><br><span class="line">    <span class="type">String</span> <span class="variable">sealed</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="type">URL</span> <span class="variable">sealBase</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">Attributes</span> <span class="variable">attr</span> <span class="operator">=</span> man.getAttributes(path);</span><br><span class="line">    <span class="keyword">if</span> (attr != <span class="literal">null</span>) &#123;</span><br><span class="line">        specTitle   = attr.getValue(Name.SPECIFICATION_TITLE);</span><br><span class="line">        specVersion = attr.getValue(Name.SPECIFICATION_VERSION);</span><br><span class="line">        specVendor  = attr.getValue(Name.SPECIFICATION_VENDOR);</span><br><span class="line">        implTitle   = attr.getValue(Name.IMPLEMENTATION_TITLE);</span><br><span class="line">        implVersion = attr.getValue(Name.IMPLEMENTATION_VERSION);</span><br><span class="line">        implVendor  = attr.getValue(Name.IMPLEMENTATION_VENDOR);</span><br><span class="line">        <span class="keyword">sealed</span>      = attr.getValue(Name.SEALED);</span><br><span class="line">    &#125;</span><br><span class="line">    attr = man.getMainAttributes();</span><br><span class="line">    <span class="keyword">if</span> (attr != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (specTitle == <span class="literal">null</span>) &#123;</span><br><span class="line">            specTitle = attr.getValue(Name.SPECIFICATION_TITLE);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (specVersion == <span class="literal">null</span>) &#123;</span><br><span class="line">            specVersion = attr.getValue(Name.SPECIFICATION_VERSION);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (specVendor == <span class="literal">null</span>) &#123;</span><br><span class="line">            specVendor = attr.getValue(Name.SPECIFICATION_VENDOR);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (implTitle == <span class="literal">null</span>) &#123;</span><br><span class="line">            implTitle = attr.getValue(Name.IMPLEMENTATION_TITLE);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (implVersion == <span class="literal">null</span>) &#123;</span><br><span class="line">            implVersion = attr.getValue(Name.IMPLEMENTATION_VERSION);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (implVendor == <span class="literal">null</span>) &#123;</span><br><span class="line">            implVendor = attr.getValue(Name.IMPLEMENTATION_VENDOR);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">sealed</span> == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">sealed</span> = attr.getValue(Name.SEALED);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="string">&quot;true&quot;</span>.equalsIgnoreCase(<span class="keyword">sealed</span>)) &#123;</span><br><span class="line">        sealBase = url;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> definePackage(name, specTitle, specVersion, specVendor,</span><br><span class="line">                         implTitle, implVersion, implVendor, sealBase);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> Package <span class="title function_">definePackage</span><span class="params">(String name, String specTitle,</span></span><br><span class="line"><span class="params">                                String specVersion, String specVendor,</span></span><br><span class="line"><span class="params">                                String implTitle, String implVersion,</span></span><br><span class="line"><span class="params">                                String implVendor, URL sealBase)</span></span><br><span class="line">    <span class="keyword">throws</span> IllegalArgumentException</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (packages) &#123;</span><br><span class="line">        <span class="type">Package</span> <span class="variable">pkg</span> <span class="operator">=</span> getPackage(name);</span><br><span class="line">        <span class="keyword">if</span> (pkg != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(name);</span><br><span class="line">        &#125;</span><br><span class="line">        pkg = <span class="keyword">new</span> <span class="title class_">Package</span>(name, specTitle, specVersion, specVendor,</span><br><span class="line">                          implTitle, implVersion, implVendor,</span><br><span class="line">                          sealBase, <span class="built_in">this</span>);</span><br><span class="line">        packages.put(name, pkg);</span><br><span class="line">        <span class="keyword">return</span> pkg;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>这样，当从JarFile中加载一个类的时候，就顺便加载了他的Manifest文件，然后加载了Package对象。我们再来看Package对象的方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Package</span> <span class="keyword">implements</span> <span class="title class_">java</span>.lang.reflect.AnnotatedElement &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Return the name of this package.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span>  The fully-qualified name of this package as defined in section 6.5.3 of</span></span><br><span class="line"><span class="comment">     *          &lt;cite&gt;The Java&amp;trade; Language Specification&lt;/cite&gt;,</span></span><br><span class="line"><span class="comment">     *          for example, &#123;<span class="doctag">@code</span> java.lang&#125;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> pkgName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Return the title of the specification that this package implements.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the specification title, null is returned if it is not known.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getSpecificationTitle</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> specTitle;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns the version number of the specification</span></span><br><span class="line"><span class="comment">     * that this package implements.</span></span><br><span class="line"><span class="comment">     * This version string must be a sequence of nonnegative decimal</span></span><br><span class="line"><span class="comment">     * integers separated by &quot;.&quot;&#x27;s and may have leading zeros.</span></span><br><span class="line"><span class="comment">     * When version strings are compared the most significant</span></span><br><span class="line"><span class="comment">     * numbers are compared.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the specification version, null is returned if it is not known.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getSpecificationVersion</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> specVersion;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Return the name of the organization, vendor,</span></span><br><span class="line"><span class="comment">     * or company that owns and maintains the specification</span></span><br><span class="line"><span class="comment">     * of the classes that implement this package.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the specification vendor, null is returned if it is not known.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getSpecificationVendor</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> specVendor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Return the title of this package.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the title of the implementation, null is returned if it is not known.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getImplementationTitle</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> implTitle;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Return the version of this implementation. It consists of any string</span></span><br><span class="line"><span class="comment">     * assigned by the vendor of this implementation and does</span></span><br><span class="line"><span class="comment">     * not have any particular syntax specified or expected by the Java</span></span><br><span class="line"><span class="comment">     * runtime. It may be compared for equality with other</span></span><br><span class="line"><span class="comment">     * package version strings used for this implementation</span></span><br><span class="line"><span class="comment">     * by this vendor for this package.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the version of the implementation, null is returned if it is not known.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getImplementationVersion</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> implVersion;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns the name of the organization,</span></span><br><span class="line"><span class="comment">     * vendor or company that provided this implementation.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the vendor that implemented this package..</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getImplementationVendor</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> implVendor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns true if this package is sealed.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> true if the package is sealed, false otherwise</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isSealed</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> sealBase != <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns true if this package is sealed with respect to the specified</span></span><br><span class="line"><span class="comment">     * code source url.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> url the code source url</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> true if this package is sealed with respect to url</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isSealed</span><span class="params">(URL url)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> url.equals(sealBase);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Compare this package&#x27;s specification version with a</span></span><br><span class="line"><span class="comment">     * desired version. It returns true if</span></span><br><span class="line"><span class="comment">     * this packages specification version number is greater than or equal</span></span><br><span class="line"><span class="comment">     * to the desired version number. &lt;p&gt;</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * Version numbers are compared by sequentially comparing corresponding</span></span><br><span class="line"><span class="comment">     * components of the desired and specification strings.</span></span><br><span class="line"><span class="comment">     * Each component is converted as a decimal integer and the values</span></span><br><span class="line"><span class="comment">     * compared.</span></span><br><span class="line"><span class="comment">     * If the specification value is greater than the desired</span></span><br><span class="line"><span class="comment">     * value true is returned. If the value is less false is returned.</span></span><br><span class="line"><span class="comment">     * If the values are equal the period is skipped and the next pair of</span></span><br><span class="line"><span class="comment">     * components is compared.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> desired the version string of the desired version.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> true if this package&#x27;s version number is greater</span></span><br><span class="line"><span class="comment">     *          than or equal to the desired version number</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@exception</span> NumberFormatException if the desired or current version</span></span><br><span class="line"><span class="comment">     *          is not of the correct dotted form.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isCompatibleWith</span><span class="params">(String desired)</span></span><br><span class="line">        <span class="keyword">throws</span> NumberFormatException</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (specVersion == <span class="literal">null</span> || specVersion.length() &lt; <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NumberFormatException</span>(<span class="string">&quot;Empty version string&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        String [] sa = specVersion.split(<span class="string">&quot;\\.&quot;</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="type">int</span> [] si = <span class="keyword">new</span> <span class="title class_">int</span>[sa.length];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; sa.length; i++) &#123;</span><br><span class="line">            si[i] = Integer.parseInt(sa[i]);</span><br><span class="line">            <span class="keyword">if</span> (si[i] &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> NumberFormatException.forInputString(<span class="string">&quot;&quot;</span> + si[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        String [] da = desired.split(<span class="string">&quot;\\.&quot;</span>, -<span class="number">1</span>);</span><br><span class="line">        <span class="type">int</span> [] di = <span class="keyword">new</span> <span class="title class_">int</span>[da.length];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; da.length; i++) &#123;</span><br><span class="line">            di[i] = Integer.parseInt(da[i]);</span><br><span class="line">            <span class="keyword">if</span> (di[i] &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> NumberFormatException.forInputString(<span class="string">&quot;&quot;</span> + di[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> Math.max(di.length, si.length);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> (i &lt; di.length ? di[i] : <span class="number">0</span>);</span><br><span class="line">            <span class="type">int</span> <span class="variable">s</span> <span class="operator">=</span> (i &lt; si.length ? si[i] : <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span> (s &lt; d)</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">if</span> (s &gt; d)</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>可以发现，package类有很多get方法，这些方法基本和Attributes类的Name内部类中定义的名字一样，也就是说Package类能直接获取到Manifest文件中定义的变量。</p>
-</li>
-</ul>
-<p>与此同时，我们发现他也有一个<code>isCompatibleWith</code>方法，这个方法很有意思，他会将给定的一个版本号字符串与<code>Specification-Version</code>的值进行比较，用于判断当前的jar的版本是否不低于给定的版本号。</p>
-<p>利用这个方法，我们就可以非常方便的在类加载时做一个验证，断言当前运行的版本号一定不低于我们给定的一个版本号。</p>
-<h2 id="打包分析"><a href="#打包分析" class="headerlink" title="打包分析"></a>打包分析</h2><p>不过问题来了，随便打开几个包的Manifest文件，我这里以<code>fastjson</code>为例:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Manifest-Version: 1.0</span><br><span class="line">Archiver-Version: Plexus Archiver</span><br><span class="line">Built-By: wenshao</span><br><span class="line">Created-By: Apache Maven 3.5.0</span><br><span class="line">Build-Jdk: 1.8.0_151</span><br></pre></td></tr></table></figure>
-<p>我们发现这个文件非常简单，并没有之前定义的那些attributes。这样一来，package类也肯定是解析不到类似的方法的。那么我们如何在打包的时候加入这些信息呢？</p>
-<p>如果是用gradle打包的话，这就用到了gradle的java插件的一个功能了。在给定的项目下添加一个打包命令的一个配置：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jar.manifest.attributes(&quot;Specification-Version&quot;: &#x27;1.0.0&#x27;)</span><br></pre></td></tr></table></figure>
-<p>这样就可以将”Specification-Version”这个属性加到打包后的jarFile里了，详见参考资料中的gradle docs。</p>
-<p>不过需要注意的是，这个值一定要是点号分隔的数字，不要加任何其他字符，否则调用isCompatibleWith方法时就会抛异常。</p>
-<p>因此一般来说，我会这样进行配置，用以兼容以”-SNAPSHOT”结尾的版本号:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jar.manifest.attributes(&quot;Specification-Version&quot;: version.split(&quot;-&quot;)[0])</span><br></pre></td></tr></table></figure>
-
-<h2 id="使用分析"><a href="#使用分析" class="headerlink" title="使用分析"></a>使用分析</h2><p>打完包之后，我们就可以很happy的在组件启动时，进行版本检查：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!TestMain.class.getPackage().isCompatibleWith(<span class="string">&quot;1.2.2&quot;</span>))&#123;</span><br><span class="line">        <span class="comment">//TODO 报一错出来</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其中的”1.2.2”可以配置在Lion或者Apollo这样的配置中心里，以统一管理。</p>
-<p>不过蛋疼的是，不是所有的第三方包的jarfile里都自带版本信息的，比如上面的fastjson。。。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/building_java_projects.html#sec:jar_manifest">Gradle Docs</a></p>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/20994766/jar-manifest-file-difference-between-specification-and-implementation">StackOverflow</a></p>
-<p><a target="_blank" rel="noopener" href="https://alipay.github.io/sofastack.github.io/">SOFA Ark</a></p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/t894690230/article/details/73252331">Java 自定义 ClassLoader 实现隔离运行不同版本jar包的方式</a></p>
-<p><a target="_blank" rel="noopener" href="http://codemacro.com/2015/09/05/java-lightweight-container/">Java中隔离容器的实现</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/11/12/elastic-base/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/12/elastic-base/" itemprop="url">「ElasticStack」ElasticSearch入门</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-12T12:42:59+00:00">
-                2018-11-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/ElasticStack/" itemprop="url" rel="index">
-                    <span itemprop="name">ElasticStack</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><h4 id="1-1-ElasticStack特点"><a href="#1-1-ElasticStack特点" class="headerlink" title="1.1 ElasticStack特点"></a>1.1 ElasticStack特点</h4><ol>
-<li>使用门槛低，开发周期短，上线快</li>
-<li>性能好，查询快，实时展示结果</li>
-<li>扩容方便，快速支撑增长迅猛的数据
+          <h3 id="1-创建gogs用户"><a href="#1-创建gogs用户" class="headerlink" title="1. 创建gogs用户"></a>1. 创建gogs用户</h3><p>为Gogs创建一个MySQL用户<code>gogs</code>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/11/12/elastic-base/#more" rel="contents">
+            <a class="btn" href="/2020/11/25/env-centos8-git-gogs/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -658,7 +453,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/10/17/database-mongodb/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/11/25/env-centos8-nexus/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -677,7 +472,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/10/17/database-mongodb/" itemprop="url">「数据库」MongoDB学习笔记</a></h2>
+                <a class="post-title-link" href="/2020/11/25/env-centos8-nexus/" itemprop="url">「环境配置」使用Nexus搭建Maven私服（CentOS 8）</a></h2>
         
 
         <div class="post-meta">
@@ -689,8 +484,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-17T10:20:16+00:00">
-                2018-10-17
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-25T10:11:23+00:00">
+                2020-11-25
               </time>
             
 
@@ -712,8 +507,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
-                    <span itemprop="name">数据库</span>
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
                   </a>
                 </span>
 
@@ -750,10 +545,10 @@
 
       
         
-          <h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><p>在mongodb官网下载对应自己电脑系统的安装包，地址为： <a target="_blank" rel="noopener" href="http://www.mongodb.org/downloads">http://www.mongodb.org/downloads</a>。</p>
+          <p><strong>Maven私服</strong> 就是在内网架设一个<code>Maven仓库服务器</code>，在代理远程仓库的同时维护本地仓库。<br>当我们需要下载一些构件（artifact）时，如果本地仓库没有，再去私服下载，私服没有，再去中央仓库下载。
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/10/17/database-mongodb/#more" rel="contents">
+            <a class="btn" href="/2020/11/25/env-centos8-nexus/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -804,7 +599,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/09/01/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%882%EF%BC%89/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/11/20/env-centos8-tomcat9/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -823,7 +618,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/09/01/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%882%EF%BC%89/" itemprop="url">TooSimple的工作周记（2）</a></h2>
+                <a class="post-title-link" href="/2020/11/20/env-centos8-tomcat9/" itemprop="url">「环境配置」Tomcat9安装及多实例多应用配置(CentOS 8)</a></h2>
         
 
         <div class="post-meta">
@@ -835,8 +630,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T08:05:56+00:00">
-                2018-09-01
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-20T10:11:23+00:00">
+                2020-11-20
               </time>
             
 
@@ -858,8 +653,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Note/" itemprop="url" rel="index">
-                    <span itemprop="name">Note</span>
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
                   </a>
                 </span>
 
@@ -896,214 +691,916 @@
 
       
         
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这个礼拜似乎是写了一礼拜的业务代码，没遇到什么太恶心的坑，就是理解业务逻辑费了点功夫。下个礼拜似乎又要开始撸组件撸网页了，现在想想感觉还是写写业务比较舒服，没事可以怼怼产品，给前端找找bug，写完还可以慢慢测；撸组件就比较无聊了，容易出大锅，而且还得求着人家用，用出问题还会被怼。。。不过好处大概就是以后跳槽面试的时候不容易被问死吧。。。</p>
-<h1 id="知识-技巧"><a href="#知识-技巧" class="headerlink" title="知识&amp;技巧"></a>知识&amp;技巧</h1><h2 id="常用-see和-link注释"><a href="#常用-see和-link注释" class="headerlink" title="常用@see和@link注释"></a>常用@see和@link注释</h2><p>写代码的时候经常会遇到一些需要枚举的类型，比如“活动类型”、“数据来源”这类的。但是一般来讲我们不会直接用enum类型，因为这些数据一般都是以整数的形式存储在数据表里面，因此用整型去存储、转移会更加方便。所以一般我们都是直接声明成一个整型，然后用另外一个类去存储这个类型的值，比如:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//需要引用的地方</span></span><br><span class="line"><span class="type">int</span> xxxType;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//该类型的值</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">XxxType</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">type1</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">type2</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">type3</span> <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这样搞没啥问题，但是比较讨厌的就是，当另外一个人看到xxxType这个字段时，他可不知道这玩意的值是XxxType去记录的，他甚至有可能去用YyyType的类型去给xxxType赋值。这就说不清楚了。</p>
-<p>因此一个比较简单的方法就是把注释写清楚了，而相比普通的注释，java的文档注释就比较好用了。这里面有一个@see的注释，非常适合这种场景：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* <span class="doctag">@see</span> the.package.of.XxxType</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">int</span> xxxType;</span><br></pre></td></tr></table></figure>
+          <h3 id="1-Tomcat9安装"><a href="#1-Tomcat9安装" class="headerlink" title="1. Tomcat9安装"></a>1. Tomcat9安装</h3><p>使用wget获取：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.aliyun.com/apache/tomcat/tomcat-9/v9.0.41/bin/apache-tomcat-9.0.41.tar.gz</span><br></pre></td></tr></table></figure>
+<p>下载之后如果没有进入别的文件夹，压缩包一般是在&#x2F;root下面。进入&#x2F;root下面进行解压：
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/11/20/env-centos8-tomcat9/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
 
-<p>也可以使用{@link}注释，达到类似的效果:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* &#123;<span class="doctag">@link</span> the.package.of.XxxType&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">int</span> xxxType;</span><br></pre></td></tr></table></figure>
-<p>这样无论谁在给这个字段赋值时，都非常清楚的知道该赋什么值了。这一点jdk做的就非常好，要向他学习。。。</p>
-<h2 id="SQL的分页查询和滚动查询"><a href="#SQL的分页查询和滚动查询" class="headerlink" title="SQL的分页查询和滚动查询"></a>SQL的分页查询和滚动查询</h2><p>SQL里的limit语句分页的性能不高这个应该是个常识，因为limit语句其实只是对前面查询的结果进行了一个简单的过滤，而没有做任何额外的优化。比如说我们希望从一个表中把所有的数据批量同步出来，但是考虑到量比较大，所以我们会希望通过分页慢慢查而不是一次性查出来。一个比较弱智的做法就是这样:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable limit <span class="number">0</span>,<span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable limit <span class="number">1000</span>,<span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable limit <span class="number">2000</span>,<span class="number">1000</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>比如有1000w的数据，那我们只要查1w次就好了，似乎效果不错。但是实际上我们是每一次都把1000w个数据查出来然后进行的过滤，也就是执行了1w次的全表扫描。可能刚开始的时候比较快，因为不需要查询多少数据就攒满了1000个数据，直接返回了，但是越查到后面就一定会越慢。</p>
-<p>这时候正确的做法应该是尽量去使用索引来限制每一次查找的范围，使得每一次扫描不再是全表查找而是索引查找。具体的做法大概是这样：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">0</span> limit <span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">1000</span> limit <span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">2000</span> limit <span class="number">1000</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>当然，前提还是在id字段上加了索引。至于为什么说第二种方法会优于第一种方法，其实很简单：</p>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/11/06/segment-tree-tricks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/11/06/segment-tree-tricks/" itemprop="url">【Algorithm Notes】线段树的一些技巧</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-06T16:00:00+00:00">
+                2020-11-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OI/" itemprop="url" rel="index">
+                    <span itemprop="name">OI</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OI/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <blockquote>
+<p>线段树, OI中最为常用的一种数据结构之一, 特点是结构美丽, 性质特殊, 可以用来解决很多看似不相干的问题。</p>
+</blockquote>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/11/06/segment-tree-tricks/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/08/30/math/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/30/math/" itemprop="url">【Algorithm Notes】数学</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-30T14:24:00+00:00">
+                2020-08-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OI/" itemprop="url" rel="index">
+                    <span itemprop="name">OI</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OI/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>整理成了 PPT 形式，<a target="_blank" rel="noopener" href="http://47.110.12.131/problem/6666/testdata/download/%E6%95%B0%E5%AD%A6%E8%AF%BE.pptx">链接。</a></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/08/30/math/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/08/10/env-centos8-nfs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/10/env-centos8-nfs/" itemprop="url">「环境配置」CentOS 8 安装和配置 NFS 服务器</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-10T10:11:23+00:00">
+                2020-08-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>网络文件系统（NFS）是一个分布式文件系统协议，它允许你通过网络共享远程文件夹。</p>
+<p>NFS 协议默认是不加密的，不提供用户身份鉴别。服务端通过限定客户端的 IP 地址和端口来限制访问。
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/08/10/env-centos8-nfs/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/08/02/spring-boot-fastdfs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/02/spring-boot-fastdfs/" itemprop="url">「Spring」SpringBoot 整合 FastDFS</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-02T12:25:23+00:00">
+                2020-08-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index">
+                    <span itemprop="name">Spring</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="1-在maven项目pom-xml中添加依赖"><a href="#1-在maven项目pom-xml中添加依赖" class="headerlink" title="1. 在maven项目pom.xml中添加依赖"></a>1. 在maven项目pom.xml中添加依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.tobato<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>fastdfs-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.27.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/08/02/spring-boot-fastdfs/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/08/02/env-centos8-fastdfs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/02/env-centos8-fastdfs/" itemprop="url">「环境配置」Centos8 安装 FastDFS 6.06</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-02T10:11:23+00:00">
+                2020-08-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>FastDFS是一款开源的分布式文件系统，功能主要包括：文件存储、文件同步、文件访问（文件上传、文件下载）等，解决了文件大容量存储和高性能访问的问题。FastDFS特别适合以文件为载体的在线服务，如图片、视频、文档等等。
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/08/02/env-centos8-fastdfs/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/07/24/getting-started-overview-webrtc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/24/getting-started-overview-webrtc/" itemprop="url">WebRTC 入门指南</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-24T06:32:14+00:00">
+                2020-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/WebRTC/" itemprop="url" rel="index">
+                    <span itemprop="name">WebRTC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p><strong>WebRTC (Web Real-Time Communications)</strong> 是由谷歌开源并推进纳入 <code>W3C</code> 标准的一项实时通讯技术，它允许网络应用或者站点，在不借助中间媒介的情况下，建立浏览器之间点对点<code>（Peer-to-Peer）</code>的连接，实现视频流和（或）音频流或者其他任意数据的传输。<code>WebRTC</code> 包含的这些标准使用户在无需安装任何插件或者第三方的软件的情况下，创建点对点<code>（Peer-to-Peer）</code>的数据分享和电话会议成为可能。</p>
 <blockquote>
-<p>Talk is cheap , explain your SQL.</p>
+<p>与 <code>Web</code> 世界经典的 <code>B/S</code> 架构最大的不同是，<code>WebRTC</code> 的通信不经过服务器，而直接与客户端连接，在节省服务器资源的同时，提高通信效率。为了做到这点，一个典型的 <code>WebRTC</code> 通信过程，包含四个步骤：<code>找到对方</code>-&gt;<code>进行协商</code>-&gt;<code>建立连接</code>-&gt;<code>开始通讯</code>。下面将分别阐述这四个步骤。</p>
 </blockquote>
-<h2 id="SQL-MyBatis批量处理语句"><a href="#SQL-MyBatis批量处理语句" class="headerlink" title="SQL&amp;MyBatis批量处理语句"></a>SQL&amp;MyBatis批量处理语句</h2><p>我们知道每一条SQL语句都会有一个最少执行时间，无论这条语句有多简单，况且每一次网络传输也需要时间。因此如果有大批量的DML语句需要执行，写一个for循环挨个去执行显然是一个很蠢的方法。所以我们更加倾向于将多条查询语句拼凑成一条，一次性去请求数据库。</p>
-<p>对于批量查询，我们知道有 where in 语句，可以很方便的一次性查询多条记录，比如:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="keyword">in</span> ( <span class="number">1</span>, <span class="number">22</span>, <span class="number">333</span> );</span><br></pre></td></tr></table></figure>
-
-<p>对于批量插入，我们知道 insert 语句本身就可以支持同时插入多个values：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> someTable (id ,key) <span class="keyword">values</span> (<span class="number">1</span>,<span class="string">&#x27;aa&#x27;</span>),(<span class="number">22</span>,<span class="string">&#x27;bbb&#x27;</span>),(<span class="number">333</span>,<span class="string">&#x27;cccc&#x27;</span>);</span><br></pre></td></tr></table></figure>
-<p>对于批量更新，我们可以利用when case 语句结合where in语句，一次性更新：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> someTable <span class="keyword">set</span> key <span class="operator">=</span> <span class="keyword">case</span> <span class="keyword">when</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">then</span> <span class="string">&#x27;aa&#x27;</span> <span class="keyword">when</span> id<span class="operator">=</span><span class="number">22</span> <span class="keyword">then</span> <span class="string">&#x27;bbb&#x27;</span> <span class="keyword">when</span> id<span class="operator">=</span><span class="number">333</span> <span class="keyword">then</span> <span class="string">&#x27;ccc&#x27;</span> <span class="keyword">when</span> id <span class="keyword">in</span> (<span class="number">1</span>, <span class="number">22</span>, <span class="number">333</span>);</span><br></pre></td></tr></table></figure>
-
-<p>对于批量更新，如果使用mybatis，mapper大概是这样:</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">&quot;updateKey&quot;</span> <span class="attr">parameterType</span>=<span class="string">&quot;java.util.List&quot;</span>&gt;</span></span><br><span class="line">    update someTable</span><br><span class="line">    <span class="tag">&lt;<span class="name">trim</span> <span class="attr">prefix</span>=<span class="string">&quot;set&quot;</span> <span class="attr">suffixOverrides</span>=<span class="string">&quot;,&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">trim</span> <span class="attr">prefix</span>=<span class="string">&quot;key =case&quot;</span> <span class="attr">suffix</span>=<span class="string">&quot;end&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">collection</span>=<span class="string">&quot;list&quot;</span> <span class="attr">item</span>=<span class="string">&quot;item&quot;</span> <span class="attr">index</span>=<span class="string">&quot;index&quot;</span>&gt;</span></span><br><span class="line">                when id=#&#123;item.id,jdbcType=BIGINT&#125; then #&#123;item.key,jdbcType=VARCHAR&#125;</span><br><span class="line">            <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">trim</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">trim</span>&gt;</span></span><br><span class="line">    where id in</span><br><span class="line">    <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">collection</span>=<span class="string">&quot;list&quot;</span> <span class="attr">index</span>=<span class="string">&quot;index&quot;</span> <span class="attr">item</span>=<span class="string">&quot;item&quot;</span> <span class="attr">separator</span>=<span class="string">&quot;,&quot;</span> <span class="attr">open</span>=<span class="string">&quot;(&quot;</span> <span class="attr">close</span>=<span class="string">&quot;)&quot;</span>&gt;</span></span><br><span class="line">        #&#123;item.id,jdbcType=BIGINT&#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="Git-stash快速保存状态"><a href="#Git-stash快速保存状态" class="headerlink" title="Git stash快速保存状态"></a>Git stash快速保存状态</h2><p>一个之前一直没有注意到的git命令，主要用于把当前未保存的状态直接推到一个栈里暂存，并且将工作区环境清空，回头有空的时候也可以再把工作区恢复。当开发到一半突然要切分支的时候特别有用。。。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git stash -h</span><br><span class="line">usage: git stash list [&lt;options&gt;]</span><br><span class="line">   or: git stash show [&lt;stash&gt;]</span><br><span class="line">   or: git stash drop [-q|--quiet] [&lt;stash&gt;]</span><br><span class="line">   or: git stash ( pop | apply ) [--index] [-q|--quiet] [&lt;stash&gt;]</span><br><span class="line">   or: git stash branch &lt;branchname&gt; [&lt;stash&gt;]</span><br><span class="line">   or: git stash save [--patch] [-k|--[no-]keep-index] [-q|--quiet]</span><br><span class="line">                      [-u|--include-untracked] [-a|--all] [&lt;message&gt;]</span><br><span class="line">   or: git stash [push [--patch] [-k|--[no-]keep-index] [-q|--quiet]</span><br><span class="line">                       [-u|--include-untracked] [-a|--all] [-m &lt;message&gt;]</span><br><span class="line">                       [-- &lt;pathspec&gt;...]]</span><br><span class="line">   or: git stash clear</span><br></pre></td></tr></table></figure>
-
-<h2 id="Gradle将jar包打包到maven本地库"><a href="#Gradle将jar包打包到maven本地库" class="headerlink" title="Gradle将jar包打包到maven本地库"></a>Gradle将jar包打包到maven本地库</h2><p>主要利用gradle的<a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/maven_plugin.html">maven插件</a>。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: &#x27;maven&#x27;</span><br><span class="line">uploadArchives &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenDeployer &#123;</span><br><span class="line">            repository(url: uri(&#x27;C:\\Users\\admin\\.m2\\repository&#x27;))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>执行<code>gradle uploadArchives</code>命令即可。</p>
-<p>需要注意的是，gradle默认的缓存目录并不是maven的<code>~/.m2/repository/</code>下，而是类似<code>~/.gradle/caches/modules-2/files-2.1</code>的目录下。</p>
-<h1 id="问题-反省"><a href="#问题-反省" class="headerlink" title="问题&amp;反省"></a>问题&amp;反省</h1><h2 id="注意各种json转化工具对map的转化"><a href="#注意各种json转化工具对map的转化" class="headerlink" title="注意各种json转化工具对map的转化"></a>注意各种json转化工具对map的转化</h2><p>在将一些对象转化为json的时候要格外注意，尤其是在数据中有map类型的数据，而且key是普通对象的时候。看下下面的例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONObject;</span><br><span class="line"><span class="keyword">import</span> com.google.gson.Gson;</span><br><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> field1;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> field2;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Foo</span><span class="params">(<span class="type">int</span> field1, <span class="type">int</span> field2)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.field1 = field1;</span><br><span class="line">        <span class="built_in">this</span>.field2 = field2;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        Map&lt;Foo, Integer&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="type">Foo</span> <span class="variable">foo1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Foo</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">        <span class="type">Foo</span> <span class="variable">foo2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Foo</span>(<span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">        map.put(foo1, <span class="number">1</span>);</span><br><span class="line">        map.put(foo2, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(JSONObject.toJSONString(map));</span><br><span class="line">        System.out.println(<span class="keyword">new</span> <span class="title class_">Gson</span>().toJson(map));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个例子中，fastjson会将这个map对象转成下面这个:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;field1&quot;:2,&quot;field2&quot;:3&#125;:2,&#123;&quot;field1&quot;:1,&quot;field2&quot;:2&#125;:1&#125;</span><br></pre></td></tr></table></figure>
-<p>fastjson将map的key也展开成了json，导致这个结果不满足标准的json格式，需要格外注意，不要因为无法进行json格式化而怀疑人生。</p>
-<p>gson会将这个map对象转换成下面这个:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;Foo(field1\u003d2, field2\u003d3)&quot;:2,&quot;Foo(field1\u003d1, field2\u003d2)&quot;:1&#125;</span><br></pre></td></tr></table></figure>
-<p>他也将key展开成了json，但是仍然是一个字符串，这样就仍然符合json的格式，可以格式化成这样:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;Foo(field1=2, field2=3)&quot;:2,</span><br><span class="line">    &quot;Foo(field1=1, field2=2)&quot;:1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>二者其实各有利弊，一个方便我们去理解，另一个则满足了约定俗成的标准。</p>
-<h2 id="小心使用String的replace和replaceAll"><a href="#小心使用String的replace和replaceAll" class="headerlink" title="小心使用String的replace和replaceAll"></a>小心使用String的replace和replaceAll</h2><p>不得不说，愚蠢的我一直以为replace函数是只替换一次，而replaceAll函数是替换全部。其实压根不是这样，replace是用普通字符串进行匹配，而replaceAll是用正则表达式去匹配。事实上他们的本质都是用的正则表达式，看一下函数实现就知道了:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">replace</span><span class="params">(CharSequence target, CharSequence replacement)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Pattern.compile(target.toString(), Pattern.LITERAL).matcher(</span><br><span class="line">            <span class="built_in">this</span>).replaceAll(Matcher.quoteReplacement(replacement.toString()));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">replaceAll</span><span class="params">(String regex, String replacement)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Pattern.compile(regex).matcher(<span class="built_in">this</span>).replaceAll(replacement);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>误用这两个函数会有很多明显的bug，比如下面的代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;(1)(11)(111)&quot;</span>;</span><br><span class="line">System.out.println(s.replace(<span class="string">&quot;(1)&quot;</span>, <span class="string">&quot;(2)&quot;</span>));</span><br><span class="line">System.out.println(s.replaceAll(<span class="string">&quot;(1)&quot;</span>, <span class="string">&quot;(2)&quot;</span>));</span><br></pre></td></tr></table></figure>
-<p>输出就会是这样:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">2</span>)(<span class="number">11</span>)(<span class="number">111</span>)</span><br><span class="line">((<span class="number">2</span>))((<span class="number">2</span>)(<span class="number">2</span>))((<span class="number">2</span>)(<span class="number">2</span>)(<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
-<p>因为括号会被正则理解为捕获，而不被当成括号，类似的错误还会有很多很多，要格外注意。</p>
-<p>当然，即使是知道差别，有时候想当然的用了也会出问题。比如下面代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;,1,1,1,11,111,&quot;</span>;</span><br><span class="line">System.out.println(s.replace(<span class="string">&quot;,1,&quot;</span>, <span class="string">&quot;,2,&quot;</span>));</span><br></pre></td></tr></table></figure>
-<p>我的意图是将字符串按逗号分隔，将值为1的全部变为2,（不替换11,111）。但是这段代码实际跑起来缺变成了这样:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">,2,1,2,11,111,</span><br></pre></td></tr></table></figure>
-<p>这样就少替换了一个。这是由于正则匹配的本质是自动机，匹配过的字符串是不会拿回来重新匹配的。。。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/09/01/database-sql/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/09/01/database-sql/" itemprop="url">「数据库」嵌入式SQL语言</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T06:32:28+00:00">
-                2018-09-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
-                    <span itemprop="name">数据库</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
-<li>交互式SQL语言有很多优点：记录集合操作、非过程性操作、一条语句就可实现复杂查询的结果，</li>
-<li>然而，交互式SQL本身也有很多局限：
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/09/01/database-sql/#more" rel="contents">
+            <a class="btn" href="/2020/07/24/getting-started-overview-webrtc/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1154,7 +1651,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/27/database-language/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2020/07/18/env-centos8-apps/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1173,7 +1670,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/08/27/database-language/" itemprop="url">「数据库」数据库语言SQL</a></h2>
+                <a class="post-title-link" href="/2020/07/18/env-centos8-apps/" itemprop="url">「环境配置」CentOS 8 常用软件安装(MySQL Nginx SVN Redis)</a></h2>
         
 
         <div class="post-meta">
@@ -1185,8 +1682,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-27T11:36:31+00:00">
-                2018-08-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-07-18T10:11:23+00:00">
+                2020-07-18
               </time>
             
 
@@ -1208,8 +1705,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
-                    <span itemprop="name">数据库</span>
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
                   </a>
                 </span>
 
@@ -1246,722 +1743,10 @@
 
       
         
-          <h3 id="SQL语言概述"><a href="#SQL语言概述" class="headerlink" title="SQL语言概述"></a>SQL语言概述</h3><p><strong>结构化查询语言</strong>(Structured Query Language)简称SQL，是一种特殊目的的编程语言，是一种数据库查询和程序设计语言，用于存取数据以及查询、更新和管理关系数据库系统。</p>
-<ul>
-<li>SQL语言是集DDL、DML和DCL于一体的数据库语言
+          <h3 id="1-CentOS-8-安装（MySQL8-0-MySQL5-7"><a href="#1-CentOS-8-安装（MySQL8-0-MySQL5-7" class="headerlink" title="1. CentOS 8 安装（MySQL8.0&#x2F;MySQL5.7)"></a>1. CentOS 8 安装（MySQL8.0&#x2F;MySQL5.7)</h3><h4 id="1-1-安装-MySQL-8-0"><a href="#1-1-安装-MySQL-8-0" class="headerlink" title="1.1 安装 MySQL 8.0"></a>1.1 安装 MySQL 8.0</h4><h5 id="1-1-1-使用最新的包管理器安装MySQL"><a href="#1-1-1-使用最新的包管理器安装MySQL" class="headerlink" title="1.1.1 使用最新的包管理器安装MySQL"></a>1.1.1 使用最新的包管理器安装MySQL</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnf install @mysql</span><br></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/08/27/database-language/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/25/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%881%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/25/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%881%EF%BC%89/" itemprop="url">TooSimple的工作周记（1）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-25T06:43:21+00:00">
-                2018-08-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Note/" itemprop="url" rel="index">
-                    <span itemprop="name">Note</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>好快啊，又是一周的轮回，本来打算把本周遇到的问题展开一个一个总结的，但是奈何踩的坑是在有点多，展开来根本没时间搞，索性就搞了这个类似周报的东西。希望从这一周开始，每一周都能坚持下来喽。</p>
-<p>由于跟给老大看的周报不同，这个是给俺自己看的，所以成果啥的就不表了，主要表一表自己写的bug跟领悟。就记一些大实话吧，”<strong>写者有罪，闻者足戒</strong>“。</p>
-<h1 id="知识-技巧"><a href="#知识-技巧" class="headerlink" title="知识&amp;技巧"></a>知识&amp;技巧</h1><h2 id="while循环的控制逻辑写在循环体内"><a href="#while循环的控制逻辑写在循环体内" class="headerlink" title="while循环的控制逻辑写在循环体内"></a>while循环的控制逻辑写在循环体内</h2><p>这句话是同事跟我讲的，领会了下他的意思，大概是，下面的写法二要比写法一好:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Method1</span></span><br><span class="line"><span class="keyword">while</span> (!shouldBreak1() &amp;&amp; !shouldBreak2()) &#123;</span><br><span class="line">    <span class="comment">//Do sth</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Method1</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (shouldBreak1()) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (shouldBreak2()) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//Do sth</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>方法一看似简单清晰，一行代码就完成了控制逻辑，但是这样其实有弊端:</p>
-<ol>
-<li>调试麻烦，如果条件越来越多，容易混淆出错的到底是哪一行</li>
-<li>打日志不方便，这很显然</li>
-<li>逻辑一致性较差，有的控制逻辑可以写在开头，可有的控制逻辑就无法写在开头了，这时候不如都直接写在代码体里，保证一致性。</li>
-</ol>
-<p>当然，复杂逻辑适合方法二这么搞，但是辩证的看，如果逻辑比较简单，用方法一也无可厚非嘛。</p>
-<h2 id="不要对数据表的记录进行物理删除"><a href="#不要对数据表的记录进行物理删除" class="headerlink" title="不要对数据表的记录进行物理删除"></a>不要对数据表的记录进行物理删除</h2><p>我总结我们内部的业务数据表都是通过增加is_deleted字段来代表改项是否被删除（逻辑删除），而不会直接删除这条记录。分析了下这样做有下面几个好处：</p>
-<ol>
-<li>防止数据丢失。这很显然。</li>
-<li>方便追查数据变更。可以看出这行记录是何时删除的等等。</li>
-<li>方便进行数据同步。比如有的场景下，数据库A希望定时全量同步数据库B的数据。在不使用DTS的情况下，A只有扫描B的全表来更新自己。当B表把某条记录删除时，A表却无法获知B表的变更，就会造成数据不一致，这样需要进行一些额外的补偿操作，比较麻烦。</li>
-<li>简化并发环境下的操作。当多个服务同时对一条记录进行操作时，如果某一个服务进行了物理删除操作，则很容易造成一些奇怪的问题。</li>
-</ol>
-<p>当然，如果一张表采用的是逻辑删除，那么业务代码在查询的时候就要小心一点了，别查到了脏数据。</p>
-<h2 id="数据表默认加上gmt-modified-gmt-create-updated-at字段"><a href="#数据表默认加上gmt-modified-gmt-create-updated-at字段" class="headerlink" title="数据表默认加上gmt_modified,gmt_create,updated_at字段"></a>数据表默认加上gmt_modified,gmt_create,updated_at字段</h2><p>一般来说，一张数据表我们会加上这样三个字段：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">`gmt_create` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT &#x27;创建时间（毫秒）&#x27;,</span><br><span class="line">`gmt_modified` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT &#x27;修改时间（毫秒）&#x27;,</span><br><span class="line">`updated_at` int(20) NOT NULL DEFAULT &#x27;0&#x27; COMMENT &#x27;记录更新时间&#x27;,</span><br></pre></td></tr></table></figure>
-<p><code>gmt_create</code> 很显然保存了记录创建的时间，方便数据追查和校验，这个可以理解。但是<code>gmt_modified</code>跟<code>updated_at</code>字段似乎有些重复，都保存了记录的更新时间，区别只在于一个是手动更新，一个是自动更新。可是这到底有没有必要呢？</p>
-<p>在某些场景下，是有必要的，因为这两个字段的逻辑含义是不同的。<code>gmt_modified</code>表示的是字段的最后的<strong>修改</strong>时间，而<code>updated_at</code>表示的是程序最后一次<strong>试图</strong>修改的时间（逻辑上类似Unix系统的<code>touch</code>）。比如某个场景下，数据库A希望从数据库B中同步一些数据，但是同步过来的数据只是数据库A的一部分，这时候我们可能希望知道数据库A中到底有哪些字段是从数据库B中同步过的（即使值没有变化），哪些字段是没有同步过的。此时，仅凭<code>gmt_modified</code>，我们无法获知哪些字段是从数据库B中获得的，这时我们就在执行同步操作的代码里手动去更新<code>updated_at</code>即可。</p>
-<p>当然，如果业务比较简单，能保证不牵涉到类似的场景，也是可以把<code>updated_at</code>拿掉的。。。</p>
-<h2 id="Guava大法好"><a href="#Guava大法好" class="headerlink" title="Guava大法好"></a>Guava大法好</h2><p>guava包里有很多便利的工具，mark下，以后慢慢用。比如在做数据分片时用<code>Lists.partition</code>方法，或者初始化集合类的<code>Lists.newArrayListWithExpectedSize</code>方法等。不过需要小心的是这种工具为了效率，容易返回一些Immutable的集合，在下游使用的时候要格外小心。比如这样的操作就不被允许:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>);</span><br><span class="line">List&lt;List&lt;Integer&gt;&gt; partitions = Lists.partition(list, <span class="number">3</span>);</span><br><span class="line">Collections.shuffle(partitions);</span><br></pre></td></tr></table></figure>
-<p>因为partition返回的是不可变集合，而shuffle方法需要进行set操作，因此就会报<code>UnsupportedOperationException</code>。</p>
-<h1 id="问题-反省"><a href="#问题-反省" class="headerlink" title="问题&amp;反省"></a>问题&amp;反省</h1><h2 id="保证线上线下数据库一致"><a href="#保证线上线下数据库一致" class="headerlink" title="保证线上线下数据库一致"></a>保证线上线下数据库一致</h2><blockquote>
-<p>测试用的数据库一定要和线上数据库的定义保持一致，否则很多线上bug在线下根本测不出来。当线下数据库变更之后，不要忘记在线上加字段，即使当时不影响业务，也容易留坑给后人。</p>
-</blockquote>
-<p>踩了一个前人的坑，线上的数据表跟测试环境的不一样，导致我新加的一个功能始终跑不动，非常诡异。当时查表的操作是放在一个线程里的，异常信息也没打出来，导致排查了很久。。。</p>
-<h2 id="定时任务在发布时注意机器数量"><a href="#定时任务在发布时注意机器数量" class="headerlink" title="定时任务在发布时注意机器数量"></a>定时任务在发布时注意机器数量</h2><blockquote>
-<p>一般情况下，一个比较复杂的web服务会将task模块与api模块分别进行部署。这是因为通常情况下，task模块的任务量比较固定，因此我们会用固定数量的机器去跑，很少去变动；而api服务的任务量不固定，经常需要根据负载去弹性伸缩，经常回去扩容和缩容。因此对于一个定时任务来说，如果这个任务执行多次的结果不是幂等的，那么就要注意不能把它部署到api服务的机器上，否则就容易造成同样的任务被不同的机器执行多次的结果。<br>当然，在分布式环境下，定时任务还是最好接入分布式任务调度系统比较好，由调度系统统一配置和管理，这样就没这么多幺蛾子了。</p>
-</blockquote>
-<p>在看着leader扩容机器的时候突然想到的，于是我赶紧把放在api模块里的定时任务偷偷移到了task模块里。。。</p>
-<h2 id="一个服务中互相无关的组件在启动时不能互相影响"><a href="#一个服务中互相无关的组件在启动时不能互相影响" class="headerlink" title="一个服务中互相无关的组件在启动时不能互相影响"></a>一个服务中互相无关的组件在启动时不能互相影响</h2><blockquote>
-<p>这一点需要留意，很多情况下我们是在一个服务里不断添加子功能，那么在写代码时就要注意不能因为一个子功能出错而导致整个服务起不起来甚至报错，尤其是在服务初始化的时候。因此我们一定要做好<code>try catch finally</code>，保证子功能的异常不会抛到外面。</p>
-</blockquote>
-<p>之前写了一个接入Rmq的服务，这个服务在接入时出了一点问题导致这个服务没起来，但是由于异常抛出去了，导致整个应用都没起来。后来把异常全都捕获之后才定位了问题并解决掉的。一般来说在一些很可能抛异常的地方一定要把异常捕获全了，可以这么写：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="comment">//TODO something that may raise an exception</span></span><br><span class="line">&#125;<span class="keyword">catch</span> (Exception1 e)&#123;</span><br><span class="line">    <span class="comment">//TODO do sth to handle or print this exception</span></span><br><span class="line">&#125;<span class="keyword">catch</span> (Exception2 e)&#123;</span><br><span class="line">    <span class="comment">//TODO do sth to handle or print this exception</span></span><br><span class="line">&#125;<span class="keyword">catch</span> (Throwable e)&#123;</span><br><span class="line">    <span class="comment">//TODO do sth to handle or print all exceptions that might be raised.</span></span><br><span class="line">&#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">    <span class="comment">//TODO do sth that must be done.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>注意一定要通过捕获<code>Throwable</code>将所有的异常、错误捕获全了，不能仅仅捕获IDE提醒的那些<code>checked exception</code>。</p>
-<h2 id="数据库字段默认值设置要小心"><a href="#数据库字段默认值设置要小心" class="headerlink" title="数据库字段默认值设置要小心"></a>数据库字段默认值设置要小心</h2><blockquote>
-<p>在设计表结构的时候，字段的默认值最好不要有业务含义，如果非得有，那一定要和业务逻辑相适配，不能就这么随便设个0或者是空啥的（况且一般来说字段类型都得是Not Null的才好）。</p>
-</blockquote>
-<p>我的一个锅，在变更表结构的时候，有一个需要新加的字段含义是某个排名的前百分比。我当时没有细想，默认就设成了0，后来在表结构变更完之后忽然想起来，默认是0的话岂不是表示默认的这些条目排名最靠前么(前0%)，这显然太不科学了，于是又重新变更了表结构，然后还要再刷一波数据。还好我的数据都是从别人那同步来的，再同步一次就好了，否则就得被迫跑路了。。</p>
-<p>当然，设置正确的默认值的前提是要<strong>了解字段的逻辑含义</strong>，如果字段是从别人那边同步过来的一定要问清楚，有效数据的范围是什么，数据的逻辑含义是什么。</p>
-<h2 id="将bean用来进行rpc传输要记得序列化"><a href="#将bean用来进行rpc传输要记得序列化" class="headerlink" title="将bean用来进行rpc传输要记得序列化"></a>将bean用来进行rpc传输要记得序列化</h2><blockquote>
-<p>当然，这是常识，一开始写的时候也会记得，但是当这个bean组合了其他的bean的时候，那些bean也是要做序列化的。。。这个很容易被忘掉。</p>
-</blockquote>
-<p>曾经写的一个的bug，在测试的时候就觉得奇怪，服务调用方传进来的参数始终不对，于是重头检查了这一块的代码，果然是序列化的问题，于是赶紧在发布前打了一个新包给服务调用方（其实也是我自己了）。</p>
-<h2 id="遇到预定义的常量要确认他的值到底是什么"><a href="#遇到预定义的常量要确认他的值到底是什么" class="headerlink" title="遇到预定义的常量要确认他的值到底是什么"></a>遇到预定义的常量要确认他的值到底是什么</h2><blockquote>
-<p>比如Double.MIN_VALUE，遇到这种常量一定要点进去看下到底是啥，不能再把这个当成最小负数来用了。</p>
-</blockquote>
-<p>同样的坑不能踩第二遍。</p>
-<h2 id="ES中自定义Analyzer时要小心默认的配置"><a href="#ES中自定义Analyzer时要小心默认的配置" class="headerlink" title="ES中自定义Analyzer时要小心默认的配置"></a>ES中自定义Analyzer时要小心默认的配置</h2><blockquote>
-<p>其实不仅是es，很多与配置有关的问题都会牵涉到一点，叫<code>默认配置</code>。有默认值固然方便，但是默认不代表可以无视，一定要做到心中有数，否则就可能会因为默认配置与当前业务逻辑不符而造成意外的、难以排查的bug</p>
-</blockquote>
-<p>曾经在前人维护的es配置中有这样的一个analyzer:</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;analysis&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;analyzer&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;comma_analyzer&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;pattern&quot;</span><span class="punctuation">:</span> <span class="string">&quot;,&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;pattern&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-<p>他定义了一个comma_analyzer，试图以逗号分隔进行分词，一切似乎都很简单干净，人畜无害。但是真正用的时候却发现很多本应当搜索到的词却搜索不到，代码改了半天也没啥进展，直到我翻到<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/6.3/analysis-pattern-analyzer.html#analysis-pattern-analyzer">es的文档</a>，才发现有一个坑爹的默认配置：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Pattern Analyzer</span><br><span class="line"></span><br><span class="line">Definition</span><br><span class="line">It consists of:</span><br><span class="line"></span><br><span class="line">Tokenizer</span><br><span class="line">  Pattern Tokenizer</span><br><span class="line">  </span><br><span class="line">Token Filters</span><br><span class="line">  Lower Case Token Filter</span><br><span class="line">  Stop Token Filter (disabled by default)</span><br></pre></td></tr></table></figure>
-<p>好嘛，默认还加了一个大写转小写的过滤器，难怪用大写字母去搜大写字母根本搜不到，必须用小写字母才能搜到对应的大写字母。<br>而且这个filter是在建索引的时候添加的，因此搜索结果本身是看不出被转为小写了，这个问题排查起来难度还是很大的。</p>
-<p>这就是一开始建索引考虑不周导致的遗留问题，现在发现bug之后修改起来也很不方便，必须要删除索引重建。在目前业务数据非常庞大的情况下，这样的代价是非常大的，因此也只能将这个缺陷告知所有的业务接入方了，在业务代码中适配了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/22/database-base/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/22/database-base/" itemprop="url">「数据库」数据库系统基础</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T12:20:19+00:00">
-                2018-08-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
-                    <span itemprop="name">数据库</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ol>
-<li>数据库 是 电子化信息的集合</li>
-</ol>
-<ul>
-<li>将信息规范化并使之电子化，形成电子信息’库’，以便利用计算机对这些信息进行快速有效的存储、检索、统计与管理。</li>
-</ul>
-<ol start="2">
-<li>表(Table)：以按行按列形式组织及展现的数据
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/08/22/database-base/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/11/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98%E7%9C%8BJVM%E5%8A%A8%E6%80%81%E5%8F%8D%E4%BC%98%E5%8C%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/11/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98%E7%9C%8BJVM%E5%8A%A8%E6%80%81%E5%8F%8D%E4%BC%98%E5%8C%96/" itemprop="url">从一个诡异的问题看JVM动态反优化</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T07:36:27+00:00">
-                2018-08-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前一段时间在做代码性能比较的时候用到了jmh这个工具，原本以为拥有了这个方便的工具就能hold住java微基准测试这个命题。但是事实上，用着用着就发现自己的理解还非常不深入，有很多在测试的时候难以解释的现象。于是查阅了相关资料，才发现这里面的水比我想象要深，趁着记忆还热乎，赶紧记录一下。</p>
-<h2 id="动态编译VS静态编译"><a href="#动态编译VS静态编译" class="headerlink" title="动态编译VS静态编译"></a>动态编译VS静态编译</h2><p>java作为一种动态编译语言与c&#x2F;c++这种静态编译语言有本质的不同。静态编译语言是在编译时就已经对代码做好了编译优化(比如C&#x2F;C++在编译时指定-O1 -O2 -O3参数)，得到的程序能够直接被计算机忠实地执行。而java这种动态编译语言在编译时几乎不会做什么优化，而是等到运行在虚拟机中时，动态的进行优化。</p>
-<p>动态优化有好处有坏处，好处就在于他可以根据程序实时的运行状况，忽略掉那些事实上没有被执行的代码的影响，最大化的优化那些被多次执行的代码（这也是jvm有“预热”这一说法的原因）；但是，缺点也在于，随着程序的运行，程序运行的环境会发生变化，如果继续保留之前动态优化的代码则会无法起作用甚至可能会出现错误，此时就需要卸载之前做的优化，这就是<strong>“动态反优化（Dynamic Deoptimization）”</strong>。</p>
-<p>显然，我们并不希望jvm经常进行动态反优化，但是其实正常情况下，相比于程序逻辑的执行时间，这点反优化造成影响还是微不足道的。相比于他带来的问题，我们往往更加享受他带来的便利，因此大部分情况我们也无需太在意这些细节。但是当我们分析问题的粒度逐渐变小时、尤其是在做微基准测试时，就需要做到对这类问题心中有数了，否则就可能贻笑大方。</p>
-<h2 id="诡异的问题"><a href="#诡异的问题" class="headerlink" title="诡异的问题"></a>诡异的问题</h2><p>说的可能有点玄乎，举一个简单的例子，比如下面这样一段微基准测试代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.pinduoduo.tusenpo.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.annotations.*;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.Runner;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.RunnerException;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.options.OptionsBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="meta">@BenchmarkMode(Mode.Throughput)</span></span><br><span class="line"><span class="meta">@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@State(Scope.Benchmark)</span></span><br><span class="line"><span class="meta">@Threads(4)</span></span><br><span class="line"><span class="meta">@Fork(0)</span></span><br><span class="line"><span class="meta">@OutputTimeUnit(TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">interface</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Method1</span> <span class="keyword">implements</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> d + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Method2</span> <span class="keyword">implements</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> d + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">callMillionTimes</span><span class="params">(Operator op)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; <span class="number">1000000</span>; i++)</span><br><span class="line">            d = op.operate(d);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_1_Method1</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method1</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_2_Method2</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method2</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_3_Empty</span><span class="params">()</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_4_Method1Again</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method1</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_5_NaiveLoop</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; <span class="number">1000000</span>; i++)</span><br><span class="line">            d = d + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RunnerException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Runner</span>(<span class="keyword">new</span> <span class="title class_">OptionsBuilder</span>().include(Test.class.getSimpleName()).build()).run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这段代码中我们定义了一个父类Operator和他的两个子类Method1、Method2，这两个类的实现<strong>完全相同</strong>，相当于一个自增操作。同时测试了五个方法：</p>
-<ol>
-<li>test_1_Method1，将Method1的方法执行一百万次。</li>
-<li>test_2_Method2，将Method2的方法执行一百万次。</li>
-<li>test_3_Empty，这其实是一个空方法。</li>
-<li>test_4_Method1Again，与test_1_Method1完全一样。</li>
-<li>test_5_NaiveLoop，这个方法体现的是Method1和Method2的“本质”。</li>
-</ol>
-<p>考虑到在jmh中，以@Benchmark注解的方法是按照方法名的字典序顺序依次执行的，而且我采用的是@Fork(0)注解，因此上述函数的排序就是该函数的执行顺序，且执行的环境是同一个。</p>
-<p>理论上讲，上面四个函数的执行速度应该是<code>1≈2≈4≈5&lt;&lt;3</code>，但是这段代码跑起来的结果乍一看却让人大吃一惊：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score        Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  15098760.275 ±  71855.243  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5       178.431 ±   1500.989  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15031249.707 ± 428833.911  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5        14.213 ±      0.046  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  15109072.590 ±  47893.576  ops/ms</span><br></pre></td></tr></table></figure>
-
-<p>最终的执行结果竟然是<code>1≈3≈5&gt;&gt;2≈4</code>，乍一看是相当令人不可思议。幸亏这里比较的方法比较简单，从而可以很容易让人归谬。如果这几个不一样的方法，那么人们就很容易做出一些自以为是的愚蠢的判断了。</p>
-<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>事实上，由于待测试的函数运行时间相对比较短，因此动态编译对函数的影响就非常的大。而随着JVM的日趋强大，动态编译本身就是一个十分复杂的系统，各种策略与运行状态会互相影响，因此想要真正完全掌握代码的执行状态其实是很困难的事。想要真正了解代码的运行状态，原则上是要在运行时加入<code>-XX:+PrintCompilation -XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining&quot;</code>这些编译参数。这些参数表示打印出编译信息、解锁隐藏参数以及打印内联信息。事实上，很多编译优化基本都是通过内联来实现的，因此打印内联信息能让我们很好的研究编译优化的情况。</p>
-<p>当然，学会读这些结果还是比较有难度的，我也只是大概理解他的含义。不过其实如果了解java编译优化的基本原理，这个问题还是不难解释的。</p>
-<p>回归上面的问题，仔细分析一下，上面的这段诡异的代码其实有如下几个疑点：</p>
-<ol>
-<li>为什么test_1_Method1和test_2_Method2的逻辑完全相同，但是执行时间却有天壤之别。</li>
-<li>为什么test_1_Method1的执行时间竟然和空的test_3_Empty一样。</li>
-<li>为什么test_1_Method1和test_4_Method1Again的代码完全一样，但是执行时间却仍然不一样。</li>
-</ol>
-<p>不过仔细分析一下，其实可以根据上面的情况分析出三点：</p>
-<ol>
-<li>从test_1,test_3,test_5的执行时间几乎相等可以推断出，这里的test_1和test_5其实并没有得到真正的执行，毕竟”10^7 ops&#x2F;ms”的执行速度都超过了计算机的主频，况且函数体还是一个一百万的循环。</li>
-<li>根据常理推断，test_2,test_4的执行速度应该是百万级的运算量理论上的运行速度。</li>
-<li>test_1与test_2、test_4的区别在于，test_1是第一次实例化Operator，而test_2,test_4则不是。</li>
-</ol>
-<p>那么显然，test_1,test_5在运行的时候一定是受到了JVM的动态优化，而test_2,test_4在执行的时候则受到了动态反优化，回归了正常而无用的计算。这里主要用到了两种优化逻辑。</p>
-<h3 id="单形调用变换"><a href="#单形调用变换" class="headerlink" title="单形调用变换"></a>单形调用变换</h3><p>我们知道，jvm支持多态，这个性质可以很方便的帮我们对复杂并具有关联的事物进行抽象建模。但是代价就是，当用父类的引用去调用子类的方法时，会多一次查虚拟表的操作，同时也不利于进行代码的内联(Inline)优化。而内联优化基本可以说是jvm优化的最重要的形式。因此在这种情况下，很多优化措施都无法生效。但是，jvm非常聪明，当他发现最近的代码块中某一个父类只有一个子类的实例时，他就很机智的将这个父类的方法与这个子类的方法进行绑定，使得调用子类的方法变得更快；同时当子类的方法比较简单时，甚至会将子类的方法进行内联。这就是JVM动态优化的一种，叫单形调用变换（monomorphic）。</p>
-<h3 id="无用代码移除"><a href="#无用代码移除" class="headerlink" title="无用代码移除"></a>无用代码移除</h3><p>无用代码移除的优化相比上面的优化更好理解，也就是JVM会判断，某些值在进行运算时如果没有对环境造成除其本身外的任何影响，那么JVM在执行时就有可能将这个值的运算直接移除。</p>
-<p>有了这两个知识，基本就可以解释上面这个问题了。</p>
-<p>首先，在test_5中，这样的简单循环计算出来的d其实没有任何用处，因此JVM就直接优化掉了，这个test_5也就直接被优化成了test_3。</p>
-<p>然后，在test_1中，由于存在单形调用变换，operate方法被直接内联成了<code>d+1</code>，因此test_1也就直接被优化成了test_5，从而最终被优化成了test_3。</p>
-<p>最后，在test_2和test_4中，由于环境中存在着Operator类的不同实例，因此单形调用变换失效，内联代码被重新动态反优化成了函数调用。而在函数调用中，当读到<code>d=op.operate(d)</code>这个方法无法时，jvm无法直接判断出d是否对op这个对象造成影响，因此也就无法将d直接优化掉，从而导致了程序完完整整的跑完了一百万次循环。</p>
-<h2 id="启示"><a href="#启示" class="headerlink" title="启示"></a>启示</h2><p>这个例子告诉我们，对java进行微基准测试与对c&#x2F;c++进行微基准测试是不一样的。JVM会有很多复杂的逻辑，我们要对代码<strong>心存敬畏</strong>。</p>
-<p>那么，有什么方法能够让我们尽量避免编译优化与编译反优化对我们的基准测试的影响呢？其实我们能做的也很有限，我们不能指定JVM去优化某段代码或者让他不去优化某段代码，我们只能尽量保证让JVM以<strong>同样</strong>的优化逻辑去优化我们希望比较的那些函数，从而尽量避免动态优化对我们结论的影响。</p>
-<h3 id="充分的预热"><a href="#充分的预热" class="headerlink" title="充分的预热"></a>充分的预热</h3><p>同样是上面的那段代码，如果我们将预热和执行的运行时间充分扩大（比如扩大十倍），那么我们就会得到完全不一样的运行结果：</p>
-<p><strong>调整参数</strong>：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Warmup(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Fork(0)</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>运行结果</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score          Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  14686856.275 ±  2661991.738  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5  12162409.605 ± 24908442.187  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15019642.291 ±   288132.800  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5  15002946.149 ±   221140.844  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  14978329.847 ±   464391.640  ops/ms</span><br></pre></td></tr></table></figure>
-<p>你会发现，经过充分的预热，所有的代码都得到了优化。</p>
-<h3 id="隔离环境"><a href="#隔离环境" class="headerlink" title="隔离环境"></a>隔离环境</h3><p>同样是上面的那段代码，如果我们将不同测试时的环境(profiler)进行隔离，我们也会得到完全优化后的结果：</p>
-<p><strong>调整参数</strong><br>这里使用给@Fork注解赋一个非零值来给新的函数创造新的执行环境。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Fork(1)</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>运行结果</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score        Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  15063249.605 ±  86686.469  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5  15059995.145 ± 170559.955  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15083788.370 ± 109821.284  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5  15108390.906 ±  77092.684  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  15048447.746 ± 458691.436  ops/ms</span><br></pre></td></tr></table></figure>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实根据<strong>观察者效应</strong>或者是广义的<strong>测不准原理</strong>，对代码进行微基准测试本身就会对代码造成影响，正如下面这句话所说：</p>
-<blockquote>
-<p>Once you measure a system’s performance ,you change the system.</p>
-</blockquote>
-<p>总而言之，学会对代码保持敬畏，技术和技术带来的现象永远只是表象，要学会脱离技术思考本质，提高自己的思维。毕竟，在IT界还有这样一句话：</p>
-<blockquote>
-<p>A fool with a tool is still a fool.</p>
-</blockquote>
-<p>共勉。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-jtp12214/index.html">Java 理论与实践-动态编译与性能测量</a><br><a target="_blank" rel="noopener" href="https://www.slideshare.net/RafaelWinterhalter/an-introduction-to-jvm-performance">An introduction to JVM performance</a><br><a target="_blank" rel="noopener" href="https://www.slideshare.net/dougqh/jvm-mechanics-when-does-the">JVM Mechanics: When Does the JVM JIT &amp; Deoptimize?</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/35046745/what-is-the-purpose-of-jmh-fork">What is the purpose of JMH @Fork?</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/504103/how-do-i-write-a-correct-micro-benchmark-in-java/">How do I write a correct micro-benchmark in Java?</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/07/23/openwrt-lan-switch/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/23/openwrt-lan-switch/" itemprop="url">OpenWrt交换机</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-23T16:16:32+00:00">
-                2018-07-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
-                    <span itemprop="name">网络</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>给路由器（WR1200JS,4个LAN口）配置交换机，分配两个局域网网段，实现单方向访问。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/07/23/openwrt-lan-switch/#more" rel="contents">
+            <a class="btn" href="/2020/07/18/env-centos8-apps/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -2003,7 +1788,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/12/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/14/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/12/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/14/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2049,7 +1834,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">507</span>
+                  <span class="site-state-item-count">565</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2071,7 +1856,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">255</span>
+                  <span class="site-state-item-count">275</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

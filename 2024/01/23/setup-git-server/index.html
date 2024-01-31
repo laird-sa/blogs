@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<meta name="baidu-site-verification" content="codeva-Ss7c9LFzfb" />
+<meta name="bytedance-verification-code" content="GHbi5zMz8c6TSVpY9rLD" />
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="git," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="对于几个人的小团队，可以自行在公司内网搭建git服务器，实现版本控制。配合gitolite实现权限控制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭建git服务器">
+<meta property="og:url" content="https://www.resonanat.com/2024/01/23/setup-git-server/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="对于几个人的小团队，可以自行在公司内网搭建git服务器，实现版本控制。配合gitolite实现权限控制。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/setup_git_server/git-topo.png">
+<meta property="article:published_time" content="2024-01-23T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-31T02:55:19.786Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="git">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/setup_git_server/git-topo.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2024/01/23/setup-git-server/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-67H9TCZZ7N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-67H9TCZZ7N');
+</script>
+
+
+  <title>搭建git服务器 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2024/01/23/setup-git-server/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">搭建git服务器</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-01-23T00:00:00+00:00">
+                2024-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>对于几个人的小团队，可以自行在公司内网搭建git服务器，实现版本控制。配合gitolite实现权限控制。</p>
+<span id="more"></span>
+<p>我搭建的服务器框架大致如下图：</p>
+<p><img src="/images/setup_git_server/git-topo.png"></p>
+<p>那么以下的搭建操作就是基于这个图进行配置。每个节点都是ubuntu 20.04发行版，图示有4个节点</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Server</td>
+<td>中心化的git仓库，本文假设IP为192.168.100.100</td>
+</tr>
+<tr>
+<td>Alice</td>
+<td>网管，负责创建仓库或者各种访问权限</td>
+</tr>
+<tr>
+<td>Bob</td>
+<td>项目组长，负责Code-Review和Merge分支到master,拥有修改仓库权限</td>
+</tr>
+<tr>
+<td>Carl</td>
+<td>项目开发者，只能在自己分支上面修改</td>
+</tr>
+</tbody></table>
+<h2 id="搭建服务器"><a href="#搭建服务器" class="headerlink" title="搭建服务器"></a>搭建服务器</h2><p>搭建服务器操作在Server和Alice节点进行</p>
+<h3 id="Alice端"><a href="#Alice端" class="headerlink" title="Alice端"></a>Alice端</h3><p>生成一个rsa密钥对</p>
+<pre><code>cd /tmp
+ssh-keygen -t rsa -b 4096 -C &quot;alice&quot;
+</code></pre>
+<p>假设生成的公私钥为</p>
+<pre><code># 私钥
+~/.ssh/alice
+# 公钥
+~/.ssh/alice.pub
+</code></pre>
+<p>将私钥写入当前用户ssh配置文件中</p>
+<pre><code>vi ~/.ssh/config
+# 添加
+Host server
+  User git
+  Hostname 192.168.100.100
+  Port 22
+  ServerAliveInterval 30
+  IdentityFile ~/.ssh/alice
+</code></pre>
+<p>将公钥上传到Server备用</p>
+<pre><code>scp ~/.ssh/alice.pub root@server:/tmp/
+</code></pre>
+<h3 id="Server端"><a href="#Server端" class="headerlink" title="Server端"></a>Server端</h3><p>留意gitolite的README，提到依赖的软件，有最低版本的要求</p>
+<ul>
+<li>git 1.6.6 or later</li>
+<li>perl 5.8.8 or later</li>
+<li>openssh 5.0 or later</li>
+</ul>
+<p>创建git账户并切换到新帐户</p>
+<pre><code>adduser git
+su git
+cd ~
+</code></pre>
+<p>创建空的ssh配置目录</p>
+<pre><code>mkdir -p ~/.ssh
+</code></pre>
+<p>克隆gitolite仓库</p>
+<pre><code>git clone https://github.com/sitaramc/gitolite
+cd gitolite
+</code></pre>
+<p>创建一个目录存放gitolite二进制文件,然后安装</p>
+<pre><code>mkdir -p ~/bin
+./install -to ~/bin
+</code></pre>
+<p>设置Alice的公钥，这样Alice就成为了gitolite管理员</p>
+<pre><code>~/bin/gitolite setup -pk /tmp/alice.pub
+</code></pre>
+<p>执行上面一条命令后，&#x2F;tmp&#x2F;alice.pub 被拷贝到~&#x2F;.gitolite&#x2F;keydir目录下，并且仓库gitolite-admin克隆到本地后，keydir目录也有一份alice.pub。</p>
+<p>所有仓库存放在<code>~/repositories</code>下，gitolite会自动修改<code>~/.ssh/authorized_keys</code>实现不同用户的访问。</p>
+<p>因此单独使用一个git用户的目的是，不希望用户手动修改authorized_keys里面的内容，而是通过gitolite来间接修改它。</p>
+<h2 id="仓库创建与权限"><a href="#仓库创建与权限" class="headerlink" title="仓库创建与权限"></a>仓库创建与权限</h2><p>修改访问权限在Alice节点进行</p>
+<p>克隆admin仓库，因为服务器只有Alice的公钥，其它用户无权访问。</p>
+<pre><code>cd ~
+git clone git@server:gitolite-admin
+cd gitolite-admin
+</code></pre>
+<p>直接编辑这个conf文件实现权限管理</p>
+<pre><code>conf/gitolite.conf
+</code></pre>
+<p>详细的权限和仓库创建可以参考官方README:</p>
+<pre><code>http://gitolite.com/gitolite/conf
+https://github.com/sitaramc/gitolite#adding-users-and-repos
+</code></pre>
+<p>比如我修改为</p>
+<pre><code>repo foo
+    RW+                     =   bob
+    -   master              =   carl
+    -   refs/tags/v[0-9]    =   carl
+    RW+ carl                =   carl
+    R                       =   carl
+</code></pre>
+<p>那么达到的效果是：</p>
+<ol>
+<li>创建了一个名字为foo的仓库</li>
+<li>RW+表示可读可写可overwrite，Bob拥有仓库最大权限</li>
+<li>减号说明Carl没有master分支和tags的读写权限</li>
+<li>Carl只能在自己分支(carl分支)上面进行修改,拥有carl分支的最大权限</li>
+<li>Carl可以读取其它分支，这时候就可以读master分支了</li>
+</ol>
+<p>注意等号后面的名字是跟ssh公钥文件名字对应的，如果gitolite-admin&#x2F;keydir目录下的公钥文件名字是</p>
+<pre><code>carl_ssh_key.pub
+</code></pre>
+<p>那么等号后面的内容就不是carl，而是carl_ssh_key</p>
+<p>为了与conf&#x2F;gitolite.conf中的帐户对应，创建ssh公私鈅要保存为正确的文件名。</p>
+<pre><code># 输出id_rsa的时候,保存为~/my_gitolite_keys/bob
+ssh-keygen -t rsa -b 4096 -C &quot;bob&quot;
+
+# 输出id_rsa的时候,保存为~/my_gitolite_keys/carl
+ssh-keygen -t rsa -b 4096 -C &quot;carl&quot;
+</code></pre>
+<p>把~&#x2F;my_gitolite_keys&#x2F;中对应的公私鈅交给Bob和Carl，下面测试步骤，要用到公私鈅</p>
+<p>将公钥文件添加到gitolite-admin仓库中</p>
+<pre><code>cp ~/my_gitolite_keys/*.pub ~/gitolite-admin/keydir/
+</code></pre>
+<p>修改conf和生成密钥完毕，就可以commit，然后将新配置push给server端</p>
+<pre><code>cd ~/gitolite-admin
+git add *
+git commit -m &quot;add user Bob, Carl; generate keys&quot;
+git push
+</code></pre>
+<p>那么server端在push结束后自动执行perl脚本，实现权限管理。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试git在Bob和Carl节点进行</p>
+<p>将由Alice交给Bob和Carl的公私鈅，分别存放到各自节点的.ssh目录下</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>公私鈅存放路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bob</td>
+<td>公钥 ~&#x2F;.ssh&#x2F;bob.pub<br>私钥 ~&#x2F;.ssh&#x2F;bob</td>
+</tr>
+<tr>
+<td>Carl</td>
+<td>公钥 ~&#x2F;.ssh&#x2F;carl.pub<br>私钥 ~&#x2F;.ssh&#x2F;carl</td>
+</tr>
+</tbody></table>
+<h3 id="Bob节点"><a href="#Bob节点" class="headerlink" title="Bob节点"></a>Bob节点</h3><p>将私钥写入当前用户ssh配置文件中</p>
+<pre><code>vi ~/.ssh/config
+# 添加
+Host server
+  User git
+  Hostname 192.168.100.100
+  Port 22
+  ServerAliveInterval 30
+  IdentityFile ~/.ssh/bob
+</code></pre>
+<p>本地克隆服务器上的foo仓库，测试修改代码</p>
+<pre><code>cd ~
+git clone git@server:foo.git
+cd foo
+echo &quot;hello world&quot; &gt; README.md
+git add README.md
+git commit -m &quot;print hello world&quot;
+git push
+</code></pre>
+<p>这样即验证了Bob有读写服务器master分支的权限</p>
+<h3 id="Carl节点"><a href="#Carl节点" class="headerlink" title="Carl节点"></a>Carl节点</h3><p>将私钥写入当前用户ssh配置文件中</p>
+<pre><code>vi ~/.ssh/config
+# 添加
+Host server
+  User git
+  Hostname 192.168.100.100
+  Port 22
+  ServerAliveInterval 30
+  IdentityFile ~/.ssh/carl
+</code></pre>
+<p>本地克隆服务器上的foo仓库，测试修改代码</p>
+<pre><code>cd ~
+git clone git@server:foo.git
+cd foo
+echo &quot;try to modify branch master&quot; &gt; README.md
+git add README.md
+git commit -m &quot;invalid commit&quot;
+git push
+</code></pre>
+<p>这么做push的话会被拒绝，即验证了Carl没有写服务器master分支的权限。</p>
+<p>下面测试在carl分支的工作流程</p>
+<p>情况1: 如果上游没有carl分支，可以添加一个carl分支并Push到服务器上</p>
+<pre><code>git checkout -b carl
+echo &quot;create branch carl&quot; &gt; README.md
+git add README.md
+git commit -m &quot;branch: carl created&quot;
+git push --set-upstream origin carl
+</code></pre>
+<p>情况2: 如果上游已经存在carl分支，直接切换到carl分支</p>
+<pre><code>git checkout carl
+</code></pre>
+<p>经常性使用git pull以拉取服务器上最新的代码版本。</p>
+<h2 id="其它设置"><a href="#其它设置" class="headerlink" title="其它设置"></a>其它设置</h2><h3 id="安全项"><a href="#安全项" class="headerlink" title="安全项"></a>安全项</h3><p>修改默认的shell为gitolite专用的，而不是默认的bash，这样让用户无法通过sshkey登陆到终端，且在root用户调用su git也无法切换（提示GL_USER not set）</p>
+<pre><code>sudo vi /etc/passwd
+# 修改git用户的shell程序为/home/git/bin/gitolite-shell
+</code></pre>
+<p>不允许git用户使用密码登陆</p>
+<pre><code>sudo vi /etc/ssh/sshd_config
+# 增加以下
+Match User git
+    PasswordAuthentication no
+
+# 重启ssh服务
+sudo systemctl restart sshd.service
+</code></pre>
+<h3 id="语言项"><a href="#语言项" class="headerlink" title="语言项"></a>语言项</h3><p>避免每次git push都产生如下警告</p>
+<pre><code>perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+        LANGUAGE = &quot;en_US:en&quot;,
+        LC_ALL = (unset),
+        LC_CTYPE = &quot;zh_CN.UTF-8&quot;,
+        LANG = &quot;en_US.UTF-8&quot;
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale (&quot;en_US.UTF-8&quot;)
+</code></pre>
+<p>首先重新生成locale</p>
+<pre><code>sudo dpkg-reconfigure locales
+</code></pre>
+<p>然后在sshd_config中禁止客户端传递环境变量给服务器，因为服务器一般才使用一种语言，而不是采用客户端的语言环境。</p>
+<pre><code>vi /etc/ssh/sshd_config
+# 注释掉这一行
+# AcceptEnv LANG LC_*
+</code></pre>
+<p>保存并退出，重启ssh服务</p>
+<pre><code>sudo systemctl restart sshd.service
+</code></pre>
+<h3 id="git-hooks"><a href="#git-hooks" class="headerlink" title="git-hooks"></a>git-hooks</h3><p>设置pre-receive, post-receive等钩子，实现语法检测或者邮件推送。参考<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/29541554/is-it-possible-to-implement-repo-based-hooks-in-gitolite">这篇文章</a>进行设置。</p>
+<p>在RC文件中取消注释数行：</p>
+<pre><code>vi ~/.gitolite.rc
+
+# 取消注释这一行，表示可以从admin仓库中增加local文件，注意不要取消错了，有两行很相似
+LOCAL_CODE =&gt; &quot;$rc&#123;GL_ADMIN_BASE&#125;/local&quot;,
+
+# 取消注释这一行，表示启用单独仓库配置hook
+&#39;repo-specific-hooks&#39;
+</code></pre>
+<p>保存，然后在克隆好的gitolite-admin仓库根目录下建立文件夹</p>
+<pre><code>cd /path/to/your/gitolite-admin-cloned
+mkdir -p local/hooks/repo-specific
+cd local/hooks/repo-specific
+</code></pre>
+<p>在此目录创建对应的hook可执行文件即可，比如我使用这个cppcheck检测Qt工程。文件名不要使用git标准的pre-receive, post-receive, post-update等</p>
+<pre><code>#!/bin/bash
+# works only in gitolite 3.6+
+# hook as pre-receive
+
+REQUIRE_BINS=(&quot;cppcheck&quot; &quot;git&quot;)
+for b in &quot;$&#123;REQUIRE_BINS[@]&#125;&quot;; do
+    type $b &gt;/dev/null 2&gt;&amp;1 || &#123; echo &gt;&amp;2 &quot;$b is required, but was not found. exited&quot;; exit 1; &#125;
+done
+
+# https://github.com/danmar/cppcheck/blob/main/cfg/qt.cfg
+QT_CFG=qt.cfg
+if [ -z $GL_ADMIN_BASE ];then
+    QT_CFG=$PWD/$QT_CFG
+else
+    QT_CFG=$GL_ADMIN_BASE/local/cppcheck-libs/$QT_CFG
+fi
+
+[[ -f $QT_CFG || -L $QT_CFG  ]] || &#123; echo &gt;&amp;2 &quot;Cannot find $QT_CFG. exited&quot;; exit 1; &#125;
+
+NULL_SHA1=&quot;0000000000000000000000000000000000000000&quot; # 40 0&#39;s
+TMP_DIR=$( mktemp -d /tmp/cppcheck-XXXXX )
+EXIT_CODE=0
+
+while read oldrev newrev ref; do
+    if [ &quot;$oldrev&quot; = &quot;$NULL_SHA1&quot; ]; then
+        oldrev=&quot;$newrev^&quot;
+    fi
+
+    echo -n &quot;new commit &quot;
+    git log --pretty=oneline --abbrev-commit -n 1 $newrev
+    echo -n &quot;old commit &quot;
+    git log --pretty=oneline --abbrev-commit -n 1 $oldrev
+
+    for filename in $( git diff --name-only $oldrev $newrev | grep -E &#39;*\.(c|cpp|cc|cxx|h|hpp)$&#39; ); do
+        short_file_name=$( basename $filename )
+        git show $newrev:$filename &gt; $TMP_DIR/$short_file_name
+        echo &quot;checking $filename ...&quot;
+        cppcheck --error-exitcode=1 --quiet --library=$QT_CFG $TMP_DIR/$short_file_name
+        [ &quot;x$?&quot; = &quot;x0&quot; ] || EXIT_CODE=1
+    done
+done
+
+[ -d &quot;$TMP_DIR&quot; ] &amp;&amp; rm -rf $TMP_DIR
+exit $EXIT_CODE
+</code></pre>
+<p>保存以上内容为my-hook，并设置为可执行权限</p>
+<pre><code>echo &#39;echo good; exit 0&#39; &gt; my-hook
+chmod +x my-hook
+</code></pre>
+<p>下载qt.cfg作为cppcheck的语法文件</p>
+<pre><code>mkdir -p /path/to/your/gitolite-admin-cloned/local/cppcheck-libs
+wget https://github.com/danmar/cppcheck/blob/main/cfg/qt.cfg
+mv qt.cfg /path/to/your/gitolite-admin-cloned/local/cppcheck-libs/
+</code></pre>
+<p>修改conf文件，指定hook</p>
+<pre><code>vi /path/to/your/gitolite-admin-cloned/conf/gitolite.conf
+
+# 设置hook
+repo foo
+      option hook.pre-receive = my-hook
+</code></pre>
+<p>提交并push到远端gitolite-admin，下次推送foo仓库即可生效。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a href="/2016/01/21/ssh-key-usage">ssh key配置</a><br><a target="_blank" rel="noopener" href="https://github.com/sitaramc/gitolite/blob/master/README.markdown">gitolite-README</a><br><a target="_blank" rel="noopener" href="http://perthcharles.github.io/2015/08/24/setup-gitolite-service-git-1/">gitolite搭建git仓库管理服务</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/git/" rel="tag"># git</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/01/23/shadowsocks_is_not_a_vpn/" rel="next" title="Shadowsocks：一个混淆工具">
+                <i class="fa fa-chevron-left"></i> Shadowsocks：一个混淆工具
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/01/23/set-up-aria2-on-vps/" rel="prev" title="aria2+yaaw离线下载">
+                aria2+yaaw离线下载 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">搭建服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Alice%E7%AB%AF"><span class="nav-number">1.1.</span> <span class="nav-text">Alice端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Server%E7%AB%AF"><span class="nav-number">1.2.</span> <span class="nav-text">Server端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%93%E5%BA%93%E5%88%9B%E5%BB%BA%E4%B8%8E%E6%9D%83%E9%99%90"><span class="nav-number">2.</span> <span class="nav-text">仓库创建与权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bob%E8%8A%82%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">Bob节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Carl%E8%8A%82%E7%82%B9"><span class="nav-number">3.2.</span> <span class="nav-text">Carl节点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E5%AE%83%E8%AE%BE%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">其它设置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E9%A1%B9"><span class="nav-number">4.1.</span> <span class="nav-text">安全项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E8%A8%80%E9%A1%B9"><span class="nav-number">4.2.</span> <span class="nav-text">语言项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-hooks"><span class="nav-number">4.3.</span> <span class="nav-text">git-hooks</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

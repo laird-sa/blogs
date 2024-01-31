@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<meta name="baidu-site-verification" content="codeva-Ss7c9LFzfb" />
+<meta name="bytedance-verification-code" content="GHbi5zMz8c6TSVpY9rLD" />
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="openwrt,ubuntu," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="充分利用VPS大硬盘、大流量的特点，让服务器进行BT&#x2F;磁力&#x2F;HTTP下载，并实现web资源管理器：文件上传下载，一举两得。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="aria2+yaaw离线下载">
+<meta property="og:url" content="https://www.resonanat.com/2024/01/23/set-up-aria2-on-vps/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="充分利用VPS大硬盘、大流量的特点，让服务器进行BT&#x2F;磁力&#x2F;HTTP下载，并实现web资源管理器：文件上传下载，一举两得。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.resonanat.com/images/aria2/aria2.png">
+<meta property="og:image" content="https://www.resonanat.com/images/aria2/yaaw.png">
+<meta property="og:image" content="https://www.resonanat.com/images/aria2/eXtplorer.png">
+<meta property="article:published_time" content="2024-01-23T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-31T02:55:19.786Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="openwrt">
+<meta property="article:tag" content="ubuntu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.resonanat.com/images/aria2/aria2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2024/01/23/set-up-aria2-on-vps/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-67H9TCZZ7N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-67H9TCZZ7N');
+</script>
+
+
+  <title>aria2+yaaw离线下载 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2024/01/23/set-up-aria2-on-vps/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">aria2+yaaw离线下载</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-01-23T00:00:00+00:00">
+                2024-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>充分利用VPS大硬盘、大流量的特点，让服务器进行BT&#x2F;磁力&#x2F;HTTP下载，并实现web资源管理器：文件上传下载，一举两得。</p>
+<span id="more"></span>
+
+<p>特别提醒：使用美国&#x2F;加拿大的VPS进行电影下载是违法的，主机商可以随时查出你的下载记录，等着被商家封号吧。请买其它版权法管得松的国家VPS进行离线下载。</p>
+<blockquote>
+<p>System: ubuntu 16.04 x64<br>RAM: 256M<br>Reverse proxy: nginx 1.10.1</p>
+</blockquote>
+<h2 id="aria2"><a href="#aria2" class="headerlink" title="aria2"></a>aria2</h2><h3 id="前戏"><a href="#前戏" class="headerlink" title="前戏"></a>前戏</h3><p>最简单的apt</p>
+<pre><code>apt install aria2
+</code></pre>
+<p>新建一个拥有者为www-data的目录，用于存放aria2的设置，初始化某些文件，这里选用*&#x2F;var&#x2F;www&#x2F;downloads*作为下载默认目录</p>
+<pre><code>mkdir /home/www-data
+mkdir /home/www-data/aria2
+mkdir /var/www/downloads
+
+cd /home/www-data/aria2
+touch aria2.session
+</code></pre>
+<p>使用这个配置文件<a href="/attachments/aria2/aria2.conf">aria2.conf</a>启动，下载后放在*&#x2F;home&#x2F;www-data&#x2F;aria2*下面</p>
+<p>为了安全起见，不用root权限运行aria2。修改完后更改拥有者www-data</p>
+<pre><code>chown -R www-data:www-data /home/www-data/aria2
+chown -R www-data:www-data /var/www/downloads
+</code></pre>
+<p>测试一下使用该文件能否启动</p>
+<pre><code>aria2c --conf-path=/home/www-data/aria2/aria2.conf
+</code></pre>
+<p><img src="/images/aria2/aria2.png"></p>
+<h3 id="开机自启"><a href="#开机自启" class="headerlink" title="开机自启"></a>开机自启</h3><p>下载init.d脚本：<a href="/attachments/aria2/aria2">点我下载</a>，保存位置为&#x2F;etc&#x2F;init.d&#x2F;aria2，并添加可执行权限</p>
+<pre><code>chmod a+x /etc/init.d/aria2
+</code></pre>
+<p>测试一下能否启动</p>
+<pre><code>killall aria2c
+/etc/init.d/aria2 start
+</code></pre>
+<p>可以加入到系统自动启动</p>
+<pre><code>vi /etc/rc.local
+# 添加 /etc/init.d/aria2 start
+</code></pre>
+<h2 id="yaaw"><a href="#yaaw" class="headerlink" title="yaaw"></a>yaaw</h2><p>这个是配合aria2实现web前端控制，纯静态html页面，在客户端javscript实现所有功能。</p>
+<pre><code>cd /var/www/
+git clone https://github.com/binux/yaaw
+</code></pre>
+<p>在nginx.conf中的server标签中添加合适的location，指向index.html。实现访问xxx.com&#x2F;yaaw即可打开页面</p>
+<pre><code>location ^~ /yaaw &#123;
+    alias /var/www/yaaw/;
+&#125;
+</code></pre>
+<p>重载nginx，测试一下网站能否打开</p>
+<pre><code>nginx -s reload
+</code></pre>
+<p><img src="/images/aria2/yaaw.png"></p>
+<p>第一次会出现Internal server error，正常，因为没有设置RPC地址。在网站右侧“设置”修改jsonrpc为正确的地址，正确值应该是</p>
+<pre><code>http://xxx.com:6800/jsonrpc
+</code></pre>
+<p>修改正确就可以登陆服务器实现下载文件到vps了，更多设置参考<a target="_blank" rel="noopener" href="http://aria2c.com/usage.html">yaaw设置帮助</a></p>
+<h2 id="eXtplorer"><a href="#eXtplorer" class="headerlink" title="eXtplorer"></a>eXtplorer</h2><h3 id="web文件管理"><a href="#web文件管理" class="headerlink" title="web文件管理"></a>web文件管理</h3><p>光有下载还不行，还需要文件管理。实现web界面的删除文件&#x2F;下载&#x2F;上传等基本功能。</p>
+<pre><code>apt install php php-cgi php-json php-xml php-mbstring
+</code></pre>
+<p>下载<a target="_blank" rel="noopener" href="http://extplorer.net/projects/extplorer/files">eXtplorer</a>，解压到&#x2F;var&#x2F;www&#x2F;eXtplorer目录</p>
+<p>同样为了安全起见，使用较低权限的www-data</p>
+<pre><code>chown -R www-data:www-data /var/www/eXtplorer
+</code></pre>
+<p>在nginx添加一个virtual-server</p>
+<pre><code>vi nginx.conf
+# http标签内增加:
+
+fastcgi_buffers 8 16k;
+fastcgi_buffer_size 32k;
+fastcgi_connect_timeout 300;
+fastcgi_send_timeout 300;
+fastcgi_read_timeout 300;
+
+
+vi sites-enabled/defualt
+# server标签增加:
+
+root /var/www/eXtplorer/;
+index index.php index.html index.htm;
+
+location / &#123;
+    try_files $uri $uri/ /index.html;
+&#125;
+
+location ~ \.php$ &#123;
+    fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    include fastcgi_params;
+&#125;
+</code></pre>
+<p>遇到的各种502 Bad Gateway错误、404错误请自己解决。一般都是权限问题，只要保证 <em>php-fpm的执行者</em>与<em>nginx的执行者</em> 都是<em>www-data</em>就不会出错。</p>
+<p>重启nginx服务，打开浏览器看看能不能进入界面。这样就可以实网页端管理文件。</p>
+<p>貌似第一次进入的密码、帐号都是admin，及时更改密码，如无法更改密码请核实eXtplorer拥有者权限。</p>
+<p><img src="/images/aria2/eXtplorer.png"></p>
+<p>把aria2下载的东西全部在这里eXtplorer下载到自己电脑，还是很不错的</p>
+<h3 id="上传文件功能"><a href="#上传文件功能" class="headerlink" title="上传文件功能"></a>上传文件功能</h3><p>eXtplorer已经集成了。最好设置一下默认最大允许上传文件大小，否则上传超大文件提示413错误:<em>Request Entity Too Large</em></p>
+<p>nginx部份</p>
+<pre><code>vi /etc/nginx/nginx.conf
+# http标签内修改
+# Content-Length的最大值限制，默认1MB，这里改为1GB
+client_max_body_size 1024m;
+</code></pre>
+<p>php部份</p>
+<pre><code>vi /etc/php/7.0/fpm/php.ini
+# 是否允许通过HTTP上传文件的开关。默认为ON即是开
+file_uploads = on
+# 允许上传文件大小的最大值。默认为2M
+upload_max_filesize = 100m 望文生意，即
+# 表单POST给PHP的所能接收的最大值，包括表单里的所有值。默认为8M
+post_max_size = 8m
+# 传至服务器上存储临时文件的地方，如果没指定就会用系统默认的临时文件夹
+upload_tmp_dir = /home/tmp_upload
+</code></pre>
+<p>一般来说，设置好上述四个参数后，在网络正常的情况下，上传&lt;&#x3D;8M的文件是不成问题的</p>
+<p>但如果要上传&gt;8M的大文件的话，只设置上述四项还不一定能行的通。除非你的网络真有100Mbps的上传高速，否则你还得继续设置下面的参数。</p>
+<pre><code># 每个PHP页面运行的最大时间值(秒)，默认30秒
+max_execution_time 600
+# 每个PHP页面接收数据所需的最大时间，默认60秒
+max_input_time 600
+# 每个PHP页面所吃掉的最大内存，默认8M
+memory_limit 8m
+</code></pre>
+<p>这样就可以使用自己的私有云了，存点小电影，老司机偶尔开开车还是不错的！远离国产云存储服务，向8秒教育宣传片say bye bye，从这里开始！！</p>
+<h2 id="openwrt"><a href="#openwrt" class="headerlink" title="openwrt"></a>openwrt</h2><p>VPS端下载完毕，接下来就使用openwrt上面的aria2将文件以HTTP下载方式拖回来。</p>
+<h3 id="aria2-1"><a href="#aria2-1" class="headerlink" title="aria2"></a>aria2</h3><p>从openwrt的官方feed中可以编译出aria2，我选用较新的aria2 1.27.1版本，老版本不稳定。容易bus error。</p>
+<pre><code>make menuconfig
+# 选择 Network-&gt;File Trans-&gt;Aria2，勾选编译BT和Metalink模块。
+make package/aria2/compile -j4 V=99
+</code></pre>
+<p>安装aria2后测试一下能否命令行下载文件</p>
+<pre><code>cd /tmp
+ariac http://ipv4.download.thinkbroadband.com/5MB.zip
+</code></pre>
+<p>没问题就使用上文的aria2.conf略作修改（比如修改pre-located参数，下载目录等，session文件位置），直接在路由使用相同的命令启动</p>
+<pre><code>aria2c --conf-path=/root/aria2.conf -D
+</code></pre>
+<h3 id="USB"><a href="#USB" class="headerlink" title="USB"></a>USB</h3><p>openwrt安装以下packages</p>
+<pre><code>opkg install \
+  kmod-usb-storage \
+  kmod-fs-ext4 \
+  kmod-fs-vfat \
+  block-mount \
+  kmod-nls-utf8 \
+  kmod-nls-iso8859-1 \
+  kmod-nls-cp437
+</code></pre>
+<p>LEDE安装：</p>
+<pre><code>opkg install \
+  kmod-usb-storage \
+  kmod-fs-ext4 \
+  kmod-fs-vfat \
+  block-mount \
+  kmod-usb-ohci \
+  kmod-usb-uhci \
+  mkf2fs \
+  f2fsck
+</code></pre>
+<p>插入U盘挂载：</p>
+<pre><code>mkdir /mnt/sda1
+mount /dev/sda1 /mnt/sda1
+</code></pre>
+<h3 id="yaaw-1"><a href="#yaaw-1" class="headerlink" title="yaaw"></a>yaaw</h3><p>可以将上文的yaaw文件夹放入&#x2F;root&#x2F;。然后直接创建一个虚拟server:</p>
+<pre><code>vi /etc/config/uhttpd
+# 添加
+config uhttpd &#39;yaaw&#39;
+list listen_http &#39;0.0.0.0:333&#39;
+list listen_http &#39;[::]:333&#39;
+option home &#39;/root/yaaw&#39;
+option max_requests &#39;3&#39;
+option http_keepalive &#39;20&#39;
+option tcp_keepalive &#39;1&#39;
+</code></pre>
+<p>重启uhttp即可访问yaaw前端，地址<code>http://192.168.1.1:333</code>。无需复杂的页面设置。</p>
+<pre><code>/etc/init.d/uhttpd restart
+</code></pre>
+<p>若要访问路由器上面的aria2，可以在yaaw右侧的配置，修改jsonrpc为合适的地址。</p>
+<pre><code>http://192.168.1.1:6800/jsonrpc
+</code></pre>
+<p>下一步是，直接将VPS上面已经离线下载好的文件通过路由器<code>aria2+yaaw</code>下载到本地。</p>
+<p>服务端使用Nginx新建一个dl虚拟server作为HTTP服务器:</p>
+<pre><code>server &#123;
+    server_name files.xxxx.com;
+    listen 80;
+    location / &#123;
+        root /var/www/downloads;
+        autoindex on;
+        autoindex_localtime on;
+        autoindex_exact_size off;
+    &#125;
+&#125;
+</code></pre>
+<p>浏览器直接打开 <a target="_blank" rel="noopener" href="http://files.xxxx.com/">http://files.xxxx.com</a> 可以直接获得离线下载地址。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/openwrt/" rel="tag"># openwrt</a>
+          
+            <a href="/tags/ubuntu/" rel="tag"># ubuntu</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/01/23/setup-git-server/" rel="next" title="搭建git服务器">
+                <i class="fa fa-chevron-left"></i> 搭建git服务器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/01/23/sed/" rel="prev" title="shell简单的文本处理">
+                shell简单的文本处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#aria2"><span class="nav-number">1.</span> <span class="nav-text">aria2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E6%88%8F"><span class="nav-number">1.1.</span> <span class="nav-text">前戏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF"><span class="nav-number">1.2.</span> <span class="nav-text">开机自启</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#yaaw"><span class="nav-number">2.</span> <span class="nav-text">yaaw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#eXtplorer"><span class="nav-number">3.</span> <span class="nav-text">eXtplorer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#web%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">web文件管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E5%8A%9F%E8%83%BD"><span class="nav-number">3.2.</span> <span class="nav-text">上传文件功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#openwrt"><span class="nav-number">4.</span> <span class="nav-text">openwrt</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#aria2-1"><span class="nav-number">4.1.</span> <span class="nav-text">aria2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USB"><span class="nav-number">4.2.</span> <span class="nav-text">USB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#yaaw-1"><span class="nav-number">4.3.</span> <span class="nav-text">yaaw</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

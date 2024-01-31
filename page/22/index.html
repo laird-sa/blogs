@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/20/SpringBoot%E4%B9%8B%E7%AE%80%E5%8D%95%E9%83%A8%E7%BD%B2/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/03/23/%E5%90%84%E7%A7%8D%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E7%AB%99%E9%95%BF%E8%AE%A4%E8%AF%81%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -326,7 +326,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/20/SpringBoot%E4%B9%8B%E7%AE%80%E5%8D%95%E9%83%A8%E7%BD%B2/" itemprop="url">SpringBoot之简单部署</a></h2>
+                <a class="post-title-link" href="/2018/03/23/%E5%90%84%E7%A7%8D%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E7%AB%99%E9%95%BF%E8%AE%A4%E8%AF%81%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/" itemprop="url">各种搜索引擎站长认证失败问题解决</a></h2>
         
 
         <div class="post-meta">
@@ -338,8 +338,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-20T15:28:59+00:00">
-                2017-05-20
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-23T08:34:49+00:00">
+                2018-03-23
               </time>
             
 
@@ -361,8 +361,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
                   </a>
                 </span>
 
@@ -400,676 +400,12 @@
       
         
           
-            <h2 id="命令行测试运行"><a href="#命令行测试运行" class="headerlink" title="命令行测试运行"></a>命令行测试运行</h2><p>有些时候我们需要将项目部署在服务器上进行简单测试，但是直接部署到Tomcat里又十分慢，这时候我们可以用maven工具的一个命令来模拟本地启动项目:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw spring-boot:run</span><br></pre></td></tr></table></figure>
-<p>这里用到了一个叫<code>spring-boot-starter-parent</code>的包，只要pom.xml里加了这个就能执行。<br>这样我们就可以在服务器的8080端口访问到这个临时的项目。</p>
-<h2 id="简单部署"><a href="#简单部署" class="headerlink" title="简单部署"></a>简单部署</h2><p>通常情况下，我们会把SpringBoot生成的项目打包成war放在Tomcat服务器中运行，不过这当中也有一些需要注意的地方，下面就简单罗列一下，作为总结。</p>
-<h2 id="修改项目配置"><a href="#修改项目配置" class="headerlink" title="修改项目配置"></a>修改项目配置</h2><p>参考SpringBoot的一篇文档<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/current/reference/html/howto-traditional-deployment.html">Traditional deployment</a>。为了能让项目支持在Tomcat中启动，我们首先要修改一下启动配置。<br>修改项目中的<code>XXXApplication.java</code>这个启动文件，使他继承<code>SpringBootServletInitializer</code>，并重载<code>configure</code>方法:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@SpringBootApplication</span><br><span class="line">public class OnlineLibraryApplication extends SpringBootServletInitializer &#123;</span><br><span class="line"></span><br><span class="line">	@Override</span><br><span class="line">	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) &#123;</span><br><span class="line">		return builder.sources(OnlineLibraryApplication.class);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		SpringApplication.run(OnlineLibraryApplication.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>这样这样就可以让项目在Tomcat中启动了。</p>
-<h2 id="修改导出的包类型"><a href="#修改导出的包类型" class="headerlink" title="修改导出的包类型"></a>修改导出的包类型</h2><p>由于默认使用的包管理工具是maven，我们要修改下pom.xml中的导出方式，在该文件的开头将<code>packaging</code>标签修改为<code>war</code>。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;packaging&gt;war&lt;/packaging&gt;</span><br></pre></td></tr></table></figure>
-<h2 id="运行Maven命令导出包"><a href="#运行Maven命令导出包" class="headerlink" title="运行Maven命令导出包"></a>运行Maven命令导出包</h2><p>为了保证项目能够在服务器中运行，最好将编译的过程放在服务器上，这样可以提早发现服务器版本落后的等的问题。因为很多情况下，Java Tomcat版本落后会导致很多奇怪的问题，有时候还不容易发现。<br>在项目根目录中有一个<code>mvnw</code>文件，我们通过下面命令执行他：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean package </span><br></pre></td></tr></table></figure>
-<p>这样，程序就会编译并且测试这个项目，以保证该项目能够在当前环境中运行。<br>编译并测试通过后，会在项目的<code>target/</code>文件夹下生成一个war包，我们把这个包放到Tomcat的webapps目录下并且重启项目，稍等片刻后即可在8080端口下与项目名相对应的路径中访问到该项目。</p>
-<h2 id="配置反向代理"><a href="#配置反向代理" class="headerlink" title="配置反向代理"></a>配置反向代理</h2><p>上面的项目在很多情况下会加载不了静态文件，因为项目中访问静态文件通常是直接在<code>xxx.xxx.xxx/css</code>之类的路径中，而Tomcat简单部署后项目的根路径会变成<code>xxx.xxx.xxx/projectName/</code>，这样实际的静态文件路径就是<code>xxx.xxx.xxx/projectName/css/</code>，显然就会找不到了。<br>当然，我们可以配置Tomcat将项目映射到<code>/</code>下，但是为了保证项目的并发性更好，我们一般都采用nginx进行反向代理。</p>
-<p>一般在<code>/etc/nginx/sites-enabled/default</code>文件中，修改出一个类似下面的配置:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name 127.0.0.1:8080;</span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass  http://127.0.0.1:8080/projectName/;</span><br><span class="line">        proxy_http_version 1.1;</span><br><span class="line">        proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">        proxy_set_header Connection &quot;upgrade&quot;;</span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">   &#125;</span><br><span class="line">    gzip on;</span><br><span class="line">    gzip_min_length 1k;</span><br><span class="line">    gzip_buffers 4 8k;</span><br><span class="line">    gzip_http_version 1.1;</span><br><span class="line">    gzip_types text/plain application/javascript application/x-javascript text/javascript text/css application/xml image/png image/jpeg;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>主要就是添加一个反向代理并开启Gzip加速。<br>很多情况下对服务性能的提高还是非常有帮助的，尤其是Gzip，如果发现某些mime-type没有加速可以把这个类型添加到<code>gzip_types</code>中。</p>
-<h2 id="查看Log日志"><a href="#查看Log日志" class="headerlink" title="查看Log日志"></a>查看Log日志</h2><p>很多情况下，我们会在程序里打上Log，那么在Tomcat里这些Log都写在了哪里呢？<br>这个主要是Tomcat的设置了，在Tomcat的logs文件夹下有很多log文件，主要是下面三类:</p>
-<h3 id="项目启动类日志"><a href="#项目启动类日志" class="headerlink" title="项目启动类日志"></a>项目启动类日志</h3><p>这类日志一般名字会类似<code>catalina.2017-05-19.log</code>这样。<br>这些日志主要记录了项目启动以及关闭时可能报的错，主要是Tomcat在启动服务的时候写的。</p>
-<h3 id="Web访问类日志"><a href="#Web访问类日志" class="headerlink" title="Web访问类日志"></a>Web访问类日志</h3><p>这类日志一般名字会类似<code>localhost_access_log.2017-05-19.txt</code>这样。<br>这些日志主要记录了每一个Web访问的历史，跟Apache的日志类似：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 - - [19/May/2017:15:03:28 +0800] &quot;GET /onlinelibrary-0.0.1-SNAPSHOT/js/swiper.min.js HTTP/1.1&quot; 200 96826</span><br><span class="line">127.0.0.1 - - [19/May/2017:15:03:28 +0800] &quot;GET /onlinelibrary-0.0.1-SNAPSHOT/images/pic1.jpg HTTP/1.1&quot; 200 123242</span><br><span class="line">127.0.0.1 - - [19/May/2017:15:03:28 +0800] &quot;GET /onlinelibrary-0.0.1-SNAPSHOT/images/pic2.jpg HTTP/1.1&quot; 200 24962</span><br></pre></td></tr></table></figure>
-
-<h3 id="SpringBoot日志"><a href="#SpringBoot日志" class="headerlink" title="SpringBoot日志"></a>SpringBoot日志</h3><p>这类日志一般名字会类似<code>catalina.out</code>这样。<br>这些日志主要记录了SpringBoot的启动日志，以及程序员在程序中写的logger的日志，方便我们进行监控。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/18/java-reflection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/18/java-reflection/" itemprop="url">「Java教程」反射机制</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-18T07:47:15+00:00">
-                2017-05-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
-                    <span itemprop="name">Java教程</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>反射(Reflection)是Java 程序开发语言的特征之一，它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。<br>多数情况下反射是为了提高程序的灵活性，运行时动态加载需要加载的对象。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/18/java-reflection/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/16/meizu-qrcode-screenshot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/16/meizu-qrcode-screenshot/" itemprop="url">魅族系统截图被附上全屏二维码水印，其中包含设备信息·转载</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-16T13:30:00+00:00">
-                2017-05-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%82%E9%97%BB%E5%A0%82/" itemprop="url" rel="index">
-                    <span itemprop="name">异闻堂</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          魅族系统截图被附上全屏二维码水印，其中包含设备信息 Pandaria
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/16/meizu-qrcode-screenshot/">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/13/SpringBoot%E4%B9%8BController%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/13/SpringBoot%E4%B9%8BController%E7%94%A8%E6%B3%95/" itemprop="url">SpringBoot之Controller用法</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-13T14:53:21+00:00">
-                2017-05-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><p>Controller是SpringBoot里最基本的组件，他的作用是把用户提交来的请求通过对URL的匹配，分配给不同的接收器，再进行处理，然后向用户返回结果。他的重点就在于如何从HTTP请求中获得信息，提取参数，并分发给不同的处理服务。</p>
-<h2 id="基本组成"><a href="#基本组成" class="headerlink" title="基本组成"></a>基本组成</h2><p>一个最经典的Controller应该大概长这样:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.demo.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Controller;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by myths on 5/16/17.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IndexController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(value = &#123;&quot;index&quot;, &quot;/&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>首先应该在类的开头，加上<code>@Controller</code>注解，告知Spring这是一个控制器。<br>然后在对应的处理函数前面加上<code>@RequestMapping</code>，告知这个函数需要相应的URL。<br>接着这个函数传入了一个Model类型的参数，这个参数主要是用于向模板传递数据。<br>该函数最后返回了一个叫”index”的字符串，表示将调用名为”index”的模板，具体名称取决于模板引擎，比如对于jsp他将访问”index.jsp”这个文件,对于thymeleaf，他将访问”index.html”这个文件。</p>
-<p>上面的是最简单的用法，实际上有很多细节需要注意，下面就来一一解释。</p>
-<h2 id="ResponseBody"><a href="#ResponseBody" class="headerlink" title="ResponseBody"></a>ResponseBody</h2><p>如果我们想返回纯字符串而不是渲染后的模板，那我们可以在需要返回字符串的函数前面加上<code>@ResponseBody</code>这个注解；<br>如果我们像对于整个类都返回字符串，我们也可以在这个类前面加上<code>@ResponseBody</code>注解，或者将<code>@Controller</code>注解换成<code>@RestController</code>，均可。</p>
-<h2 id="RequestMapping"><a href="#RequestMapping" class="headerlink" title="RequestMapping"></a>RequestMapping</h2><h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p>这个注解是用来告诉Spring，下面的这个函数或者类是用来映射到那个URL的，通常情况下有下面这些选项：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(</span></span><br><span class="line"><span class="meta">        path = &#123;&quot;/test&quot;&#125;,</span></span><br><span class="line"><span class="meta">        params = &#123;&quot;name&quot;,&quot;userId&quot;&#125;,</span></span><br><span class="line"><span class="meta">        method = &#123;RequestMethod.GET&#125;,</span></span><br><span class="line"><span class="meta">        consumes = &#123;&quot;text/plain&quot;, &quot;application/*&quot;&#125;,</span></span><br><span class="line"><span class="meta">        produces = &quot;text/plain&quot;,</span></span><br><span class="line"><span class="meta">        headers = &quot;content-type=text/*&quot;</span></span><br><span class="line"><span class="meta">)</span></span><br></pre></td></tr></table></figure>
-<p>我们可以指定这个路径，参数，方法，头信息，来作为一个Controller的入口。当然，通常我们只需要指定path就行了。</p>
-<h3 id="对象转json或xml"><a href="#对象转json或xml" class="headerlink" title="对象转json或xml"></a>对象转json或xml</h3><p>这里有一个使用的小窍门，比如有时候我们希望返回json字符串，我们当然可以调用jackson,gson,fastjson等等工具来组合数据，但是这样显然比较麻烦。其实springboot自带了将对象持久化的工具，只要我们在<code>produces</code>参数中指定头信息，就可以将返回的对象直接转换为json或xml。比如:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.mythsman.bean.TestBean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;test&quot;, produces = &#123;&quot;application/json;charset=UTF-8&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">public</span> TestBean <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">TestBean</span> <span class="variable">testBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TestBean</span>();</span><br><span class="line">        testBean.setName(<span class="string">&quot;myths&quot;</span>);</span><br><span class="line">        testBean.setAge(<span class="number">12</span>);</span><br><span class="line">        <span class="keyword">return</span> testBean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>访问后的返回结果就是<code>&#123;&quot;name&quot;:&quot;myths&quot;,&quot;age&quot;:12&#125;</code>。同理，也可以自动转换成xml格式，不过xml格式对与map等的数据结构无法支持，因此我们还是建议采用json。</p>
-<h3 id="作用对象"><a href="#作用对象" class="headerlink" title="作用对象"></a>作用对象</h3><p>这个注解可以注解一个函数，也可以注解一个类。当注解一个类时，类中所有的方法都会在这个基础上再进行过滤：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/path1&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/path2&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;ok&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个函数就能匹配”&#x2F;path1&#x2F;path1”这个地址。</p>
-<h3 id="缺省参数"><a href="#缺省参数" class="headerlink" title="缺省参数"></a>缺省参数</h3><p>当RequestMapping的参数是空的时候，他就表示匹配剩余所有的页面,实际上也就是匹配所有的404页面。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IndexController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当RequestMapping不指定参数名时，默认就是path参数。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IndexController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="PathVariable"><a href="#PathVariable" class="headerlink" title="PathVariable"></a>PathVariable</h2><p>RequestMapping中的path也可以是一个未定的变量，比如下面的代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/&#123;variable&#125;&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(<span class="meta">@PathVariable(&quot;variable&quot;)</span>String variable)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> variable;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>通过花括号我们就可以指定这个变量，并且通过<code>@PathVariable</code>注解得到这个参数，非常方便。</p>
-<h2 id="RequestParam"><a href="#RequestParam" class="headerlink" title="RequestParam"></a>RequestParam</h2><p>RequestMapping也可以获取类似表单传回的信息形式，比如<code>/index?name=XXX</code>，这个<code>name</code>变量就可以通过RequestParam注解来获得:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(<span class="meta">@RequestParam(value = &quot;name&quot;,required = false,defaultValue = &quot;233&quot;)</span>String name)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们可以控制这个参数的名字，是否必须，以及设置默认值，来更好的进行匹配。</p>
-<h2 id="RequestBody"><a href="#RequestBody" class="headerlink" title="RequestBody"></a>RequestBody</h2><p>RequestBody用来获取Post信息的消息体,只要在参数中通过<code>@RequestBody</code>注解就能得到这个参数:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(<span class="meta">@RequestBody</span> String body)</span> &#123;</span><br><span class="line">		<span class="comment">//对body进行解析即可</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;success&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上面这些大概就是Controller中最基本的用法了，十分的方便清楚。具体的细节可以参考源码中的注释，解释的也是十分详尽了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/12/SpringBoot%E7%8E%AF%E5%A2%83%E7%86%9F%E6%82%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/12/SpringBoot%E7%8E%AF%E5%A2%83%E7%86%9F%E6%82%89/" itemprop="url">SpringBoot环境熟悉</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-12T14:34:12+00:00">
-                2017-05-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>就个人而言，我曾经比较畏惧JAVA，我们都知道JAVA这个东西是相当成熟了，各种框架特别复杂，名词也特别的多。我还记得我第一次想学struts的时候折腾了半天硬是没有找到头绪，面对各种眼花缭乱的包、眼花缭乱的配置文件、眼花缭乱的框架版本、眼花缭乱的报错信息，还有眼花缭乱的各种名词，硬是停留在了servlet的层面上，完全失去了在短时间内学下去的动力。因此很久都没有碰过JAVA。不过一个机缘巧合，我突然发现其实这些东西都是很有套路的，每一个东西其实都是为了解决某一个小问题，只是刚入门的时候面对庞大的体系一下子懵了。而且，在JAVA发展到当今的程度，之前冗杂的事情也被简化了很多，框架的封装度更加的高，我们学起来也轻松很多了。</p>
-<h2 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h2><p>Springboot就是当前火热起来的用于JAVA Web开发的微框架，配置十分方便，结合Intellij IDEA用起来十分的顺手，非常适合快速上手。同时他的文档也清楚,<a target="_blank" rel="noopener" href="http://spring.io/">官方文档</a>里写的也很细致。</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>曾经最烦人的配置问题在这里都不是问题，当我们需要创建项目的时候，可以去<a target="_blank" rel="noopener" href="http://start.spring.io/">start.spring.io</a>上选择相应的配置，下载一个空的项目包，然后用IDE打开即可。</p>
-<p>通常情况下，除了指定包信息以及各种版本信息之外，我们在开发Springboot的时候一般会加上下面的依赖：</p>
+            <p>这两天闲着没事就随便找一些奇奇怪怪的搜索引擎，注册了一波站长信息，这时候一般都需要认证站长的所有权，通常有下面几种方法:</p>
 <ul>
-<li>Thymeleaf</li>
-<li>AOP</li>
-<li>MySQL</li>
-<li>MyBatis</li>
-<li>Redis</li>
-<li>DevTools</li>
+<li>meta 标签认证</li>
+<li>上传文件认证</li>
+<li>CNAME认证<br>一般来讲CNAME认证比较稳妥但是要登运营商的管理界面管理，有点麻烦，而且认证之后要是忘了删记录，看起来着实有点凌乱。因此后来我就习惯用认证文件来认证，上传也方便，删除也方便。不过近几次却经常发现这样认证总是失败，本以为是某家平台的问题，但是发现很多家平台都一样。后来研究了一下才发现是因为之前网站开启了https那会，把http的流量全都用301重定向到了https，而一般的认证似乎都是访问的http的页面，导致无法识别重定向后的内容。<br>解决的方法也很简单，暂时关闭http到https的强制重定向，等认证之后再开启即可(脑子笨，排查半天才发现是这个问题)。</li>
 </ul>
-<p>Thymeleaf是SpringBoot1.5版本后推荐的模板引擎，取代了曾经的velocity以及更加古老的jsp，左右后台渲染前台页面的控制器；<br>AOP则是对面向切面编程思想的支持，他给我们提供了面向切面编程的接口；<br>MySQL则是非常主流的数据库驱动；<br>Mybatis则为我们在数据库与函数之间建立了一个DAO(Data Access Object)层，方便我们不用写jdbc的代码就能访问数据；<br>Redis则是非常流行的NOSQL数据库，适合对一些数据做缓存处理以及快速的读取写入；<br>DevTools则提供了很多方便我们编程的特性，让IDE反应更快。。。</p>
-<p>事实上这个网站做的事情也很简单，就是构建了下面的文件结构:</p>
-<pre><code>├── mvnw
-├── mvnw.cmd
-├── pom.xml
-└── src
-    ├── main
-    │   ├── java
-    │   │   └── com
-    │   │       └── example
-    │   │           └── demo
-    │   │               └── DemoApplication.java
-    │   └── resources
-    │       ├── application.properties
-    │       ├── static
-    │       └── templates
-    └── test
-        └── java
-            └── com
-                └── example
-                    └── demo
-                        └── DemoApplicationTests.java
-</code></pre>
-<p>说白了其实就是配置了maven的包管理系统，以及推荐的文件结构，仅此而已。</p>
-<h2 id="什么是maven"><a href="#什么是maven" class="headerlink" title="什么是maven"></a>什么是maven</h2><p>maven其实就是一个包管理工具，就像是python的pip，ubuntu的apt,js的npm，在<a target="_blank" rel="noopener" href="https://www.maven.org/">www.maven.org</a>里集成了绝大多数大家常用的包信息，类似于webservice的注册中心。maven将本项目所有的包依赖全都写进了pom.xml文件中，免得我们一个一个下载再一个一个放进build path里，免去了很多的麻烦。<br>上面的配置形成的pom.xml如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line">	&lt;groupId&gt;com.example&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;demo&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">	&lt;packaging&gt;jar&lt;/packaging&gt;</span><br><span class="line">	&lt;name&gt;demo&lt;/name&gt;</span><br><span class="line">	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;</span><br><span class="line">	&lt;parent&gt;</span><br><span class="line">		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;</span><br><span class="line">		&lt;version&gt;1.5.3.RELEASE&lt;/version&gt;</span><br><span class="line">		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;</span><br><span class="line">	&lt;/parent&gt;</span><br><span class="line">	&lt;properties&gt;</span><br><span class="line">		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;</span><br><span class="line">		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;</span><br><span class="line">		&lt;java.version&gt;1.8&lt;/java.version&gt;</span><br><span class="line">	&lt;/properties&gt;</span><br><span class="line">	&lt;dependencies&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;1.3.0&lt;/version&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;runtime&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;runtime&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;test&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">	&lt;/dependencies&gt;</span><br><span class="line">	&lt;build&gt;</span><br><span class="line">		&lt;plugins&gt;</span><br><span class="line">			&lt;plugin&gt;</span><br><span class="line">				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</span><br><span class="line">			&lt;/plugin&gt;</span><br><span class="line">		&lt;/plugins&gt;</span><br><span class="line">        &lt;/build&gt;</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
-<p>如果我们想重新加入一个包，只要在maven的管理中心找到这个包的groupId以及artifactId然后写在这里的dependency里就行了。最后利用IDE提供的自动导入maven包即可。</p>
-<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>相比于曾经写项目每个组件都有一个xml配置文件，SpringBoot都帮我们封装成了一个统一的配置文件application.properties，比如在某一个项目中我的配置是这样的:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#tomcat start</span><br><span class="line">server.compression.enabled=true</span><br><span class="line"></span><br><span class="line">#tomcat end</span><br><span class="line"></span><br><span class="line">#redis start</span><br><span class="line">spring.redis.database=0</span><br><span class="line">spring.redis.host=localhost</span><br><span class="line">spring.redis.port=6379</span><br><span class="line">#redis end</span><br><span class="line"></span><br><span class="line">#multipart start</span><br><span class="line">spring.http.multipart.enabled=true</span><br><span class="line">spring.http.multipart.max-file-size=10MB</span><br><span class="line">spring.http.multipart.max-request-size=10MB</span><br><span class="line">#multipart end</span><br><span class="line"></span><br><span class="line">#thymeleaf start</span><br><span class="line">spring.thymeleaf.mode=HTML5</span><br><span class="line">spring.thymeleaf.encoding=UTF-8</span><br><span class="line">spring.thymeleaf.content-type=text/html</span><br><span class="line">spring.thymeleaf.cache=true</span><br><span class="line">#thymeleaf end</span><br><span class="line"></span><br><span class="line">#mysql start</span><br><span class="line">spring.datasource.url=jdbc:mysql://localhost:3306/test</span><br><span class="line">spring.datasource.username=root</span><br><span class="line">spring.datasource.password=123456</span><br><span class="line">#mysql start</span><br><span class="line"></span><br><span class="line">#mybatis start</span><br><span class="line">mybatis.configuration.cache-enabled=true</span><br><span class="line">mybatis.configuration.lazy-loading-enabled=true</span><br><span class="line">mybatis.configuration.multipleResultSetsEnabled=true</span><br><span class="line">#mybatis end</span><br></pre></td></tr></table></figure>
-<p>这其实就是对传统的配置方法做了一层封装，使得项目更加简洁清楚，所有的配置项也都能由IDE自动补全，不要太爽。</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>由于这个框架比较新，因此很多组建都需要java8的支持，并且如果以后发布到服务器上，也需要Tomcat8的支持，这一点需要尤其的注意。</p>
 
           
         
@@ -1118,7 +454,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/12/java-thread/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/03/15/ubuntu-zh-CN-UTF-8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1137,7 +473,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/12/java-thread/" itemprop="url">「Java教程」多线程</a></h2>
+                <a class="post-title-link" href="/2018/03/15/ubuntu-zh-CN-UTF-8/" itemprop="url">解决 ubuntu 服务器中文乱码</a></h2>
         
 
         <div class="post-meta">
@@ -1149,8 +485,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-12T10:07:41+00:00">
-                2017-05-12
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-15T11:02:18+00:00">
+                2018-03-15
               </time>
             
 
@@ -1172,8 +508,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
-                    <span itemprop="name">Java教程</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -1210,10 +546,10 @@
 
       
         
-          <p>多线程的存在，不是提高程序的执行速度。其实是为了提高应用程序的使用率。<br>程序的执行其实都是在抢 CPU 的资源，CPU 的执行权。<br>多个进程是在抢这个资源，而其中的某一个进程如果执行路径(线程)比较多，就会有更高的几率抢到 CPU 的执行权。</p>
+          <p>之前买了阿里云的服务器，后来在上面编辑中文字符的时候发现乱码，在网上找了下解决方案，发现比较乱，有的也不太好用，特此整理了一下可用的一个方案。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/05/12/java-thread/#more" rel="contents">
+            <a class="btn" href="/2018/03/15/ubuntu-zh-CN-UTF-8/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1264,7 +600,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/10/wpo-localstorage-css-js/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/03/11/Java%E4%B8%AD%E5%85%B3%E4%BA%8E%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9D%91/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1283,7 +619,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/10/wpo-localstorage-css-js/" itemprop="url">Web 性能优化（4）——localstorage 存储静态文件的意义</a></h2>
+                <a class="post-title-link" href="/2018/03/11/Java%E4%B8%AD%E5%85%B3%E4%BA%8E%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9D%91/" itemprop="url">Java中日期处理的一些坑</a></h2>
         
 
         <div class="post-meta">
@@ -1295,8 +631,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-10T09:27:00+00:00">
-                2017-05-10
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-11T04:57:05+00:00">
+                2018-03-11
               </time>
             
 
@@ -1318,8 +654,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
-                    <span itemprop="name">实验室</span>
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
                   </a>
                 </span>
 
@@ -1356,10 +692,171 @@
 
       
         
-          <p>localstorage 并不仅仅只是”狂拽酷炫吊炸天“的黑科技。在一些特殊场景下，甚至可能会有意想不到的收获。</p>
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>记录下最近在用java处理日期格式的时候遇到的一些坑，虽然是挺简单的一些点，但是如果不了解清楚在使用的时候还是会走很多弯路的。</p>
+<h2 id="相关类"><a href="#相关类" class="headerlink" title="相关类"></a>相关类</h2><p>Java8 之后，涉及日期处理的类基本都分到了 java.time 包下，非常清楚，功能也做了强化。而在这之前，如果我们要处理日期，就只能组合的使用 java.util 以及 java.text 这两个包，感觉十分凌乱。当然，以后我们就不用再纠结这些了，直接用 java.time 包就行了。这个包下有众多类，不过一般在做日期转换的时候主要关注下面这几个:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">LocalDate</span><br><span class="line">LocalTime</span><br><span class="line">LocalDateTime</span><br><span class="line">ZonedDateTime</span><br><span class="line">DateTimeFormatter</span><br><span class="line">TemporalAccessor</span><br><span class="line">TemporalQueries</span><br><span class="line">TemporalQueries</span><br><span class="line">ChronoField</span><br></pre></td></tr></table></figure>
+<p>前四个类是用来保存日期的，DataTimeFormatter 使用来将日期进行格式化和解析的，剩下的是用来从格式化的时间数据中提取信息的，分工明确。看起来挺简单的，但是在用的时候还是有一些坑。。。</p>
+<h2 id="一些坑"><a href="#一些坑" class="headerlink" title="一些坑"></a>一些坑</h2><h3 id="日期本地化"><a href="#日期本地化" class="headerlink" title="日期本地化"></a>日期本地化</h3><p>很经典的一个例子就是给一个格式化的日期串，比如 <code>Sun Feb 13 15:00:10 +0000 2011</code> 我们该怎么把他提取到 LocalDateTime 里。<br>看上去没难度，查一下 DateTimeFormatter 的文档，找到每个部分对应的 pattern 即可:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">dateString</span> <span class="operator">=</span> <span class="string">&quot;Sun Feb 13 15:00:10 2011&quot;</span>;</span><br><span class="line">    <span class="type">DateTimeFormatter</span> <span class="variable">formatter</span> <span class="operator">=</span> DateTimeFormatter.ofPattern(<span class="string">&quot;EEE MMM dd HH:mm:ss yyyy&quot;</span>);</span><br><span class="line">    <span class="type">LocalDateTime</span> <span class="variable">dateTime</span> <span class="operator">=</span> LocalDateTime.parse(dateString, formatter);</span><br><span class="line">    System.out.println(dateTime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然而，这段代码却极大可能会报错:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;main&quot; java.time.format.DateTimeParseException: Text &#x27;Sun Feb 13 15:00:10 2011&#x27; could not be parsed at index 0</span><br><span class="line">	at java.time.format.DateTimeFormatter.parseResolved0(DateTimeFormatter.java:1949)</span><br><span class="line">	at java.time.format.DateTimeFormatter.parse(DateTimeFormatter.java:1851)</span><br><span class="line">	......</span><br></pre></td></tr></table></figure>
+<p>说是无法解析，研究了半天才发现 DateTimeFormatter 这个类默认进行了本地化的设置，如果默认环境是中文，那么他只能解析用中文表示的字符串，类似 <code>星期日 二月 13 15:00:10 2011</code>。。。<br>解决的方法也很简单，强行传入一个本地化参数即可:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">dateString</span> <span class="operator">=</span> <span class="string">&quot;Sun Feb 13 15:00:10 2011&quot;</span>;</span><br><span class="line">    <span class="type">DateTimeFormatter</span> <span class="variable">formatter</span> <span class="operator">=</span> DateTimeFormatter.ofPattern(<span class="string">&quot;EEE MMM dd HH:mm:ss yyyy&quot;</span>, Locale.US);</span><br><span class="line">    <span class="type">LocalDateTime</span> <span class="variable">dateTime</span> <span class="operator">=</span> LocalDateTime.parse(dateString, formatter);</span><br><span class="line">    System.out.println(dateTime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="带时区的数据"><a href="#带时区的数据" class="headerlink" title="带时区的数据"></a>带时区的数据</h3><p>如果我们希望打印带时区信息的格式串，一定要用 ZonedDateTime 而不能用 LocalDateTime ，比如</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">DateTimeFormatter</span> <span class="variable">formatter</span> <span class="operator">=</span> DateTimeFormatter.ofPattern(<span class="string">&quot;EEE MMM dd HH:mm:ss xx yyyy&quot;</span>, Locale.US);</span><br><span class="line">    <span class="type">String</span> <span class="variable">zoned</span> <span class="operator">=</span> formatter.format(ZonedDateTime.now());<span class="comment">//正常</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">local</span> <span class="operator">=</span> formatter.format(LocalDateTime.now());<span class="comment">//报错</span></span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正常的会打印出 <code>Sun Mar 11 14:22:43 +0800 2018</code>，而错误的就会报下面的错:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;main&quot; java.time.temporal.UnsupportedTemporalTypeException: Unsupported field: OffsetSeconds</span><br><span class="line">	at java.time.LocalDate.get0(LocalDate.java:680)</span><br><span class="line">	at java.time.LocalDate.getLong(LocalDate.java:659)</span><br><span class="line">	at java.time.LocalDateTime.getLong(LocalDateTime.java:720)</span><br><span class="line">	......</span><br></pre></td></tr></table></figure>
+
+<h3 id="正确使用格式串"><a href="#正确使用格式串" class="headerlink" title="正确使用格式串"></a>正确使用格式串</h3><p>关于格式串的含义可以参考 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns">java doc</a>，这里有很多意义相近的表示方法，用的时候要<strong>用心</strong>区分。<br>比如文档里有这两行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Symbol  Meaning         Presentation      Examples</span><br><span class="line">------  -------         ------------      -------</span><br><span class="line"> Y     week-based-year   year           1996; 96</span><br><span class="line"> y     year-of-era      year           2004; 04</span><br></pre></td></tr></table></figure>
+<p>所以我们指的年到底是哪个年呢？这个要好好区分，其实我们一般用的年是指 ‘year-of-era’ ，如果用了另外一个就会发生解析错误。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html">java8 doc DateTimeFormatter</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/02/28/alibaba-interview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/28/alibaba-interview/" itemprop="url">面试分享：2018阿里巴巴前端面试总结(题目+答案)</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-28T09:37:18+00:00">
+                2018-02-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Interview/" itemprop="url" rel="index">
+                    <span itemprop="name">Interview</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>脑子混了记得不多了，记得多少就记录多少吧。。。。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/05/10/wpo-localstorage-css-js/#more" rel="contents">
+            <a class="btn" href="/2018/02/28/alibaba-interview/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1410,7 +907,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/09/npm/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/02/13/crontab-part1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1429,7 +926,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/09/npm/" itemprop="url">NPM 学习笔记整理</a></h2>
+                <a class="post-title-link" href="/2018/02/13/crontab-part1/" itemprop="url">crontab 踩坑之绝对路径</a></h2>
         
 
         <div class="post-meta">
@@ -1441,8 +938,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-09T19:25:24+00:00">
-                2017-05-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-13T02:09:26+00:00">
+                2018-02-13
               </time>
             
 
@@ -1464,8 +961,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Node/" itemprop="url" rel="index">
-                    <span itemprop="name">Node</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -1502,11 +999,10 @@
 
       
         
-          <h1 id="什么是-NPM"><a href="#什么是-NPM" class="headerlink" title="什么是 NPM"></a>什么是 NPM</h1><p><code>npm</code> 之于 <code>Node</code> ，就像 <code>pip</code> 之于 <code>Python</code> , <code>gem</code> 之于 <code>Ruby</code> , <code>composer</code> 之于 <code>PHP</code> 。</p>
-<p><code>npm</code> 是 <code>Node</code> 官方提供的包管理工具，他已经成了 <code>Node</code> 包的标准发布平台，用于 <code>Node</code> 包的发布、传播、依赖控制。<br><code>npm</code> 提供了命令行工具，使你可以方便地下载、安装、升级、删除包，也可以让你作为开发者发布并维护包。</p>
+          <p>由于放假后网络原因不方便使用电脑，需要创建一个 <code>crontab</code> 定时任务，用来在每天固定时间执行一个 <code>Shell</code> 脚本</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/05/09/npm/#more" rel="contents">
+            <a class="btn" href="/2018/02/13/crontab-part1/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1557,7 +1053,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/05/java-io/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/02/04/Slf4j%E6%A1%86%E6%9E%B6%E7%90%86%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1576,7 +1072,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/05/java-io/" itemprop="url">「Java教程」IO机制</a></h2>
+                <a class="post-title-link" href="/2018/02/04/Slf4j%E6%A1%86%E6%9E%B6%E7%90%86%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90/" itemprop="url">Slf4j框架理解与分析</a></h2>
         
 
         <div class="post-meta">
@@ -1588,8 +1084,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-05T09:31:22+00:00">
-                2017-05-05
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-04T07:57:48+00:00">
+                2018-02-04
               </time>
             
 
@@ -1611,154 +1107,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
-                    <span itemprop="name">Java教程</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>输入输出（I&#x2F;O）是指程序与外部设备或其他计算机进行交互的操作。几乎所有的程序都具有输入与输出操作，Java把这些输入与输出操作用流来实现，通过统一的接口来表示，从而使程序设计更为简单。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/05/java-io/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/" itemprop="url">C++11学习笔记3</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-01T14:43:21+00:00">
-                2017-05-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
                   </a>
                 </span>
 
@@ -1796,60 +1146,655 @@
       
         
           
-            <h3 id="右值引用"><a href="#右值引用" class="headerlink" title="右值引用"></a>右值引用</h3><h4 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h4><p>在古老的标准里，C++中的变量分为左值(lvalue)与右值(rvalue)这两种，左值就是能够用&amp;获得地址的值，可以对他进行修改，右值就是不能用&amp;获得地址的值，通常只是临时变量，不能进行修改。而在C++11中，变量不再仅仅分为左值与右值了，他引入了另一种值叫将亡值(expire value,xvalue)。从此，变量类型分为了三种:</p>
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这两天在看设计模式相关的书，正好看到了门面模式，感觉不太能领悟它的精髓，就想找一些例子来看，突然发现这个slf4j框架不就是一个门面(facade &#x2F;fəˈsɑ:d&#x2F;)么，干脆就直接拿来看一看了，正好也把java的日志系统也了解了解。</p>
+<h1 id="日志系统"><a href="#日志系统" class="headerlink" title="日志系统"></a>日志系统</h1><p>不谈那些比较复杂的分布式日志系统，这里主要讨论的是单机常用的那些日志框架。现在在Java生态中存在的日志框架也是挺多的了，初来乍到看起来有点懵，其实所谓的日志框架主要分两种：</p>
 <ul>
-<li>lvalue  :left value 就是传统意义上的左值</li>
-<li>xvalue  :expire value 就是将亡值</li>
-<li>prvalue :pure right value 就是传统意义上的右值</li>
+<li>一种是日志框架门面(facade)，用来统一一个共同的接口，方便我们用相同的代码支持不同的实现方法。主要包括commons-logging和slf4j两套规范。</li>
+<li>另一种就是日志框架的实现了，主要包括log4j、log4j2、logback、slf4j-simple和java.util.logging包。</li>
 </ul>
-<p>而且，xvalue+prvalue又称为rvalue，lvalue+xvalue又称为glvalue。</p>
-<h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>那么什么是xvalue呢，什么又是右值引用呢？<br>xvalue其实就是对右值的引用：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> &amp;&amp;x=<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
-<p>这个x跟传统的左值引用肯定是不一样的，毕竟左值引用是不能引用右值的。<br>这个x跟左值变量也是不一样的，虽然看上去没啥区别，但是实际上这个x并没有进行构造，而是像左值引用一样，对右值10进行了引用，使得这个右值的内存不被立即释放。这样我们就可以像使用左值一样的使用这个右值了。<br>那么现在就应该清楚了，右值引用就是通过对右值进行引用使得我们能够保存这个右值的生命周期，并像使用左值一样的使用右值的方法。（自己的定义）</p>
-<h4 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h4><p>这么费劲心机定义一个右值引用有啥意义呢？其实主要是为了提高变量传递的效率。虽然很多情况下，我们的编译器会做一些优化，但是不同编译器不同，因此下面基于g++的测试我开启了<code>-fno-elide-constructors</code>参数防止其优化。<br>比如下面的这个过程:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Test</span>()&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(<span class="type">const</span> Test &amp;test)&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;copy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Test</span>()&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;destroy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看上去没什么额外开销，而事实上，这个过程的执行结果是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>也就是说他执行了一次构造，一次拷贝构造。而事实上，这个拷贝构造是浪费额外开销的，而且这个拷贝其实是对一个右值的拷贝，在拷贝后这个右值就被析构了，我们完全可以不执行析构而让新的值就用这个右值的引用。<br>旧的做法是使用常量引用来做这件事:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">const</span> Test&amp; t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这避免了额外的拷贝，但是后果是这个值只能是常量，无法被修改。<br>如果使用了右值引用，那么这个问题就简单多了:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test&amp;&amp; t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>这个右值引用既没有对结果进行拷贝，也能够让我们像使用一个左值一样的使用他。</p>
-<h4 id="移动拷贝构造"><a href="#移动拷贝构造" class="headerlink" title="移动拷贝构造"></a>移动拷贝构造</h4><p>为什么引入移动拷贝构造，这是因为我们考虑到了以下问题：<br>我们知道，构造函数分为深拷贝和浅拷贝，默认的是浅拷贝，浅拷贝导致的结果就是拷贝出来的对象跟拷贝前的对象拥有相同的堆内元素，如果我们析构了拷贝前的对象，那么拷贝后的对象就无法使用了，因此浅拷贝不适合做赋值的移动操作；而深拷贝呢，又太浪费空间了，完全没有必要生成一个一模一样的对象然后把原先的再删除。因此就引入了拷贝构造这个东西。<br>比如下面的例子：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> *ptr;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Test</span>():<span class="built_in">ptr</span>(<span class="keyword">new</span> <span class="built_in">int</span>(<span class="number">0</span>))&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(<span class="type">const</span> Test &amp;test):<span class="built_in">ptr</span>(<span class="keyword">new</span> <span class="built_in">int</span>(*test.ptr))&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;copy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(Test &amp;&amp;test):<span class="built_in">ptr</span>(test.ptr)&#123;</span><br><span class="line">        test.ptr=<span class="literal">nullptr</span>;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;move&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Test</span>()&#123;</span><br><span class="line">        <span class="keyword">delete</span> ptr;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;destroy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>移动构造的参数就是一个右值引用，他做的事是将移动源的所有堆内元素指针断开，并连上移动目的地的指针。这样移动源就可以安心的析构而不影响移动目的地的堆内元素。同时也省去了不必要的拷贝开销，效率非常的高。</p>
-<h3 id="std-move"><a href="#std-move" class="headerlink" title="std::move"></a>std::move</h3><p>移动构造有一个问题，就是他的参数必须是右值，这就带来一个问题，如果上面的main函数变成这样:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t1;</span><br><span class="line">    Test t2=t1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>由于t1是个左值，那么他会去执行拷贝构造而不会执行移动构造，这显然不是我们像看到的。<br>为了使左值的移动能够使用移动构造，我们就有了std::move这个东西，他的作用很简单，就是把左值变成右值引用。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t1;</span><br><span class="line">    Test t2=std::<span class="built_in">move</span>(t1);</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>如我所愿。<br>注意一点就是在使用std::move()之后的对象t1这时候的堆内元素就已经无效了。</p>
-<p>std::move()这么好用，显然c++中的模板都支持这个move语义。</p>
-<h3 id="std-emplace-back"><a href="#std-emplace-back" class="headerlink" title="std::emplace_back"></a>std::emplace_back</h3><p>我们知道了对象的构造，拷贝、移动都是要付出一些代价的，那我们很容易就会想到，当我们使用容器的时候，如果使用拷贝构造，显然效率很低；如果使用移动构造，那么还是会有一些移动的开销，需要执行移动构造函数，能不能有一种方法，直接在容器里执行构造函数，这样就既不用拷贝，也不用移动了呢？答案是当然有，这就是std::emplace_back方法。我们可以比较下面的三种方法：</p>
-<p><strong>拷贝插入</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    Test t;</span><br><span class="line">    v.<span class="built_in">push_back</span>(t);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p><strong>移动插入</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    v.<span class="built_in">push_back</span>(<span class="built_in">Test</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-
-<p><strong>emplace_back</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    v.<span class="built_in">emplace_back</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>显然，这个emplace_back的效率是最高的。</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/26419368/">深入应用c++11</a></p>
+<p>这两类东西当然要一起用，显然属于apache的东西一般放在一起用(log4j log4j2 commons-logging)，属于QOS的东西也一般放在一起用(logback slf4j)。不过话也不是绝对的，既然是门面嘛，肯定要支持的全一点了，如果门面跟实现的api不同的话呢，那就用适配器模式写一个adapter层做适配就好了。比如slf4j支持jul跟log4j就是通过适配器来做的。</p>
+<p>这种通过门面来统一日志框架的好处是显而易见的，那就是我们在写代码的时候只需要知道门面的api就行了(这通常是比较简单而且一致的)，不需要知道不同框架的实现细节。我们完全可以在运行时再指定我们使用哪一套日志框架，这样就做到了业务逻辑与日志系统的解耦。如果是从依赖关系的角度来讲就是，比如对与slf4j，我们只需要在编译时依赖<code>slf4j-api.jar</code>(编译依赖)，这个jar里几乎只是定义了接口跟一些通用的工具；然后我们可以在运行时再去指定各种不同的实现，比如<code>slf4j-simple.jar</code>(运行依赖)。</p>
+<p>这种使用方式与我们使用sql绑定驱动挺像的，其实他们都是采用的类似的思想。</p>
+<p>但是这就带来一个问题，这种运行时进行服务发现的功能是怎么实现的呢？这其实至少有两种解决办法，一种是通过配置文件，将需要加载的类写到配置文件里，然后再通过ClassLoader去加载这个类，做到运行时的加载(比如commons-logging的配置)；还有一种就更加方便了，不需要额外的配置文件，就能做到类的动态加载—SPI。</p>
+<h1 id="SPI"><a href="#SPI" class="headerlink" title="SPI"></a>SPI</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>SPI 就是(Service Provider Interface)，字面意思就是服务提供接口，这套规范其实我在之前的<a href="/2017/12/19/1/">Lombok原理分析</a>中提到过，只是当时还不知道这个就是这么一个玩意。。。他的用法其实很简单，就是在服务调用者跟服务提供者之间商定了一个协议：</p>
+<ol>
+<li>服务发现者需要定义一个接口。</li>
+<li>服务提供者要实现之前的接口，然后在 classpath 里的 META-INF&#x2F;services 文件夹下新建一个文件，文件名是之前的接口的全类名，文件内容是实现类的全类名。</li>
+<li>服务发现者保证会通过 ServiceLoader 在类路径内的所有jar包中搜索指定接口的实现类，进行实例化。</li>
+</ol>
+<p>显然，一般来讲服务发现者一般就不能直接通过构造函数来构造这个接口的实现类，而是通过静态工厂方式封装实例化的过程。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>举一个简单的例子，首先定义一个没有实现的接口Ispi.java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Ispi</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们的目的是最终能够在场景类中通过这样的方法来调用Test.java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Ispi</span> <span class="variable">ispi</span> <span class="operator">=</span> SpiFactory.getSpi();</span><br><span class="line">        ispi.say();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么首先我们需要写一个实现类SpiImpl.java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SpiImpl</span> <span class="keyword">implements</span> <span class="title class_">Ispi</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hey , I&#x27;m an implement&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后创建resources&#x2F;META-INF&#x2F;services文件夹(resources文件夹已写入类路径)，在文件夹下写入创建一个文件名为<code>com.mythsman.test.Ispi</code>，内容为<code>com.mythsman.test.SpiImpl</code>，用以注册这个服务。</p>
+<p>当然，上面这两步既可以在同一个项目中，也可以在另外一个项目中，只需要打包后将jar包放入类路径即可。</p>
+<p>接着来写工厂SpiFactory.java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.ServiceLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SpiFactory</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Ispi <span class="title function_">getSpi</span><span class="params">()</span> &#123;</span><br><span class="line">        ServiceLoader&lt;Ispi&gt; loader = ServiceLoader.load(Ispi.class);</span><br><span class="line">        List&lt;Ispi&gt; ispiList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (Ispi ispi : loader) &#123;</span><br><span class="line">            ispiList.add(ispi);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (ispiList.size() &gt; <span class="number">2</span>) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;Mutiple implements found.&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SubstituteSpi</span>();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ispiList.size() &lt; <span class="number">1</span>) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;No implements found.&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SubstituteSpi</span>();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> ispiList.get(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的ServiceLoader会去类路径中查找所有支持了Ispi接口的实现类，并返回一个迭代器，这个迭代器会实例化所有的实现类。当然我们可能会发现多个实现类或者没有发现实现类，这时为了保证代码的健壮我们通常会写一个默认的实现SubstituteSpi.java:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SubstituteSpi</span> <span class="keyword">implements</span> <span class="title class_">Ispi</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">say</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Well I&#x27;m a backburner implement&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果能成功发现一个，那么我们就可以返回这一个实例了。</p>
+<p>这种方法应该是一种比较清楚的服务动态发现的方法了。</p>
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>实际上我们的很多库都采用了SPI的规范只是我们可能用到的时候对原理不太了解，其实下面这些常见的框架里都用到了SPI:</p>
+<h3 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h3><p>我们在入门的时候都学过用jdbc包，用的时候我们都被要求写一段类似下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>其实这段代码没有任何实际意义，只是显式的加载了一个类，告诉我们记得添加这个jar包，实际上只要将这个jar包放在了类路径里面，这段话其实就没有必要了。<br>我们去查 mysql-connector-java 这个包就会发现，他用的就是spi的方法，将自己的 <code>com.mysql.cj.jdbc.Driver</code> 这个类注册给了 <code>java.sql.Driver</code> 这个接口。加载的时候用的其实也是 ServiceLoader 。</p>
+<h3 id="Lombok"><a href="#Lombok" class="headerlink" title="Lombok"></a>Lombok</h3><p>lombok的原理也是类似，他用自己写的 AnnotationProcessor 去实现 javax.annotation.processing.Processor ，从而做到在编译期进行注解处理。</p>
+<h3 id="Slf4j"><a href="#Slf4j" class="headerlink" title="Slf4j"></a>Slf4j</h3><p>这个我们下面细讲。</p>
+<p>反正我当前遇到的jar包，只要它的scope是runtime，基本上都是通过这种方法来搞得。</p>
+<h1 id="SLF4J"><a href="#SLF4J" class="headerlink" title="SLF4J"></a>SLF4J</h1><h2 id="成员"><a href="#成员" class="headerlink" title="成员"></a>成员</h2><p>slf4j通过上述的方法构建了自己的生态圈，在slf4j-api-xxx.jar的统一管理下容纳了多种实现：</p>
+<ul>
+<li>slf4j-log4j12-xxx.jar</li>
+<li>slf4j-jdk14-xxx.jar</li>
+<li>slf4j-nop-xxx.jar</li>
+<li>slf4j-simple-xxx.jar</li>
+<li>slf4j-jcl-xxx.jar</li>
+<li>logback-classic-xxx.jar<br>其中slf4j-nop比较无聊，其实就是什么都没有实现，所有的log都不会处理；slf4j-simple比较小巧，基本能满足简单的使用，配置也很少；logback-classic是slf4j相同作者的作品；剩下其他的则都是相当于一个适配层，将slf4j与其他实现进行适配。</li>
+</ul>
+<h2 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h2><p>那么如果我们想写一个支持slf4j规范的框架应该怎么写呢，其实很简单，只需要实现 org.slf4j.spi.SLF4JServiceProvider 这个接口即可。比如slf4j-jdk14就是这么写的:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.slf4j.jul;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.slf4j.ILoggerFactory;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.IMarkerFactory;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.helpers.BasicMDCAdapter;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.helpers.BasicMarkerFactory;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.spi.MDCAdapter;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.spi.SLF4JServiceProvider;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JULServiceProvider</span> <span class="keyword">implements</span> <span class="title class_">SLF4JServiceProvider</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">REQUESTED_API_VERSION</span> <span class="operator">=</span> <span class="string">&quot;1.8.99&quot;</span>; <span class="comment">// !final</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> ILoggerFactory loggerFactory;</span><br><span class="line">	<span class="keyword">private</span> IMarkerFactory markerFactory;</span><br><span class="line">	<span class="keyword">private</span> MDCAdapter mdcAdapter;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> ILoggerFactory <span class="title function_">getLoggerFactory</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> loggerFactory;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> IMarkerFactory <span class="title function_">getMarkerFactory</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> markerFactory;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> MDCAdapter <span class="title function_">getMDCAdapter</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> mdcAdapter;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getRequesteApiVersion</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> REQUESTED_API_VERSION;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">initialize</span><span class="params">()</span> &#123;</span><br><span class="line">		loggerFactory = <span class="keyword">new</span> <span class="title class_">JDK14LoggerFactory</span>();</span><br><span class="line">		markerFactory = <span class="keyword">new</span> <span class="title class_">BasicMarkerFactory</span>();</span><br><span class="line">		mdcAdapter = <span class="keyword">new</span> <span class="title class_">BasicMDCAdapter</span>();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对于简单的日志系统，我们其实只需要实现一下ILoggerFactory接口就行了，IMarkerFactory 跟 MDCAdapter用默认的就可以了。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>用起来很方便，用LoggerFactory创建logger即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LoggerFactory.getLogger(Test.class);</span><br><span class="line">        logger.info(<span class="string">&quot;this is an info&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>getLogger传入的其实就是一个名字而已，方便我们定位而且这些log默认会写到System.err里。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>那么如果我们想对日志进行配置该怎么弄呢，比如设置日志级别，日志输出文件？遗憾的是，日志门面并没有对这个进行统一，而是将这个功能交给了不同的日志实现自己去做（毕竟这东西也不太好统一）。比如logback和log4j，我们就要写长长的xml;比如slf4j-simple,我们就要去看他源码，找到他定义的日志文件和配置项（查看SimpleLoggerConfiguration类就很清楚了）。</p>
+<h2 id="MDC"><a href="#MDC" class="headerlink" title="MDC"></a>MDC</h2><p>记得slf4j的接口里有一个MDC,这个东西是做什么的呢？其实从他的名字就可以猜到(Mapped Diagnostic Context)，其实就是一个类似Map的上下文。他解决了我们可能会希望进行一些即时数据的保存与计算：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.slf4j.MDC;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        MDC.put(<span class="string">&quot;key&quot;</span>, <span class="string">&quot;value&quot;</span>);</span><br><span class="line">        System.out.println(MDC.get(<span class="string">&quot;key&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实说白了也就是一个ThreadLocal的ConcurrentHashMap。。。。</p>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/chenhongliang/p/5312517.html">Java常用日志框架介绍</a><br><a target="_blank" rel="noopener" href="https://www.slf4j.org/manual.html">Slf4j user manual</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/u012410733/article/details/52475039">Java 规范 SPI</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Sinte-Beuve/p/5758971.html">slf4j log4j logback关系详解和相关用法</a></p>
 
           
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/02/03/xiaomi-anc-earphone-3-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/03/xiaomi-anc-earphone-3-5/" itemprop="url">小米降噪耳机（3.5mm）评测</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-03T12:46:00+00:00">
+                2018-02-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E4%BA%AB%E9%95%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">分享镜</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <script src="https://cdn.jsdelivr.net/npm/aplayer@1.6.0/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@1.0.1/dist/Meting.min.js"></script>
+
+<p>之前在同学的安利之下，我剁手了一副小米降噪耳机 Type-C 版（评测可以看 <a target="_blank" rel="noopener" href="https://blog.nfz.moe/archives/xiaomi-anc-earphone.html">这里</a>）。但是 Type-C 版的音质并不好，而且听歌时手机不能充电。于是，我就手痒，又买了小米降噪耳机 3.5mm 版（完了，没钱了）</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/03/xiaomi-anc-earphone-3-5/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/01/31/linux-sed-command/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/31/linux-sed-command/" itemprop="url">SED 命令简明教程</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-31T11:03:52+00:00">
+                2018-01-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p><code>awk</code>于 1977 年出生，今年 36 岁本命年，<code>sed</code>比<code>awk</code>大 2-3 岁，<code>awk</code>就像林妹妹，sed 就是宝玉哥哥了。所以 林妹妹跳了个<code>Topless</code>，他的哥哥<code>sed</code>坐不住了，也一定要出来抖一抖。</p>
+<p><code>sed</code>全名叫<code>stream editor</code>，流编辑器，用程序的方式来编辑文本，相当的<code>hacker</code>啊。<code>sed</code>基本上就是玩正则模式匹配，所以，玩<code>sed</code>的人，正则表达式一般都比较强。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/01/31/linux-sed-command/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/01/30/haidian-xicheng-chinese-paper/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/30/haidian-xicheng-chinese-paper/" itemprop="url">测评：海淀、西城区高三期末语文试卷对比</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T05:10:00+00:00">
+                2018-01-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%87%AA%E8%A8%80%E8%AF%AD/" itemprop="url" rel="index">
+                    <span itemprop="name">自言语</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>2018 年是北京市高考改革前的倒数第二年。在新课标改革前夕，高考的变革在试卷上如何体现成为大家关心的重点。通过高三期末试题的分析，可以看到今年高考的一个走向和趋势。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/01/30/haidian-xicheng-chinese-paper/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/01/30/Hexo-NexT-Wildfire/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/30/Hexo-NexT-Wildfire/" itemprop="url">在Hexo博客 NexT主题中部署Wildfire评论系统</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T04:14:00+00:00">
+                2018-01-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>前一段时间，发现了一个评论系统很好用，果断把这个评论系统换到自己的博客里了。</p>
+<p>所以本文主要讲在 <code>Hexo</code> 的 <code>NexT</code> 主题中如何使用 <code>Wildfire</code> ，至于其他的博客以及其他的主题中如何使用的问题，我就不多说了。有需求的朋友可以去项目主页提问，或者在这里提问也可以。如果我懂得话一定会回答的。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/01/30/Hexo-NexT-Wildfire/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1887,7 +1832,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/21/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/23/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/21/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/23/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1933,7 +1878,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">507</span>
+                  <span class="site-state-item-count">565</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1955,7 +1900,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">255</span>
+                  <span class="site-state-item-count">275</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/18/%E9%9D%A2%E5%90%91%E6%9C%80%E5%B0%8F%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D%E7%9A%84LSH/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -326,7 +326,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" itemprop="url">Scikit-learn包基本使用</a></h2>
+                <a class="post-title-link" href="/2016/09/18/%E9%9D%A2%E5%90%91%E6%9C%80%E5%B0%8F%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D%E7%9A%84LSH/" itemprop="url">面向最小哈希签名的LSH</a></h2>
         
 
         <div class="post-meta">
@@ -338,8 +338,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-09T06:50:02+00:00">
-                2016-04-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-18T11:37:55+00:00">
+                2016-09-18
               </time>
             
 
@@ -361,8 +361,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
                   </a>
                 </span>
 
@@ -400,31 +400,23 @@
       
         
           
-            <p><a target="_blank" rel="noopener" href="http://scikit-learn.org/stable/">Scikit-learn</a>的包是机器学习使用的最全也是实用的包，封装了许多机器学习算法，包括各种分类、回归、聚类、降维、模型选择、预处理等许多方面的内容，提供了相当于黑盒的接口，非常适合初学者使用。</p>
-<p>在朋友的推荐下发现了<a target="_blank" rel="noopener" href="https://www.kaggle.com/">Kaggle</a>这个网站，这里面有很多的机器学习的数据和基本的题目，通过这些练习可以比较好的掌握机器学习的算法。因此就在这当中拿了<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/titanic">Titanic号遇难人员的预测</a>做了个实验。其实做法十分简单，权当熟悉框架了。</p>
-<h2 id="题目要求"><a href="#题目要求" class="headerlink" title="题目要求"></a>题目要求</h2><p>题目给定了Titannic号上人员的信息（包括阶层、姓名、性别、年龄、船上直系亲属的个数、船上表亲的个数、船票号、船费、包厢、登船地点等内容），并给出他们的生存情况；然后再给定一些人的信息，让我们预测他们的生存情况。</p>
-<p><img src="/images/2016/04/09/1/1.png"></p>
-<p>数据是以csv文件的形式给出的，如上图所示。</p>
-<p>最后从类似的文件里读取另外一波人的信息，并将预测结果输出到一个csv文件中。具体数据规范见原题《<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/titanic">Titanic号遇难人员的预测</a>》。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>对于这种问题其实只要把字符串的描述的特征提取成特征向量然后随便跑个学习算法就可以了，至于什么学习算法好还是要具体问题具体分析，都用一遍就知道了，我这里用的是朴素贝叶斯模型。</p>
-<p>注意到有些特征是没有意义的，比如名字、船票号啥的，这些特征可以忽略；还有就是有的年龄和票价是没有的，那么简单点考虑就用平均值代替就好了。</p>
-<p>具体实现也就很简单了，主要是Scikit-learn的使用。</p>
-<p><strong>代码如下：</strong></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> csv,re</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> metrics</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#read csv data</span></span><br><span class="line">reader=csv.reader(file(<span class="string">&#x27;train.csv&#x27;</span>))</span><br><span class="line">data=[]</span><br><span class="line">age=[]</span><br><span class="line">price=[]</span><br><span class="line">start=<span class="literal">True</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> reader:</span><br><span class="line">    <span class="keyword">if</span> start:</span><br><span class="line">        start=<span class="literal">False</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    data.append(item)</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">5</span>]!=<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        age.append(<span class="built_in">float</span>(item[<span class="number">5</span>]))</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">9</span>]!=<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        price.append(<span class="built_in">float</span>(item[<span class="number">9</span>]))</span><br><span class="line">meanAge=np.array(age).mean()</span><br><span class="line">meanPrice=np.array(price).mean()</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">5</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        item[<span class="number">5</span>]=meanAge</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">9</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        item[<span class="number">9</span>]=meanPrice</span><br><span class="line"></span><br><span class="line"><span class="comment">#generate learning data</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getFeature</span>(<span class="params">dataItem</span>):</span><br><span class="line">    feature=[]</span><br><span class="line">    <span class="comment">#Pclass</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">2</span>]==<span class="string">&#x27;1&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">elif</span> dataItem[<span class="number">2</span>]==<span class="string">&#x27;2&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Sex</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">4</span>]==<span class="string">&#x27;female&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Age</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">5</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#SibSp</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">6</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Parch</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">7</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Fare</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">9</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Cabin</span></span><br><span class="line">    <span class="keyword">if</span>  dataItem[<span class="number">10</span>]==<span class="string">&#x27;&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Embarked</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">11</span>]==<span class="string">&#x27;S&#x27;</span>:</span><br><span class="line">        feature.extend([<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">elif</span> dataItem[<span class="number">11</span>]==<span class="string">&#x27;C&#x27;</span>:</span><br><span class="line">        feature.extend([<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.extend([<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> feature,<span class="built_in">int</span>(dataItem[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">x=[]</span><br><span class="line">y=[]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">    f,l=getFeature(item)</span><br><span class="line">    x.append(f)</span><br><span class="line">    y.append(l)</span><br><span class="line"></span><br><span class="line"><span class="comment">#classify</span></span><br><span class="line">model = GaussianNB()</span><br><span class="line">model.fit(x, y)</span><br><span class="line"></span><br><span class="line">expected=y</span><br><span class="line">predicted = model.predict(x)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(metrics.classification_report(expected, predicted))</span><br><span class="line"><span class="built_in">print</span>(metrics.confusion_matrix(expected, predicted))</span><br><span class="line"></span><br><span class="line"><span class="comment">#predict and write</span></span><br><span class="line">reader=csv.reader(file(<span class="string">&#x27;test.csv&#x27;</span>,<span class="string">&#x27;rb&#x27;</span>))</span><br><span class="line">testData=[]</span><br><span class="line">start=<span class="literal">True</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> reader:</span><br><span class="line">    <span class="keyword">if</span> start:</span><br><span class="line">        start=<span class="literal">False</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    newItem=[]</span><br><span class="line">    newItem.append(-<span class="number">1</span>)</span><br><span class="line">    newItem.append(item[<span class="number">0</span>])</span><br><span class="line">    newItem.extend(item[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">if</span>(newItem[<span class="number">5</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        newItem[<span class="number">5</span>]=meanAge</span><br><span class="line">    <span class="keyword">if</span>(newItem[<span class="number">9</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        newItem[<span class="number">9</span>]=meanPrice</span><br><span class="line"></span><br><span class="line">    testData.append(newItem)</span><br><span class="line"></span><br><span class="line">testX=[]</span><br><span class="line">testId=[]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> testData:</span><br><span class="line">    f,Id=getFeature(item)</span><br><span class="line">    testX.append(f)</span><br><span class="line">    testId.append(Id)</span><br><span class="line"></span><br><span class="line">predictY=model.predict(testX)</span><br><span class="line"></span><br><span class="line">writer=csv.writer(file(<span class="string">&#x27;result.csv&#x27;</span>,<span class="string">&#x27;wb&#x27;</span>))</span><br><span class="line"></span><br><span class="line">writer.writerow([<span class="string">&#x27;PassengerId&#x27;</span>,<span class="string">&#x27;Survived&#x27;</span>])</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(testId)):</span><br><span class="line">    writer.writerow([testId[i],predictY[i]])</span><br></pre></td></tr></table></figure>
-
-<p>要注意以下几点：</p>
-<ol>
-<li>在对csv文件进行读取时，我们从reader中只能逐行读取一遍，因此需要将他读到临时list里方便后续处理；</li>
-<li>区分list的append和extend方法的使用，一个是添加一个元素，一个是合并两个list。</li>
-<li>传入的学习参数时必须都是float数据类型。</li>
-<li>学习模型可以非常容易进行替换，我当前用的是高斯朴素贝叶斯模型，其实完全可以换成决策树（DecisionTreeClassifier）、SVM（SVC）等其他分类模型，而我们要改的只是<code>model = GaussianNB()</code>一行而已。</li>
-</ol>
-<p><strong>输出结果：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          0       0.83      0.83      0.83       549</span><br><span class="line">          1       0.72      0.72      0.72       342</span><br><span class="line"></span><br><span class="line">avg / total       0.79      0.79      0.79       891</span><br><span class="line"></span><br><span class="line">[[454  95]</span><br><span class="line"> [ 96 246]]</span><br></pre></td></tr></table></figure>
-<p>第一块是对于每一个分类所得到的准确率、召回率、f1-score，和分出的总数；</p>
-<p>第二块是混淆矩阵；</p>
-<p>具体含义可见<a href="/2016/04/09/2">机器学习中分类准确率的评估方法</a>。</p>
-<p>最后尝试了下决策树跟SVM，发现使用决策树的结果是最好的（准确率甚至到了99%）。不过最终提交上去才发现最终的识别率还是好低(72%)。。。不过仔细想想，想这种的预测还是挺不靠谱的，毕竟偶然因素太大了，仅仅凭着这些东西感觉完全不可能达到100%的准确率啊。</p>
+            <h2 id="LSH"><a href="#LSH" class="headerlink" title="LSH"></a>LSH</h2><p>我们知道<a href="/2016/09/17/1/">最小哈希签名</a>能够把一篇较大的文档压缩成一个较短的签名并且不影响文档间的Jaccard相似度。很多情况下，我们用最小哈希签名的目的就是为了方便的对文档进行存储，并且对于给定的文档，能在大量的文档中快速的查找相似的文章。现在我们能做到快速的对两篇文章进行相似度比较，但是当总的文档数目比较大的时候，比较所有文档的最小哈希签名仍然是一个非常耗时耗力的事。而我们知道，对于给定的文档而言，文档库中的绝大多数文档其实都没有比较的意义，如果能有一个方法能过滤掉不需要比较的大量文档，那么显然就能加快整个查找的过程。这个思路其实可以称为”Filter and Refine”，”先过滤，后提纯”。而实现这个的方法，就是LSH(Locality-Sensitive Hashing 局部敏感哈希)。</p>
+<p>现在先不精确定义LSH，只要知道LSH是一种对大量数据进行过滤的方法即可。</p>
+<h2 id="面向最小哈希签名的LSH"><a href="#面向最小哈希签名的LSH" class="headerlink" title="面向最小哈希签名的LSH"></a>面向最小哈希签名的LSH</h2><p>对于最小哈希签名来说，我们可以通过一种叫“行条化策略”的方法，对最小哈希签名再进行一次哈希。怎么做呢？</p>
+<p>对于$n$个长度为$k$的最小哈希签名的集合$S_1,S_2,S_3,…,S_n$、以及生成他们的的$k$个哈希函数来说，我们用下面的签名矩阵来表示他们：<br>$$<br>\begin{matrix}&amp;S_1&amp;S_2&amp;S_3&amp;…&amp;S_n\\h_1&amp;x&amp;x&amp;x&amp;x&amp;x\\h_2&amp;x&amp;x&amp;x&amp;x&amp;x\\h_3&amp;x&amp;x&amp;x&amp;x&amp;x\\…&amp;x&amp;x&amp;x&amp;x&amp;x\\h_k&amp;x&amp;x&amp;x&amp;x&amp;x\\\end{matrix}<br>$$</p>
+<p>其中一列就表示一个最小哈希签名。</p>
+<p>接着，我们把这个矩阵平均划分成$b$个行条，每个行条有$r$行(显然$r*b&#x3D;k$)。这相当于我们把每一个签名分成了$b$段，每一段有$r$个数。然后我们再分别对每一段进行一次哈希，将该段相同的哈希签名放在一个桶中，该段不同的放在不同的桶中(当然，不同行条的桶互不影响）。这就相当于把一个长度为$k$的最小哈希签名映射到了$b$个桶中。</p>
+<p>这样一来，我们如果我们需要对某个最小哈希签名进行相似查找，我们只要对这$b$个桶中的那些东西进行比较即可，省去了很多不必要的比较。</p>
+<h2 id="行条化策略分析"><a href="#行条化策略分析" class="headerlink" title="行条化策略分析"></a>行条化策略分析</h2><p>那么用行条化策略后会不会影响我们查询的准确性呢？答案是—当然会。</p>
+<p>所谓影响正确性，无非就两种，一种是伪正例(false positive)，一种是伪反例(false negative)。</p>
+<p>所谓伪正例，就是指我们把不相似的签名加到了进一步比较的列表中。对于伪正例而言，我们显然不用担心，因为下一步直接比较的目的就是去除伪正例，只是会害我们多比较几次，因此我们主要关注的是伪反例。</p>
+<p>所谓伪反例，就是指我们把相似度很高的签名给漏掉了。这就很尴尬了，因为漏掉的话以后就再也不会考虑到他了。这是我们需要极力避免的。</p>
+<p>那么伪反例的比例到底是怎么样的呢？</p>
+<p>我们知道在两个签名的Jaccard相似度为$s$的情况下，这两个签名的某一个位相等的概率就是$s$，那么在某一行相等的概率就是$s^r$，那么在任意一行都不相等的概率就是$(1-s^r)^b$，那么他们最终成为候选对的概率就是$(1-(1-s^r)^b)$。也就是说两个签名最终会被放在一起作为进行比较的概率$P&#x3D;1-(1-s^r)^b$。</p>
+<p>也就是说，对于给定的$s\ r\ b$，伪反例的比例就是$1-P$。假设$s&#x3D;0.8,b&#x3D;20,r&#x3D;5$，这时伪反例的比例就是0.000356，还是相当低的，而且随着b的增大，这个值还会变得更小。</p>
+<p>接下来我们就分析以下如何根据我们需要的$s$来确定参数$r,b$。不管$r,b$的取值是什么，$P$关于$s$的函数图像基本是这样的：</p>
+<p><img src="/images/2016/09/18/1/1.png"></p>
+<p>注意到$s$的取值在0到1之间，这个函数图像和sigmoid还是有点像的，虽然突变的部分不是很明显，但是还是两端的差距还是很明显的。通过调节这个函数的参数，我们就可以控制只把相似度大于一定阈值$s_{thresh}$的签名以很高的概率纳为候选对，而相似度低的签名以很低的概率不纳为候选对。通常情况下我们会通过调节$r,b$，使这个阈值$s_{thresh}$对应到概率为0.5的地方，这个时候就有$s_{thresh}&#x3D;(1-2^{-\frac 1b})^{\frac 1r}$。不过有时候为了方便，也为了更准确，这个$s_{thresh}$会设置为$(\frac 1b)^{\frac 1r}$。当$s&#x3D;(\frac 1b)^{\frac 1r}$时，我们可以算出来，概率$Q&#x3D;1-(1-\frac 1b)^b$。显然$\underset{b\to \infty}{Q}\to 1-\frac1e\approx 0.632$。也就是说这个值会比0.5稍大，不过实际上效果可能更好。</p>
 
           
         
@@ -473,7 +465,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/08/%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/17/%E6%9C%80%E5%B0%8F%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -492,7 +484,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/04/08/%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8/" itemprop="url">朴素贝叶斯分类器</a></h2>
+                <a class="post-title-link" href="/2016/09/17/%E6%9C%80%E5%B0%8F%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D/" itemprop="url">最小哈希签名</a></h2>
         
 
         <div class="post-meta">
@@ -504,8 +496,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-08T15:50:05+00:00">
-                2016-04-08
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-17T04:02:22+00:00">
+                2016-09-17
               </time>
             
 
@@ -527,8 +519,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
                   </a>
                 </span>
 
@@ -566,19 +558,21 @@
       
         
           
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>朴素贝叶斯分类器是机器学习中最基础的分类算法了，之前一直忽视这个算法，感觉这种简单利用贝叶斯公式的方法的确很Naive。但是事实上这个算法在对于特征相互独立的分类问题来说还是非常好用的。其基本思想就是在给定在各种情况下一个事件发生的先验概率的情况下，套用贝叶斯公式求出给定各种情况下给定事件发生的后验概率。思想非常简单，但是在某些情况下效果还是非常好的，值得掌握。</p>
-<h2 id="贝叶斯公式"><a href="#贝叶斯公式" class="headerlink" title="贝叶斯公式"></a>贝叶斯公式</h2><p>贝叶斯公式很简单了，对于事件A和事件B，下面的公式显然成立：</p>
-<p>$$P(A|B)&#x3D;\frac{P(A)P(B|A)}{P(B)}$$</p>
-<p>这也基本不用证明，分母移过来两边就显然相等了。</p>
-<p>在实际应用中，只要把事件B换成$F_1F_2F_3…F_n$等几个特征就可以了。有了这个公式，对于有互不相关的离散特征的分类问题就可以对数据进行简单统计然后对于给定特征求出预期事件了。</p>
-<h2 id="连续特征处理"><a href="#连续特征处理" class="headerlink" title="连续特征处理"></a>连续特征处理</h2><p>从贝叶斯公式的使用可以了解到，这个方法只能处理离散性质的问题，比如性别、身份、地区等特征，但是对于类似年龄、身高、体重等连续性比较强的特征就不太好用概率来表示了。这时通常有下面两种处理方式：</p>
-<p><strong>分段处理</strong></p>
-<p>比如对于年龄，可以分为[0-10],[10-20],[20-30]。。。等较小的区间，这样就可以把他看成是一个离散的特征了。</p>
-<p><strong>高斯化处理</strong></p>
-<p>把连续的值看成是近似高斯分布，求出均值和标准差（最大似然值），这样对于某一个值我们就可以求出一个值，用这个值来表示概率即可。</p>
-<h2 id="除零问题处理"><a href="#除零问题处理" class="headerlink" title="除零问题处理"></a>除零问题处理</h2><p>很明显，在某些特殊的情况下贝叶斯分类器的分母可能为零，这样就会导致一些不令人愉悦的错误。这时我们只要将所有的计数都加一，这样在数据较大时就完全可以忽略这点误差，这就叫<strong>Laplace校准</strong>。</p>
-<p>上面就是朴素贝叶斯分类的基本内容，相比与这个“朴素”的算法，还有一个应用贝叶斯公式的算法叫“<strong>贝叶斯网络</strong>”，暂时还没研究到，以后有机会再来学习。</p>
-<h2 id="相关参考"><a href="#相关参考" class="headerlink" title="相关参考"></a>相关参考</h2><p><a target="_blank" rel="noopener" href="http://scikit-learn.org/stable/modules/naive_bayes.html">Scikit-learn:Naive Bayes</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/naive-bayesian-classifier.html">分类算法之朴素贝叶斯分类</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/lsldd/article/details/41542107">用Python开始机器学习之朴素贝叶斯分类器</a><br><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2013/12/naive_bayes_classifier.html">朴素贝叶斯分类器的应用</a></p>
+            <p>最小哈希签名(minhashing signature)解决的问题是，如何用一个哈希方法来对一个集合（集合大小为n）中的子集进行保留相似度的映射（使他在内存中占用的字节数尽可能的少）。</p>
+<p>其实哈希本身并不算难，难的是怎么保留两个子集的相似度的信息。所谓保留相似度，就是说我们能十分直观的从两个子集的哈希结果中看出他们的相似度。当然，朴素的办法就用是一个长度为n的二进制数的每个位来分别对应集合中的每个元素。不过当n比较大而待hash的集合的数目比较小的时候，这种方法的效率就太低了。这时候最常用的方法就是对集合进行最小哈希。</p>
+<h2 id="最小哈希"><a href="#最小哈希" class="headerlink" title="最小哈希"></a>最小哈希</h2><p>什么叫最小哈希，我的理解是，一个很大的集合进行哈希处理的过程其实是由很多小的哈希过程组成。而这些最小的哈希过程就被称为是最小哈希。最小哈希的具体内容就是把一个集合映射到一个编号上。具体的过程也很简单了。</p>
+<p>比如对于集合$U&#x3D;\{a,b,c,d,e\},S_1:\{a,d\},S_2:\{c\},S_3:\{b,d,e\},S_4:\{a,c,d\}$，我们用一个矩阵形式来表示他们：</p>
+<p>$$\begin{matrix}No.&amp;Item&amp;S_1&amp;S_2&amp;S_3&amp;S_4\\0&amp;a&amp;1&amp;0&amp;0&amp;1\\1&amp;b&amp;0&amp;0&amp;1&amp;0\\2&amp;c&amp;0&amp;1&amp;0&amp;1\\3&amp;d&amp;1&amp;0&amp;1&amp;1\\4&amp;e&amp;0&amp;0&amp;1&amp;0\\\end{matrix}$$</p>
+<p>那么，对他进行一次最小哈希就是在经过随机的行排列之后，对于每个集合，从上到下取第一个数值为1的那一行的行号。</p>
+<p>比如对上面的矩阵进行随机行排列后变成：</p>
+<p>$$\begin{matrix}No.&amp;Item&amp;S_1&amp;S_2&amp;S_3&amp;S_4\\1&amp;b&amp;0&amp;0&amp;1&amp;0\\4&amp;e&amp;0&amp;0&amp;1&amp;0\\0&amp;a&amp;1&amp;0&amp;0&amp;1\\3&amp;d&amp;1&amp;0&amp;1&amp;1\\2&amp;c&amp;0&amp;1&amp;0&amp;1\\\end{matrix}$$</p>
+<p>那么每个集合的minhash结果就应该是$h(S_1)&#x3D;0,h(S_2)&#x3D;2,h(S_3)&#x3D;1,h(S_4)&#x3D;0$。</p>
+<p>这就是minhash的基本方法。</p>
+<h2 id="最小哈希签名"><a href="#最小哈希签名" class="headerlink" title="最小哈希签名"></a>最小哈希签名</h2><p>在最小哈希的基础上，最小哈希签名也就很简单了。在最小哈希中，需要对每行进行随机行排列，如果是真随机排列的话显然计算消耗会特别大。因此实际上我们采用了一个替代方法，就是再用一个哈希函数，将行号进行哈希变换。比如当n&#x3D;5时，对$0,1,2,3,4$这5个数，可以用$h(x)&#x3D;(3x+1)%5$的方法进行映射，得到$1,4,2,0,3$。当然，随便找的$h(x)&#x3D;ax+b$这种哈希函数显然可能会冲突，不过只要n和a互素，那么生成的一定是一个排列，这一点用同余类的知识很好证明。</p>
+<p>不过显然，一次最小哈希的结果不能全面的表现出集合的特征。因此最小哈希签名采用了k个不同的哈希函数$h_1,h_2,h_3,…,h_k$，对于集合S，分别调用这些函数作为最小哈希的排列函数，构建出集合S的最小哈希签名$[h_1(S),h_2(S),h_3(S),…,h_k(S)]$。显然，这个签名所占的空间要远远小于用朴素的方法保存集合所需的空间。</p>
+<h2 id="保留相似度的哈希"><a href="#保留相似度的哈希" class="headerlink" title="保留相似度的哈希"></a>保留相似度的哈希</h2><p>为什么说这个最小哈希签名是一种保留相似度的哈希呢？其实也很好理解。</p>
+<p>事实上，对于两个集合$S_1,S_2$来说，我们知道在前面的矩阵的所有行中，他们的值同时为1的行有$|S_1\cap S_2|$个；一个是1一个是0的行有$|S_1\cup S_2|-|S_1 \cap S_2|$个。那么在对行进行随机排列之后，从上往下数同时为1的行比一个为1一个为0的行先出现的概率就是$\frac{|S_1\cap S_2|}{|S_1\cup S_2|}$。而这恰巧就是两个集合的Jaccard相似度。也就是说在每一次最小哈希的过程中，两个集合的哈希值相等的概率就是两个集合的Jaccard相似度。这个性质就非常棒了，他保证了如果把最小哈希签名生成的向量当成集合，那么对两个集合进行最小哈希签名之后生成的集合之间的Jaccrad相似度的期望值与原集合的Jaccard相似度相等。</p>
+<p>这就是所谓的保留相似度的哈希。</p>
 
           
         
@@ -627,7 +621,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/04/%E6%95%99%E8%82%B2%E7%BD%91%E4%B8%AD%E7%AE%80%E5%8D%95%E5%88%A9%E7%94%A8ipv6%E4%B8%8A%E7%BD%91/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/16/%E6%96%87%E6%A1%A3%E5%88%86%E5%89%B2%E7%9A%84shingling%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -646,7 +640,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/04/04/%E6%95%99%E8%82%B2%E7%BD%91%E4%B8%AD%E7%AE%80%E5%8D%95%E5%88%A9%E7%94%A8ipv6%E4%B8%8A%E7%BD%91/" itemprop="url">教育网中简单利用ipv6上网</a></h2>
+                <a class="post-title-link" href="/2016/09/16/%E6%96%87%E6%A1%A3%E5%88%86%E5%89%B2%E7%9A%84shingling%E7%AE%97%E6%B3%95/" itemprop="url">文档分割的shingling算法</a></h2>
         
 
         <div class="post-meta">
@@ -658,8 +652,465 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-04T14:44:03+00:00">
-                2016-04-04
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-16T12:23:38+00:00">
+                2016-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>shingling算法是最常见的文档分割算法，说白了就是将一个文档分解成由短字符构成的字符串集合。分割后的文档就可以通过Jaccard相似度等简单的度量标准进行相似度检测了。</p>
+<h2 id="k-shingling"><a href="#k-shingling" class="headerlink" title="k-shingling"></a>k-shingling</h2><p>对于任意一篇文档，我们把他当成一个字符串，那么他的k-shingling集合就被定义为文档中所有长度为k的子字符串的集合。比如字符串“abcdabd”，他的2-shingling集合就是{ab,bc,cd,da,bd}。</p>
+<p>当然，所有类型的子字符串只会在集合中出现一次。不过实际的文档中可能会有连续的空格、TAB、回车或者标点符号之类的东西，一般可以把他们都变成一个空格来进行处理。</p>
+<h2 id="shingle大小的选择"><a href="#shingle大小的选择" class="headerlink" title="shingle大小的选择"></a>shingle大小的选择</h2><p>显然，如果要使用k-shingling来对文档进行处理就要先确定这个k值，一般而言，要确保这个值足够大，保证任意的shingle在文档中出现的概率较低。不过也没有一个具体的选择方法，倒是有一些经验参数，比如对于英文邮件，可以取k&#x3D;5；而对于英文研究论文，可以取k&#x3D;9，因为邮件的长度一般比较低，而论文则相对较高。</p>
+<h2 id="一个简单变种"><a href="#一个简单变种" class="headerlink" title="一个简单变种"></a>一个简单变种</h2><p>有一种简单的基于词的shingling方法，能够很有效的区分英文新闻与广告。这个应用在对网页进行查重的时候特别有用，因为网页上除了新闻本身之外，通常还会有不同的广告，干扰我们对相同新闻的判断。具体的做法也很简单，就是把shingle定义成一个停用词(就是”and”、”but”、“you”之类经常出现的词)加上后续的两个单词。这样做是因为广告通常比较精炼而较少包含停用词。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/16/%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%BA%A6%E9%87%8F%E6%A0%87%E5%87%86%E4%B9%8BJaccard%E7%9B%B8%E4%BC%BC%E5%BA%A6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/16/%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%BA%A6%E9%87%8F%E6%A0%87%E5%87%86%E4%B9%8BJaccard%E7%9B%B8%E4%BC%BC%E5%BA%A6/" itemprop="url">相似度度量标准之Jaccard相似度</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-16T10:19:46+00:00">
+                2016-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>Jaccard相似度(杰卡德相似度)是一个用于衡量两个集合相似程度的度量标准，他的定义如下：给定两个集合$S,T$，那么我们记这两个集合的Jaccard相似度$SIM(S,T)$为:<br>$$SIM(S,T)&#x3D;|S\cap T|&#x2F;|S\cup T|$$<br>也就是两个集合交集的大小除以两个集合并集的大小。显然他的取值在[0,1]区间。</p>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>原始的Jaccard相似度定义的仅仅是两个集合(set)之间的相似度，而实际上更常见的情况是我们需要求两个包(bag,multiset)的相似度，即每个元素可能会出现多次。那么在这种情况下，Jaccard相似度的分子就便成了取每个元素在两个包中出现的最小次数之和，分母是两个包中元素的数目之和。比如$\{a,a,a,b\},\{a,a,b,b,c\}$之间的Jaccard相似度就是(2+1)&#x2F;(4+5)&#x3D;33%。</p>
+<p>这里分子的设计是很容易理解的，那么为什么分母设计成两个集合中元素数目之和而不是并集(包的并集通常定义为元素的叠加)中的数目之和呢？因为那样会使最大的Jaccard相似度为1&#x2F;2，而不是习惯理解的1。当然，我们也可以把包的并集中的元素数目定义为在两个集合中出现的最大次数，这样的度量标准也比较符合我们的认知习惯。</p>
+<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><p>Jaccard的应用很广，最常见的应用就是求两个文档的文本相似度，通过一定的办法(比如shinging)对文档进行分词，构成词语的集合，再计算Jaccard相似度即可。当然，用途还有很多，不过大多需要结合其他的技术。</p>
+<h2 id="一道习题"><a href="#一道习题" class="headerlink" title="一道习题"></a>一道习题</h2><p>问：假定全集$U$有$n$个元素，随机选择两个子集$S,T$，每个子集都有m个元素，求$S,T$的Jaccard相似度的期望值。</p>
+<p>解：显然，若有k个元素重合，那么贡献的Jaccard相似度就是$\frac{k}{2m-k}$，且这个事件出现的概率是$\frac{C^k_mC^{m-k}_{n-m}}{C^m_n}$，因此对这k种可能求和即可：</p>
+<p>$Exp(SIM(S,T))&#x3D;\sum^m_{k&#x3D;0}\frac{k}{2m-k}\frac{C^k_mC^{m-k}_{n-m}}{C^m_n}$</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/13/SDL2%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/13/SDL2%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/" itemprop="url">SDL2安装指南</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-13T11:31:44+00:00">
+                2016-09-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>SDL（Simple DirectMedia Layer）是一套开放源代码的跨平台多媒体开发库，使用C语言写成。SDL提供了数种控制图像、声音、输出入的函数，让开发者只要用相同或是相似的代码就可以开发出跨多个平台（Linux、Windows、Mac OS X等）的应用软件。目前SDL多用于开发游戏、模拟器、媒体播放器等多媒体应用领域。下面主要介绍一下在Windows下搭建SDL2开发环境的过程。</p>
+<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>下载自<a target="_blank" rel="noopener" href="http://www.libsdl.org/download-2.0.php">SDL官网</a>，在Development Libraries中选择相应的版本。我这里选择的是Windows平台下的Visual C++版，因为我接下来使用的环境是VS2013。</p>
+<p><img src="/images/2016/09/13/1/1.png"></p>
+<h2 id="文件"><a href="#文件" class="headerlink" title="文件"></a>文件</h2><p>把文件下载下来解压后的文档树应该是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">└─SDL2-2.0.4</span><br><span class="line">    │  BUGS.txt</span><br><span class="line">    │  COPYING.txt</span><br><span class="line">    │  README-SDL.txt</span><br><span class="line">    │  README.txt</span><br><span class="line">    │  WhatsNew.txt</span><br><span class="line">    │</span><br><span class="line">    ├─docs</span><br><span class="line">    │      doxyfile</span><br><span class="line">    │      README-android.md</span><br><span class="line">    │      README-cmake.md</span><br><span class="line">    │      README-directfb.md</span><br><span class="line">    │      ......</span><br><span class="line">    │</span><br><span class="line">    ├─include</span><br><span class="line">    │      begin_code.h</span><br><span class="line">    │      close_code.h</span><br><span class="line">    │      SDL.h</span><br><span class="line">    │      SDL_assert.h</span><br><span class="line">    │      SDL_atomic.h</span><br><span class="line">    │      SDL_audio.h</span><br><span class="line">    │      ......</span><br><span class="line">    │</span><br><span class="line">    └─lib</span><br><span class="line">        ├─x64</span><br><span class="line">        │      SDL2.dll</span><br><span class="line">        │      SDL2.lib</span><br><span class="line">        │      SDL2main.lib</span><br><span class="line">        │      SDL2test.lib</span><br><span class="line">        │</span><br><span class="line">        └─x86</span><br><span class="line">                SDL2.dll</span><br><span class="line">                SDL2.lib</span><br><span class="line">                SDL2main.lib</span><br><span class="line">                SDL2test.lib</span><br></pre></td></tr></table></figure>
+<p>主要包含使用说明、doc文档、头文件、以及库文件。这里的库文件包括x86和x64两种架构的，每种都含有一个动态链接库和三个静态链接库。</p>
+<h2 id="VS中的项目配置"><a href="#VS中的项目配置" class="headerlink" title="VS中的项目配置"></a>VS中的项目配置</h2><p>SDL2说白了其实只是一个C语言库，因此配置他就跟配置其他任意的库一样，主要分为三步：</p>
+<p>一、包含必需的头文件和库文件</p>
+<p>因为我们需要能够include进SDL2的头文件，并且找到对应的实现代码(库文件)，所以我们必需得让编译器能够找到他们。因此我们只需要在工程的<code>项目-&gt;属性-&gt;配置属性-&gt;VC++目录&lt;</code> 里配置好相应的路径：</p>
+<p><img src="/images/2016/09/13/1/2.png"></p>
+<p>也就是修改图中的包含目录以及库目录，分别对应之前的include文件夹，以及lib&#x2F;x86文件夹(VS默认的是x86架构)。</p>
+<p>二、添加编译指令</p>
+<p>既然用了第三方的库，那么我们在进行编译的时候肯定需要加上-l指令，从而指定编译进去的静态链接库。而按照微软一贯的保姆式作风，在VS中并不需要我们手动输入编译指令，只需要修改一下编译配置，然后就能直接编译了。这个配置在<code>项目-&gt;属性-&gt;配置属性-&gt;链接器-&gt;输入-&gt;附加依赖项&lt;</code> 这里：</p>
+<p><img src="/images/2016/09/13/1/3.png"></p>
+<p>在这里面加上那三个静态库的名字即可(SDL2.lib、SDL2main.lib、SDL2test.lib)。</p>
+<p>三、配置动态库</p>
+<p>只配置了静态库已经是可以编译的了，但却是无法调试的，因为程序运行需要SDL2.dll这个动态库的支持。那么我们只需要将SDL2.dll加入电脑的PATH环境变量里或者是工程目录下，从而保证程序能找到他。</p>
+<p>最后，针对SDL2还需要额外设置一个配置，就是程序的入口，具体原因不明。配置方法就是修改<code>项目-&gt;属性-&gt;配置属性-&gt;链接器-&gt;系统-&gt;子系统</code>，内容改成”<strong>窗口 (&#x2F;SUBSYSTEM:WINDOWS)</strong>“即可：</p>
+<p><img src="/images/2016/09/13/1/4.png"></p>
+<p>搞好上面这个配置，理论上就能跑SDL2的程序了，那我就直接把下面这个显示图片的程序作为Hello World来测试一下吧：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;SDL.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">SDL_Init</span>(SDL_INIT_EVERYTHING) == <span class="number">-1</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Window *win = <span class="literal">nullptr</span>;</span><br><span class="line">	win = <span class="built_in">SDL_CreateWindow</span>(<span class="string">&quot;Hello World!&quot;</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">640</span>, <span class="number">480</span>, SDL_WINDOW_SHOWN);</span><br><span class="line">	<span class="keyword">if</span> (win == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Renderer *ren = <span class="literal">nullptr</span>;</span><br><span class="line">	ren = <span class="built_in">SDL_CreateRenderer</span>(win, <span class="number">-1</span>, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);</span><br><span class="line">	<span class="keyword">if</span> (ren == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Surface *bmp = <span class="literal">nullptr</span>;</span><br><span class="line">	bmp = <span class="built_in">SDL_LoadBMP</span>(<span class="string">&quot;test.bmp&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (bmp == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Texture *tex = <span class="literal">nullptr</span>;</span><br><span class="line">	tex = <span class="built_in">SDL_CreateTextureFromSurface</span>(ren, bmp);</span><br><span class="line">	<span class="built_in">SDL_FreeSurface</span>(bmp);</span><br><span class="line">	<span class="built_in">SDL_RenderClear</span>(ren);</span><br><span class="line">	<span class="built_in">SDL_RenderCopy</span>(ren, tex, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="built_in">SDL_RenderPresent</span>(ren);</span><br><span class="line">	<span class="built_in">SDL_Delay</span>(<span class="number">2000</span>);</span><br><span class="line">	<span class="built_in">SDL_DestroyTexture</span>(tex);</span><br><span class="line">	<span class="built_in">SDL_DestroyRenderer</span>(ren);</span><br><span class="line">	<span class="built_in">SDL_DestroyWindow</span>(win);</span><br><span class="line">	<span class="built_in">SDL_Quit</span>();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>程序运行的结果就是显示test.bmp两秒钟。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/12/QR%E4%BA%8C%E7%BB%B4%E7%A0%81%E6%A4%8D%E5%85%A5%E5%9B%BE%E7%89%87%E6%96%B9%E6%B3%95%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/12/QR%E4%BA%8C%E7%BB%B4%E7%A0%81%E6%A4%8D%E5%85%A5%E5%9B%BE%E7%89%87%E6%96%B9%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">QR二维码植入图片方法简析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-12T14:33:13+00:00">
+                2016-09-12
               </time>
             
 
@@ -720,17 +1171,45 @@
       
         
           
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>之前一直没有注意过科学上网的问题，因为平常不怎么需要，改个hosts文件登个google也就够用了。直到最近才发现，其实在教育网中，本身就可以利用ipv6地址进行绕过GFW访问google,facebook,twitter,youtube等等，而且甚至还不需要登网关（当然，不登网关反而只能访问国外的IPv6网址，对于很多ipv4的网址反而无法访问）。当然，这种不登陆网关就访问其他网站的行为并不能算是作弊，这只能算是对ipv6资源的合理利用，这是学校鼓励并推荐使用的。但是可惜的是，很多同学并没有充分的利用这个资源，在<a target="_blank" rel="noopener" href="http://6rank.edu.cn/tongji2.php">6rank</a>中可以查看到这个资源使用的情况，基本上大部分的高校对ipv6的使用率都不到1%。。。</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>ipv6的配置其实特别简单，只要你的网段给你的机子分配了ipv6的地址，就完全可以通过简单的修改ipv6的hosts达到访问国外ipv6网址的效果。</p>
-<h3 id="查看是否支持ipv6"><a href="#查看是否支持ipv6" class="headerlink" title="查看是否支持ipv6"></a>查看是否支持ipv6</h3><p>尽管大部分的高校都接通了ipv6，但是有的高校还没有接入，而且接入ipv6的高校中在有些位置也并没有做到完全覆盖，因此还是要先确认下首先要支持ipv6再行折腾。</p>
-<p>首先确认下电脑是否支持ipv6：windows下在cmd中输入<code>ipconfig</code> ，查看是否有Ipv6地址项；在Linux下输入<code>ifconfig</code> ，查看是否有inet6地址项，如果有，就说明你的电脑有ipv6的地址。</p>
-<p>然后确认下网络是否支持ipv6：有一个项目叫kame.net，登陆进这里，如果能看到动态的小乌龟就说明网络是支持ipv6的。</p>
-<h3 id="修改hosts"><a href="#修改hosts" class="headerlink" title="修改hosts"></a>修改hosts</h3><p>ipv6说白了跟ipv4一样，对于国外的主机还是缺少dns解析这一步，因此我们还是需要通过各种手段找到ipv6的域名跟ip的对应关系，写在hosts文件里，这样才能直接通过域名来访问。</p>
-<p>windows中在<code>c:\User\Administrator\system32\drivers\etc\hosts</code>下，Linux中在<code>/etc/hosts</code>下。</p>
-<p>至于这个文件的内容从哪里找，我个人是在<a target="_blank" rel="noopener" href="https://serve.netsh.org/pub/ipv6-hosts/">https://serve.netsh.org/pub/ipv6-hosts/</a>中看的，这个应该算是比较官方的。</p>
-<h3 id="清除缓存"><a href="#清除缓存" class="headerlink" title="清除缓存"></a>清除缓存</h3><p>上面的操作基本就OK了，但是一般这时候还要清除下浏览器的缓存，因为为了提高效率，如果这次发送的http请求和之前发送的http请求一模一样，很多浏览器都会直接从缓存中提取内容而不去获取最新的消息。windows下还需要在cmd中输入<code>ipconfig/flushdns</code>，ubuntu下在shell下输入<code>sudo service networking restart</code>。</p>
-<p>通过以上配置，我们就可以直接访问ipv6的地址了，由于普通的校园网关只对ipv4加以限制，因此ipv6的部分并不需要连接网关就可以登陆。而且ipv6的网络速度还格外的快，访问facebook甚至比访问百度还快！</p>
-<h2 id="相关信息"><a href="#相关信息" class="headerlink" title="相关信息"></a>相关信息</h2><p><a target="_blank" rel="noopener" href="http://6rank.edu.cn/">CNGI高校驻地网IPv6用户数量测试</a><br><a target="_blank" rel="noopener" href="http://pcedu.pconline.com.cn/671/6712896_2.html">为何Ipv6难以普及</a><br><a target="_blank" rel="noopener" href="https://serve.netsh.org/pub/ipv6-hosts/">奶齿网发布的ipv6信息</a><br><a target="_blank" rel="noopener" href="http://ipv6-test.com/">Ipv6测试网</a></p>
+            <p>我们平时都经常见到二维码，用手机扫一扫就会显示当中的内容，内容大多是url的格式，方便人们访问站点。不过对于人来说，直接看二维码却并没有任何良好的印象。因此很多商家为了让自家的二维码更加形象，会想方设法地让自家的二维码更加形象生动，于是也就诞生出了很多种图像植入的方法。今天就把这些方法稍微汇总一下。</p>
+<h2 id="二维码"><a href="#二维码" class="headerlink" title="二维码"></a>二维码</h2><p>二维码可以说是现今人们生活中经常接触到的东西，简单的讲其实就是把条形码中的竖线变成点，从而增加一个数据维度，达到增加数据内容的目的。事实上二维码的种类有很多，曾经流行的二维码规范大概有下面这几种：</p>
+<p><img src="/images/2016/09/12/1/1.png"></p>
+<p>不过，最终一直流行到现在的二维码规范就剩下一个日本公司率先搞出来的<strong>QR二维码</strong>(Quick Response)了。QR二维码最典型的特征就是在图片的三个角有三个定位用的正方形，信息容量大、定位方便、数据保密和恢复能力强。有个日本的网站简要介绍了他的构造，连接在<a target="_blank" rel="noopener" href="http://www.swetake.com/qrcode/qr1_en.html">这里</a>。接下来的说明主要是围绕这种二维码进行的讨论。</p>
+<h2 id="直接插入图片"><a href="#直接插入图片" class="headerlink" title="直接插入图片"></a>直接插入图片</h2><p>直接插入图片的方法就是在二维码的中间插入设计好的图片，比如下面这些：<br><img src="/images/2016/09/12/1/2.png"></p>
+<p>这样插入的图片比较清楚，显然会使人们对二维码的辨识度变高很多，也更容易被人们接受。但是这中插入图片的方法完全是利用了二维码本身的容错处理，或多或少的影响了二维码本身的容错性，原则上是不安全的方法。</p>
+<h2 id="修改点阵形状"><a href="#修改点阵形状" class="headerlink" title="修改点阵形状"></a>修改点阵形状</h2><p>所谓修改点阵形状，就是用类似设计师的眼光看待这个二维码，把原本的黑点和白点进行艺术化的修饰。这种方法虽然很难添加自己想要的图片，但是却十分具有艺术美感，让人印象深刻。也可以适当结合插入图片的方法，更加具有表现力。</p>
+<p><img src="/images/2016/09/12/1/3.png"><br><img src="/images/2016/09/12/1/4.png"><br><img src="/images/2016/09/12/1/5.png"><br><img src="/images/2016/09/12/1/6.png"><br><img src="/images/2016/09/12/1/7.png"><br><img src="/images/2016/09/12/1/8.png"></p>
+<p>当然，这种方法会增加扫码器识别的难度，万一图像做的过火了，简陋的扫码器扫描不出来就很尴尬了。</p>
+<h2 id="增加背景图案"><a href="#增加背景图案" class="headerlink" title="增加背景图案"></a>增加背景图案</h2><p>简而言之就是为二维码增加背景，不过随之而来的问题跟上面一样，就是如何能让普通的扫码器快速识别出来。作为几年前百度内部hacthon的优胜项目，百度的工程师对点阵图案也做了一些处理，使二维码能呈现这样的图案：<br><img src="/images/2016/09/12/1/9.png"></p>
+<p>基本想法就是把二维码的每个点变小，中间漏出的空隙就用来呈现背景图案。对于某些特定的背景而言，呈现的效果还是很不错的，而且识别起来也相对准确一点。不过对图片的要求也比较高，否则可能会干扰图像的识别。</p>
+<p>与这个方法效果看上取类似的还有一种生成方法，这种方法也结合了下面的修改编码的算法，而且已经发表在<a target="_blank" rel="noopener" href="http://link.springer.com/article/10.1007/s00371-015-1107-x#Sec7">springer</a>里，他能够呈现这样的效果：</p>
+<p><img src="/images/2016/09/12/1/10.png"></p>
+<p>看上去和百度的差不多，不过其实技术含量要高出不知道多少倍。。。</p>
+<h2 id="修改编码算法"><a href="#修改编码算法" class="headerlink" title="修改编码算法"></a>修改编码算法</h2><p>上述的方法都或多或少的影响了图像本身的识别能力，虽然看上去效果不错，但是都会或多或少的影响扫码器的识别。而下面的方法能够利用一定的编码技术和小技巧将一个二值图嵌入到二维码中，完全不影响二维码的识别。虽然显示的图像有点抽象，但是拿出来装逼还是很能够体现出技术含量的。</p>
+<p><img src="/images/2016/09/12/1/11.png"><br><img src="/images/2016/09/12/1/12.png"><br><img src="/images/2016/09/12/1/13.png"><br><img src="/images/2016/09/12/1/14.png"></p>
+<p>上面这些图案的生成其实还是十分繁琐的，需要深入了解QR二维码的实现以及RS编码的特征的编码人员才能真正实现出将二值图和二维码进行融合的算法。</p>
+<p>讲述算法的原理的原文在<a target="_blank" rel="noopener" href="http://research.swtch.com/qart">这里</a>，有个简单(蹩脚)的中文翻译版本在<a target="_blank" rel="noopener" href="http://blog.csdn.net/yanlaizhishi/article/details/8522722">这里</a>，他们实现的程序发布在了<a target="_blank" rel="noopener" href="http://research.swtch.com/qr/draw">这里</a>(不知道怎么回事时而登的上时而登不上)。</p>
+<p>下面就简要介绍一下这个算法的基本思想。</p>
+<p>首先我们要稍微了解一下QR二维码的基本构造。QR二维码的一个经典构造就是下面的这张图：</p>
+<p><img src="/images/2016/09/12/1/15.png"></p>
+<p>简单区分下就是有三类东西，一类是类似小正方形的东西和图中那些黑白相间的条纹，他们主要是用来帮助扫码器定位用的的，所有的QR二维码都具有的部分；还有一类就是格式信息的控制部分，他们就像是配置文件一样，定义了这张二维码的基本信息格式，是必不可少的，主要分布在定位符旁边，毕竟他们是不容许出错的；最后一类就是数据了，当然是经过编码的数据，按照一定的排列规则填充在剩下的空间里，具有一定的容错能力。</p>
+<p>很显然数据是以二进制串的形式存储在图里的，也就是黑点和白点了。一张固定大小的图能保存的数据量显然也是固定的，QR二维码也定义了数据的终止符，也就是说当我们的数据写完之后，写上终止符，编码程序会自动在后面加上一些无用的数据(其实是一个循环的数据串)，使得总长度等于最大数据量。这些数据按照下面的顺序写入二维码中：</p>
+<p><img src="/images/2016/09/12/1/16.png"></p>
+<p>或者换一张图就是这样：</p>
+<p><img src="/images/2016/09/12/1/17.png"></p>
+<p>不过如果直接将这个数据就这么显示出来，那么对于只需要保存少量信息的二维码来说，很大的空间都是相同的内容(就是用来填充的字符串)，这样显然不美观。因此在把数据写进去之后，我们还会对他做一个mask处理，也就是通过一定的选择算法拿下面这八张图片中的一张图和这个图片按位求异或，保证黑点和白点的总体分布最均匀。</p>
+<p><img src="/images/2016/09/12/1/18.png"></p>
+<p>当然，我们得在二维码的格式控制区域说明我们用的是哪个掩膜，保证能够恢复。</p>
+<p>这就是QR二维码直观的构造了。</p>
+<p>但是即使知道了这个构造，我们也无法随意改动某个像素点，因为这些数据都是经过精心处理的，我们首先得知道他的编码方式才能在不破坏编码信息的基础上寻找修改点阵的办法。</p>
+<p>事实上QR二维码对数据采用的是Reed-Solomon编码，具体细节在<a href="/2016/09/11/1/">之前的文章</a>里有所介绍。简单的理解就是他把数据块$(d_1,d_2,d_3,…,d_n)$变成了$(d_1,d_2,d_3,…,d_n,c_1,c_2,…,c_m)$，增加了具有容错能力的冗余码。显然，我们只能直接操控数据，而不能直接决定冗余码。那么我们该怎么修改数据才能既保证数据意义不变，又显示期望的图案呢？这就用到了一个小trick。</p>
+<p>我们知道QR二维码基本是用来表示URL的，而URL有个特点，就是可以任意添加锚点(#)而不影响显示的结果，比如<a target="_blank" rel="noopener" href="https://blog.mythsman.com/">https://blog.mythsman.com</a>和<a target="_blank" rel="noopener" href="https://blog.mythsman.com/#this_is_junk">https://blog.mythsman.com#this_is_junk</a>，这两个url在显示的时候是完全没有区别的。也就是说只要数据是url，我们就可以在他后面添加‘#’再加上任意的数据来控制二维码的图形。这样一来，经过编码后的数据就变成了三部分：开头是原始数据加上’#’符号，中间是我们用来绘图的数据，最后是校验数据块。对于图片而言就是两头是不可控的数据，中间是可控的数据。这样弄完之后，可以呈现的效果大概是这样：</p>
+<p><img src="/images/2016/09/12/1/19.png"></p>
+<p>可以很明显看到中间的图片显示的很清楚，只是两边都看不清。</p>
+<p>可是这种图看上去还是太生硬了，很明显就是刻意修改的数据嘛。不过还好，我们还有另一个办法让他看上去更自然。</p>
+<p>回顾下之前的Reed-Solomon编码，我们知道若将$b_1,b_2$的RS编码后的值$c_1,c_2$进行异或得到$c_3$，那么这个$c_3$恰好就是$b_1,b_2$异或后的值的RS编码。这样我们就可以在保证编码合法的情况下对数据矩阵进行初等变换。原本我们只能操作整个数据中间的区域，可是经过初等变换(也就是高斯约旦消元)之后，我们就可以把能够操作的区域和不能操作的区域进行混合，这样就能把图像的控制区域放大，只是这样会牺牲图像的清晰度。不过这种图像却会给人一种自然朦胧的感觉，还是非常炫的。</p>
+<p><img src="/images/2016/09/12/1/20.png"></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://coolshell.cn/articles/10590.html">二维码的生成细节和原理</a><br><a target="_blank" rel="noopener" href="http://www.21ic.com/app/ce/201301/157718.htm">二维码 QR码编码原理详解</a><br><a target="_blank" rel="noopener" href="http://research.swtch.com/qart">QArt Codes</a><br><a target="_blank" rel="noopener" href="http://36kr.com/p/35225.html">令人拍案叫绝的15个二维码</a><br><a target="_blank" rel="noopener" href="http://36kr.com/p/204804.html">百度加入二维码之争，推出静态图像版、动态gif版“梦幻二维码”</a><br><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/132241.htm">百度百科-二维码</a></p>
 
           
         
@@ -779,7 +1258,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/29/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E7%9A%84Gamma%E7%9F%AB%E6%AD%A3/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/11/%E4%BC%BD%E7%BD%97%E5%8D%8E%E5%9F%9F%E6%80%A7%E8%B4%A8%E7%AE%80%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -798,7 +1277,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/29/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E7%9A%84Gamma%E7%9F%AB%E6%AD%A3/" itemprop="url">图像处理的Gamma矫正</a></h2>
+                <a class="post-title-link" href="/2016/09/11/%E4%BC%BD%E7%BD%97%E5%8D%8E%E5%9F%9F%E6%80%A7%E8%B4%A8%E7%AE%80%E6%9E%90/" itemprop="url">伽罗华域性质简析</a></h2>
         
 
         <div class="post-meta">
@@ -810,8 +1289,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-29T16:06:36+00:00">
-                2016-03-29
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-11T15:08:46+00:00">
+                2016-09-11
               </time>
             
 
@@ -833,8 +1312,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
+                  <a href="/categories/Maths/" itemprop="url" rel="index">
+                    <span itemprop="name">Maths</span>
                   </a>
                 </span>
 
@@ -872,11 +1351,17 @@
       
         
           
-            <p>Gamma矫正这个东西听上去挺玄乎，其实特别简单。就是为了调节照相机拍摄的图像的色调，使他更加符合人眼的观测效果（主要用在）。说白了就是一种幂函数型的色调曲线，即对于每个像素的灰度$I$我们把他变成$I^{gamma}$，当然，在这之前，我们得把灰度值$I$归一化到(0,1)的范围内。</p>
-<p>这个gamma分为大于一和小于一的情况。当他大于一的时候，很明显这个幂函数在(0,1)的区间内是下凸的，图像会变暗；当他小于一的时候，这个幂函数在(0,1)的区间内是上凸的，图像会变亮。通常认为人眼的gamma值大概是0.45左右。姑且信了。</p>
-<p>说实话这个东西我还没觉得有啥用处。实现起来也非常简单：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">imshow((cv2.imread(<span class="string">&#x27;lena.png&#x27;</span>,<span class="number">0</span>)/<span class="number">255.0</span>))</span><br><span class="line">imshow((cv2.imread(<span class="string">&#x27;lena.png&#x27;</span>,<span class="number">0</span>)/<span class="number">255.0</span>)**<span class="number">5</span>)</span><br><span class="line">imshow((cv2.imread(<span class="string">&#x27;lena.png&#x27;</span>,<span class="number">0</span>)/<span class="number">255.0</span>)**<span class="number">0.5</span>)</span><br></pre></td></tr></table></figure>
-<p><img src="/images/2016/03/30/1/1.png"><br><img src="/images/2016/03/30/1/2.png"><br><img src="/images/2016/03/30/1/3.png"></p>
+            <p>伽罗华域名字听起来挺酷的，其实就是有限域。域这个东西由于他能够进行满足加减乘除四则运算，在加密解密、编码解码当中应用非常广泛。但是我们常见的实数域却无法直接在计算机中精确的保存，因此有限域这类能够支持四则运算而且能够用有限的编码精确保存的东西就非常有用了。</p>
+<h2 id="域"><a href="#域" class="headerlink" title="域"></a>域</h2><p>域的定义在各种与离散数学相关的地方都能看到，看上去定义的十分啰嗦，说白了其实就是从有理数抽象出来的一种集合，能加能减能乘能除，满足各种四则运算律。普通的域没啥特别之处，感觉实际上用处不大。</p>
+<h2 id="有限域-GF-域、伽罗华域"><a href="#有限域-GF-域、伽罗华域" class="headerlink" title="有限域($GF$域、伽罗华域)"></a>有限域($GF$域、伽罗华域)</h2><p>有限域的性质相比域来说就诱人多了，除了域的通用特点外，他还能够将所有运算的值在有限的数位内表示出来。这对数的保存而言特别有利。 常见的有限域当然就是模素数域了，比如模7域$GF(7)&#x3D;\{0,1,2,3,4,5,6\}$，这类域能够生成阶数为指定素数的域。但是很多情况下，我们需要域的阶数不是一个素数，而是一个类似于$2^n$之类的数，比如一个字节的大小$2^8$，如果能把这个范围的数用一个域来映射，那对很多计算是特别有帮助的。在要求不严格的情况下，我们当然可以弃掉一些信息，截取一个小一点的素数，比如对于256来说，我们可以选择251，来构成模251域。不过毕竟信息有丢失，我们需要一个更加方便安全的方法。</p>
+<h2 id="GF-2-n-域"><a href="#GF-2-n-域" class="headerlink" title="$GF(2^n)$域"></a>$GF(2^n)$域</h2><p>这个域的出现解决了上面的问题，他的阶数恰巧适应了二进制表示，比如常见的$GF(2^8)$就能正好表示一个字节的数。他的基本思想就是把数字映射到一个多项式，把他的四则运算变成多项式之间特殊的四则运算。</p>
+<h3 id="映射方法"><a href="#映射方法" class="headerlink" title="映射方法"></a>映射方法</h3><p>对于$GF(2^8)$来说，一个8bit的二进制数就直接按照各个位上的值依次放在$x^i$的系数上(显然这个多项式各个位上的系数只能是0或1)。比如5的二进制表示是101，那么他对应的多项式就是$x^2+1$。</p>
+<h3 id="多项式计算"><a href="#多项式计算" class="headerlink" title="多项式计算"></a>多项式计算</h3><p>多项式的计算是问题解决的核心，普通的多项式以及正常的四则运算显然不是一个域。为了保证多项式能够构成域，我们特地设计了下面的运算。</p>
+<p>正如整数集合不能构成域，但是模素数集合却能构成域一样。普通的多项式不能构成域，但是模素数多项式却能构成域。所谓的素数多项式，就是指不能被因式分解的多项式，这么设计的理由跟模素数域中选用素数的理由一样。对于$GF(2^8)$，素数多项式的最高项一定是8次，至于低次位的是多少我们并不在意。这个素多项式，我们叫做本源多项式。</p>
+<p>加减运算：这上面定义的加减运算就是各个位的系数进行异或操作，显然加法跟减法是一个意思。</p>
+<p>乘除运算：如果按照加减法的定义直接进行乘除运算的话会比较麻烦，通常的做法是用逆元表进行计算。我们知道有限域的生成元g可以直接用其自身的幂表示整个$GF(2^n)$域，那么域中的每个元素都可以表示成$g^i$。我们可以根据生成元g轻松确定这个i，那么他的逆元就是$g^(n-i)$。这样我么就可以打一个逆元的表，若要求$a*b$，我们直接去求$(a^{-1}*b^{-1})^{-1}$即可，只要查三次表。</p>
+<p>当然，在具体的运算过程中还有很多细节可以优化，比如乘法过程可以用异或和位移运算来加速等等。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://research.swtch.com/field">Finite Field Arithmetic and Reed-Solomon Coding</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/luotuo44/article/details/41645597">有限域GF(2^8)的四则运算及拉格朗日插值</a><br><a target="_blank" rel="noopener" href="http://blog.sina.com.cn/s/blog_4572df4e01019wsj.html">DataMatrix编码2——伽罗华域运算</a></p>
 
           
         
@@ -925,7 +1410,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/11/Reed-Solomon%E7%BA%A0%E5%88%A0%E7%A0%81%E7%AE%80%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -944,7 +1429,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/" itemprop="url">OpenCV计算图像的梯度特征</a></h2>
+                <a class="post-title-link" href="/2016/09/11/Reed-Solomon%E7%BA%A0%E5%88%A0%E7%A0%81%E7%AE%80%E6%9E%90/" itemprop="url">Reed-Solomon纠删码简析</a></h2>
         
 
         <div class="post-meta">
@@ -956,8 +1441,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-29T15:52:28+00:00">
-                2016-03-29
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-11T11:06:44+00:00">
+                2016-09-11
               </time>
             
 
@@ -979,8 +1464,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
+                  <a href="/categories/Maths/" itemprop="url" rel="index">
+                    <span itemprop="name">Maths</span>
                   </a>
                 </span>
 
@@ -1018,19 +1503,22 @@
       
         
           
-            <p>计算图像的梯度是在进行图像处理时经常用到的方法，但是这玩意自己手写未免效率低而且容易出错。OpenCV里集成了相应的函数，只不过用的人好像并不多导致我找了半天才找到。姑且记一下以备日后使用。</p>
-<h2 id="计算像素梯度的绝对值"><a href="#计算像素梯度的绝对值" class="headerlink" title="计算像素梯度的绝对值"></a>计算像素梯度的绝对值</h2><p>这个用到了cv2.magnitude方法，具体用法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sobelx=cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3)#1,0表示只在x方向求一阶导数</span><br><span class="line">sobely=cv2.Sobel(im,cv2.CV_64F,0,1,ksize=3)#0,1表示只在y方向求一阶导数</span><br><span class="line">mag=cv2.magnitude(x,y)</span><br></pre></td></tr></table></figure>
-<p>这里传入两个参数，分别是x和y方向的梯度，这里我用的是Sobel算子分别求x和y方向的梯度，卷积核的大小我设置的是３。得到的mag就是对应每个像素的梯度矩阵。实际上这也可以算成边缘检测吧。</p>
-<p>对于Sobel函数有个注意点，他的第二个参数是扩展了像素的数值范围，因为梯度是有方向的，所以sobel函数得到的是有正有负的值，所以相当于扩大了取值。通常情况下我们会加上下面的函数来得到梯度的绝对值：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sobelx=cv2.convertScaleAbs(cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3))</span><br></pre></td></tr></table></figure>
-<p>在外面套一个取绝对值的函数，或者也可以直接套一个np.abs()。。。不过效果不太一样。</p>
-<h2 id="计算像素梯度的方向"><a href="#计算像素梯度的方向" class="headerlink" title="计算像素梯度的方向"></a>计算像素梯度的方向</h2><p>这个用到了cv2.parse方法，具体用法如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase= cv2.phase(cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3),cv2.Sobel(im,cv2.CV_64F,0,1,ksize=3),angleInDegrees=True)</span><br></pre></td></tr></table></figure>
-<p>Sobel的用法跟上面一样，最后一个参数为True表示结果用角度制表示，否则用弧度制。</p>
-<p>得到的结果通常会用直方图来表示，</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hist(phase.ravel(),256,[0,256])</span><br></pre></td></tr></table></figure>
-<p>输出的图像就是梯度按照角度的分布。</p>
+            <p>Reed-Solomon编码（又叫RS编码、里德-所罗门编码）作为一种前向纠错编码，是一种很常见的数据冗余技术，也就是通过对数据增加冗余部分来保证当数据丢失时能够在一定程度上进行恢复。最典型的应用就是在现在最流行的QR二维码的编码设计中。</p>
+<h2 id="实现功能"><a href="#实现功能" class="headerlink" title="实现功能"></a>实现功能</h2><p>他所解决的问题是：给定$n$个数据块$(d_1,d_2,d_3,…,d_n)$，对于一个确定的正整数$m$， RS编码能够根据这$n$个数据块生成$m$个校验块， $(c_1, c_2,…, c_m)$。  我们能够做到，从这$m+n$个数据(或校验)块中任取$n$块就能解码出原始数据。 即对于$n$个数据块进行RS编码后生成的$n+m$个数据块，我们能够容忍丢失至多$m$个数据块。</p>
+<h2 id="编码原理"><a href="#编码原理" class="headerlink" title="编码原理"></a>编码原理</h2><p>实现的功能听上去很强大，其实原理却十分简单，只是他很巧妙的运用了矩阵运算的特点，说起来也十分简单。</p>
+<p>一、对于需要进行冗余处理的$n$个数据块，我们把他写成列向量的形式，其中每个数据块都可以看做是一个数。</p>
+<p>二、生成一个变换矩阵，这个矩阵由$n+m$行和$n$列组成，其中上面的$n\times n$的部分是一个单元矩阵，下面的$m\times n$的部分是一个范德蒙矩阵。</p>
+<p>三、用这个变换矩阵左乘数据列向量得到$n+m$位冗余码列向量。</p>
+<p>算式如下：</p>
+<p>$$\begin{bmatrix}1&amp;0&amp;..&amp;0&amp;0\\0&amp;1&amp;..&amp;0&amp;0\\..&amp;..&amp;..&amp;..&amp;..\\0&amp;0&amp;..&amp;1&amp;0\\0&amp;0&amp;..&amp;0&amp;1\\1^0&amp;1^1&amp;..&amp;1^{n-2}&amp;1^{n-1}\\2^0&amp;2^1&amp;..&amp;2^{n-2}&amp;2^{n-1}\\..&amp;..&amp;..&amp;..&amp;..\\ (m-1)^0&amp;(m-1)^1&amp;..&amp;(m-1)^{n-2}&amp;(m-1)^{n-1}\\m^0&amp;m^1&amp;..&amp;m^{n-2}&amp;m^{n-1}\end{bmatrix}\times \begin{bmatrix}b_1\\b_2\\b_3\\..\\b_n\end{bmatrix}&#x3D;\begin{bmatrix}b_1\\b_2\\b_3\\..\\b_n\\c_1\\c_2\\c_3\\..\\c_m\end{bmatrix}$$</p>
+<p>上面使用单位矩阵显然是为了保证原数据块在编码后不发生变化，从而看上去只是增加了冗余码。</p>
+<p>下面使用范德蒙矩阵其实是为了保证这个矩阵任取$n*n$的部分可逆。</p>
+<h2 id="解码原理"><a href="#解码原理" class="headerlink" title="解码原理"></a>解码原理</h2><p>根据上面的编码方式，我们可以很容易理解他的解码方法。对于编码后的数据块$(b_1,b_2,…,b_n,c_1,c_2,…,c_m)$，只需要任取其中的$m$个数据块，假设为$(b_{a_1},b_{a_2},…,b_{a_x},c_{b_1},c_{b_2},…,c_{b_y})$其中$x+y&#x3D;m$，再用$f_i$表示编码过程中那个矩阵的第$i$行。显然，下面的等式一定成立：<br>$$\begin{bmatrix}f_{a_1}\\f_{a_2}\\..\\f_{a_x}\\f_{n+b_1}\\f_{n+b_2}\\..\\f_{n+b_y}\end{bmatrix}\times\begin{bmatrix}b_1\\b_2\\b_3\\..\\b_n\end{bmatrix}&#x3D;\begin{bmatrix}b_{a_1}\\b_{a_2}\\…\\b_{a_x}\\c_{b_1}\\c_{b_2}\\…\\c_{b_y}\end{bmatrix}$$</p>
+<p>这样一来，我们就可以把中间的数据矩阵解出来了。</p>
+<h2 id="计算域"><a href="#计算域" class="headerlink" title="计算域"></a>计算域</h2><p>上面的方法理论上是能够做到数据冗余处理的，不过由于作为一种编码技术，RS编码需要处理的是特定长度的二进制数据，然而求矩阵逆的过程是在实数域内进行的。显然特定长度的二进制位是无法准确描述实数的。因此RS编码的计算域采用的是能够用二进制位精确编码的伽罗华域$GF(2^n)$。这个域的特性就是非常适合处理$[0-2^n)$范围内数据的四则运算，而且这里的四则运算大都通过位运算处理，效率比较高。实际生产中由于数据的量会比较大，为了加快整个计算的过程，通常会采用离散傅里叶变换(DFT)及其逆变换来进行编码实现。具体的介绍可以参见<a target="_blank" rel="noopener" href="http://blog.mythsman.com/?p=3135">这一篇文章</a>。</p>
+<h2 id="重要特征"><a href="#重要特征" class="headerlink" title="重要特征"></a>重要特征</h2><p>由于RS编码采用的是伽罗华域$GF(2^n)$，那他就有一个很有趣的特点，那就是对于数据$b_1,b_2$以及其分别对应的冗余码$c_1,c_2$，我们可以迅速的知道对于数据$b_1\otimes b_2$，他的冗余码就是$c_1\otimes c_2$($\otimes $表示异或)。</p>
+<p>这一点其实很好理解，根据之前的编码过程，我们很容易知道对于实数域，如果数据$b_1,b_2$分别对应的冗余码是$c_1,c_2$，那么数据$b_1+ b_2$的冗余码就是$c_1+ c_2$。而现在的运算域是伽罗华域，在伽罗华域中加法做的就是异或操作。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://peterylh.blog.163.com/blog/static/12033201371375050233/">Reed Solomon纠删码</span></a><br><a target="_blank" rel="noopener" href="http://www.eetop.cn/blog/html/71/63271-2747.html">里德-所罗门码(RS 码) 简介</a><br><a target="_blank" rel="noopener" href="http://research.swtch.com/field">Finite Field Arithmetic and Reed-Solomon Coding</a></p>
 
           
         
@@ -1079,7 +1567,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/09/%E5%B9%82%E5%AE%9A%E5%BE%8B%E5%92%8C%E9%BD%90%E5%A4%AB%E5%AE%9A%E5%BE%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1098,7 +1586,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" itemprop="url">Tomcat Servlet编程基础</a></h2>
+                <a class="post-title-link" href="/2016/09/09/%E5%B9%82%E5%AE%9A%E5%BE%8B%E5%92%8C%E9%BD%90%E5%A4%AB%E5%AE%9A%E5%BE%8B/" itemprop="url">幂定律和齐夫定律</a></h2>
         
 
         <div class="post-meta">
@@ -1110,8 +1598,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-27T15:51:24+00:00">
-                2016-03-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-09T14:27:33+00:00">
+                2016-09-09
               </time>
             
 
@@ -1133,8 +1621,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
                   </a>
                 </span>
 
@@ -1172,25 +1660,12 @@
       
         
           
-            <p>之前一直使用的是Apache服务器，对于Tomcat的工作方式反而不那么习惯。给我一个Java web程序源码我都不晓得他应该怎么连接到Tomcat上。于是趁着无聊的时候看了个J2EE的Servlet教程，终于对怎么把java部署到Tomcat上、以及Tomcat的基本工作流程有了简要的认识。当然，这里仅仅指的是简单的Servlet程序的部署方法，不过这点方法从理论上讲已经具备了写一个简单web 应用的能力了。</p>
-<h2 id="Tomcat基本配置"><a href="#Tomcat基本配置" class="headerlink" title="Tomcat基本配置"></a>Tomcat基本配置</h2><p>Tomcat的配置文件是%TOMCAT_HOME%&#x2F;conf&#x2F;server.xml，这里配置了Tomcat的基本信息，最重要的是下面这两个：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;</span><br><span class="line">               connectionTimeout=&quot;20000&quot;</span><br><span class="line">               redirectPort=&quot;8443&quot; /&gt;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;localhost&quot;  appBase=&quot;webapps&quot;</span><br><span class="line">            unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br></pre></td></tr></table></figure>
-<p>第一个指定了Tomcat监听的端口，默认是8080，如果和其他应用冲突了可以在这里修改。</p>
-<p>第二个指定了Tomcat映射的根目录，就像apache中的&#x2F;var&#x2F;www&#x2F;html&#x2F;的作用一样，但又不完全一样。因为这下面放的都应该是一套完整的应用而不是单一的html文件。</p>
-<h2 id="HttpServlet类基本用法"><a href="#HttpServlet类基本用法" class="headerlink" title="HttpServlet类基本用法"></a>HttpServlet类基本用法</h2><p>Servlet程序就是服务器小程序，现在我们的目的是编写web服务器，那么自然就用到了HttpServlet类来实现一个Http服务器应用。它的基本框架是：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebServlet(&quot;/MyServlet&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> <span class="number">1L</span>;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		response.getWriter().append(<span class="string">&quot;&lt;a href=&#x27;http://www.baidu.com&#x27;&gt;baidu&lt;/a&gt;&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		doGet(request, response);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里最常用的就是重载它的doGet和doPost方法，每个方法都传入Request和Response方法，可以从Request中读入用户传过来的数据，并且将需要显示的内容写在Response中，这样就可以达到简单的动态显示网页的效果了。（注意加@WebServlet标注）</p>
-<h2 id="Webapps下项目基本配置"><a href="#Webapps下项目基本配置" class="headerlink" title="Webapps下项目基本配置"></a>Webapps下项目基本配置</h2><p>这个是Tomcat和Apache非常不同的东西，也是我花了半天才理清楚的。</p>
-<p>把Servlet应用放在Webapps文件夹下必须要有web.xml配置文件，这个文件应该放在 项目根目录&#x2F;WEB-INF&#x2F; 下，这是用来配置整个项目的配置文件。他一定要有如下格式：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;ISO-8859-1&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee</span></span></span><br><span class="line"><span class="string"><span class="tag">                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">metadata-complete</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>实际上就是把<code>%TOMCAT_HOME%/conf/web.xml</code>文件的中间部分去掉，留下了外壳，以后需要在这里面慢慢添加配置文件。</p>
-<p>当然， 为了让他能访问到一个特定的Servlet程序，我们还要的对他进行注册:</p>
-<p>首先，我们要把编译过的MyServlet.class文件放在WEB-INF&#x2F;下的classes&#x2F;文件夹下；</p>
-<p>然后，在上面的web.xml中间写入这样的内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">      &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">      &lt;servlet-class&gt;MyServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;/servlet&gt;</span><br><span class="line"></span><br><span class="line">    &lt;servlet-mapping&gt;</span><br><span class="line">        &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">        &lt;url-pattern&gt;/MyServlet&lt;/url-pattern&gt;</span><br><span class="line">    &lt;/servlet-mapping&gt;</span><br></pre></td></tr></table></figure>
-<p>意思很清楚，就是对这个Servlet起个名字，然后把他映射到项目根目录下的MyServlet上，这样就能够通过浏览器访问到了。（事实上，上面的操作的目的就是之前那个类文件中的<code>@WebServlet(&quot;/MyServlet&quot;)</code> 。</p>
-<p>上面是比较基础的操作方法，如果是用Eclipse的话就简单的很了，什么配置web.xml啊，新建文件夹啊都不用操心，只要新建动态网页应用，写个Servlet类，然后直接就能跑起来。不过有一个要注意的就是在用Eclipse查看浏览页面的时候是不用手动开启Tomcat服务器的，如果手动开了的话还会报错。</p>
+            <h2 id="幂定律"><a href="#幂定律" class="headerlink" title="幂定律"></a>幂定律</h2><p>幂定律又叫幂律，大量的事实表明，很多现象都服从类似于幂函数$y&#x3D;cx^a$的形式，其中$a$是幂，而且通常是负数。</p>
+<p>幂定律可以非常直观的用马太效应(Matthew effect)解释，说白了其实就是所谓的“富者越富，穷者越穷”。例如图书的销售，本来销售好的图书可能会发布更多的广告，做更多的营销从而导致销量更多。这样如果将图书销售量按照名次排列下来就会发现图书销量会随着名次的提高而指数性的提高。</p>
+<h2 id="齐夫定律"><a href="#齐夫定律" class="headerlink" title="齐夫定律"></a>齐夫定律</h2><p>齐夫定律(Zipf’s Law)其实可以说是幂定律的一种形式，只是由于在曾经一次语料库的统计分析中由于拟合效果很好而广为人知。简而言之，他的内容就是对于一个语料库而言，我们统计他当中每一个词$i$出现的频率$f_i$与该频率在所有的词语中间的排名$r_i$，发现$f_i\times r_i$竟然近似等于一个常数$C$。当然，这只是一个经验定律，并不是定理、更不是理论。不过在自然界中有很多现象都满足这样一条规律而已。</p>
+<p>不过这个定律的具体形式也不仅仅局限于上面的那个等式，而是有可能会变成$f_i\times r_i^\alpha &#x3D;C$等等一系列形式。毕竟只是一个经验公式，拟合的时候相应的调节下参数也不是不可。</p>
+<h2 id="齐夫定律的简单应用"><a href="#齐夫定律的简单应用" class="headerlink" title="齐夫定律的简单应用"></a>齐夫定律的简单应用</h2><p>除了拟合预测，齐夫定律还有一个很有用的应用，就是在之前的一个实验中，我需要在某个城市的地图上上随机生成一些点来模拟人的位置，那么我该如何模拟更加真实呢？现实生活中人肯定不会是标准均匀分布的，如果使用正态分布的话，所有人都是以一个点为中心分布似乎也不太合理。这是就可以用到这个齐夫定律了。我们可以先假定总共有$N$个人，我们可以把人这些人分为$m$个人群，每个人群都是以二维正态分布的方式(选择好方差)聚集在中心点周围，而中心点可以以随机分布的方式从图中直接获取。至于每个人群的人数，我们可以按照齐夫定律，选择每个人群的个数。选择的方法也很简单，假设第$i$个人群的人数是$a_i$，解下面的方程组即可：<br>$$\left\{\begin{aligned}&amp;\sum a_i&#x3D;N\\&amp;i*a_i&#x3D;j*a_j\end{aligned}\right.$$</p>
+<p>这样最后生成的随机分布就非常具有说服力了。</p>
 
           
         
@@ -1239,7 +1714,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/08/%E7%94%A8%E4%BA%8E%E6%96%87%E6%A1%A3%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E5%8F%96%E7%9A%84TFIDF%E6%8C%87%E6%A0%87/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1258,7 +1733,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" itemprop="url">Python面向对象编程基础</a></h2>
+                <a class="post-title-link" href="/2016/09/08/%E7%94%A8%E4%BA%8E%E6%96%87%E6%A1%A3%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E5%8F%96%E7%9A%84TFIDF%E6%8C%87%E6%A0%87/" itemprop="url">用于文档关键字提取的TFIDF指标</a></h2>
         
 
         <div class="post-meta">
@@ -1270,8 +1745,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-25T14:34:08+00:00">
-                2016-03-25
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-08T12:46:09+00:00">
+                2016-09-08
               </time>
             
 
@@ -1293,8 +1768,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
                   </a>
                 </span>
 
@@ -1332,484 +1807,15 @@
       
         
           
-            <p>最近一直在用Python写代码，发现了很多代码重复的问题，总是复制粘贴显得特别凌乱，于是就想用类来封装一下。下面就记录下Python中最基础的面向对象编程方法。python的面向对象跟java，c++的面向对象意思都差不多，从他们类比过来还是非常好理解的。</p>
-<h2 id="类定义"><a href="#类定义" class="headerlink" title="类定义"></a>类定义</h2><p>python的类定义比较简单格式基本是这样的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>():</span><br><span class="line"></span><br><span class="line">    publicAttr= <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">instanceMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">staticMethod</span>():</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">classMethod</span>(<span class="params">cls</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__del__</span>():</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>直接定义一个Test类，括号里面表示他的父类，默认是Object。</li>
-<li>构造函数名字叫__init__，括号内表示构造的参数，但是第一个参数必须是self，表示传入自己的引用，而且之后调用的所有类属性类方法都需要用self来引导。</li>
-<li>类的方法分为实例方法、静态方法和类方法。除了实例方法外，其他方法是在方法上方用‘@staticmethod’或‘@classmethod’来表示的。而且只有实例方法必须先生成一个实例才可以调用。</li>
-<li>注意类方法默认传入的参数不是self，而是cls，表示他是类方法。类方法跟静态方法基本差不多，不同的就是这个参数，以及在继承中的差异。</li>
-<li>析构函数名字叫__del__，传入self参数。由于python本身具有垃圾回收机制，我们既可以用<code>del myinstance</code>来显式调用，也可以让系统自己调用。</li>
-</ul>
-<h2 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h2><p>python中并没有权限控制的关键字，所以默认的权限都是public，他相信程序员知道自己正在做什么。不过他也提供了权限控制的机制，就是通过方法名。如果方法名或属性名前面由‘__’修饰，那么python就认为他是私有的。</p>
-<p>比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>():</span><br><span class="line">    __privateAttr=<span class="number">1</span></span><br><span class="line">    publicAttr= <span class="number">2</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__privateMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span> self.__private</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">publicMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span> self.publicAttr</span><br><span class="line"></span><br><span class="line">test=Test()             <span class="comment">#constructor</span></span><br><span class="line"><span class="built_in">print</span> test.publicAttr</span><br><span class="line"><span class="comment">#print test.__privateAttr</span></span><br><span class="line">test.publicMethod()</span><br><span class="line"><span class="comment">#test.__privateMethod()</span></span><br></pre></td></tr></table></figure>
-<p>类外部调用私有属性是会报错的。</p>
-<p>不过事实上，私有属性也是可以在类外被访问到的，只要在他的名字前面加上“_类名”就可以了。</p>
-<h2 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h2><p>python支持多重继承（具体内容暂时不研究），父类名写在类声明的括号里面。具体用法跟其他的支持OOP语言的使用方法类似。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/23/Eclipse+Tomcat%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E5%BF%83%E5%BE%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/23/Eclipse+Tomcat%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E5%BF%83%E5%BE%97/" itemprop="url">Eclipse+Tomcat平台搭建心得</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-23T15:56:49+00:00">
-                2016-03-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>突然被要求搭建个Java 动态网页开发环境，好久不用eclipse的我着实懵逼好久。这当中遇到了好多好多的坑，姑且记录下一些注意事项，加深下对Eclipse和Tomcat的理解。</p>
-<ul>
-<li><p>java环境和Tomcat的环境一定要搭建正确，windows下注意配置下环境变量即可，ubuntu下还要注意尽量要自己下载源码编译，不要用apt-get里面的包。。。apt-get里的东西满满的都是坑，懒人化操作固然方便，但是这就导致了我们对他的路径、环境变量的存储位置都不清楚，这对接下来的配置会带来极大的困难。</p>
-</li>
-<li><p>eclipse的版本一定要看准了，不一定要是最新的，但是尽量用eclipse for j2ee 版本的。虽说理论上任何的eclipse版本之间都可以通过安装插件来达到同样的效果，但是这还是有很多不一样的地方。当你对着教程学习的时候，发现自己的菜单选项和人家的选项不一样的时候还是非常的蛋疼的。</p>
-</li>
-<li><p>eclipse在配置Server的时候一定要选择到我们下载的Tomcat路径。因为无论我们是否安装了Tomcat，在preference-&gt;server-&gt;runtime environment 选项中eclipse总会提供所有的Tomcat版本供我们选择，然而这些并没有卵用，如果想让eclipse连接本机的Tomcat，必须在search选项中选择Tomcat安装路径。这样选择的server才能用。</p>
-</li>
-<li><p>一定要添加全所有需要的jar包，在build path里添加需要的包（这里通常有很多很多，比如struts，spring，javax，json之类的），尤其是Tomcat的包（即javax之类的包，如果不是eclipse for j2ee的话是很难找到的）。而且还要注意选择jre包，选择不对的话是会报错的，而且很难看出来。</p>
-</li>
-<li><p>一定要记得，要在WEB-INF&#x2F;lib&#x2F;文件夹下把之前build path中添加的包通通添加进来， 否则会迷之报错，最典型的就是在Tomcat启动时报类似“Error configuring application listener of class org.springframework.web.context.ContextLoaderListener”的错误。。。话说报这个错的时候谁会想到是因为jar包没有加对地方造成的。。。另外提一句，如果是绕过eclipse直接在Tomcat中启动项目的话，还得会看日志，日志文件是在<code>%TOMCAT_HOME%/logs/catalina.out</code>文件中。如果不会看日志文件，你看到的只能是404 not found，并不能研究错误是什么。。。</p>
-</li>
-<li><p>通常情况下，第一次在Tomcat里跑自己的项目肯定会报类似这样的错误<code>“The Apache Tomcat Native library which allows optimal performance in production environments was not found...”</code>这是因为我们缺少APR（Apache Portable Runtime）这个东西，在windows下可以直接下tcnative-1.dll文件，并放在c:&#x2F;windows&#x2F;system32&#x2F;下（注意选择架构）。如果是在ubuntu下就有点麻烦了，还得去下apr和apr-util文件来配置编译。。。甚是麻烦以至于我到现在都没弄好。。。</p>
-</li>
-</ul>
-<p>差不多上面就是我搭建Eclipse+Tomcat服务器遇到的问题和解决的方法。以后遇到问题还是要善于去找日志文件，并勤于利用搜索引擎，这样才能将问题进行有针对性的解决。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/14/Markdown%E6%96%87%E6%9C%AC%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80%E5%88%9D%E8%AF%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/14/Markdown%E6%96%87%E6%9C%AC%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80%E5%88%9D%E8%AF%86/" itemprop="url">Markdown文本标记语言初识</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-14T13:22:53+00:00">
-                2016-03-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>一直听说用Markdown写博文挺方便的，也一直没有在意，然而最近在用jupyter的时候突然发现jupyter是自带Markdown的，这让没用过的我很是尴尬。而且后来在网上翻博客的时候，发现<a target="_blank" rel="noopener" href="http://www.jianshu.com/">“简书”</a> 上的博客格式都非常漂亮，特别是层次非常清楚，排版也和工整，后来才知道这个就是用markdown写的。于是我也萌生了一个用markdown写文章的想法。 当然在这之前，肯定要了解下markdown的语法什么的。</p>
-<h2 id="平台"><a href="#平台" class="headerlink" title="平台"></a>平台</h2><p>首先我需要一个Linux下写Markdown的小工具，有一个开源的小软件叫‘retext’（用pyqt写的）能够挺好的支持markdown的语法的。</p>
-<p>如果是在web上直接写markdown，也有很多平台，百度一下就晓得了。当然，类似jupyter、简书甚至wordpress也都能够很好的支持markdown</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>用法十分简单，一张表就可以基本解决：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#Header 1</span><br><span class="line">##Heaer 2</span><br><span class="line">###Header 3</span><br><span class="line">####header 4</span><br><span class="line">#####header 5</span><br><span class="line">######header 6</span><br><span class="line"></span><br><span class="line">Header</span><br><span class="line">====</span><br><span class="line"></span><br><span class="line">SubHeader</span><br><span class="line">----</span><br><span class="line"></span><br><span class="line">**bold**</span><br><span class="line"></span><br><span class="line">*italics*</span><br><span class="line"></span><br><span class="line">*emphasize*</span><br><span class="line"></span><br><span class="line">label [^1]</span><br><span class="line"></span><br><span class="line">&gt; This is the quote</span><br><span class="line"></span><br><span class="line">    #include&lt;iostream&gt;</span><br><span class="line">    using namespace std;</span><br><span class="line">    int main()&#123;</span><br><span class="line">        printf(&quot;hello world\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">[This is the label](http://www.baidu.com)</span><br><span class="line"></span><br><span class="line">![alt](/images/2016/03/14/1/1.png)</span><br><span class="line"></span><br><span class="line">*  1</span><br><span class="line">* * 1</span><br><span class="line">* * * 1</span><br><span class="line"></span><br><span class="line">[^1]: This is my first footnote</span><br></pre></td></tr></table></figure>
-<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="/images/2016/03/14/1/2.png"></p>
-<p>需要说明的几点：</p>
-<ul>
-<li>换行是用位于行末的两个空格来确定的，而不是直接回车。</li>
-<li>代码是用同一的一个缩进位来表示的。</li>
-<li>引用链接是用<code>[text](url)</code>来确定的，如果是引用图片，则在前面加！号即可。</li>
-<li>标注是用<code>[^n]</code>来确定的，在需要使用的时候用<code>[^n]</code>，在文章末尾用<code>[^n]:description</code>来加以说明。</li>
-<li>多级分点是用<code>*</code>来表示的，当然，多个<code>*</code>之间要有空格。</li>
-<li>其他用法可以查看文档</li>
-</ul>
-<p>Markdown之所以这么红，我想就是因为他的宗旨非常切合大众的需要，那就是“成为一种适用于网络的书写语言”，他的宗旨就是易读易写。这也就难怪他成为写博客，构建cms站点，甚至是写论文的一个非常好的工具了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/12/%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96%E5%A4%84%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/12/%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96%E5%A4%84%E7%90%86/" itemprop="url">直方图均衡化处理</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-12T15:49:25+00:00">
-                2016-03-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>直方图均衡化方法属于图像增强的范畴，是一种对图像进行灰度级修正的方法。简而言之，就是对一个灰度图像进行处理，使他的特征更加明显。通常情况下，在对图像进行进一步的处理之前，直方图均衡化是一种对灰度进行归一化处理的好方法，而且也可以增强图像的对比度。</p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这个方法的思路非常简单，就是我们把一个灰度图像以0-255个灰度值为横坐标，灰度对应的像素点的个数为纵坐标，构成一个灰度直方图。对于那些灰度分布非常不均衡的图像来说，我们要做的就是通过对灰度值进行一个映射，将他灰度直方图尽可能的拉伸。通常情况下我们可以对他的累计分布函数（CDF）进行线性插值即可，实现起来也很简单。</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>当然我们并不需要每次都自己写，调用matplotlib的函数可以很轻松的画出直方图，调用OpenCV的函数可以很轻松的进行均衡化：</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> Image,cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">raw=Image.<span class="built_in">open</span>(<span class="string">&#x27;test.png&#x27;</span>)</span><br><span class="line">im=np.array(raw.convert(<span class="string">&#x27;L&#x27;</span>))</span><br><span class="line"></span><br><span class="line">gray()</span><br><span class="line">figure()</span><br><span class="line">hist(im.ravel(),<span class="number">256</span>,[<span class="number">0</span>,<span class="number">256</span>])<span class="comment">#matplotlib的函数，hist用来绘直方图，ravel是将二维图像数组转换成一维数组</span></span><br><span class="line">xlim([<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line"></span><br><span class="line">equ=cv2.equalizeHist(im)    <span class="comment">#OpenCV直方图均衡化的接口</span></span><br><span class="line">figure()</span><br><span class="line">hist(equ.ravel(),<span class="number">256</span>,[<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line">xlim([<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line"></span><br><span class="line">figure()</span><br><span class="line">imshow(raw)</span><br><span class="line"></span><br><span class="line">res=np.hstack((im,equ))    <span class="comment">#将两个图像水平合并方便查看</span></span><br><span class="line">figure()</span><br><span class="line">imshow(res)</span><br><span class="line"></span><br><span class="line">show()</span><br></pre></td></tr></table></figure>
-
-<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="/images/2016/03/12/1/1.png"><br><img src="/images/2016/03/12/1/2.png"><br><img src="/images/2016/03/12/1/3.png"><br><img src="/images/2016/03/12/1/4.png"></p>
+            <h2 id="关键字提取问题"><a href="#关键字提取问题" class="headerlink" title="关键字提取问题"></a>关键字提取问题</h2><p>在大规模网络文章整合的过程中，我们经常需要对某一篇文章提取关键字。比如对于某一篇关于计算机的文章，我们应该提取出类似于“计算机”、“编程”、“CPU”之类的符合人类认知习惯的关键词，但是这个过程却不是那么容易。现在，我们把问题归结为，在不使用机器学习方法的情况下，给定一个文档集，仅从单词频率等角度对文档集当中的某一篇文档进行考虑，期望能够对于该篇文章，我们能从文章中依次提取出最有代表性的关键词。</p>
+<p>我们很容易想到的方法就是统计每个词的词频了，但是对于任何文章而言，出现频率最多的应该是一些音节助词等毫无意义的词语，比如中文里的“的”、英文里的“is”之类的词语。这些词语我们通常叫他“停用词”。显然，在统计词频的时候我们首先得把他们去掉。但是去掉这些常见停用词之后，剩下的词语中出现频率高就真的意味着能够代表文章的主旨么？显然不一定，虽然在某些情况下，某个能表现主旨的词语会在文章中多次出现，但是在有些情况下这个表现主旨的词语只会偶尔出现，不过与此相对应的是，这些词在不同主旨的文章中出现的次数却应该更少。</p>
+<p>针对上述的特性，就有了TF.IDF指标。他的意义就是<strong>词项频率(Term  Frequency</strong>)乘以**逆文档频率(Inverse Document Frequency)**。</p>
+<h2 id="词项频率"><a href="#词项频率" class="headerlink" title="词项频率"></a>词项频率</h2><p>词项频率就是指在该文档中某一个词出现的频率，这个数值越高原则上就代表这个词语的得分就越大。当然，由于文章的词数可能会比较大，我们需要对这个频率进行下归一化。也就是说，假定文档集有$N$篇文档，$f_{ij}$表示词项$i$在文档$j$中出现的次数(或频率)，我们把他的词项频率$TF_{ij}$定义如下：$$TF_{ij}&#x3D;\frac{f_{ij}}{max_kf_{kj}}$$</p>
+<p>意思也很简单，就是把这个词的频率除以这个文档中频率最高的词的频率，作为他的词项频率。这个数值保证了词的得分与词在文章中的频率正相关。</p>
+<h2 id="逆文档频率"><a href="#逆文档频率" class="headerlink" title="逆文档频率"></a>逆文档频率</h2><p>逆文档频率顾名思义就是代表这个数值与该词项在所有文档中出现的频率逆相关，正如前面所说，一个词在所有文档中出现的次数越少就表示这个词越有可能代表某一个特定的主题。因此，我们再假定词项$i$在$N$篇文档集中的$n$篇文章内出现，那么我们把这个他的逆文档频率定义如下：$$IDF_i&#x3D;log_2\frac N {n_i}$$</p>
+<p>就是把出现频率$\frac{n_i}N$取个倒数再取个对数。这样既保证了该指数与文档频率逆相关，又保证了这个值的影响程度不会太大。</p>
+<h2 id="TF-IDF指标"><a href="#TF-IDF指标" class="headerlink" title="TF.IDF指标"></a>TF.IDF指标</h2><p>最后我们只要把上面这两个指数相乘就可以得到该词项在该文档中的权重了，即词项$i$在文档$j$中的得分为:$$TF_{ij}\times IDF_i$$</p>
+<p>其实这也算是个经验公式了，不过在很多情况下还是很准的。</p>
 
           
         
@@ -1849,7 +1855,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/37/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><span class="page-number current">38</span><a class="page-number" href="/page/39/">39</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/39/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/37/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><span class="page-number current">38</span><a class="page-number" href="/page/39/">39</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/39/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1895,7 +1901,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">507</span>
+                  <span class="site-state-item-count">565</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1917,7 +1923,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">255</span>
+                  <span class="site-state-item-count">275</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

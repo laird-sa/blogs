@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<meta name="baidu-site-verification" content="codeva-Ss7c9LFzfb" />
+<meta name="bytedance-verification-code" content="GHbi5zMz8c6TSVpY9rLD" />
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="shell,ubuntu," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="使用Shell脚本处理文本很方便。通常情况下，若处理文本，一句shell脚本能解决的问题，换成python要十行代码，因此在某些情况下选择shell文本处理能提高效率。    书名 作者 下载地址    Classic Shell Scripting Arnold R. &amp; Nelson H.F.B 暂无   Advanced Bash-Scripting Guide Mendel Coo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shell简单的文本处理">
+<meta property="og:url" content="https://www.resonanat.com/2024/01/23/sed/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="使用Shell脚本处理文本很方便。通常情况下，若处理文本，一句shell脚本能解决的问题，换成python要十行代码，因此在某些情况下选择shell文本处理能提高效率。    书名 作者 下载地址    Classic Shell Scripting Arnold R. &amp; Nelson H.F.B 暂无   Advanced Bash-Scripting Guide Mendel Coo">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-01-23T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-31T02:55:19.786Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="shell">
+<meta property="article:tag" content="ubuntu">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2024/01/23/sed/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-67H9TCZZ7N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-67H9TCZZ7N');
+</script>
+
+
+  <title>shell简单的文本处理 | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2024/01/23/sed/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">shell简单的文本处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-01-23T00:00:00+00:00">
+                2024-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>使用Shell脚本处理文本很方便。通常情况下，若处理文本，一句shell脚本能解决的问题，换成python要十行代码，因此在某些情况下选择shell文本处理能提高效率。</p>
+<table>
+<thead>
+<tr>
+<th>书名</th>
+<th>作者</th>
+<th>下载地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Classic Shell Scripting</td>
+<td>Arnold R. &amp; Nelson H.F.B</td>
+<td><a href="">暂无</a></td>
+</tr>
+<tr>
+<td>Advanced Bash-Scripting Guide</td>
+<td>Mendel Cooper</td>
+<td><a target="_blank" rel="noopener" href="http://www.tldp.org/LDP/abs/abs-guide.pdf">PDF</a></td>
+</tr>
+</tbody></table>
+<h2 id="grep"><a href="#grep" class="headerlink" title="grep"></a>grep</h2><p>打印出某行。</p>
+<span id="more"></span>
+
+<pre><code>ifconfig | grep 127.0.0.1
+</code></pre>
+<p>使用正则表达式BRE或者ERE匹配行：</p>
+<pre><code>ifconfig | grep &#39;\([0-9]*\)\.&#39;
+ifconfig | grep -e &#39;[0-9]*\.&#39;
+</code></pre>
+<p>在文件下查找含有某个字符串的文件：（find string in files）</p>
+<pre><code>grep -rnw &#39;/home/ubuntu&#39; -e &quot;pattern_to_find&quot;
+    
+</code></pre>
+<p>相关文章：<a href="/2015/10/29/RE_POSIX/">正则表达式学习</a></p>
+<h2 id="sed"><a href="#sed" class="headerlink" title="sed"></a>sed</h2><p>加载多个命令需要-e参数。每一个-e后面跟者一个命令<br>定界符可以是逗号，也可以分号，总之不要跟替换内容重复。<br>启用overwrite模式，将改动写入到源文件: -i 参数<br>启用ERE表达式 -r 参数。但并不是完整支持ERE，比如：无法使用\d匹配数字，可以用[:alnum:]代替</p>
+<p>++sed默认只对一行进行一次匹配。++</p>
+<ul>
+<li><p>若要一行内多次匹配，要加上g，比如</p>
+<pre><code>  sed &#39;s/hello/hi/g&#39; test.txt
+  
+</code></pre>
+</li>
+<li><p>若跨行搜索，使用以下命令将所有换行符替换成逗号</p>
+<pre><code>  sed &#39;:a;&#123;N;s/\n/,/&#125;;ba&#39;
+</code></pre>
+</li>
+</ul>
+<p>上面这是一种label的用法，参考<a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/1251999/how-can-i-replace-a-newline-n-using-sed">这篇文章</a></p>
+<p>备份&#x2F;home&#x2F;ubuntu的目录结构到&#x2F;tmp&#x2F;backup</p>
+<pre><code>mkdir /tmp/backup
+find /home/ubuntu -type d -print |
+sed &#39;s;/home/ubuntu;/temp/backup/;&#39; |
+sed &#39;s;/^/mkdir /&#39; |
+sh -x
+</code></pre>
+<p>删掉空行</p>
+<pre><code>sed &#39;/^$/d&#39; ./1.txt # d命令是删除整行，不是删除pattern
+</code></pre>
+<p>从文件加载命令</p>
+<pre><code># use global replace because in a line
+echo &quot;s/fuck/love/g&quot; &gt; config  
+echo &quot;I fuck you because I love you, So I love you and fucking you&quot; &gt; text
+sed -f config ./text
+</code></pre>
+<p>仅显示匹配(类似grep)</p>
+<pre><code>printf &quot;one\ntwo\nthree\nfour\none\n&quot; &gt; text
+sed -n &#39;/one/p&#39; ./text
+</code></pre>
+<p>匹配特定行</p>
+<ul>
+<li><p>提及两位人名：</p>
+<pre><code>  printf &quot;Tom wants to sleep.\nBut Tom has to finish task.\n&quot; &gt; text
+  sed &#39;/Tom/ s//&amp; and Jerry/g&#39; ./text
+</code></pre>
+</li>
+<li><p>指定打印哪些行</p>
+<pre><code>  sed -n &#39;10,24p&#39; /etc/passwd
+</code></pre>
+</li>
+<li><p>仅替换范围内的行</p>
+<pre><code>  # 从含games那行到proxy那行进行替换
+  sed &#39;/games/,/proxy/ s/usr/ffffffffffffff/g&#39; /etc/passwd
+</code></pre>
+</li>
+<li><p>将命令应用于不匹配的某些行</p>
+<pre><code>  # 不匹配games的所有行进行替换操作
+  sed &#39;/games/ !s/usr/xxxxxxxxxxxxxxxxxx/g&#39; /etc/passwd
+</code></pre>
+</li>
+</ul>
+<p>小把戏：匹配NULL (由于*表示重复0~INF次)</p>
+<pre><code>echo abc | sed &#39;s/b*/1&#39;
+结果：1abc
+</code></pre>
+<h2 id="tr"><a href="#tr" class="headerlink" title="tr"></a>tr</h2><p>进行替换、压缩和删除。它可以将一组字符变成另一组字符。<br>++注意是一组字符，不是一个字符串++</p>
+<p>选项</p>
+<pre><code>-c或——complerment：取代所有不属于第一字符集的字符
+-d或——delete：删除所有属于第一字符集的字符
+-s或--squeeze-repeats：把连续重复的字符以单独一个字符表示
+-t或--truncate-set1：先删除第一字符集较第二字符集多出的字符。
+</code></pre>
+<p>大写转小写</p>
+<pre><code>echo &quot;HELLO WORLD&quot; | tr &#39;A-Z&#39; &#39;a-z&#39;
+</code></pre>
+<p>‘A-Z’ 和 ‘a-z’都是集合，集合是可以自己制定的，例如：’ABD-}’、’bB.,’、’a-de-h’、’a-c0-9’都属于集合，集合里可以使用’\n’、’\t’，可以可以使用其他ASCII字符。</p>
+<p>将制表符转换为空格</p>
+<pre><code>cat text | tr &#39;\t&#39; &#39; &#39;
+</code></pre>
+<p>将制表符转换为空格</p>
+<pre><code>cat text | tr &#39;\t&#39; &#39; &#39; 
+</code></pre>
+<p>字符集补集，不在补集中的所有字符被删除</p>
+<pre><code>echo aa.,a 1 b#$bb 2 c*/cc 3 ddd 4 | tr -d -c &#39;0-9 \n&#39;
+</code></pre>
+<p>此例中，补集中包含了数字0~9、空格和换行符\n，所以没有被删除，其他字符全部被删除了。 </p>
+<p>用tr压缩字符，可以压缩输入中重复的字符</p>
+<pre><code>echo &quot;thissss is a text linnnnnnne.&quot; | tr -s &#39; sn&#39;
+# this is a text line. 
+</code></pre>
+<p>删除Windows文件“造成”的’^M’字符</p>
+<pre><code>cat file | tr -s &quot;\r&quot; &quot;\n&quot; &gt; new_file 或 cat file | tr -d &quot;\r&quot; &gt; new_file
+</code></pre>
+<h2 id="cut"><a href="#cut" class="headerlink" title="cut"></a>cut</h2><p>字段提取。<br>取出字段：</p>
+<pre><code>cut -d : -f 1,5 /etc/passwd | head
+cut -d : -f 6 /etc/passwd | tail
+</code></pre>
+<h2 id="join"><a href="#join" class="headerlink" title="join"></a>join</h2><p>连接字段</p>
+<pre><code>printf &quot;#Sales\njoe\t200\njane\t300\nhreman\t150\nchris\t450\n&quot; &gt; text1
+printf &quot;#Quotas\njoe\t49\njane\t54\nhreman\t20\nchris\t49\n&quot; &gt; text2
+# 删掉注释，然后排序
+sed &#39;/^#/d&#39; text1 | sort &gt; text1.sort
+sed &#39;/^#/d&#39; text2 | sort &gt; text2.sort
+# 以第一个字段作结合
+join text1.sort text2.sort
+</code></pre>
+<h2 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h2><p>分为mawk gawk 等几个版本，用法大同小异。下面以ubuntu内置的mawk为例。<br>注意目前的ubuntu内置mawk版本是1.3.3，是很老的版本，bug：不支持posix正则表达式字符集，比如[:alnum:]，因此想要用posix，就得<a target="_blank" rel="noopener" href="http://invisible-island.net/mawk/">更新mawk</a>。<br>编译安装后要更新一下软链接。</p>
+<pre><code>sudo ln -sf /usr/local/bin/mawk /usr/bin/awk
+</code></pre>
+<p>awk的一般语法</p>
+<pre><code>awk pattern &#123; action &#125; #如果模式匹配，执行action
+awk pattern            #如果模式匹配，打印它
+awk         &#123; action &#125; #针对每条记录，执行action
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>awk变量</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FILENAME</td>
+<td>当前输入文件名称</td>
+</tr>
+<tr>
+<td>FNR</td>
+<td>输入文件的记录数</td>
+</tr>
+<tr>
+<td>FS</td>
+<td>分隔符，支持正则表达式</td>
+</tr>
+<tr>
+<td>NF</td>
+<td>当前记录的字段数</td>
+</tr>
+<tr>
+<td>NR</td>
+<td>在工作job中的记录数</td>
+</tr>
+<tr>
+<td>OFS</td>
+<td>输出字段分隔符</td>
+</tr>
+<tr>
+<td>ORS</td>
+<td>输出记录分隔符</td>
+</tr>
+<tr>
+<td>RS</td>
+<td>输入记录分隔符，默认’\n’</td>
+</tr>
+</tbody></table>
+<p>++awk是在文字缓冲区逐行处理++<br>打印非空行：</p>
+<pre><code>awk &#39;NF &gt; 0 &#123;print $0&#125;&#39;
+</code></pre>
+<p>实现cut取出字段,-F指定分隔符</p>
+<pre><code>awk -F: &#39;&#123;print &quot;User-name:&quot;,$1,&quot;,but real name is&quot;,$5&#125;&#39; /etc/passwd | head
+# 改动一下，-v设置**为输出分隔符
+awk -F: -v &#39;OFS=**&#39; &#39;&#123;print $1,$5&#125;&#39; /etc/passwd | head
+</code></pre>
+<p>将每行的回车符替换为逗号，并将所有行合并到一行</p>
+<pre><code>awk &#39;&#123;printf&quot;%s,&quot;,$0&#125;&#39;  #没有跨行概念
+</code></pre>
+<p>提取中国路由表，项目<a target="_blank" rel="noopener" href="https://github.com/fivesheep/chnroutes">chnroute</a>的源码</p>
+<pre><code># ipv4.txt 文件内容
+apnic|CN|ipv4|43.242.220.0|1024|20140904|allocated
+apnic|IN|ipv4|43.242.228.0|1024|20140904|assigned
+apnic|HK|ipv4|43.242.232.0|1024|20140904|assigned
+apnic|MN|ipv4|43.242.240.0|1024|20140905|allocated
+apnic|CN|ipv4|43.242.252.0|1024|20140905|allocated
+# 执行
+cat ipv4.txt |
+awk -F\| &#39;/CN\|ipv4/ &#123; printf(&quot;%s/%d\n&quot;, $4, 32-log($5)/log(2)) &#125;&#39;
+</code></pre>
+<p>注意：-F为重新定义默认分隔符，匹配Pattern为正则表达式CN|ipv4，输出分隔符分隔的字段，并进行数学对数运算</p>
+<p>在一个列表中调换第二、第三列</p>
+<pre><code># list.txt 文件
+姓名	学号	成绩
+张三	23	23
+李四	22	49
+老王	33	66
+赵爷	44	22
+# 执行：
+awk -F&#39;\t&#39; -v OFS=&#39;\t&#39; &#39;&#123; print $1, $3, $2 &#125;&#39; list.txt
+</code></pre>
+<p>将单换行符的文本换成双换行：</p>
+<pre><code>awk &#39;&#123; print $0 &quot;\n&quot; &#125;&#39; list.txt
+# 等价于 sed -e &#39;s/$/\n/g&#39; list.txt
+</code></pre>
+<p>将双换行符的文本换成单换行：</p>
+<pre><code>awk &#39;BEGIN &#123; RS=&quot;\n*\n&quot; &#125; &#123; print &#125;&#39; list.txt
+</code></pre>
+<p>支持类似c语言的各种逻辑语句：</p>
+<pre><code>awk &#39;BEGIN &#123;for(x=0;x&lt;=1.0;x+=0.05)print x&#125;&#39;
+</code></pre>
+<p>结合Shell产生随机数：</p>
+<pre><code>#! /bin/bash
+for k in $(seq 1 5); do
+    awk &#39;BEGIN&#123;
+               srand()
+               for(k=1;k&lt;5;k++)
+                   printf(&quot;%.5f\t&quot;,rand())
+               print &quot;&quot;
+              &#125;&#39;
+    sleep 1
+done
+</code></pre>
+<h2 id="sort"><a href="#sort" class="headerlink" title="sort"></a>sort</h2><p>排序。<br>修饰符如下：</p>
+<table>
+<thead>
+<tr>
+<th>字母</th>
+<th>说明</th>
+<th>字母</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>b</td>
+<td>忽略开头空白</td>
+<td>g</td>
+<td>以一般的符号数字进行比较，仅用于GNU</td>
+</tr>
+<tr>
+<td>d</td>
+<td>字典顺序</td>
+<td>i</td>
+<td>忽略无法打印的字符</td>
+</tr>
+<tr>
+<td>f</td>
+<td>不分大小写</td>
+<td>n</td>
+<td>以整数进行比较</td>
+</tr>
+<tr>
+<td>r</td>
+<td>倒序</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody></table>
+<p>还是passwd文件。这东西能玩一年</p>
+<pre><code># -t分隔符 -k表示从第几个字段到第几个字段为key
+# -k2.4,5.6表示从第二个字段的第四个字符开始比较，一直比到第五字段第六字符
+sort -t: -k1,1 /etc/passwd
+
+# -k3nr修饰符表示第三字段，按数字，反向排序
+sort -t: -k3nr /etc/passwd
+
+# 先按第四个字段进行排序，若具有相同第四字段，再以第三个字段进行排序
+sort -t: -k4n -k3n /etc/passwd
+</code></pre>
+<p>文本块排序：<br>假设text为如下内容：</p>
+<pre><code># SORTKEY: Schlob, Hans Jürgen
+Hans Jürgen Schlob
+Unter den Linden 78
+D-10117 Berlin
+Germany
+
+# SORTKEY: Jones, Adrian
+Adrian Jones
+371 Montgomery Park Road
+Henley-on-Thames RG9 4AJ
+UK
+
+# SORTKEY: Brown, Kim
+Kim Brown
+1841 S Main Street
+Westchester, NY 10502
+USA
+</code></pre>
+<p>先用awk处理标识符。再处理键值，恢复原样：</p>
+<pre><code>cat text | awk -v RS=&quot;&quot; &#39;&#123;gsub(&quot;\n&quot; , &quot;^Z&quot;); print &#125;&#39; |
+sort -f |
+awk -v ORS=&quot;\n\n&quot; &#39;&#123;gsub(&quot;\^Z&quot;,&quot;\n&quot;);print &#125;&#39; |
+grep -v &#39;sort&#39;
+</code></pre>
+<p>排序后看看是否重复：</p>
+<pre><code>printf &quot;three\none\ntwo\nthree\nfour\none\nthree\n&quot; &gt; text
+# 显示去掉重复的、排序后记录
+sort latin-numbers | uniq
+# 显示计数
+sort latin-numbers | uniq -c
+# 仅显示重复记录
+sort latin-numbers | uniq -d
+# 仅显示未出现重复
+sort latin-numbers | uniq -u
+</code></pre>
+<h2 id="fmt"><a href="#fmt" class="headerlink" title="fmt"></a>fmt</h2><p>打开ubuntu的默认字典，格式化段落为30个字为一行：</p>
+<pre><code>sed -n &#39;999,1020p&#39; /usr/share/dict/words | fmt -w 30
+</code></pre>
+<h2 id="wc"><a href="#wc" class="headerlink" title="wc"></a>wc</h2><p>计数，words count</p>
+<pre><code>echo &quot;hello world, i am the king of the world.&quot; &gt; text
+cat text | wc -c  #字节数
+cat text | wc -l  #行数
+cat text | wc -w  #数词
+</code></pre>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/shell/" rel="tag"># shell</a>
+          
+            <a href="/tags/ubuntu/" rel="tag"># ubuntu</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/01/23/set-up-aria2-on-vps/" rel="next" title="aria2+yaaw离线下载">
+                <i class="fa fa-chevron-left"></i> aria2+yaaw离线下载
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/01/23/rsync-only-for-ssh/" rel="prev" title="只允许rsync同步的中心机器">
+                只允许rsync同步的中心机器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#grep"><span class="nav-number">1.</span> <span class="nav-text">grep</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sed"><span class="nav-number">2.</span> <span class="nav-text">sed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tr"><span class="nav-number">3.</span> <span class="nav-text">tr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cut"><span class="nav-number">4.</span> <span class="nav-text">cut</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join"><span class="nav-number">5.</span> <span class="nav-text">join</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#awk"><span class="nav-number">6.</span> <span class="nav-text">awk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sort"><span class="nav-number">7.</span> <span class="nav-text">sort</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fmt"><span class="nav-number">8.</span> <span class="nav-text">fmt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wc"><span class="nav-number">9.</span> <span class="nav-text">wc</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

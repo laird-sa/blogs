@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/04/PostGIS%E5%88%9D%E6%8E%A2/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/20/android-captive-portal/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -326,7 +326,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/08/04/PostGIS%E5%88%9D%E6%8E%A2/" itemprop="url">PostGIS初探</a></h2>
+                <a class="post-title-link" href="/2016/12/20/android-captive-portal/" itemprop="url">Android 的网络感叹号</a></h2>
         
 
         <div class="post-meta">
@@ -338,8 +338,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-04T15:32:12+00:00">
-                2016-08-04
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-20T12:06:42+00:00">
+                2016-12-20
               </time>
             
 
@@ -361,8 +361,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
                   </a>
                 </span>
 
@@ -399,340 +399,10 @@
 
       
         
-          
-            <p>PostGIS是PostgreSQL的空间扩展，他使得PostgreSQL支持空间数据类型，比如点、线段、折线段、多边形、椭圆等等，并且能够使用高效的空间索引进行存储和查找。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>ubuntu下在安装好PostgreSQL的基础下用<code>apt install postgis</code>即可。</p>
-<p>确认安装版本可以用在postgreSQL的shell里查询:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths=# select * from pg_available_extensions where name like &#x27;postgis%&#x27;;</span><br></pre></td></tr></table></figure>
-<p>我这里大概显示的是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">name          | default_version | installed_version |                               comment                               </span><br><span class="line">------------------------+-----------------+-------------------+---------------------------------------------------------------------</span><br><span class="line"> postgis_sfcgal         | 2.2.1           |                   | PostGIS SFCGAL functions</span><br><span class="line"> postgis                | 2.2.1           |                   | PostGIS geometry, geography, and raster spatial types and functions</span><br><span class="line"> postgis_topology       | 2.2.1           |                   | PostGIS topology spatial types and functions</span><br><span class="line"> postgis_tiger_geocoder | 2.2.1           |                   | PostGIS tiger geocoder and reverse geocoder</span><br></pre></td></tr></table></figure>
-<p>很明显可以看见版本和说明。</p>
-<h2 id="简要使用"><a href="#简要使用" class="headerlink" title="简要使用"></a>简要使用</h2><p>用好这个扩展好像也是个挺麻烦的事的，因为这个牵涉到使用很多的函数，因此查看帮助文档就显得很必要了。</p>
-<p>下面就以对点进行最近邻的查找为例。</p>
-<p><strong>首先要导入该扩展:</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;myths=# create extension postgis;</span><br></pre></td></tr></table></figure>
-<p>导入后会在数据库里多出下面这几个表：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">myths=# \d</span><br><span class="line">             List of relations</span><br><span class="line"> Schema |       Name        | Type  | Owner </span><br><span class="line">--------+-------------------+-------+-------</span><br><span class="line"> public | geography_columns | view  | myths</span><br><span class="line"> public | geometry_columns  | view  | myths</span><br><span class="line"> public | raster_columns    | view  | myths</span><br><span class="line"> public | raster_overviews  | view  | myths</span><br><span class="line"> public | spatial_ref_sys   | table | myths</span><br><span class="line">(５ rows)</span><br></pre></td></tr></table></figure>
-<p>这些东西都是postgis必备的东西，尤其是spatial_ref_sys表，保存了不同的坐标系信息。</p>
-<p><strong>然后建表：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths=# create table testTable(id int primary key ,geo geometry(point,0));</span><br></pre></td></tr></table></figure>
-<p>基本的sql语句，不同的是geo字段的类型是point，而且后面跟了个数字。这个数字是srid，表示我们使用的坐标集。这个数字对应的是之前的spatial_ref_sys里的字段。通常的经纬度坐标集对应的srid是4326，而这里的0表示我用的是普通的几何坐标。关于srid的问题可以直接百度。</p>
-<p><strong>插入语句：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths=#　insert into testTable values(1,ST_GeomFromText(&#x27;POINT(32 66)&#x27;,0));</span><br></pre></td></tr></table></figure>
-<p>这就用到了st_geomfromtext()函数，这个函数把文本形式的类型转换为实际类型，并且指定srid，插入到表中。</p>
-<p>对应的类型还有：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">• POINT(0 0)</span><br><span class="line">• LINESTRING(0 0,1 1,1 2)</span><br><span class="line">• POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))</span><br><span class="line">• MULTIPOINT(0 0,1 2)</span><br><span class="line">• MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))</span><br><span class="line">• MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))</span><br><span class="line">• GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))</span><br><span class="line">。。。。。。</span><br></pre></td></tr></table></figure>
-
-<p><strong>批量生成数据</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.BufferedWriter;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		<span class="type">BufferedWriter</span> <span class="variable">writer</span> <span class="operator">=</span> Files.newBufferedWriter(Paths.get(<span class="string">&quot;/home/myths/Desktop/data.txt&quot;</span>));</span><br><span class="line">		<span class="type">Random</span> <span class="variable">rand</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Random</span>();</span><br><span class="line">		<span class="type">int</span> <span class="variable">left</span> <span class="operator">=</span> -<span class="number">500000</span>, right = <span class="number">500000</span>, up = <span class="number">500000</span>, down = -<span class="number">500000</span>;</span><br><span class="line">		<span class="type">int</span> <span class="variable">number</span> <span class="operator">=</span> <span class="number">1000000</span>;</span><br><span class="line">		writer.write(<span class="string">&quot;begin;\n&quot;</span>);</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; number; i++) &#123;</span><br><span class="line">			<span class="type">int</span> <span class="variable">randx</span> <span class="operator">=</span> rand.nextInt(right - left) + left;</span><br><span class="line">			<span class="type">int</span> <span class="variable">randy</span> <span class="operator">=</span> rand.nextInt(up - down) + down;</span><br><span class="line">			<span class="type">String</span> <span class="variable">query</span> <span class="operator">=</span> String.format(<span class="string">&quot;insert into testTable values(%d,ST_GeomFromText(&#x27;POINT(%d %d)&#x27;,0));\n&quot;</span>, i,</span><br><span class="line">					randx, randy);</span><br><span class="line">			writer.write(query);</span><br><span class="line">		&#125;</span><br><span class="line">		writer.write(<span class="string">&quot;commit;\n&quot;</span>);</span><br><span class="line">		writer.flush();</span><br><span class="line">		writer.close();</span><br><span class="line">		System.out.println(<span class="string">&quot;done&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>生成后用<code>myths=# \i ~/Desktop/data.txt</code>导入即可。</p>
-<p><strong>最近邻查找</strong><br><code>myths=# select id,st_astext(geo) from testtable order by geo&lt;-&gt;st_geomfromtext(&#39;point(10 10)&#39;,0) limit 10;</code><br>这个语句就是查找距离点(10,10)最近的前10个点。这里&lt;-&gt;表示求距离，st_astext()函数把wkb形式的数据转换成wkt的可读形式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">id   |     st_astext     </span><br><span class="line">--------+-------------------</span><br><span class="line"> 863823 | POINT(-388 537)</span><br><span class="line"> 789164 | POINT(-136 -947)</span><br><span class="line"> 841388 | POINT(670 808)</span><br><span class="line"> 368903 | POINT(1069 664)</span><br><span class="line"> 169180 | POINT(1209 -458)</span><br><span class="line"> 359475 | POINT(-83 1348)</span><br><span class="line"> 167871 | POINT(792 -1300)</span><br><span class="line"> 337646 | POINT(-1047 1152)</span><br><span class="line"> 585595 | POINT(-955 1439)</span><br><span class="line">  46949 | POINT(-920 -1480)</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 2207.639 ms</span><br></pre></td></tr></table></figure>
-<p>否则就是这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">myths=# select id,geo from testtable order by geo&lt;-&gt;st_geomfromtext(&#x27;point(10 10)&#x27;,0) limit 10;</span><br><span class="line">   id   |                    geo                     </span><br><span class="line">--------+--------------------------------------------</span><br><span class="line"> 863823 | 010100000000000000004078C00000000000C88040</span><br><span class="line"> 789164 | 010100000000000000000061C00000000000988DC0</span><br><span class="line"> 841388 | 01010000000000000000F084400000000000408940</span><br><span class="line"> 368903 | 01010000000000000000B490400000000000C08440</span><br><span class="line"> 169180 | 01010000000000000000E492400000000000A07CC0</span><br><span class="line"> 359475 | 01010000000000000000C054C00000000000109540</span><br><span class="line"> 167871 | 01010000000000000000C0884000000000005094C0</span><br><span class="line"> 337646 | 010100000000000000005C90C00000000000009240</span><br><span class="line"> 585595 | 01010000000000000000D88DC000000000007C9640</span><br><span class="line">  46949 | 01010000000000000000C08CC000000000002097C0</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 690.557 ms</span><br></pre></td></tr></table></figure>
-
-<p><strong>添加索引</strong><br><code>myths=# create index testIndex on testtable using gist(geo);</code><br>对于空间类型添加的索引是gist类型的，具体含义参见文档。</p>
-<p>添加了索引后可以发现查询效率有明显提升：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">myths=# select id,st_astext(geo) from testtable order by geo&lt;-&gt;st_geomfromtext(&#x27;point(10 10)&#x27;,0) limit 10;</span><br><span class="line">   id   |     st_astext     </span><br><span class="line">--------+-------------------</span><br><span class="line"> 863823 | POINT(-388 537)</span><br><span class="line"> 789164 | POINT(-136 -947)</span><br><span class="line"> 841388 | POINT(670 808)</span><br><span class="line"> 368903 | POINT(1069 664)</span><br><span class="line"> 169180 | POINT(1209 -458)</span><br><span class="line"> 359475 | POINT(-83 1348)</span><br><span class="line"> 167871 | POINT(792 -1300)</span><br><span class="line"> 337646 | POINT(-1047 1152)</span><br><span class="line"> 585595 | POINT(-955 1439)</span><br><span class="line">  46949 | POINT(-920 -1480)</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 49.153 ms</span><br><span class="line"></span><br><span class="line">myths=# select id,geo from testtable order by geo&lt;-&gt;st_geomfromtext(&#x27;point(10 10)&#x27;,0) limit 10;</span><br><span class="line">   id   |                    geo                     </span><br><span class="line">--------+--------------------------------------------</span><br><span class="line"> 863823 | 010100000000000000004078C00000000000C88040</span><br><span class="line"> 789164 | 010100000000000000000061C00000000000988DC0</span><br><span class="line"> 841388 | 01010000000000000000F084400000000000408940</span><br><span class="line"> 368903 | 01010000000000000000B490400000000000C08440</span><br><span class="line"> 169180 | 01010000000000000000E492400000000000A07CC0</span><br><span class="line"> 359475 | 01010000000000000000C054C00000000000109540</span><br><span class="line"> 167871 | 01010000000000000000C0884000000000005094C0</span><br><span class="line"> 337646 | 010100000000000000005C90C00000000000009240</span><br><span class="line"> 585595 | 01010000000000000000D88DC000000000007C9640</span><br><span class="line">  46949 | 01010000000000000000C08CC000000000002097C0</span><br><span class="line">(10 rows)</span><br><span class="line"></span><br><span class="line">Time: 1.092 ms</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://www.postgis.net/">PostGIS.net</a><br><a target="_blank" rel="noopener" href="http://postgis.net/docs/manual-2.0/">PostGIS 2.0 Manual</a><br><a target="_blank" rel="noopener" href="http://mysql.taobao.org/monthly/2015/07/04/">PostGIS 在 O2O应用中的优势</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/04/PostgreSQL%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/04/PostgreSQL%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/" itemprop="url">PostgreSQL安装使用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-04T13:17:35+00:00">
-                2016-08-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>PostgreSQL大概是除MySQL之外的最好用的开源数据库管理系统了，有着开源数据库中最好的空间扩展，当前的应用也特别的多。当然我主要就是冲着PostGIS来的，不过在这之前首先得会玩PostGreSQL。下面就简要记录下使用过程。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>PostgreSQL有个<a target="_blank" rel="noopener" href="https://www.postgresql.org/">官方网站</a>，这里有简要的说明和文档。ubuntu下安装直接用apt大法就可以。这里需要注意下版本，不要在电脑里留多个不同的版本。</p>
-<p>安装好后在shell里用<code>$psql -V</code>来查看版本。在<code>\etc\postgresql\</code> 目录下也会有对应版本号的配置文件。如果发现什么端口错误或者被占用的问题可以在<code>postgresql.conf</code>下修改下端口或者删除多余的版本。</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>PostgreSQL和其他数据库有个很大的不同就是他登陆的时候是以数据库的身份登陆的，默认的数据库是postgres(而且会在安装时自动生成postgres这个角色)。因此我们首先得以postgres的角色进行操作。</p>
-<p>具体的创建角色和数据库的过程参照**<a target="_blank" rel="noopener" href="http://www.cnblogs.com/stephen-liu74/archive/2012/05/18/2302639.html">PostgreSQL学习手册(角色和权限)</a>**。</p>
-<p>关于其他的细节可以参考**<a target="_blank" rel="noopener" href="http://www.php100.com/manual/PostgreSQL8/tutorial.html">PostgreSQL 8.1 中文文档</a>**这里的教程来。</p>
-<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><ol>
-<li>一般的SQL语句与其他类型的数据库差不多。</li>
-<li>选择数据库、选择表等操作可以用<code>\?</code>命令查看，比如<code>\d</code>  <code>\l</code>  <code>\timing</code> 等。</li>
-<li>一些内置的表基本都是以<code>pg_</code> 开头，而且可以用自动补全来查看，比如管理角色的<code>pg_roles</code> 表、管理密码的<code>pg_shadow</code> 表等。</li>
-</ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/stephen-liu74/archive/2012/05/18/2302639.html">PostgreSQL学习手册(角色和权限)</a><br><a target="_blank" rel="noopener" href="http://www.php100.com/manual/PostgreSQL8/tutorial.html">PostgreSQL 8.1 中文文档</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/22/javascript-Function/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/07/22/javascript-Function/" itemprop="url">js高级与面向对象之函数</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-22T11:40:39+00:00">
-                2016-07-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="函数声明"><a href="#函数声明" class="headerlink" title="函数声明"></a>函数声明</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">func</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="comment">//函数体</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//2.函数表达式</span></span><br><span class="line"><span class="keyword">var</span> func1 = <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//3.通过Function构造函数来创建</span></span><br><span class="line"><span class="keyword">var</span> func2 = <span class="keyword">new</span> <span class="title class_">Function</span>();</span><br></pre></td></tr></table></figure>
+          <p>从 Android L 开始，原生和 CM 的 ROM 用户就会发现，状态栏的网络信号莫名多了一个感叹号。而且，有的时候明明连着 WIFI 用得好好的，却突然跳到数据流量。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/07/22/javascript-Function/#more" rel="contents">
+            <a class="btn" href="/2016/12/20/android-captive-portal/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -783,7 +453,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/10/Django%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/19/Python%E5%A4%9A%E6%A0%B8%E7%BC%96%E7%A8%8B%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -802,7 +472,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/07/10/Django%E6%A1%86%E6%9E%B6%E5%9F%BA%E7%A1%80/" itemprop="url">Django框架基础</a></h2>
+                <a class="post-title-link" href="/2016/12/19/Python%E5%A4%9A%E6%A0%B8%E7%BC%96%E7%A8%8B%E5%88%86%E6%9E%90/" itemprop="url">Python多核编程分析</a></h2>
         
 
         <div class="post-meta">
@@ -814,8 +484,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-10T16:33:03+00:00">
-                2016-07-10
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-19T13:47:07+00:00">
+                2016-12-19
               </time>
             
 
@@ -837,8 +507,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
                   </a>
                 </span>
 
@@ -876,28 +546,23 @@
       
         
           
-            <p>Django框架大概是python web框架中最有名的一个了，由于学习需要得用python搞个网页出来，那就学学这个喽。</p>
-<p>入门级的介绍我是参考<a target="_blank" rel="noopener" href="http://www.ziqiangxuetang.com/django/">自强学堂</a>的简单教程，总的来说讲的还是蛮清楚的。</p>
-<p>下面简单记录下搭建过程，其实也是非常容易上手。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>当然可以去<a target="_blank" rel="noopener" href="https://www.djangoproject.com/download/">django官网</a>下载源码直接<code>$sudo pip install Django</code>，而且版本也比较新。</p>
-<p>相比下源码直接用来说，用pip安装能自动的把常用的命令对应的放在&#x2F;usr&#x2F;local&#x2F;bin&#x2F;等里面而不是扎堆放在一起，因此非常方便随处使用。</p>
-<p>安装完成后在python命令行里输入</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; import django</span><br><span class="line">&gt;&gt;&gt; django.VERSION</span><br><span class="line">(1, 9, 7, &#x27;final&#x27;, 0)</span><br></pre></td></tr></table></figure>
-<p>即可查询当前版本了，这个还是要十分清楚的，因为1.7、1.8、1.9各个版本的使用差别还是很大的。</p>
-<h2 id="文件结构"><a href="#文件结构" class="headerlink" title="文件结构"></a>文件结构</h2><p>django工程首先用<code>django-admin.py startproject project-name</code>来创建，这会生成一个项目文件夹。然后进入文件夹，输入<code>python manage.py startapp app-name</code>命令来生成一个应用。不过新建的app要手动在项目文件里注册，即在Test&#x2F;Test&#x2F;settings.py里的INSTALLED_APPS的字典里加上’app-name’字段来帮助项目找到属于他的应用。</p>
-<p>文件树大概是这样的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Test/</span><br><span class="line">├── manage.py</span><br><span class="line">├── MyApp</span><br><span class="line">│   ├── admin.py</span><br><span class="line">│   ├── apps.py</span><br><span class="line">│   ├── __init__.py</span><br><span class="line">│   ├── models.py</span><br><span class="line">│   ├── tests.py</span><br><span class="line">│   ├── views.py</span><br><span class="line">└── Test</span><br><span class="line">    ├── __init__.py</span><br><span class="line">    ├── settings.py</span><br><span class="line">    ├── urls.py</span><br><span class="line">    ├── wsgi.py</span><br></pre></td></tr></table></figure>
-<p>大的Test文件就是整个项目，MyApp就是一个项目(网站)，小的Test就是项目的配置文件，包括项目的基本配置(setting.py)，以及url映射文件(urls.py)。</p>
-<h2 id="HelloWorld"><a href="#HelloWorld" class="headerlink" title="HelloWorld"></a>HelloWorld</h2><p>下面就显示一个HelloWorld。</p>
-<p>既然要显示网页，就肯定得有url到文件的映射，这个就是由项目里的urls.py文件设置：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:urf-8</span></span><br><span class="line"><span class="keyword">from</span> django.conf.urls <span class="keyword">import</span> url</span><br><span class="line"><span class="keyword">from</span> django.contrib <span class="keyword">import</span> admin</span><br><span class="line"><span class="keyword">from</span> MyApp <span class="keyword">import</span> views <span class="keyword">as</span> MyAppViews  <span class="comment"># 添加</span></span><br><span class="line"></span><br><span class="line">urlpatterns = [</span><br><span class="line">    url(<span class="string">r&#x27;^$&#x27;</span>, MyAppViews.index),  <span class="comment"># 添加</span></span><br><span class="line">    url(<span class="string">r&#x27;^admin/&#x27;</span>, admin.site.urls),</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-<p>首先得导入项目的views，然后用正则来匹配网页，r’^$’很明显就是匹配根目录。而MyAppViews.index就是对应调用的函数，这个函数就写在app&#x2F;views.py下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> django.http <span class="keyword">import</span> HttpResponse</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>(<span class="params">request</span>):</span><br><span class="line">    <span class="keyword">return</span> HttpResponse(<span class="string">u&quot;HelloWorld&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>很好理解，就是直接打印。</p>
-<p>最后启动服务，在项目根目录下输入</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python manage.py runserver 8000</span><br></pre></td></tr></table></figure>
-<p>当然，端口号8000可以省略或者指定其他的端口。</p>
-<p>这样就能在本地访问8000端口的http服务了。<br>理论上，这点东西就足以搞搞静态页面了，不过事实上，他的功能更加强大。</p>
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>之前一直都用python的多线程库(比如threading)来写一些并发的代码，后来发现其实用这个方法写的程序其实并不是真正的并行(parrallel)计算，而只是利用单个CPU进行的并发(concurrency)计算。因此，多线程也仅仅只在处理一些被频繁阻塞的程序时才会有效率上的提升，比如网络爬虫里等待http返回等；而在CPU使用密集的程序里使用多线程反而会造成效率的下降。那么为什么python不把threading库设计成并发的线程呢？这是因为python本身有一个全局翻译锁，叫GIL(Global Interpreter Lock)，这个锁的目的是让当前的python解释器在同一时间只能执行一条语句，从而保证程序的正确运行，这也就导致了一个python解释器只能并发处理而不能并行处理。那么，如果想并行的执行代码，显然需要开启多个python解释器，这也就不是多线程，而是多进程了，因此python在多线程库里并不支持多核处理，而是在多进程库(multiprocessing)里支持多核处理。</p>
+<h2 id="多线程编程："><a href="#多线程编程：" class="headerlink" title="多线程编程："></a>多线程编程：</h2><p>多线程编程比较简单，主要利用threading类即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">mutex = threading.Lock()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">little_thread</span>(<span class="params">arg</span>):</span><br><span class="line">	<span class="built_in">print</span> <span class="string">&#x27;Thread %d start.&#x27;</span>%(arg)</span><br><span class="line">	mutex.acquire()</span><br><span class="line">	<span class="comment">#critical area</span></span><br><span class="line">	mutex.release()</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		arg*=arg</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>():</span><br><span class="line">	threads=[]</span><br><span class="line">	thread_num=<span class="number">4</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(thread_num):</span><br><span class="line">		t=threading.Thread(target=little_thread,args=(i,))</span><br><span class="line">		t.start()</span><br><span class="line">		threads.append(t)</span><br><span class="line">	<span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">		t.join()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">	test()</span><br></pre></td></tr></table></figure>
+<p>基本用法也就是把执行逻辑的函数传给Thread对象，并用tuple的形式传进参数，然后start就可以开始线程，最后join阻塞等待线程结束。</p>
+<p>同时，也可以自定义锁，来保护共享数据或者临界区。</p>
+<p>这里注意到我在死循环里写的不是空语句，而是一个较为复杂的计算，这是因为如果写的不是空语句，那么操作系统可能会对线程进行优化，导致效果不理想。</p>
+<p>我把上面的代码运行在一个四核的机器上，用htop工具查看各个cpu的占用情况：</p>
+<p><img src="/images/2016/12/19/1/1.png"></p>
+<p>我们发现这四个核基本只有一个核在全速运行，其他的三个核基本没有工作，这就说明了多线程其实并没有真正用到多个核。</p>
+<h2 id="多进程编程"><a href="#多进程编程" class="headerlink" title="多进程编程"></a>多进程编程</h2><p>多进程编程方法其实和多线程类似，只是需要注意多进程的各个子进程无法直接访问父进程内的公共变量（毕竟已经是一个独立的进程了，有自己的数据段）。为了解决这个问题，就需要用到一个Manager来管理共享变量：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> multiprocessing</span><br><span class="line"></span><br><span class="line"><span class="comment">#shared variable</span></span><br><span class="line">output_line=multiprocessing.Manager().<span class="built_in">list</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">little_process</span>(<span class="params">arg</span>):</span><br><span class="line">	<span class="built_in">print</span> <span class="string">&#x27;Process %d start.&#x27;</span>%(arg)</span><br><span class="line">	output_line.append(arg)</span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		<span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>():</span><br><span class="line">	processes=[]</span><br><span class="line">	process_num=<span class="number">4</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(process_num):</span><br><span class="line">		t=multiprocessing.Process(target=little_process,args=(i,))</span><br><span class="line">		t.start()</span><br><span class="line">		processes.append(t)</span><br><span class="line">	<span class="keyword">for</span> t <span class="keyword">in</span> processes:</span><br><span class="line">		t.join()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">	test()</span><br></pre></td></tr></table></figure>
+<p>这段代码跑出来的CPU使用率是这样的：</p>
+<p><img src="/images/2016/12/19/1/2.png"></p>
+<p>显然，多进程充分发挥了多核计算机的有点，对CPU密集型的程序有着极好的加速效果。</p>
+<p>附一张爽歪歪的图(话说实验室的服务器用起来还是挺爽的)：</p>
+<p><img src="/images/2016/12/19/1/3.png"></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://cenalulu.github.io/python/gil-in-python/">Python的GIL是什么鬼</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/vamei/archive/2012/10/12/2721484.html">threading和multiprocessing</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/zahuopuboss/article/details/53448741">Python多进程并发</a></p>
 
           
         
@@ -946,7 +611,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/09/javascript-prototype-chain/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/18/adb-Android-Debug-Bridge/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -965,7 +630,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/07/09/javascript-prototype-chain/" itemprop="url">js高级与面向对象之原型链</a></h2>
+                <a class="post-title-link" href="/2016/12/18/adb-Android-Debug-Bridge/" itemprop="url">adb(Android Debug Bridge，Android调试桥)常用命令</a></h2>
         
 
         <div class="post-meta">
@@ -977,8 +642,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-09T11:41:47+00:00">
-                2016-07-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-18T08:18:21+00:00">
+                2016-12-18
               </time>
             
 
@@ -1000,8 +665,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
                   </a>
                 </span>
 
@@ -1038,10 +703,10 @@
 
       
         
-          <h2 id="原型链是什么？"><a href="#原型链是什么？" class="headerlink" title="原型链是什么？"></a>原型链是什么？</h2><p>只要是对象就会有原型，那么所有的原型就会形成一个链式的结构，这个结构就称为原型链</p>
+          <p>说到 <code>ADB</code> 大家应该都不陌生，即 <code>Android Debug Bridge，Android</code> 调试桥，身为 <code>Android</code> 开发的我们，熟练使用 <code>ADB</code> 命令将会大大提升我们的开发效率， <code>ADB</code> 的命令有很多，今天就来整理下我在开发常用到的一些 ADB 命令。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/07/09/javascript-prototype-chain/#more" rel="contents">
+            <a class="btn" href="/2016/12/18/adb-Android-Debug-Bridge/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1092,7 +757,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/07/06/Git%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%85%A5%E9%97%A8/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/14/%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E4%B8%8E%E9%87%8D%E7%BB%84%E6%8A%80%E5%B7%A7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1111,7 +776,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/07/06/Git%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%85%A5%E9%97%A8/" itemprop="url">Git版本控制入门</a></h2>
+                <a class="post-title-link" href="/2016/12/14/%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E4%B8%8E%E9%87%8D%E7%BB%84%E6%8A%80%E5%B7%A7/" itemprop="url">大文件分割与重组技巧</a></h2>
         
 
         <div class="post-meta">
@@ -1123,8 +788,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-07-06T13:47:17+00:00">
-                2016-07-06
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-14T15:11:00+00:00">
+                2016-12-14
               </time>
             
 
@@ -1146,8 +811,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -1185,11 +850,24 @@
       
         
           
-            <p>最近看了很多大牛的博客，感觉在迷迷糊糊的考试周里突然又有了学习的动力，不知不觉对工程也有了兴趣。以前总是怀疑我是不是不应该学软件工程而是该学计算机科学，现在想想但是还真是naive。虽然身边的那些师兄、同学都说搞工程什么的特别low（感觉我以前内心深处也是这么想的0.0），但是仔细看了看他们自己似乎也没有什么特别大的成果。我总觉得肚子里越是没有干货的人就越是喜欢对自己稍微了解的领域评头论足。当然，说实话我对Software Engineering这个行当也不是很了解，而且感觉同专业里大多数人了解的应该不会比我多多少，但是这并不是止步不前的借口。且不说知乎上那些大一就能够经济独立的同学，或者是已经工作了的博主，就是身边也有很多取得出色成就的牛人。马上大三了，还有很多路要走。真正搞代码的人虽说从骨子里都有种傲气，但是我们也都清楚真正的力量和自己的藐小。总觉得乔帮主对干咱们这个行当的人总结的特别好，stay hungry，stay foolish.</p>
-<p>屁话撸多了，言归正传，既然要搞工程，首先肯定得会搬砖。所谓搬砖嘛，也就是把建筑材料拼拼补补，一点一点的堆起来，最后弄成个小房子。这件事本身其实没有什么问题，一个小房子自己搞搞也能弄完，出了问题也没人推，自己的设计自己也清楚。但是如果是盖大房子呢，这肯定就不能是一个人就能搞定的了，得有很多人一起弄，那么这就有些麻烦了。搞不好就是你碰了我的砖，我动了你的砖，出了问题我也可以说这块砖不是我搬的等等很麻烦。这就引出了版本控制的重要性，现在几乎所有的项目都是用版本控制和仓储工具的，存在的意义也没什么好争辩的了。在这当中我想最出名的就是Github了，不过Github也只是git版本控制的一个仓储平台，类似的平台还有很多，比如oschina里的git（吐槽下github的网络不稳定，感觉oschina才是比较实用的东西。。。），最终用的是git版本控制方法。而git也只是各种版本控制和仓储工具的一种，还有很多类似SVN、CVS等，不过git应该算是最流行的了。</p>
-<p>对于git的安装、使用和它的优点以及细节，<a target="_blank" rel="noopener" href="http://iissnan.com/progit/">Pro Git</a>这本书已经写的非常好了，可以作为教程学习（比那些上来就写命令的菜鸟教程好多了）。这个书的来源也十分值得研究<code>https://github.com/progit/progit</code>，搭建这个阅读环境的方法也十分漂亮。</p>
-<p>具体的操作也就不提了，书上写的已经是非常好了，有问题直接查阅。</p>
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>由于各种不同的问题，我们经常会遇到需要将一个大文件分割存储的问题。比如github里单个文件大小一般不能超过100M、比如FAT32文件系统里单个文件大小不能超过4G，比如我们想把某一个数据文件分割存储和查看，比如对日志文件进行分割保存等等。</p>
+<p>在ubuntu下，这个工作其实相当简单，只需要牵涉到两个命令:split、cat.</p>
+<h2 id="文件分割–split"><a href="#文件分割–split" class="headerlink" title="文件分割–split"></a>文件分割–split</h2><p>split命令用来将一个大文件分割成多个小文件，可以固定大小分割(常用于分割二进制文件)，还可以固定行数分割(常用于分割文本文件)。</p>
+<p><strong>按行分割</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ split -l 10 data subdata-</span><br><span class="line">$ ls</span><br><span class="line">data subdata-ab  subdata-ad  subdata-af  subdata-ah  subdata-aa  subdata-ac  subdata-ae  subdata-ag</span><br></pre></td></tr></table></figure>
+<p>-l参数指定每个文件的行数，然后带分割的数据文件，以及分割后重新命名的文件前缀。默认分割出的文件是固定前缀加字典序，这样也是为了方便重组是不扰乱顺序。</p>
+<p><strong>按大小分割</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ split -b 10M data subdata-</span><br></pre></td></tr></table></figure>
+<p>-b参数指定用二进制分割，也就是指定文件大小，剩下的与按行分割类似。</p>
+<p><strong>用数字后缀</strong></p>
+<p>如果不喜欢英文字母后缀，我们可以用-d参数表示我们期望用数字来表示顺序。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ split -d -l 10 data subdata-</span><br><span class="line">$ ls</span><br><span class="line">data  subdata-00  subdata-01  subdata-02  subdata-03  subdata-04</span><br></pre></td></tr></table></figure>
 
+<h2 id="文件重组–cat"><a href="#文件重组–cat" class="headerlink" title="文件重组–cat"></a>文件重组–cat</h2><p>一直以为cat就是用来显示文件的。。其实cat本来的用途就是文件的组合。</p>
+<p>对于用split命令生成的以subdata-为固定前缀的文件:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">subdata-00  subdata-01  subdata-02  subdata-03  subdata-04</span><br></pre></td></tr></table></figure>
+<p>我们可以非常方便的用cat命令进行组合，而不影响文件顺序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat subdata-* &gt;data</span><br></pre></td></tr></table></figure>
           
         
       
@@ -1237,7 +915,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/25/%E5%A5%BD%E5%8A%A8%E6%A0%A1%E5%9B%AD%E7%90%86%E8%AE%BA%E8%80%83%E8%AF%95%E7%A0%B4%E8%A7%A32-2/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/12/Node-part2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1256,7 +934,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/06/25/%E5%A5%BD%E5%8A%A8%E6%A0%A1%E5%9B%AD%E7%90%86%E8%AE%BA%E8%80%83%E8%AF%95%E7%A0%B4%E8%A7%A32-2/" itemprop="url">好动校园理论考试破解(2/2)</a></h2>
+                <a class="post-title-link" href="/2016/12/12/Node-part2/" itemprop="url">Node第二部分-模块及工具</a></h2>
         
 
         <div class="post-meta">
@@ -1268,8 +946,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-25T10:37:59+00:00">
-                2016-06-25
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-12T01:12:32+00:00">
+                2016-12-12
               </time>
             
 
@@ -1291,8 +969,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
+                  <a href="/categories/Node/" itemprop="url" rel="index">
+                    <span itemprop="name">Node</span>
                   </a>
                 </span>
 
@@ -1329,13 +1007,14 @@
 
       
         
-          
-            <p>现在已经分析清楚了，就这么点玩意，照着之前分析出来的接口用python写个小脚本就行了。</p>
-<p>hack.py</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> urllib2,cookielib,urllib,json,sys,time</span><br><span class="line"></span><br><span class="line">login_system_url=<span class="string">&quot;http://appsrv.ihodoo.com/login&quot;</span></span><br><span class="line">login_exam_url=<span class="string">&quot;http://appsrv.ihodoo.com/auth/exam/enterIndex?&quot;</span></span><br><span class="line">get_paper_url=<span class="string">&quot;http://appsrv.ihodoo.com/auth/exam/start/&quot;</span></span><br><span class="line">solve_question_url=<span class="string">&quot;http://appsrv.ihodoo.com/auth/exam/select/&quot;</span></span><br><span class="line">submit_paper_url=<span class="string">&quot;http://appsrv.ihodoo.com/auth/exam/submit/&quot;</span></span><br><span class="line">data=&#123;&#125;</span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Mozilla/5.0 (Linux; U; Android 2.3.7; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">login_system</span>(<span class="params">username,password</span>):</span><br><span class="line">	request=urllib2.urlopen(login_system_url,urllib.urlencode(&#123;<span class="string">&quot;username&quot;</span>:username,<span class="string">&quot;password&quot;</span>:password&#125;))</span><br><span class="line">	content=request.read()</span><br><span class="line">	response=json.loads(content)</span><br><span class="line">	data[<span class="string">&quot;uid&quot;</span>]=<span class="built_in">str</span>(response[<span class="string">&quot;uid&quot;</span>])<span class="comment">#用户名</span></span><br><span class="line">	data[<span class="string">&quot;sno&quot;</span>]=<span class="built_in">str</span>(response[<span class="string">&quot;sno&quot;</span>])<span class="comment">#学号</span></span><br><span class="line">	data[<span class="string">&quot;token&quot;</span>]=<span class="built_in">str</span>(response[<span class="string">&quot;token&quot;</span>])<span class="comment">#token</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">login_exam</span>():</span><br><span class="line">	url=login_exam_url+<span class="string">&quot;uid=&quot;</span>+data[<span class="string">&quot;uid&quot;</span>]+<span class="string">&quot;&amp;token=&quot;</span>+data[<span class="string">&quot;token&quot;</span>]</span><br><span class="line">	request=urllib2.urlopen(url)</span><br><span class="line">	content=request.read()</span><br><span class="line">	response=json.loads(content)</span><br><span class="line">	data[<span class="string">&quot;id&quot;</span>]=<span class="built_in">str</span>(response[<span class="string">&quot;id&quot;</span>])<span class="comment">#某编号</span></span><br><span class="line">	data[<span class="string">&quot;totalSubCount&quot;</span>]=<span class="built_in">str</span>(response[<span class="string">&quot;totalSubCount&quot;</span>])<span class="comment">#题数</span></span><br><span class="line">	data[<span class="string">&quot;examPaperId&quot;</span>]=<span class="built_in">str</span>(response[<span class="string">&quot;examPaperId&quot;</span>])<span class="comment">#试卷编号</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_paper</span>():</span><br><span class="line">	url=get_paper_url+data[<span class="string">&quot;id&quot;</span>]+<span class="string">&quot;/&quot;</span>+data[<span class="string">&quot;examPaperId&quot;</span>]+<span class="string">&quot;?uid=&quot;</span>+data[<span class="string">&quot;uid&quot;</span>]+<span class="string">&quot;&amp;token=&quot;</span>+data[<span class="string">&quot;token&quot;</span>]+<span class="string">&quot;&amp;totalCount=&quot;</span>+data[<span class="string">&quot;totalSubCount&quot;</span>]</span><br><span class="line">	request=urllib2.urlopen(url)</span><br><span class="line">	content=request.read()</span><br><span class="line">	response=json.loads(content)</span><br><span class="line">	ans=response[<span class="string">&quot;dtos&quot;</span>]</span><br><span class="line">	<span class="keyword">for</span> question <span class="keyword">in</span> ans:</span><br><span class="line">		subId=<span class="built_in">str</span>(question[<span class="string">&quot;subId&quot;</span>])</span><br><span class="line">		answers=question[<span class="string">&quot;answers&quot;</span>]</span><br><span class="line">		option=<span class="string">&quot;&quot;</span></span><br><span class="line">		<span class="keyword">for</span> opt <span class="keyword">in</span> answers:</span><br><span class="line">			option+=<span class="string">&quot;,&quot;</span>+opt[<span class="string">&quot;optionValue&quot;</span>]</span><br><span class="line">		option=option[<span class="number">1</span>:<span class="built_in">len</span>(option)]</span><br><span class="line">		<span class="comment">#time.sleep(10) 如果每道题需要做10秒。。。</span></span><br><span class="line">		solve_question(subId,option)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">solve_question</span>(<span class="params">subId,option</span>):</span><br><span class="line">	url=solve_question_url+data[<span class="string">&quot;examPaperId&quot;</span>]+<span class="string">&quot;/&quot;</span>+subId+<span class="string">&quot;?selectOptions=&quot;</span>+option+<span class="string">&quot;&amp;token=&quot;</span>+data[<span class="string">&quot;token&quot;</span>]+<span class="string">&quot;&amp;uid=&quot;</span>+data[<span class="string">&quot;uid&quot;</span>]</span><br><span class="line">	urllib2.urlopen(url)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">submit_paper</span>():</span><br><span class="line">	url=submit_paper_url+data[<span class="string">&quot;examPaperId&quot;</span>]+<span class="string">&quot;?uid=&quot;</span>+data[<span class="string">&quot;uid&quot;</span>]+<span class="string">&quot;&amp;token=&quot;</span>+data[<span class="string">&quot;token&quot;</span>]</span><br><span class="line">	request=urllib2.urlopen(url)</span><br><span class="line">	content=request.read()</span><br><span class="line">	response=json.loads(content)</span><br><span class="line">	<span class="built_in">print</span> <span class="string">&quot;Your score is &quot;</span>+<span class="built_in">str</span>(response[<span class="string">&quot;score&quot;</span>])+<span class="string">&quot; !&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="string">&#x27;__main__&#x27;</span>==__name__:</span><br><span class="line">    login_system(sys.argv[<span class="number">1</span>],sys.argv[<span class="number">2</span>])</span><br><span class="line">    login_exam()</span><br><span class="line">    get_paper()</span><br><span class="line">    submit_paper()</span><br></pre></td></tr></table></figure>
-<p>最后执行<code>python hack.py &lt;账号&gt; &lt;密码&gt;</code> 即可。不出意外的话，几秒钟之后就会显示<code>Your score is 100 !</code> 了。</p>
-
-          
+          <p>为了让 <code>NodeJs</code> 的文件可以相互调用，<code>NodeJs</code> 提供了一个简单的模块系统。<br>模块是 <code>NodeJs</code> 应用程序的基本组成部分，文件和模块是一一对应的。换言之，一个 <code>NodeJs</code> 文件就是一个模块，这个文件可能是 <code>JavaScript</code> 代码、<code>JSON</code> 或者编译过的 <code>C/C++</code> 扩展。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/12/12/Node-part2/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1382,7 +1061,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/25/%E5%A5%BD%E5%8A%A8%E6%A0%A1%E5%9B%AD%E7%90%86%E8%AE%BA%E8%80%83%E8%AF%95%E7%A0%B4%E8%A7%A31-2/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/10/Node-part1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1401,7 +1080,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/06/25/%E5%A5%BD%E5%8A%A8%E6%A0%A1%E5%9B%AD%E7%90%86%E8%AE%BA%E8%80%83%E8%AF%95%E7%A0%B4%E8%A7%A31-2/" itemprop="url">好动校园理论考试破解(1/2)</a></h2>
+                <a class="post-title-link" href="/2016/12/10/Node-part1/" itemprop="url">Node第一部分-初体验</a></h2>
         
 
         <div class="post-meta">
@@ -1413,8 +1092,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-25T10:28:04+00:00">
-                2016-06-25
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-10T02:31:09+00:00">
+                2016-12-10
               </time>
             
 
@@ -1436,8 +1115,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
+                  <a href="/categories/Node/" itemprop="url" rel="index">
+                    <span itemprop="name">Node</span>
                   </a>
                 </span>
 
@@ -1474,39 +1153,19 @@
 
       
         
-          
-            <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>不知道从什么时候开始，学校的体育理论考试搞成了下载一个app然后在这上面考。。。本来觉得没什么，然后突然爆出这个app有一坨bug，安卓端多选题只能提交一个答案(后来发现原因是多选题提交答案时的while循环里多写了一个break。。。)，导致分数奇低。虽然后来做了一个紧急修复，但从这也能看出开发人员的尿性。。。再后来，有个专门搞app的同学说他能够刷到满分，我稍微想了下，这种考试型app的逻辑能够被破解，无非有两个方法：第一种就是记录所有模拟题库中的题目和答案，然后比对考题进行提交；第二种就是他在把题目发送过来的时候顺带把答案也发送过来了，然后在本地做的成绩校验，最后把结果发回服务器。后来实际操作了下，发现app中的题库在考试阶段是关闭的，那么只就剩下第二种可能了。不得不说开发的同行们也是人才，发送考试卷子还会把答案发过来，而且报文还是明文未加密的，这不是成心勾人犯罪么。。。</p>
-<p>这样，思路有了，下面就是操作了。说白了，我们需要做的就是抓包分析，分析他前后台传送的http报文，然后模拟考试。</p>
-<h2 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h2><p>跟抓网页不一样，这次是抓手机的包，那么就需要用电脑来代理手机的网络，具体做法详见<a target="_blank" rel="noopener" href="http://jingyan.baidu.com/article/c1465413a1e2b00bfdfc4c71.html">Fiddler代理如何配置</a>。这里讲的很清楚了，不过需要注意的是默认的端口8888可能会被一些程序占用，无法使用的时候换一个端口号即可。</p>
-<p>当然首先电脑跟手机得是一个局域网，我这里当然是校园网。</p>
-<p>顺便提一句，这个方法还可以用一个网关登陆N多个终端。。。不过目测是分享带宽的。。。</p>
-<p>代理配置好之后，打开app，考一次试（这将浪费一次考试机会），记录下fiddler抓到的报文：</p>
-<h2 id="一、登陆"><a href="#一、登陆" class="headerlink" title="一、登陆"></a>一、登陆</h2><p><strong>request</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">POST http://appsrv.ihodoo.com/login HTTP/1.1</span><br><span class="line">If-Modified-Since: Sat, 18 Jun 2016 03:36:12 GMT+00:00</span><br><span class="line">Content-Type: application/x-www-form-urlencoded; charset=UTF-8</span><br><span class="line">User-Agent: Dalvik/2.1.0 (Linux; U; Android 5.1.1; Mi-4c MIUI/V7.3.2.0.LXKCNDD)</span><br><span class="line">Host: appsrv.ihodoo.com</span><br><span class="line">Connection: Keep-Alive</span><br><span class="line">Accept-Encoding: gzip</span><br><span class="line">Content-Length: 46</span><br><span class="line"></span><br><span class="line">username=17751129083&amp;password=***************   (密码不给看)</span><br></pre></td></tr></table></figure>
-<p><strong>respond</strong></p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;uid&quot;</span><span class="punctuation">:</span><span class="string">&quot;17751129083&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;user_id&quot;</span><span class="punctuation">:</span><span class="number">39052</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;sno&quot;</span><span class="punctuation">:</span><span class="string">&quot;1427406034&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;portalUserId&quot;</span><span class="punctuation">:</span><span class="number">115982</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;isBindSchool&quot;</span><span class="punctuation">:</span><span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;isMasterMass&quot;</span><span class="punctuation">:</span><span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;loginStatus&quot;</span><span class="punctuation">:</span><span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;bindDto&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span></span><br><span class="line">				<span class="attr">&quot;sno&quot;</span><span class="punctuation">:</span><span class="string">&quot;1427406034&quot;</span><span class="punctuation">,</span></span><br><span class="line">				<span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;丁庆祝&quot;</span><span class="punctuation">,</span></span><br><span class="line">				<span class="attr">&quot;school&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span></span><br><span class="line">							<span class="attr">&quot;id&quot;</span><span class="punctuation">:</span><span class="number">26</span><span class="punctuation">,</span></span><br><span class="line">							<span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;苏州大学&quot;</span></span><br><span class="line">						<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">				<span class="attr">&quot;schoolId&quot;</span><span class="punctuation">:</span><span class="number">26</span><span class="punctuation">,</span></span><br><span class="line">				<span class="attr">&quot;schoolName&quot;</span><span class="punctuation">:</span><span class="string">&quot;苏州大学&quot;</span><span class="punctuation">,</span></span><br><span class="line">				<span class="attr">&quot;currentAdclassId&quot;</span><span class="punctuation">:</span><span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">				<span class="attr">&quot;currentAdclassName&quot;</span><span class="punctuation">:</span><span class="string">&quot;&quot;</span></span><br><span class="line">			<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;token&quot;</span><span class="punctuation">:</span><span class="string">&quot;afa6da18-0fd2-476c-93df-4a2e3b0263eb&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-<p>登陆的过程就是把用户名密码post过去，然后他会返回给你一堆信息，这里显示了json数据部分，意思也都很清楚，尤其注意那个token。</p>
-<h2 id="二、进入考试"><a href="#二、进入考试" class="headerlink" title="二、进入考试"></a>二、进入考试</h2><p><strong>request</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET http://appsrv.ihodoo.com/auth/exam/enterIndex?uid=17751129083&amp;token=afa6da18-0fd2-476c-93df-4a2e3b0263eb HTTP/1.1</span><br></pre></td></tr></table></figure>
-<p><strong>respond</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;id&quot; : 10,</span><br><span class="line">	&quot;notices&quot; : &quot;&quot;,</span><br><span class="line">	&quot;startTime&quot; : &quot;2016年06月13日 00时05分&quot;,</span><br><span class="line">	&quot;endTime&quot; : &quot;2016年06月26日 23时55分&quot;,</span><br><span class="line">	&quot;totalSubCount&quot; : 50,</span><br><span class="line">	&quot;examPaperId&quot; : 318367,</span><br><span class="line">	&quot;examPaperName&quot; : &quot;试题来源：篮球21二年级&quot;,</span><br><span class="line">	&quot;subjectScore&quot; : 2.0,</span><br><span class="line">	&quot;studentName&quot; : &quot;丁庆祝&quot;,</span><br><span class="line">	&quot;studentSno&quot; : &quot;1427406034&quot;,</span><br><span class="line">	&quot;itemName&quot; : &quot;篮球21&quot;,</span><br><span class="line">	&quot;examMinutes&quot; : 60,</span><br><span class="line">	&quot;isAllowExam&quot; : true,</span><br><span class="line">	&quot;isDuring&quot; : true,</span><br><span class="line">	&quot;message&quot; : &quot;丁庆祝_篮球21二年级_20160614尚未交卷，请在规定的时间内完成考试！&quot;,</span><br><span class="line">	&quot;scores&quot; : &#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这是进入考试的提醒，把uid和token用Get方法传过去，他会返回你即将得到的考卷的信息，包括某编号(id)、题目数(totalSubCount)、试卷编号(examPaperId)。</p>
-<h2 id="三、获得考卷"><a href="#三、获得考卷" class="headerlink" title="三、获得考卷"></a>三、获得考卷</h2><p><strong>request</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET http://appsrv.ihodoo.com/auth/exam/start/10/318367?uid=17751129083&amp;token=afa6da18-0fd2-476c-93df-4a2e3b0263eb&amp;totalCount=50 HTTP/1.1</span><br></pre></td></tr></table></figure>
-<p><strong>respond</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;dtos&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;subName&quot;: &quot;在体育锻炼过程中，使外环境与内环境在时间上协调起来，才能达到最佳的体育锻炼效果。&quot;, </span><br><span class="line">            &quot;subId&quot;: 38667, </span><br><span class="line">            &quot;sort&quot;: 6, </span><br><span class="line">            &quot;totalCount&quot;: 50, </span><br><span class="line">            &quot;options&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 121582, </span><br><span class="line">                    &quot;optValue&quot;: &quot;A&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;√&quot;</span><br><span class="line">                &#125;, </span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 121583, </span><br><span class="line">                    &quot;optValue&quot;: &quot;B&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;×&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ], </span><br><span class="line">            &quot;answers&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;optionValue&quot;: &quot;A&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ], </span><br><span class="line">            &quot;selects&quot;: [ ], </span><br><span class="line">            &quot;isMarked&quot;: false</span><br><span class="line">        &#125;, </span><br><span class="line"></span><br><span class="line">      ......</span><br><span class="line">      ......</span><br><span class="line">      ......</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;subName&quot;: &quot;秋季的人体新陈代谢活动比较弱，对有害物质的抵抗力较低，更容易危害人体健康。&quot;, </span><br><span class="line">            &quot;subId&quot;: 38668, </span><br><span class="line">            &quot;sort&quot;: 8, </span><br><span class="line">            &quot;totalCount&quot;: 50, </span><br><span class="line">            &quot;options&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 121584, </span><br><span class="line">                    &quot;optValue&quot;: &quot;A&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;√&quot;</span><br><span class="line">                &#125;, </span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 121585, </span><br><span class="line">                    &quot;optValue&quot;: &quot;B&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;×&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ], </span><br><span class="line">            &quot;answers&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;optionValue&quot;: &quot;B&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ], </span><br><span class="line">            &quot;selects&quot;: [ ], </span><br><span class="line">            &quot;isMarked&quot;: false</span><br><span class="line">        &#125;, </span><br><span class="line">        &#123;</span><br><span class="line">            &quot;subName&quot;: &quot;从文化的视角探讨奥林匹克运动，对＿＿＿、＿＿＿、吸收奥林匹克先进文化、加强社会主义精神文明建设，具有重要意义。&quot;, </span><br><span class="line">            &quot;subId&quot;: 39050, </span><br><span class="line">            &quot;sort&quot;: 29, </span><br><span class="line">            &quot;totalCount&quot;: 50, </span><br><span class="line">            &quot;options&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 122844, </span><br><span class="line">                    &quot;optValue&quot;: &quot;A&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;A 了解奥林匹克运动&quot;</span><br><span class="line">                &#125;, </span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 122845, </span><br><span class="line">                    &quot;optValue&quot;: &quot;B&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;B 进行奥林匹克比赛&quot;</span><br><span class="line">                &#125;, </span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 122846, </span><br><span class="line">                    &quot;optValue&quot;: &quot;C&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;C 弘扬奥林匹克精神&quot;</span><br><span class="line">                &#125;, </span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;id&quot;: 122847, </span><br><span class="line">                    &quot;optValue&quot;: &quot;D&quot;, </span><br><span class="line">                    &quot;optLabel&quot;: &quot;D 开展奥林匹克教育&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ], </span><br><span class="line">            &quot;answers&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;optionValue&quot;: &quot;C&quot;</span><br><span class="line">                &#125;, </span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;optionValue&quot;: &quot;D&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ], </span><br><span class="line">            &quot;selects&quot;: [ ], </span><br><span class="line">            &quot;isMarked&quot;: false</span><br><span class="line">        &#125;</span><br><span class="line">    ], </span><br><span class="line">    &quot;message&quot;: &quot;&quot;, </span><br><span class="line">    &quot;isSuccess&quot;: true</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这是获得考卷的过程，把id、examPaperId、uid、token、totalSubCount传过去即可，得到一堆试题。。。。。。这里取三种典型题目，第一个是单选题，第二个是判断题，第三个是多选题。每道题都有题目内容，题目编号，题目顺序(由于json是不保证顺序的，因此需要有个sort来控制顺序)、题目选项、以及题目答案。。。</p>
-<h2 id="四、模拟做题"><a href="#四、模拟做题" class="headerlink" title="四、模拟做题"></a>四、模拟做题</h2><p><strong>request</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET http://appsrv.ihodoo.com/auth/exam/select/318367/38861?selectOptions=B,C&amp;token=afa6da18-0fd2-476c-93df-4a2e3b0263eb&amp;uid=17751129083</span><br></pre></td></tr></table></figure>
-<p>返回结果大概就是提交成功之类的。</p>
-<p>这个过程其实就是把每道题的id、答案加上自己的uid和token一起发过去，非常简单。</p>
-<h2 id="五、提交试卷"><a href="#五、提交试卷" class="headerlink" title="五、提交试卷"></a>五、提交试卷</h2><p><strong>request</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET http://appsrv.ihodoo.com/auth/exam/submit/318367?uid=17751129083&amp;token=afa6da18-0fd2-476c-93df-4a2e3b0263eb HTTP/1.1</span><br></pre></td></tr></table></figure>
-<p><strong>respond</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;score&quot; : 6.0,</span><br><span class="line">  &quot;times&quot; : 1,</span><br><span class="line">  &quot;totalRank&quot; : 0,</span><br><span class="line">  &quot;scoreRank&quot; : 11395,</span><br><span class="line">  &quot;message&quot; : &quot;试卷提交成功！&quot;,</span><br><span class="line">  &quot;rankMessage&quot; : &quot;您本次考试成绩还没有以前考得高，需要继续加油！&quot;,</span><br><span class="line">  &quot;isSuccess&quot; : true</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>套路跟上面一样。。。最后发现我得了6.0分。。。</p>
-
-          
+          <h2 id="NodeJs是什么？"><a href="#NodeJs是什么？" class="headerlink" title="NodeJs是什么？"></a>NodeJs是什么？</h2><blockquote>
+<p>简单的说 <code>NodeJs</code> 就是运行在服务端的 <code>JavaScript</code> 。<code>NodeJs</code> 是一个基于 <code>Chrome JavaScript</code> 运行时建立的一个平台。<code>NodeJs</code> 是一个事件驱动 <code>I/O</code> 服务端 <code>JavaScript</code> 环境，基于 <code>Google</code> 的 <code>V8</code> 引擎，<code>V8</code> 引擎执行 <code>Javascript</code> 的速度非常快，性能非常好。</p>
+</blockquote>
+<ul>
+<li>官网 <code>https://nodejs.org</code></li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/12/10/Node-part1/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1553,7 +1212,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/16/%E7%94%A8LaTeX%E8%BF%9B%E8%A1%8C%E8%AE%BA%E6%96%87%E6%8E%92%E7%89%88/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/12/01/hexo-auto-deploy-with-flow-ci/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1572,7 +1231,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/06/16/%E7%94%A8LaTeX%E8%BF%9B%E8%A1%8C%E8%AE%BA%E6%96%87%E6%8E%92%E7%89%88/" itemprop="url">用LaTeX进行论文排版</a></h2>
+                <a class="post-title-link" href="/2016/12/01/hexo-auto-deploy-with-flow-ci/" itemprop="url">用 Flow.CI 让 Hexo 持续集成</a></h2>
         
 
         <div class="post-meta">
@@ -1584,8 +1243,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-16T05:44:50+00:00">
-                2016-06-16
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-01T05:40:16+00:00">
+                2016-12-01
               </time>
             
 
@@ -1607,8 +1266,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/LaTeX/" itemprop="url" rel="index">
-                    <span itemprop="name">LaTeX</span>
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
                   </a>
                 </span>
 
@@ -1645,18 +1304,14 @@
 
       
         
-          
-            <p>都知道写文档论文之类的肯定是用LaTeX比较漂亮，虽然我对用LaTeX写数学公式稍微有点了解，但是还是没有直接用它来排版。下面就整理下用LaTeX写文档的方法。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>最常用的LaTeX排版工具是<a target="_blank" rel="noopener" href="http://www.miktex.org/download">MikTeX</a>。选择好windows版本，下载安装即可。可执行文件是<code>%install_path%/miktex/bin/x64/texworks.exe</code>。</p>
-<h2 id="论文模板"><a href="#论文模板" class="headerlink" title="论文模板"></a>论文模板</h2><p>这里的格式通常是在网上找模板。。。毕竟自己弄还是挺麻烦的，而且还要考虑中文编码的问题。我找到的模板如下：(用pdfLaTeX+MakeIndex+BibTex编译)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line">\documentclass[a4paper, 11pt]&#123;article&#125;</span><br><span class="line"></span><br><span class="line">%%%%%% 导入包 %%%%%%</span><br><span class="line">\usepackage&#123;CJKutf8&#125;</span><br><span class="line">\usepackage&#123;graphicx&#125;</span><br><span class="line">\usepackage[unicode]&#123;hyperref&#125;</span><br><span class="line">\usepackage&#123;xcolor&#125;</span><br><span class="line">\hypersetup&#123;hidelinks&#125;%%%取消链接的红框框%%%%</span><br><span class="line"></span><br><span class="line">\usepackage&#123;indentfirst&#125;</span><br><span class="line"></span><br><span class="line">%%%%%% 设置字号 %%%%%%</span><br><span class="line">\newcommand&#123;\chuhao&#125;&#123;\fontsize&#123;42pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\xiaochuhao&#125;&#123;\fontsize&#123;36pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\yihao&#125;&#123;\fontsize&#123;28pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\erhao&#125;&#123;\fontsize&#123;21pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\xiaoerhao&#125;&#123;\fontsize&#123;18pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\sanhao&#125;&#123;\fontsize&#123;15.75pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\sihao&#125;&#123;\fontsize&#123;14pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\xiaosihao&#125;&#123;\fontsize&#123;12pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\wuhao&#125;&#123;\fontsize&#123;10.5pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\xiaowuhao&#125;&#123;\fontsize&#123;9pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\liuhao&#125;&#123;\fontsize&#123;7.875pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line">\newcommand&#123;\qihao&#125;&#123;\fontsize&#123;5.25pt&#125;&#123;\baselineskip&#125;\selectfont&#125;</span><br><span class="line"></span><br><span class="line">%%%% 设置 section 属性 %%%%</span><br><span class="line">\makeatletter</span><br><span class="line">\renewcommand\section&#123;\@startsection&#123;section&#125;&#123;1&#125;&#123;\z@&#125;%</span><br><span class="line">&#123;-1.5ex \@plus -.5ex \@minus -.2ex&#125;%</span><br><span class="line">&#123;.5ex \@plus .1ex&#125;%</span><br><span class="line">&#123;\normalfont\sihao\CJKfamily&#123;hei&#125;&#125;&#125;</span><br><span class="line">\makeatother</span><br><span class="line"></span><br><span class="line">%%%% 设置 subsection 属性 %%%%</span><br><span class="line">\makeatletter</span><br><span class="line">\renewcommand\subsection&#123;\@startsection&#123;subsection&#125;&#123;1&#125;&#123;\z@&#125;%</span><br><span class="line">&#123;-1.25ex \@plus -.5ex \@minus -.2ex&#125;%</span><br><span class="line">&#123;.4ex \@plus .1ex&#125;%</span><br><span class="line">&#123;\normalfont\xiaosihao\CJKfamily&#123;hei&#125;&#125;&#125;</span><br><span class="line">\makeatother</span><br><span class="line"></span><br><span class="line">%%%% 设置 subsubsection 属性 %%%%</span><br><span class="line">\makeatletter</span><br><span class="line">\renewcommand\subsubsection&#123;\@startsection&#123;subsubsection&#125;&#123;1&#125;&#123;\z@&#125;%</span><br><span class="line">&#123;-1ex \@plus -.5ex \@minus -.2ex&#125;%</span><br><span class="line">&#123;.3ex \@plus .1ex&#125;%</span><br><span class="line">&#123;\normalfont\xiaosihao\CJKfamily&#123;hei&#125;&#125;&#125;</span><br><span class="line">\makeatother</span><br><span class="line"></span><br><span class="line">%%%% 段落首行缩进两个字 %%%%</span><br><span class="line">\makeatletter</span><br><span class="line">\let\@afterindentfalse\@afterindenttrue</span><br><span class="line">\@afterindenttrue</span><br><span class="line">\makeatother</span><br><span class="line">\setlength&#123;\parindent&#125;&#123;2em&#125;  %中文缩进两个汉字位</span><br><span class="line"></span><br><span class="line">%%%% 下面的命令重定义页面边距，使其符合中文刊物习惯 %%%%</span><br><span class="line">\addtolength&#123;\topmargin&#125;&#123;-54pt&#125;</span><br><span class="line">\setlength&#123;\oddsidemargin&#125;&#123;0.63cm&#125;  % 3.17cm - 1 inch</span><br><span class="line">\setlength&#123;\evensidemargin&#125;&#123;\oddsidemargin&#125;</span><br><span class="line">\setlength&#123;\textwidth&#125;&#123;14.66cm&#125;</span><br><span class="line">\setlength&#123;\textheight&#125;&#123;24.00cm&#125;    % 24.62</span><br><span class="line"></span><br><span class="line">%%%% 下面的命令设置行间距与段落间距 %%%%</span><br><span class="line">\linespread&#123;1.4&#125;</span><br><span class="line">% \setlength&#123;\parskip&#125;&#123;1ex&#125;</span><br><span class="line">\setlength&#123;\parskip&#125;&#123;0.5\baselineskip&#125;</span><br><span class="line"></span><br><span class="line">%%%% 正文开始 %%%%</span><br><span class="line">\begin&#123;document&#125;</span><br><span class="line">\begin&#123;CJK&#125;&#123;UTF8&#125;&#123;gbsn&#125;</span><br><span class="line"></span><br><span class="line">%%%% 定理类环境的定义 %%%%</span><br><span class="line">\newtheorem&#123;example&#125;&#123;例&#125;             % 整体编号</span><br><span class="line">\newtheorem&#123;algorithm&#125;&#123;算法&#125;</span><br><span class="line">\newtheorem&#123;theorem&#125;&#123;定理&#125;[section]  % 按 section 编号</span><br><span class="line">\newtheorem&#123;definition&#125;&#123;定义&#125;</span><br><span class="line">\newtheorem&#123;axiom&#125;&#123;公理&#125;</span><br><span class="line">\newtheorem&#123;property&#125;&#123;性质&#125;</span><br><span class="line">\newtheorem&#123;proposition&#125;&#123;命题&#125;</span><br><span class="line">\newtheorem&#123;lemma&#125;&#123;引理&#125;</span><br><span class="line">\newtheorem&#123;corollary&#125;&#123;推论&#125;</span><br><span class="line">\newtheorem&#123;remark&#125;&#123;注解&#125;</span><br><span class="line">\newtheorem&#123;condition&#125;&#123;条件&#125;</span><br><span class="line">\newtheorem&#123;conclusion&#125;&#123;结论&#125;</span><br><span class="line">\newtheorem&#123;assumption&#125;&#123;假设&#125;</span><br><span class="line"></span><br><span class="line">%%%% 重定义 %%%%</span><br><span class="line">\renewcommand&#123;\contentsname&#125;&#123;目录&#125;  % 将Contents改为目录</span><br><span class="line">\renewcommand&#123;\abstractname&#125;&#123;摘要&#125;  % 将Abstract改为摘要</span><br><span class="line">\renewcommand&#123;\refname&#125;&#123;参考文献&#125;   % 将References改为参考文献</span><br><span class="line">\renewcommand&#123;\indexname&#125;&#123;索引&#125;</span><br><span class="line">\renewcommand&#123;\figurename&#125;&#123;图&#125;</span><br><span class="line">\renewcommand&#123;\tablename&#125;&#123;表&#125;</span><br><span class="line">\renewcommand&#123;\appendixname&#125;&#123;附录&#125;</span><br><span class="line">\renewcommand&#123;\algorithm&#125;&#123;算法&#125;</span><br><span class="line"></span><br><span class="line">%%%% 定义标题格式，包括title，author，affiliation，email等 %%%%</span><br><span class="line">\title&#123;功能说明&#125;</span><br><span class="line">\author&#123;丁庆祝\footnote&#123;电子邮件：dqz48548263@qq.com，博客：\url&#123;http://blog.mythsman.com&#125;&#125;\\[2ex]%链接、注解%</span><br><span class="line">\xiaosihao 苏州大学 2014级计算机学院\\[2ex]</span><br><span class="line">&#125;</span><br><span class="line">\date&#123;2016年6月&#125;</span><br><span class="line"></span><br><span class="line">%%%% 以下部分是正文 %%%%</span><br><span class="line">\maketitle</span><br><span class="line">\tableofcontents</span><br><span class="line">\newpage</span><br><span class="line"></span><br><span class="line">--这里是正文--</span><br><span class="line"></span><br><span class="line">\newpage%这个newpage很重要，不加的话可能会莫名报错...%</span><br><span class="line">\end&#123;CJK&#125;</span><br><span class="line">\end&#123;document&#125;</span><br></pre></td></tr></table></figure>
-<p>这主要是写中文文档的配置，当然他会提醒你下载一些包，照做即可。</p>
-<h2 id="基本格式"><a href="#基本格式" class="headerlink" title="基本格式"></a>基本格式</h2><p>其实，通常使用的时候，我们最需要的操作只是对文章进行分章节：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">\section&#123;Section&#125;</span><br><span class="line">Section content</span><br><span class="line">\subsection&#123;Subsection&#125;</span><br><span class="line">Subsection content</span><br><span class="line">\subsubsection&#123;Subsubsection&#125;</span><br><span class="line">Subsubsection content</span><br><span class="line">\paragraph&#123;paragraph&#125;</span><br><span class="line">Paragraph content</span><br><span class="line">\subparagraph&#123;subparagraph&#125;</span><br><span class="line">subparagraph content</span><br></pre></td></tr></table></figure>
-<p>效果大概是这样：</p>
-<p><img src="/images/2016/06/16/1/1.png"><br><img src="/images/2016/06/16/1/2.png"></p>
-
-          
+          <p><a target="_blank" rel="noopener" href="https://flow.ci/">Flow.CI</a> 是一个由著名移动应用公测平台 <a target="_blank" rel="noopener" href="https://fir.im/">Fir.im</a> 推出的持续集成（CI）的 saas 服务平台，感觉就是中国的 Travis.CI，作用是把你 Github 或者 Coding 上的代码拉过来，通过容器技术自动化完成代码的构建、测试、交付和部署。整个对 Flow.CI 使用下来的感受就是简洁和美观，配置方便，速度很快。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/12/01/hexo-auto-deploy-with-flow-ci/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1703,7 +1358,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/06/15/javascript-inherit/">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/11/29/hexo-auto-deploy-with-daocloud/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1722,7 +1377,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/06/15/javascript-inherit/" itemprop="url">js高级与面向对象之继承</a></h2>
+                <a class="post-title-link" href="/2016/11/29/hexo-auto-deploy-with-daocloud/" itemprop="url">使用 DaoCloud 让 Hexo 持续集成</a></h2>
         
 
         <div class="post-meta">
@@ -1734,8 +1389,303 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-15T05:43:28+00:00">
-                2016-06-15
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-29T12:51:00+00:00">
+                2016-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
+                    <span itemprop="name">博客栈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>用 Hexo 搭建好博客，使用起来算方便，而且静态页面使用起来很方便，但是每次还要在安装了 Hexo 环境的机器上才能写文章和发布。能不能在任何地方只要新增或修改了 post 就自动生成并部署 hexo 呢？</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/11/29/hexo-auto-deploy-with-daocloud/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/11/27/use-tools-part1-markdown/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/11/27/use-tools-part1-markdown/" itemprop="url">工具使用篇之Markdown</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-27T02:35:12+00:00">
+                2016-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Markdown/" itemprop="url" rel="index">
+                    <span itemprop="name">Markdown</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="Markdown-介绍"><a href="#Markdown-介绍" class="headerlink" title="Markdown 介绍"></a>Markdown 介绍</h2><ul>
+<li><em>Markdown</em> 是一个 <strong>轻量级  高效率</strong> 的标记语言</li>
+<li>轻量级标记语言，<code>2004</code> 年被 <code>John Gruber</code> 创造， 它允许人们“使用易读易写的纯文本格式编写文档”， Markdown 最重要的设计就是可读性， Markdown 可以选择性的转换为 <code>HTML</code> 文档格式， 很多网站目前都使用了 <code>Markdown</code> 或者其变种，例如 <code>Github</code> 、简书等大型社区。</li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/11/27/use-tools-part1-markdown/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/11/25/javascript-jquery-part7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/11/25/javascript-jquery-part7/" itemprop="url">JQuery分析及实现part7之 Ajax 模块功能及实现</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-25T13:31:12+00:00">
+                2016-11-25
               </time>
             
 
@@ -1795,10 +1745,10 @@
 
       
         
-          <p>一个对象没有某些属性和方法，另一个对象有，拿过来使用，就是继承</p>
+          <p>JQuery模块分析及其实现第七部分 Ajax 部分功能及实现,接第六部分!</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/06/15/javascript-inherit/#more" rel="contents">
+            <a class="btn" href="/2016/11/25/javascript-jquery-part7/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -1840,7 +1790,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/33/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><span class="page-number current">34</span><a class="page-number" href="/page/35/">35</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/35/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/33/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><span class="page-number current">34</span><a class="page-number" href="/page/35/">35</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/35/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1886,7 +1836,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">507</span>
+                  <span class="site-state-item-count">565</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1908,7 +1858,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">255</span>
+                  <span class="site-state-item-count">275</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

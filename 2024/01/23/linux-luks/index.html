@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<meta name="baidu-site-verification" content="codeva-Ss7c9LFzfb" />
+<meta name="bytedance-verification-code" content="GHbi5zMz8c6TSVpY9rLD" />
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ubuntu,加密," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Linux内核自带的磁盘分区加密，与Android的dm-crypt同样方便。 编程随想曾经介绍过LUKS和VeraCrypt，博主把两者都测试了一下，写下LUKS的使用方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux下分区加密LUKS">
+<meta property="og:url" content="https://www.resonanat.com/2024/01/23/linux-luks/index.html">
+<meta property="og:site_name" content="Resive world">
+<meta property="og:description" content="Linux内核自带的磁盘分区加密，与Android的dm-crypt同样方便。 编程随想曾经介绍过LUKS和VeraCrypt，博主把两者都测试了一下，写下LUKS的使用方法。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-01-23T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-31T02:55:19.782Z">
+<meta property="article:author" content="Companyd">
+<meta property="article:tag" content="ubuntu">
+<meta property="article:tag" content="加密">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://www.resonanat.com/2024/01/23/linux-luks/"/>
+
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4636539228226058"
+     crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-67H9TCZZ7N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-67H9TCZZ7N');
+</script>
+
+
+  <title>Linux下分区加密LUKS | Resive world</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 7.1.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Resive world</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Come world to Record life</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            Sitemap
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2024/01/23/linux-luks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux下分区加密LUKS</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-01-23T00:00:00+00:00">
+                2024-01-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Linux内核自带的磁盘分区加密，与Android的dm-crypt同样方便。</p>
+<p>编程随想曾经介绍过LUKS和VeraCrypt，博主把两者都测试了一下，写下LUKS的使用方法。</p>
+<span id="more"></span>
+<h2 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h2><p>假设要在&#x2F;dev&#x2F;sda2上进行创建，创建过程会格式化该分区。验证密码的方式常用有两种：密码和key-file</p>
+<h3 id="使用密码创建"><a href="#使用密码创建" class="headerlink" title="使用密码创建"></a>使用密码创建</h3><pre><code>sudo cryptsetup luksFormat /dev/sda2
+</code></pre>
+<p>创建过程输入大写YES确认格式化分区，然后输入密码。</p>
+<h3 id="使用key-file创建"><a href="#使用key-file创建" class="headerlink" title="使用key-file创建"></a>使用key-file创建</h3><p>生成一个随机数二进制文件（熵较大的随机数适合做key-file，普通文本熵较小,因此比纯密码要安全）</p>
+<p>以生成一个64K的文件（&#x2F;tmp&#x2F;MyKey.bin）为例，为安全起见不要小于1KB。妥善保管，丢后无法打开加密分区。</p>
+<pre><code>dd if=/dev/urandom of=/tmp/MyKey.bin bs=1k count=64
+</code></pre>
+<p>创建LUKS分区，此时指定Key-file</p>
+<pre><code>sudo cryptsetup --key-file /tmp/MyKey.bin luksFormat /dev/sda2
+</code></pre>
+<h2 id="挂载、卸载分区"><a href="#挂载、卸载分区" class="headerlink" title="挂载、卸载分区"></a>挂载、卸载分区</h2><p>创建后，挂载加密分区</p>
+<pre><code># 密码
+sudo cryptsetup luksOpen /dev/sda2 xxx
+
+# key-file
+sudo cryptsetup luksOpen /dev/sda2 --key-file /tmp/MyKey.bin xxx
+</code></pre>
+<p>xxx为&#x2F;dev&#x2F;mapper下将要创建的文件名，可以随意设置。当解密成功后可以直接操作&#x2F;dev&#x2F;mapper&#x2F;xxx这个块设备，而不是操作&#x2F;dev&#x2F;sda2。</p>
+<p>实际上系统会自动创建软链接到&#x2F;dev&#x2F;dm-yyy（yyy是数字），指向&#x2F;dev&#x2F;mapper&#x2F;xxx这个块设备（。</p>
+<p>若第一次挂载前，需要格式化这个分区，设置卷标（可选操作）</p>
+<pre><code>sudo mkfs.ext4 /dev/mapper/xxx
+sudo e2label /dev/mapper/xxx &quot;my-private&quot;
+</code></pre>
+<p>挂载该分区</p>
+<pre><code>mkdir /tmp/my-priavte
+sudo mount /dev/mapper/xxx /tmp/my-priavte
+</code></pre>
+<p>若第一次挂载，记得设置恰当的访问权限，否则没权限读写啊</p>
+<pre><code>sudo chown username:username -R /tmp/my-priavte
+</code></pre>
+<p>使用完毕后，卸载分区</p>
+<pre><code>sudo umount /tmp/my-priavte
+sudo cryptsetup luksClose /dev/mapper/xxx
+</code></pre>
+<p>实测Kubuntu 18.04支持直接从资源管理器输入密码挂载加密分区。</p>
+<p>也可以自己指定在&#x2F;etc&#x2F;fstab挂载已解密的分区，不过要指定noauto方式，最终还是得手动挂载</p>
+<pre><code># 记下/dev/mapper/xxx的 UUID
+sudo blkid
+/dev/mapper/luks-0dee9fef-33c4-423e-9d4b-d39c8bd5adac: LABEL=&quot;hello&quot; UUID=&quot;7455aa01-e36f-4771-9f9b-723d786416ec&quot; TYPE=&quot;ext4&quot;
+
+# vi /etc/fstab增加一行
+UUID=7455aa01-e36f-4771-9f9b-723d786416ec /tmp/hello ext4 defaults,noauto 0 2
+</code></pre>
+<h2 id="增加、删除、修改slot"><a href="#增加、删除、修改slot" class="headerlink" title="增加、删除、修改slot"></a>增加、删除、修改slot</h2><p>LUKS具备8个slot，每个slot可以设置密码或者key-file验证。这8个slot目的就是加密master-key。</p>
+<p>格式化后的分区只有一个slot。</p>
+<p>每个“Key Slot”好比是一个独立的钥匙：都可以用来打开这个加密盘。</p>
+<p>查看当前的slot状态 显示Disabled就是尚未使用的slot</p>
+<pre><code>sudo cryptsetup luksDump /dev/sda2
+</code></pre>
+<p>增加slot：密码或者key-file，增加时候需要验证已有的slot</p>
+<pre><code># 密码方式
+sudo cryptsetup luksAddKey
+
+# key-file方式，创建一个新keyfile
+dd if=/dev/urandom of=/tmp/MyAnotherKey.bin bs=1k count=64
+# 法1: 验证原有的keyfile，再添加另一个keyfile
+sudo cryptsetup luksAddKey /tmp/MyAnotherKey.bin --key-file /tmp/MyKey.bin
+# 法2: 验证原有密码，再添加另一个keyfile
+sudo cryptsetup luksAddKey /tmp/MyAnotherKey.bin
+</code></pre>
+<p>删除slot的方法一：通过slot号码删除</p>
+<pre><code># 先记下slot的号码(0~7)，比如1
+sudo cryptsetup luksKillSlot /dev/sda2 1
+</code></pre>
+<p>删除slot的方法二：通过输入一个有效的slot验证删除</p>
+<pre><code># 输入有效密码
+sudo cryptsetup luksRemoveKey /dev/sda2
+
+# 删除一个key-file对应的slot
+sudo cryptsetup luksRemoveKey /dev/sda2 --key-file /tmp/MyAnotherKey.bin
+</code></pre>
+<p>若要删除所有slots（不需要验证密码，不可逆的毁灭性操作，只能通过恢复已备份的header来拯救）</p>
+<pre><code>sudo cryptsetup luksErase
+</code></pre>
+<p>修改slot，以下方法都可以</p>
+<pre><code># 验证原有密码，修改密码
+sudo cryptsetup luksChangeKey /dev/sda2
+#  验证原有密码，修改成另一个keyfile
+sudo cryptsetup luksChangeKey /dev/sda2 /tmp/MyAnotherKey.bin
+# 验证原有的keyfile，修改成新密码
+sudo cryptsetup luksChangeKey /dev/sda2 --key-file /tmp/MyKey.bin
+# 验证原有的keyfile，修改成另一个keyfile
+sudo cryptsetup luksChangeKey /dev/sda2 /tmp/MyAnotherKey.bin --key-file /tmp/MyKey.bin
+</code></pre>
+<h2 id="备份、恢复、擦除Header"><a href="#备份、恢复、擦除Header" class="headerlink" title="备份、恢复、擦除Header"></a>备份、恢复、擦除Header</h2><p>man手册中有这么一段话</p>
+<blockquote>
+<p>If the header of a LUKS volume gets damaged, all data is permanently lost unless you have a header-backup. If a key-slot is damaged, it can only be restored from a header-backup or if another active key-slot with known passphrase is undamaged. </p>
+</blockquote>
+<p>上面的意思：如果LUKS的Header被破坏了，数据将永远丢失。如果Slot被破坏了则只能从header备份恢复。要么使用一个没有被破坏的slot。</p>
+<h3 id="备份header"><a href="#备份header" class="headerlink" title="备份header"></a>备份header</h3><pre><code>sudo cryptsetup luksHeaderBackup /dev/sda2 --header-backup-file /tmp/header.bin
+</code></pre>
+<p>header属于机密信息，确保不让别人发现你的header。如果你擦除了header，而别人使用你的header恢复了header，那么你的擦除将是徒劳。</p>
+<h3 id="恢复header"><a href="#恢复header" class="headerlink" title="恢复header"></a>恢复header</h3><pre><code>sudo cryptsetup luksHeaderRestore /dev/sda2 --header-backup-file /tmp/header.bin
+</code></pre>
+<p>恢复后，所有slot将被重置为&#x2F;tmp&#x2F;header.bin的内容</p>
+<h3 id="擦除header"><a href="#擦除header" class="headerlink" title="擦除header"></a>擦除header</h3><blockquote>
+<p>Damaging the LUKS header is something people manage to do with surprising frequency. This risk is the result of a trade-off between security and safety, as LUKS is designed for fast and secure wiping by just overwriting header and key-slot area.</p>
+</blockquote>
+<p>上面的意思：有些人会将header毁灭，用于将数据无法恢复，LUKS则出于性能和简单的设计，毁灭的操作是直接覆盖header数据。</p>
+<p>擦除前，从header可以判断这是一个Luks分区</p>
+<pre><code>sudo cryptsetup -v isLuks /dev/sdb2 # Command successful.
+</code></pre>
+<p>擦除头部1052672个字节（默认的header大小，仅包含1个slot，实际情况是slot越多，header尺寸越大）</p>
+<pre><code>head -c 1052672 /dev/zero &gt; /dev/sda2
+sync
+</code></pre>
+<p>那么除了头部1052672字节，后面都是原来加密的数据，只是这个header被我们手工破坏了。再次验证这个分区是否为有效的LUKS分区</p>
+<pre><code>sudo cryptsetup -v isLuks /dev/sdb2 # Command successful. # is not a valid LUKS device
+</code></pre>
+<h2 id="备份MasterKey"><a href="#备份MasterKey" class="headerlink" title="备份MasterKey"></a>备份MasterKey</h2><p>设计8个slot的目的只有一个：解密master-key，因此master-key才是最重要的。一旦master-key泄漏，什么slot验证都是虚设，能直接被解密数据。</p>
+<blockquote>
+<p>Beware that the master key cannot be changed without reencryption and can be used to decrypt the data stored in the LUKS container without a passphrase and even without the LUKS header. This means that if the master key is compromised, the whole device has to be erased to prevent further access. Use this option carefully.</p>
+</blockquote>
+<p>上面这段话凸显了MasterKey比Header更重要，因为直接绕过了slot验证。一旦masterKey落入他人手中，你只能擦除整个分区来避免他读取机密数据。</p>
+<p>下面这个命令可以导出MasterKey，输入大写YES确定。</p>
+<pre><code># 密码验证
+sudo cryptsetup luksDump --dump-master-key /dev/sda2
+
+# key-file验证
+sudo cryptsetup luksDump --dump-master-key /dev/sda2 --key-file /tmp/MyKey.bin
+</code></pre>
+<p>dump的时候，无论是通过哪个slot验证，输出的master key都是同一个。</p>
+<p>将MK dump内容字节串：复制好</p>
+<pre><code>89 53 d5 3e a0 4a 80 ea a3 ec 69 fc f0 6d ff 22 
+1f 3e df 2b 1a c2 05 6e bf 2d f1 61 39 dd 77 5e
+</code></pre>
+<p>创建为一个dumpInput.txt纯文本，粘贴字节串，然后xxd命令转成master-key二进制文件</p>
+<pre><code>xxd -r -p dumpInput.txt /tmp/master-key.bin
+</code></pre>
+<p>使用master-key直接打开加密盘，无需验证slot：</p>
+<pre><code>sudo cryptsetup luksOpen --master-key-file /tmp/master-key.bin
+</code></pre>
+<p>知道这玩意的可怕了吗？Master Key更需要妥善保管！！</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a target="_blank" rel="noopener" href="https://program-think.blogspot.com/2015/10/dm-crypt-cryptsetup.html">编程随想：扫盲 dm-crypt——多功能 Linux 磁盘加密工具</a><br><a target="_blank" rel="noopener" href="https://www.thegeekstuff.com/2016/03/cryptsetup-lukskey/">10 Linux cryptsetup Examples for LUKS Key Management</a><br><a target="_blank" rel="noopener" href="https://www.lisenet.com/2013/luks-add-keys-backup-and-restore-volume-header/">LUKS: Add a Backup Key, Backup, Restore and Delete LUKS Volume Header</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ubuntu/" rel="tag"># ubuntu</a>
+          
+            <a href="/tags/%E5%8A%A0%E5%AF%86/" rel="tag"># 加密</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/01/23/makefile-notes/" rel="next" title="Makefile读书笔记">
+                <i class="fa fa-chevron-left"></i> Makefile读书笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/01/23/lede-toolchain/" rel="prev" title="获得LEDE的工具链">
+                获得LEDE的工具链 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">565</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA"><span class="nav-number">1.</span> <span class="nav-text">创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%AF%86%E7%A0%81%E5%88%9B%E5%BB%BA"><span class="nav-number">1.1.</span> <span class="nav-text">使用密码创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8key-file%E5%88%9B%E5%BB%BA"><span class="nav-number">1.2.</span> <span class="nav-text">使用key-file创建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%82%E8%BD%BD%E3%80%81%E5%8D%B8%E8%BD%BD%E5%88%86%E5%8C%BA"><span class="nav-number">2.</span> <span class="nav-text">挂载、卸载分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E3%80%81%E5%88%A0%E9%99%A4%E3%80%81%E4%BF%AE%E6%94%B9slot"><span class="nav-number">3.</span> <span class="nav-text">增加、删除、修改slot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%87%E4%BB%BD%E3%80%81%E6%81%A2%E5%A4%8D%E3%80%81%E6%93%A6%E9%99%A4Header"><span class="nav-number">4.</span> <span class="nav-text">备份、恢复、擦除Header</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%87%E4%BB%BDheader"><span class="nav-number">4.1.</span> <span class="nav-text">备份header</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%81%A2%E5%A4%8Dheader"><span class="nav-number">4.2.</span> <span class="nav-text">恢复header</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%A6%E9%99%A4header"><span class="nav-number">4.3.</span> <span class="nav-text">擦除header</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%87%E4%BB%BDMasterKey"><span class="nav-number">5.</span> <span class="nav-text">备份MasterKey</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Companyd</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
