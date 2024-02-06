@@ -307,6 +307,326 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/21/SpringBoot%E4%B9%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/21/SpringBoot%E4%B9%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/" itemprop="url">SpringBoot之定时任务</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-21T09:07:35+00:00">
+                2017-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="任务需求"><a href="#任务需求" class="headerlink" title="任务需求"></a>任务需求</h2><p>最近在用SpringBoot写一个关于定时项目的时候遇到一个问题，就是客户端访问服务器的结果实际上是每个一段时间发生一次变化，并且在服务器在每天的某个固定的时间点都要触发一次事件。<br>我们当然可以在遇到每一个请求时都重新计算结果，但是为了提高效率，我们显然可以让服务器每隔一段时间计算一次结果，并且把这个结果进行保存，对在下一个时间段内的每个请求都直接返回计算后的结果。这样就能较好的提高了服务器的性能。<br>那么问题就在于如何处理定时任务。其实SpringBoot早就提供了非常方便的接口，但是网上的介绍还是有点乱的，我就记录下具体操作的注意点方便以后查找。</p>
+<h2 id="创建定时服务"><a href="#创建定时服务" class="headerlink" title="创建定时服务"></a>创建定时服务</h2><p>一般来说定时服务会写在一个Component里，方便管理。对于定时任务，我们其实只要在需要定时执行的函数前加上<code>@Scheduled</code>注解，比如下面这样:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ScheduledTask</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Scheduled(fixedRate = 5000)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">scheduledTask</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">//do sth...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>与此同时，我们还要在项目的启动文件里配置上<code>@EnableScheduling</code>注解，告诉项目我们是支持定时任务的:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LotteryApplication</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		SpringApplication.run(LotteryApplication.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们的函数就能定时执行了。</p>
+<h2 id="Scheduled参数"><a href="#Scheduled参数" class="headerlink" title="Scheduled参数"></a>Scheduled参数</h2><p>Scheduled主要支持<code>fixRate</code>,<code>fixDelay</code>,<code>cron</code>,<code>initialDelay</code>这些参数，下面做简要说明。</p>
+<h3 id="fixRate和fixDelay"><a href="#fixRate和fixDelay" class="headerlink" title="fixRate和fixDelay"></a>fixRate和fixDelay</h3><p>fixRate和fixDelay参数都指定了函数每隔某个毫秒数执行一次，但是他们之间也有细小的差别。<br><strong>fixRate</strong><br>fixRate的计时是相对于系统时间的，也就是一定相隔会固定时间执行。<br><strong>fixDelay</strong><br>fixDelay的计时是相对于上一次调用的时间的，因此他受其他程序调用的影响，如果该函数在其他地方被手动调用，那么这个计时器就会重新计时。</p>
+<h3 id="initialDelay参数"><a href="#initialDelay参数" class="headerlink" title="initialDelay参数"></a>initialDelay参数</h3><p>initialDelay参数是个额外参数，比较简单，就是指定从项目开始运行到该函数首次被调用的执行时间，以毫秒计。<br>如果不指定这个参数，这个值就是-1，也就是程序开始时不执行。<br>在不知到initialDelay这个参数的时候为了让程序启动时立即调用该函数，我让这个定时类继承了<code>InitializingBean</code>并在重写的<code>afterPropertiesSet</code>方法中手动调用了这个函数。。。现在看起来还真是愚蠢。。。</p>
+<h3 id="cron"><a href="#cron" class="headerlink" title="cron"></a>cron</h3><p>这个Cron是最复杂也是高度自定义化的定时工具，在Linux系统里也有类似的crontab命令。他其实是更加细致的定义了定时任务，以一个字符串的形式进行表示。<br>在SpringBoot中，一个cron字符串是由六个部分以空格组成的字符串，文档中的例子是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&quot;0 0 * * * *&quot; = the top of every hour of every day.</span><br><span class="line">&quot;*/10 * * * * *&quot; = every ten seconds.</span><br><span class="line">&quot;0 0 8-10 * * *&quot; = 8, 9 and 10 o&#x27;clock of every day.</span><br><span class="line">&quot;0 0 6,19 * * *&quot; = 6:00 AM and 7:00 PM every day.</span><br><span class="line">&quot;0 0/30 8-10 * * *&quot; = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</span><br><span class="line">&quot;0 0 9-17 * * MON-FRI&quot; = on the hour nine-to-five weekdays</span><br><span class="line">&quot;0 0 0 25 12 ?&quot; = every Christmas Day at midnight</span><br></pre></td></tr></table></figure>
+<p>六个部分分别表示秒、分、时、日、月、周。<br>他支持’-‘表示范围，’*’表示通配，’&#x2F;‘表示在左边的时间匹配后间隔右边的时间，’?’一般表示周的通配。<br>具体的使用方法还要参考相关文档。<br>网上有很多类似<a target="_blank" rel="noopener" href="http://cron.qqe2.com/">Cron表达式测试工具</a>这样的测试工具，方便我们测试自己写的Cron表达式。<br>下面一个例子表示每隔五分钟执行一次:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Scheduled(cron = &quot;0 0/5 * * * ?&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">fiveMinutes</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">//do sth.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h3><p>在实际使用Scheduled注解时，我们一定要指定且仅仅指定fixRate、fixDelay、cron当中的一个，否则肯定会导致错误。当然，我们可以任意指定initialDelay参数。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://spring.io/guides/gs/scheduling-tasks/">SpringBoot Guides</a><br><a target="_blank" rel="noopener" href="http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/support/CronSequenceGenerator.html">Spring CronSequenceGenerator</a><br><a target="_blank" rel="noopener" href="http://www.manpagez.com/man/5/crontab/">Cron expression</a><br><a target="_blank" rel="noopener" href="http://jingyan.baidu.com/article/7f41ecec0d0724593d095c19.html">Cron表达式详解</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/20/SpringBoot%E4%B9%8B%E7%AE%80%E5%8D%95%E9%83%A8%E7%BD%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/20/SpringBoot%E4%B9%8B%E7%AE%80%E5%8D%95%E9%83%A8%E7%BD%B2/" itemprop="url">SpringBoot之简单部署</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-20T15:28:59+00:00">
+                2017-05-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="命令行测试运行"><a href="#命令行测试运行" class="headerlink" title="命令行测试运行"></a>命令行测试运行</h2><p>有些时候我们需要将项目部署在服务器上进行简单测试，但是直接部署到Tomcat里又十分慢，这时候我们可以用maven工具的一个命令来模拟本地启动项目:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw spring-boot:run</span><br></pre></td></tr></table></figure>
+<p>这里用到了一个叫<code>spring-boot-starter-parent</code>的包，只要pom.xml里加了这个就能执行。<br>这样我们就可以在服务器的8080端口访问到这个临时的项目。</p>
+<h2 id="简单部署"><a href="#简单部署" class="headerlink" title="简单部署"></a>简单部署</h2><p>通常情况下，我们会把SpringBoot生成的项目打包成war放在Tomcat服务器中运行，不过这当中也有一些需要注意的地方，下面就简单罗列一下，作为总结。</p>
+<h2 id="修改项目配置"><a href="#修改项目配置" class="headerlink" title="修改项目配置"></a>修改项目配置</h2><p>参考SpringBoot的一篇文档<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/current/reference/html/howto-traditional-deployment.html">Traditional deployment</a>。为了能让项目支持在Tomcat中启动，我们首先要修改一下启动配置。<br>修改项目中的<code>XXXApplication.java</code>这个启动文件，使他继承<code>SpringBootServletInitializer</code>，并重载<code>configure</code>方法:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@SpringBootApplication</span><br><span class="line">public class OnlineLibraryApplication extends SpringBootServletInitializer &#123;</span><br><span class="line"></span><br><span class="line">	@Override</span><br><span class="line">	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) &#123;</span><br><span class="line">		return builder.sources(OnlineLibraryApplication.class);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		SpringApplication.run(OnlineLibraryApplication.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这样这样就可以让项目在Tomcat中启动了。</p>
+<h2 id="修改导出的包类型"><a href="#修改导出的包类型" class="headerlink" title="修改导出的包类型"></a>修改导出的包类型</h2><p>由于默认使用的包管理工具是maven，我们要修改下pom.xml中的导出方式，在该文件的开头将<code>packaging</code>标签修改为<code>war</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;packaging&gt;war&lt;/packaging&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="运行Maven命令导出包"><a href="#运行Maven命令导出包" class="headerlink" title="运行Maven命令导出包"></a>运行Maven命令导出包</h2><p>为了保证项目能够在服务器中运行，最好将编译的过程放在服务器上，这样可以提早发现服务器版本落后的等的问题。因为很多情况下，Java Tomcat版本落后会导致很多奇怪的问题，有时候还不容易发现。<br>在项目根目录中有一个<code>mvnw</code>文件，我们通过下面命令执行他：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean package </span><br></pre></td></tr></table></figure>
+<p>这样，程序就会编译并且测试这个项目，以保证该项目能够在当前环境中运行。<br>编译并测试通过后，会在项目的<code>target/</code>文件夹下生成一个war包，我们把这个包放到Tomcat的webapps目录下并且重启项目，稍等片刻后即可在8080端口下与项目名相对应的路径中访问到该项目。</p>
+<h2 id="配置反向代理"><a href="#配置反向代理" class="headerlink" title="配置反向代理"></a>配置反向代理</h2><p>上面的项目在很多情况下会加载不了静态文件，因为项目中访问静态文件通常是直接在<code>xxx.xxx.xxx/css</code>之类的路径中，而Tomcat简单部署后项目的根路径会变成<code>xxx.xxx.xxx/projectName/</code>，这样实际的静态文件路径就是<code>xxx.xxx.xxx/projectName/css/</code>，显然就会找不到了。<br>当然，我们可以配置Tomcat将项目映射到<code>/</code>下，但是为了保证项目的并发性更好，我们一般都采用nginx进行反向代理。</p>
+<p>一般在<code>/etc/nginx/sites-enabled/default</code>文件中，修改出一个类似下面的配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name 127.0.0.1:8080;</span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass  http://127.0.0.1:8080/projectName/;</span><br><span class="line">        proxy_http_version 1.1;</span><br><span class="line">        proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">        proxy_set_header Connection &quot;upgrade&quot;;</span><br><span class="line">        proxy_set_header Host $host;</span><br><span class="line">   &#125;</span><br><span class="line">    gzip on;</span><br><span class="line">    gzip_min_length 1k;</span><br><span class="line">    gzip_buffers 4 8k;</span><br><span class="line">    gzip_http_version 1.1;</span><br><span class="line">    gzip_types text/plain application/javascript application/x-javascript text/javascript text/css application/xml image/png image/jpeg;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要就是添加一个反向代理并开启Gzip加速。<br>很多情况下对服务性能的提高还是非常有帮助的，尤其是Gzip，如果发现某些mime-type没有加速可以把这个类型添加到<code>gzip_types</code>中。</p>
+<h2 id="查看Log日志"><a href="#查看Log日志" class="headerlink" title="查看Log日志"></a>查看Log日志</h2><p>很多情况下，我们会在程序里打上Log，那么在Tomcat里这些Log都写在了哪里呢？<br>这个主要是Tomcat的设置了，在Tomcat的logs文件夹下有很多log文件，主要是下面三类:</p>
+<h3 id="项目启动类日志"><a href="#项目启动类日志" class="headerlink" title="项目启动类日志"></a>项目启动类日志</h3><p>这类日志一般名字会类似<code>catalina.2017-05-19.log</code>这样。<br>这些日志主要记录了项目启动以及关闭时可能报的错，主要是Tomcat在启动服务的时候写的。</p>
+<h3 id="Web访问类日志"><a href="#Web访问类日志" class="headerlink" title="Web访问类日志"></a>Web访问类日志</h3><p>这类日志一般名字会类似<code>localhost_access_log.2017-05-19.txt</code>这样。<br>这些日志主要记录了每一个Web访问的历史，跟Apache的日志类似：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 - - [19/May/2017:15:03:28 +0800] &quot;GET /onlinelibrary-0.0.1-SNAPSHOT/js/swiper.min.js HTTP/1.1&quot; 200 96826</span><br><span class="line">127.0.0.1 - - [19/May/2017:15:03:28 +0800] &quot;GET /onlinelibrary-0.0.1-SNAPSHOT/images/pic1.jpg HTTP/1.1&quot; 200 123242</span><br><span class="line">127.0.0.1 - - [19/May/2017:15:03:28 +0800] &quot;GET /onlinelibrary-0.0.1-SNAPSHOT/images/pic2.jpg HTTP/1.1&quot; 200 24962</span><br></pre></td></tr></table></figure>
+
+<h3 id="SpringBoot日志"><a href="#SpringBoot日志" class="headerlink" title="SpringBoot日志"></a>SpringBoot日志</h3><p>这类日志一般名字会类似<code>catalina.out</code>这样。<br>这些日志主要记录了SpringBoot的启动日志，以及程序员在程序中写的logger的日志，方便我们进行监控。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/18/java-reflection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1527,345 +1847,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/" itemprop="url">C++11学习笔记3</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-01T14:43:21+00:00">
-                2017-05-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="右值引用"><a href="#右值引用" class="headerlink" title="右值引用"></a>右值引用</h3><h4 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h4><p>在古老的标准里，C++中的变量分为左值(lvalue)与右值(rvalue)这两种，左值就是能够用&amp;获得地址的值，可以对他进行修改，右值就是不能用&amp;获得地址的值，通常只是临时变量，不能进行修改。而在C++11中，变量不再仅仅分为左值与右值了，他引入了另一种值叫将亡值(expire value,xvalue)。从此，变量类型分为了三种:</p>
-<ul>
-<li>lvalue  :left value 就是传统意义上的左值</li>
-<li>xvalue  :expire value 就是将亡值</li>
-<li>prvalue :pure right value 就是传统意义上的右值</li>
-</ul>
-<p>而且，xvalue+prvalue又称为rvalue，lvalue+xvalue又称为glvalue。</p>
-<h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>那么什么是xvalue呢，什么又是右值引用呢？<br>xvalue其实就是对右值的引用：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> &amp;&amp;x=<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
-<p>这个x跟传统的左值引用肯定是不一样的，毕竟左值引用是不能引用右值的。<br>这个x跟左值变量也是不一样的，虽然看上去没啥区别，但是实际上这个x并没有进行构造，而是像左值引用一样，对右值10进行了引用，使得这个右值的内存不被立即释放。这样我们就可以像使用左值一样的使用这个右值了。<br>那么现在就应该清楚了，右值引用就是通过对右值进行引用使得我们能够保存这个右值的生命周期，并像使用左值一样的使用右值的方法。（自己的定义）</p>
-<h4 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h4><p>这么费劲心机定义一个右值引用有啥意义呢？其实主要是为了提高变量传递的效率。虽然很多情况下，我们的编译器会做一些优化，但是不同编译器不同，因此下面基于g++的测试我开启了<code>-fno-elide-constructors</code>参数防止其优化。<br>比如下面的这个过程:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Test</span>()&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(<span class="type">const</span> Test &amp;test)&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;copy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Test</span>()&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;destroy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看上去没什么额外开销，而事实上，这个过程的执行结果是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>也就是说他执行了一次构造，一次拷贝构造。而事实上，这个拷贝构造是浪费额外开销的，而且这个拷贝其实是对一个右值的拷贝，在拷贝后这个右值就被析构了，我们完全可以不执行析构而让新的值就用这个右值的引用。<br>旧的做法是使用常量引用来做这件事:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">const</span> Test&amp; t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这避免了额外的拷贝，但是后果是这个值只能是常量，无法被修改。<br>如果使用了右值引用，那么这个问题就简单多了:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test&amp;&amp; t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>这个右值引用既没有对结果进行拷贝，也能够让我们像使用一个左值一样的使用他。</p>
-<h4 id="移动拷贝构造"><a href="#移动拷贝构造" class="headerlink" title="移动拷贝构造"></a>移动拷贝构造</h4><p>为什么引入移动拷贝构造，这是因为我们考虑到了以下问题：<br>我们知道，构造函数分为深拷贝和浅拷贝，默认的是浅拷贝，浅拷贝导致的结果就是拷贝出来的对象跟拷贝前的对象拥有相同的堆内元素，如果我们析构了拷贝前的对象，那么拷贝后的对象就无法使用了，因此浅拷贝不适合做赋值的移动操作；而深拷贝呢，又太浪费空间了，完全没有必要生成一个一模一样的对象然后把原先的再删除。因此就引入了拷贝构造这个东西。<br>比如下面的例子：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> *ptr;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Test</span>():<span class="built_in">ptr</span>(<span class="keyword">new</span> <span class="built_in">int</span>(<span class="number">0</span>))&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(<span class="type">const</span> Test &amp;test):<span class="built_in">ptr</span>(<span class="keyword">new</span> <span class="built_in">int</span>(*test.ptr))&#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;copy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Test</span>(Test &amp;&amp;test):<span class="built_in">ptr</span>(test.ptr)&#123;</span><br><span class="line">        test.ptr=<span class="literal">nullptr</span>;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;move&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Test</span>()&#123;</span><br><span class="line">        <span class="keyword">delete</span> ptr;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;destroy&quot;</span>&lt;&lt;std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t=<span class="built_in">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>移动构造的参数就是一个右值引用，他做的事是将移动源的所有堆内元素指针断开，并连上移动目的地的指针。这样移动源就可以安心的析构而不影响移动目的地的堆内元素。同时也省去了不必要的拷贝开销，效率非常的高。</p>
-<h3 id="std-move"><a href="#std-move" class="headerlink" title="std::move"></a>std::move</h3><p>移动构造有一个问题，就是他的参数必须是右值，这就带来一个问题，如果上面的main函数变成这样:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t1;</span><br><span class="line">    Test t2=t1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>由于t1是个左值，那么他会去执行拷贝构造而不会执行移动构造，这显然不是我们像看到的。<br>为了使左值的移动能够使用移动构造，我们就有了std::move这个东西，他的作用很简单，就是把左值变成右值引用。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Test t1;</span><br><span class="line">    Test t2=std::<span class="built_in">move</span>(t1);</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
-<p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>如我所愿。<br>注意一点就是在使用std::move()之后的对象t1这时候的堆内元素就已经无效了。</p>
-<p>std::move()这么好用，显然c++中的模板都支持这个move语义。</p>
-<h3 id="std-emplace-back"><a href="#std-emplace-back" class="headerlink" title="std::emplace_back"></a>std::emplace_back</h3><p>我们知道了对象的构造，拷贝、移动都是要付出一些代价的，那我们很容易就会想到，当我们使用容器的时候，如果使用拷贝构造，显然效率很低；如果使用移动构造，那么还是会有一些移动的开销，需要执行移动构造函数，能不能有一种方法，直接在容器里执行构造函数，这样就既不用拷贝，也不用移动了呢？答案是当然有，这就是std::emplace_back方法。我们可以比较下面的三种方法：</p>
-<p><strong>拷贝插入</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    Test t;</span><br><span class="line">    v.<span class="built_in">push_back</span>(t);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">copy</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p><strong>移动插入</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    v.<span class="built_in">push_back</span>(<span class="built_in">Test</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">move</span><br><span class="line">destroy</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-
-<p><strong>emplace_back</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::vector&lt;Test&gt;v;</span><br><span class="line">    v.<span class="built_in">emplace_back</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">construct</span><br><span class="line">destroy</span><br></pre></td></tr></table></figure>
-<p>显然，这个emplace_back的效率是最高的。</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/26419368/">深入应用c++11</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/01/use-hexo-at-any-time-any-place/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/01/use-hexo-at-any-time-any-place/" itemprop="url">随时随地 Hexo——我是如何使用 Hexo 的</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-01T04:58:27+00:00">
-                2017-05-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
-                    <span itemprop="name">博客栈</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Hexo 是一个使用 Node.js 作为构建引擎的极速、简单且强大的静态博客架构。但 Hexo 只有在安装了 Hexo 的环境上才能运行。于是我设计了一套实现 Hexo 随时随地部署、随时随地发布的方案。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/01/use-hexo-at-any-time-any-place/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1916,7 +1897,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">564</span>
+                  <span class="site-state-item-count">566</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1927,7 +1908,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">67</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1938,7 +1919,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-count">278</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

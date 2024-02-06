@@ -307,6 +307,325 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F1-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/05/%E8%87%AA%E5%88%B6%E6%AD%A3%E6%96%B9%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F1-4/" itemprop="url">自制正方软件系统验证码的识别程序（1/4）</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-05T09:16:50+00:00">
+                2016-02-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>学了几天机器学习的原理，感觉还是要自己动手写一个像样的程序才行。正好刚研究过<a target="_blank" rel="noopener" href="http://deeplearning.net/">deeplearning.net</a>上的那个<a target="_blank" rel="noopener" href="http://deeplearning.net/tutorial/logreg.html#putting-it-all-together">识别mnist数据库的源码</a>，于是打算利用一下写一个识别验证码的程序。</p>
+<p>他提供的代码已经基本实现了利用<strong>Logistic Regression</strong> 来分类，用的是<strong>softmax</strong>算法，支持多元分类。然而他只能读入指定的mnist数据集的经过处理后的格式。因此我当前的任务就是将一张实实在在的图片转换成计算机可以识别的格式，并且进行好预处理，选择好特征值，而不用考虑机器学习代码的细节（这个的确有点难）。但是仅仅是处理好这些事情也并不容易。</p>
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>我的目标是我们学校的<a target="_blank" rel="noopener" href="http://xk.suda.edu.cn/">选课系统</a>的网站（没错我是苏大的0.0），这里的验证码相对比较规则，而且未来应该有点实用价值吧。</p>
+<p><img src="/images/2016/02/05/1/1.png" alt="1"></p>
+<p>就是这里的验证码，取出来看一下就是这样：<img src="http://xk.suda.edu.cn/CheckCode.aspx"></p>
+<p>当然，为了识别这个，还是得多下载几张下来自己人脑识别几张作为训练集。。。</p>
+<h2 id="下载图片"><a href="#下载图片" class="headerlink" title="下载图片"></a>下载图片</h2><p>下载这种东西还是用shell脚本方便：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>((i=<span class="number">1</span>;i&lt;=<span class="number">10000</span>;i++))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">	wget -O <span class="string">&#x27;./png/&#x27;</span><span class="variable">$i</span> <span class="string">&#x27;http://xk.suda.edu.cn/CheckCode.aspx&#x27;</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<p>一不小心下了10000张，先留着再说。</p>
+<h2 id="获得训练集"><a href="#获得训练集" class="headerlink" title="获得训练集"></a>获得训练集</h2><p>本来想在网上找点靠谱的识别平台，但是不管要不要钱，效果都不好。所以，，甭想了，先人脑识别500张再说。。。。。。</p>
+<p>为了方便以后使用，我就用他的文件名来记录实际的值。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>自己观察下载的图片，发现他有这么几个特点：</p>
+<p>1、包含字母数字，但是9、o、z三个字符不存在（估计是因为容易产生混淆，为了方便用户就没提供这些）。这一点很重要，因为在进行训练的时候，如果某个集合是空的，那么就会在执行的过程中出现类似‘除0错误’这样的东西。因此分类的时候需要把这三个字符排除。</p>
+<p>2、包含四个字符，每一个字符都占据一个相对固定的位置。这一点大大降低了识别的难度，因为这样我们就可以将字符进行分割，从而把问题转化为对单个字符的识别。否则用普通的办法就难以下手了。</p>
+<p>3、字符的颜色固定，都是蓝色。这样我们就可以非常方便的进行二值化处理而不用考虑反色的问题了。</p>
+<p>4、图片的噪声只有一些象征性的点点。。。这对我们来说几乎形同虚设，只要稍微对图片进行处理就能消除影响。</p>
+<p>5、下载了大量的数据之后发现竟然有大量的图片出现重复，于是我猜他的图片并不是动态生成的，而是静态读取的。这么说来就算再不济，我也完全可以把他的图片全部下载，找个验证码平台识别好然后进行hash查找。总共也就167万种，全部下下来就几个G，跑个小半天应该就下的差不多了吧。</p>
+<p>根据上面这些特点，我们就能有针对性的设计程序了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/02/02/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%80%9D%E6%83%B3/" itemprop="url">机器学习中的交叉验证思想</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-02T15:34:28+00:00">
+                2016-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>在使用训练集对参数进行训练的时候，经常会发现人们通常会将一整个训练集分为三个部分（比如<a href="/2016/01/25/1/">mnist手写训练集</a>）。一般分为：<strong>训练集（train_set）</strong>，<strong>评估集（valid_set）</strong>，<strong>测试集（test_set）</strong>这三个部分。这其实是为了保证训练效果而特意设置的。其中<strong>测试集</strong>很好理解，其实就是完全不参与训练的数据，仅仅用来观测测试效果的数据。而<strong>训练集</strong>和<strong>评估集</strong>则牵涉到下面的知识了。</p>
+<p>因为在实际的训练中，训练的结果对于训练集的拟合程度通常还是挺好的（初试条件敏感），但是对于训练集之外的数据的拟合程度通常就不那么令人满意了。因此我们通常并不会把所有的数据集都拿来训练，而是分出一部分来（这一部分不参加训练）对训练集生成的参数进行测试，相对客观的判断这些参数对训练集之外的数据的符合程度。这种思想就称为<strong>交叉验证（Cross Validation）。</strong></p>
+<p>通常我们使用的交叉验证方法有下面几种：</p>
+<h2 id="简单交叉验证（simple-cross-validation）"><a href="#简单交叉验证（simple-cross-validation）" class="headerlink" title="简单交叉验证（simple cross validation）"></a>简单交叉验证（simple cross validation）</h2><p>简单交叉验证当然很简单了，就是把整个训练集随机分为两部分（通常是70%的训练集，30%的评估集）。</p>
+<p>1、首先我们用训练集建立模型，这时候我们需要尝试多种的参数来得到一些不同的模型；</p>
+<p>2、对于每一个模型，调用评估集来进行测试，计算出训练误差（通常是以类似损失函数的形式）；</p>
+<p>3、取训练误差最小的那个模型作为最后的结果；</p>
+<p>这个方法当然会存在一些训练数据的浪费，毕竟有大量的数据没有参与真正的训练而是仅仅作为评估。所以这个方法只能在数据非常易得的情况下使用，如果数据比较珍贵，显然这种方法就不适用了。</p>
+<p>有时候这个方法好像也被称为<strong>HoldOut验证</strong>（Hold-Out Method）。其实这也不算是交叉验证了，因为他的训练集并没有交叉。</p>
+<p>通常情况下我们是直接选取前70%为训练集，但是如果训练数据是按照一定规律排放的，那么选取数据的时候就要先打乱顺序，或者按照一定的随机方法选取数据。否则训练集就不一定具有一般性了。</p>
+<h2 id="K-折交叉验证（S-fold-Cross-Validation）"><a href="#K-折交叉验证（S-fold-Cross-Validation）" class="headerlink" title="K-折交叉验证（S-fold Cross Validation）"></a>K-折交叉验证（S-fold Cross Validation）</h2><p>这个据说是最常用的验证方法了，步骤如下：</p>
+<p>1、将数据集均分为K份</p>
+<p>2、从K份中取一份作为评估集，另外K-1份作为训练集，生成K个模型以及这K个模型对于评估集的训练误差；</p>
+<p>3、取训练误差最小的那个模型作为最后的结果；</p>
+<p>经大量实验验证，据说我们取<strong>K&#x3D;10</strong>的时候效果最好。</p>
+<p>这个方法一方面保证了数据充分被使用训练了，避免了数据的浪费；另一方面也互相进行了验证，达到了交叉验证的效果，不过计算代价还是有点高。</p>
+<h2 id="留p交叉验证（Leave-p-out-Cross-Validation"><a href="#留p交叉验证（Leave-p-out-Cross-Validation" class="headerlink" title="留p交叉验证（Leave-p-out Cross Validation)"></a>留p交叉验证（Leave-p-out Cross Validation)</h2><p>从名字大概就可以看出来了，所谓留p，就是每一次训练都会留下p个数据作为评估集，剩下的n-p个数据作为训练集，分别进行建模测试，取出效果最好的模型。这里我们会发现这p个数据可以有$C_n^p$组可能，所以计算的复杂度还是挺高的。</p>
+<p>当然，有时候我们会取p&#x3D;1，这导致了每一个数据都会独立作为测试集。这种方法又被叫做**留一交叉验证（Leave-One-Out Cross Validation)**，当数据极为匮乏的时候才会使用。</p>
+<p>事实上，交叉验证的方法不仅能够提高数据的利用率，更重要的是他也能够在一定程度上解决过拟合（Overfitting）问题，因为过拟合只能很好的拟合训练集中的数据而并不能拟合评估集中的数据。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/28/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1711,309 +2030,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/22/python%E6%A0%87%E5%87%86%E5%BA%93cPickle%E5%8C%85%E7%94%A8%E6%B3%95%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/22/python%E6%A0%87%E5%87%86%E5%BA%93cPickle%E5%8C%85%E7%94%A8%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">python标准库cPickle包用法简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-22T15:53:50+00:00">
-                2016-01-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>CPickle包是一个很常用的工具，用来将任何一个数据类型存储到文件中，再原封不动的读取出来。在需要保存一些特定格式的数据或是大量的数据的时候相比自己写文件来说，可是非常方便而且有用的。</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h2 id="将数据输出到文件"><a href="#将数据输出到文件" class="headerlink" title="将数据输出到文件"></a>将数据输出到文件</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">test</span>():</span><br><span class="line">    element1 = <span class="number">1</span></span><br><span class="line">    element2  = <span class="string">&#x27;2&#x27;</span></span><br><span class="line"></span><br><span class="line">obj=test()</span><br><span class="line">cPickle.dump(obj,<span class="built_in">open</span>(<span class="string">&quot;data.txt&quot;</span>,<span class="string">&#x27;wb&#x27;</span>))<span class="comment">#输出到文件</span></span><br><span class="line">cPickleString=cPickle.dumps(obj)<span class="comment">#输出到变量</span></span><br><span class="line"><span class="built_in">print</span> cPickleString</span><br></pre></td></tr></table></figure>
-<p>输出：（屏幕和文件）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(i__main__</span><br><span class="line">test</span><br><span class="line">p1</span><br><span class="line">(dp2</span><br><span class="line">b.</span><br></pre></td></tr></table></figure>
-<p>从上面这个例子可以看出用dump方法可以把任何数据类型输出到文件，而dumps方法可以把任何数据输出到变量。当然，存储的形式就是他自己规定的了。</p>
-<h2 id="从文件读取数据"><a href="#从文件读取数据" class="headerlink" title="从文件读取数据"></a>从文件读取数据</h2><p>用刚才生成的数据来恢复文件：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">test</span>():</span><br><span class="line">    element1 = <span class="number">1</span></span><br><span class="line">    element2  = <span class="string">&#x27;2&#x27;</span></span><br><span class="line"></span><br><span class="line">obj=cPickle.load(<span class="built_in">open</span>(<span class="string">&quot;data.txt&quot;</span>,<span class="string">&#x27;rb&#x27;</span>))</span><br><span class="line"><span class="built_in">print</span> obj.element1</span><br><span class="line"><span class="built_in">print</span> obj.element2</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">１</span><br><span class="line">２</span><br></pre></td></tr></table></figure>
-<p>很明显load方法接受文件参数，把读取的数据返回给变量，可以无损恢复。</p>
-<h2 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h2><p>用法很简单，但是绝对是挺实用的。最后补充句，就是这个cPickle包其实是原来的pickle包用C语言改写的。所以pickle包跟他的用法基本相同，但是cPickle会更快一点。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/22/%E5%88%A9%E7%94%A8Sphinx%E5%B7%A5%E5%85%B7%E4%B8%BApython%E9%A1%B9%E7%9B%AE%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/22/%E5%88%A9%E7%94%A8Sphinx%E5%B7%A5%E5%85%B7%E4%B8%BApython%E9%A1%B9%E7%9B%AE%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/" itemprop="url">利用Sphinx工具为python项目生成文档</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-22T13:51:48+00:00">
-                2016-01-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Sphinx(没错，就叫斯芬克斯。。。)其实是一个基于SQL全文检索引擎，大概是个为数据库检索提供一些更加强大的检索功能。这个东西也给很多种的语言比如PHP,Python,Perl,Ruby留有API接口，可以供他们调用实现检索功能。</p>
-<p>当然，暂时我还没打算研究这个东西。今天我只是想利用他给Python的接口来为python程序生成基于网页形式的项目文档。（好像国外挺流行这个的，今天就是为了给deep learning的源码生成下文档才晓得有这个东西的）。</p>
-<p>目测这潭水还是很深的，今天姑且就事论事，把实现的步骤简要记录下来方便日后使用。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>由于是为了在python下使用了，当然使用python的下载工具pip来安装了，pip的使用方法见<a href="/2015/11/23/1/">《pip工具简单用法》</a>。</p>
-<p>安装命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$pip install sphinx</span><br></pre></td></tr></table></figure>
-<p>so easy就装好了，接下来就是用他来生成文档了。</p>
-<h2 id="生成"><a href="#生成" class="headerlink" title="生成"></a>生成</h2><p>对于那些本身就为Sphinx设计过的工程来说，可以直接找到他的doc&#x2F;目录，如果发现了conf.py文件的话，说明他已经预先做了配置。这时候我们只需要直接生成apidoc就行了：<br><code>$ sphinx-apidoc -o .doc/ .</code><br>然后在他的输出目录下就会出现一个Makefile，然后我们只要<code>$make html</code>，就会发现一个html文件夹，没错，我们的文档就在这里啦。</p>
-<p>而对于那些没有配置过Sphinx的工程来说，我们首先得在他的.py文件的目录下进行预先生成：<br><code>$sphinx-quickstart</code><br>然后根据提示输入文件名，作者名，版本号啥啥的，然后一路确认就可以了。这样就会生成一个conf.py的文件，然后进行之前的操作就好了。</p>
-<p>以上这就是生成文档的最简单的用法。。。应该是一个程序员理所应当需要掌握的了。。。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2064,7 +2080,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">564</span>
+                  <span class="site-state-item-count">566</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2075,7 +2091,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">67</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -2086,7 +2102,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-count">278</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

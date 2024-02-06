@@ -307,6 +307,322 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/22/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BBED%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/22/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BBED%E7%AE%97%E6%B3%95/" itemprop="url">路径匹配之编辑距离ED算法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-22T14:55:10+00:00">
+                2016-04-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
+                    <span itemprop="name">Trajectory Similarity</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>编辑距离（Edit Distance），又称Levenshtein距离，原本是用来描述指两个字串之间，由一个转成另一个所需的最少编辑操作次数。这里的”编辑操作“是指“插入”、“删除”和“修改”。是由俄罗斯科学家Vladimir Levenshtein在1965年提出的概念。他通常就被用作一种相似度计算函数，尤其在自然语言处理方面。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>具体的讲，用编辑距离来描述处理路径相似度问题需要解决的是如下的问题，这个问题又叫”Edit Distance on Real sequence“(解决的方法就叫EDR算法)：</p>
+<p>给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，现在我们需要将其中一个序列改成另一个序列（反之亦然，易证相互转换的编辑距离是相等的），且我们一次只能对一个元素做插入、修改、删除中的一个操作。我们将变换所需的最小步数记为$EDR(A,B)$，这个值就可以作为两个序列相异度的一个量度。当然，跟LCSS一样，判断两个点”相等“还需要设定一个阈值$\varepsilon$，距离小于这个阈值的点可以被认为是”相等“的（不过论文中认为只有两个点的所有维度上的距离只差都小于这个阈值才被判断为相等，虽然我认为意思都差不多）。如下例：</p>
+<p><img src="/images/2016/04/22/1/1.png"></p>
+<p>其中黑线表示目标路径，红色实线表示当前路径，红色虚线表示改变后的路径。显然他们的编辑距离是３，包含两个插入操作、一个替换操作。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>简单dp。</p>
+<p>对于序列$A[1:n],B[1:m]$，令$EDR[i,j]$表示$A[1:i],B[1:j]$之间的编辑距离；$\varepsilon$表示判断两点相等的阈值；$subcost[i][j]$的值表示$A[i],B[j]$是否相等，若是则取１，若否则取０。那么：</p>
+<p>$$EDR[i,j]&#x3D;\left\{\begin{matrix}m&amp;if\ i&#x3D;0\\n&amp;if\ j&#x3D;0\\min\left\{\begin{aligned}EDR[i-1][j-1]+subcost[i][j]\\EDR[i][j-1]+1\\EDR[i-1][j]+1\end{aligned}\right.&amp;otherwise\end{matrix}\right.$$</p>
+<p>根据这个递推式就可以求出编辑距离了。</p>
+<h2 id="其他处理"><a href="#其他处理" class="headerlink" title="其他处理"></a>其他处理</h2><p>通常情况下这种距离在进行对比的时候都会进行<strong>归一化</strong>。这么做的基础当然是认为路径的相似度主要是考虑形状而不考虑位置）。既然是需要用阈值来判断相等，当然还是将路径的尺度固定到一个相对稳定的度量范围内才更有适用性。归一化的操作也非常简单，就是对于待归一化的路径点的每一个维度$x_k$，令他的值等于$\frac{x_k-\mu_x}{\sigma_x}$，其中$\mu_x,\sigma_x$分别表示该维度下的坐标的平均值和标准差。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>用EDR算法表示的路径相似度，有着对噪声不敏感的特点。但是他所表示的意义不是非常好（表示路径之间转换的操作数而跟距离没啥关系），而且确定阈值的过程还是很麻烦的。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/2020247.htm">编辑距离</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Edit_distance">Edit distance</a><br>Robust and Fast Similarity Search for Moving Object Trajectories</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/21/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E8%B7%9D%E7%A6%BB%E5%BD%92%E5%B9%B6MD%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/21/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E8%B7%9D%E7%A6%BB%E5%BD%92%E5%B9%B6MD%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">路径匹配之距离归并MD算法简析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-21T14:41:45+00:00">
+                2016-04-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
+                    <span itemprop="name">Trajectory Similarity</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>距离归并算法（Merge Distance）也是一种计算路径相似度的算法（其实“路径归并”是我自己瞎翻译的，因为没有找到更加官方的中文翻译）。跟DTW，LCSS之类不同，他提出来时间不算长，但是思想也是十分简单的。计算方便理解容易，也是进行路径相似度匹配的不错的思路。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>MD算法解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都可以是一个二维坐标点或者是更高维度的坐标。现在我们需要找到一条路径，使他经过这两个序列的所有点，且保证若$i &lt; j$那么$A_j$一定在$A_i$后面出现（对于$B$亦然）。显然这样我们可以有多种结果，那么我们只要取最短的那个路径来作为最后能够代表他们相似度的路径。具体要求如下图所示：</p>
+<p><img src="/images/2016/04/21/1/1.png"></p>
+<p>对于左边的图，下面的那个路径就是对上面的路径进行归并后的最短路径；对于右边的图，绿色的实线路径就是对蓝色和红色的虚线路径归并后的最短路径。</p>
+<p>Merge Distance算法就是为了求出这个最短的路径长度。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>简单dp。</p>
+<p>对于序列$A[1:n],B[1:m]$，令$MDa[i][j]$表示以$A[i]$为终点的序列$A[1:i]$和$B[1:j]$所形成的最短路径的长度；令$MDb[i][j]$表示以$B[j]$为终点的序列$A[1:i]$和$B[1:j]$所形成的最短路径的长度；$dis(X,Y)$表示$X$和$Y$之间的距离。这样我们就可以构造如下的递推关系式：</p>
+<p>$i&#x3D;1:$</p>
+<p>$$MDa[i][j]&#x3D;dis(A[i],B[j])+\sum_{k&#x3D;2}^{j}dis(B[k-1],B[k])$$</p>
+<p>$j&#x3D;1:$</p>
+<p>$$MDb[i][j]&#x3D;dis(A[i],B[j])+\sum_{k&#x3D;2}^{i}dis(A[k-1],A[k])$$</p>
+<p>$for\ 1&lt; i\leq n,1\leq j \leq m:$</p>
+<p>$$MDa[i][j]&#x3D;min\left\{\begin{matrix}MDa[i-1][j]+dis(A[i-1],A[i])\\MDb[i-1][j]+dis(A[i],B[j])\end{matrix}\right.$$</p>
+<p>$for\ 1\leq i\leq n,1&lt; j \leq m:$</p>
+<p>$$MDb[i][j]&#x3D;min\left\{\begin{matrix}MDa[i][j-1]+dis(A[i],B[j])\\MDb[i][j-1]+dis(B[j-1],B[j])\end{matrix}\right.$$</p>
+<p>&nbsp;</p>
+<p>这样我们就可以很容易的求出$MDa[n][m]$和$MDb[n][m]$，然后取其中的较小值作为最终的长度。复杂度$O(m*n)$</p>
+<h2 id="后续处理"><a href="#后续处理" class="headerlink" title="后续处理"></a>后续处理</h2><p>通过上面的算法我们算出了两个序列归并后的路径长度记为$L(A,B)$，同时我们把路径$A$的长度记为$L(A)$，路径$B$的长度记为$L(B)$。当两个路径完全重合的时候，很明显这个值会等于$L(A)\ or\ L(B)$。显然，如果我们想把$L(A,B)$作为路径相异度的量度的话，最好还是让他此时的值等于零。因此我们会对他的值进行一下处理，使他更像一个相似度的量度而不仅仅是一种距离。我们如下定义这个量度$MD(A,B)$：</p>
+<p>$$MD(A,B)&#x3D;\frac{2*L(A,B)}{L(A)+L(B)}-1$$</p>
+<p>这样，我们所定义的这个值就满足路径完全相同时，相异度就是０，而且这个值并不会随着路径长度的增加而丧失准确度。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Merge Distance算法所得到的量度对于原路径点与<strong>降采样（SubSampling）</strong>后的路径点或**超采样(SuperSampling)**后的路径点的相异度评判差别很小（论文中实验为证），这也是相对于传统的DTW，欧氏距离等相似度评判方法表现突出的地方。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Anas Ismail,Antoine Vigneron.A New Trajectory Similarity Measure for GPS Data, (KAUST) Thuwal 23955-6900, Saudi Arabia</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/20/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97LCSS%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1544,326 +1860,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" itemprop="url">Scikit-learn包基本使用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-09T06:50:02+00:00">
-                2016-04-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><a target="_blank" rel="noopener" href="http://scikit-learn.org/stable/">Scikit-learn</a>的包是机器学习使用的最全也是实用的包，封装了许多机器学习算法，包括各种分类、回归、聚类、降维、模型选择、预处理等许多方面的内容，提供了相当于黑盒的接口，非常适合初学者使用。</p>
-<p>在朋友的推荐下发现了<a target="_blank" rel="noopener" href="https://www.kaggle.com/">Kaggle</a>这个网站，这里面有很多的机器学习的数据和基本的题目，通过这些练习可以比较好的掌握机器学习的算法。因此就在这当中拿了<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/titanic">Titanic号遇难人员的预测</a>做了个实验。其实做法十分简单，权当熟悉框架了。</p>
-<h2 id="题目要求"><a href="#题目要求" class="headerlink" title="题目要求"></a>题目要求</h2><p>题目给定了Titannic号上人员的信息（包括阶层、姓名、性别、年龄、船上直系亲属的个数、船上表亲的个数、船票号、船费、包厢、登船地点等内容），并给出他们的生存情况；然后再给定一些人的信息，让我们预测他们的生存情况。</p>
-<p><img src="/images/2016/04/09/1/1.png"></p>
-<p>数据是以csv文件的形式给出的，如上图所示。</p>
-<p>最后从类似的文件里读取另外一波人的信息，并将预测结果输出到一个csv文件中。具体数据规范见原题《<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/titanic">Titanic号遇难人员的预测</a>》。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>对于这种问题其实只要把字符串的描述的特征提取成特征向量然后随便跑个学习算法就可以了，至于什么学习算法好还是要具体问题具体分析，都用一遍就知道了，我这里用的是朴素贝叶斯模型。</p>
-<p>注意到有些特征是没有意义的，比如名字、船票号啥的，这些特征可以忽略；还有就是有的年龄和票价是没有的，那么简单点考虑就用平均值代替就好了。</p>
-<p>具体实现也就很简单了，主要是Scikit-learn的使用。</p>
-<p><strong>代码如下：</strong></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> csv,re</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> metrics</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#read csv data</span></span><br><span class="line">reader=csv.reader(file(<span class="string">&#x27;train.csv&#x27;</span>))</span><br><span class="line">data=[]</span><br><span class="line">age=[]</span><br><span class="line">price=[]</span><br><span class="line">start=<span class="literal">True</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> reader:</span><br><span class="line">    <span class="keyword">if</span> start:</span><br><span class="line">        start=<span class="literal">False</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    data.append(item)</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">5</span>]!=<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        age.append(<span class="built_in">float</span>(item[<span class="number">5</span>]))</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">9</span>]!=<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        price.append(<span class="built_in">float</span>(item[<span class="number">9</span>]))</span><br><span class="line">meanAge=np.array(age).mean()</span><br><span class="line">meanPrice=np.array(price).mean()</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">5</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        item[<span class="number">5</span>]=meanAge</span><br><span class="line">    <span class="keyword">if</span>(item[<span class="number">9</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        item[<span class="number">9</span>]=meanPrice</span><br><span class="line"></span><br><span class="line"><span class="comment">#generate learning data</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getFeature</span>(<span class="params">dataItem</span>):</span><br><span class="line">    feature=[]</span><br><span class="line">    <span class="comment">#Pclass</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">2</span>]==<span class="string">&#x27;1&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">elif</span> dataItem[<span class="number">2</span>]==<span class="string">&#x27;2&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Sex</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">4</span>]==<span class="string">&#x27;female&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Age</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">5</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#SibSp</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">6</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Parch</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">7</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Fare</span></span><br><span class="line">    feature.append(<span class="built_in">float</span>(dataItem[<span class="number">9</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Cabin</span></span><br><span class="line">    <span class="keyword">if</span>  dataItem[<span class="number">10</span>]==<span class="string">&#x27;&#x27;</span>:</span><br><span class="line">        feature.append(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.append(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">#Embarked</span></span><br><span class="line">    <span class="keyword">if</span> dataItem[<span class="number">11</span>]==<span class="string">&#x27;S&#x27;</span>:</span><br><span class="line">        feature.extend([<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">elif</span> dataItem[<span class="number">11</span>]==<span class="string">&#x27;C&#x27;</span>:</span><br><span class="line">        feature.extend([<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        feature.extend([<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> feature,<span class="built_in">int</span>(dataItem[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">x=[]</span><br><span class="line">y=[]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">    f,l=getFeature(item)</span><br><span class="line">    x.append(f)</span><br><span class="line">    y.append(l)</span><br><span class="line"></span><br><span class="line"><span class="comment">#classify</span></span><br><span class="line">model = GaussianNB()</span><br><span class="line">model.fit(x, y)</span><br><span class="line"></span><br><span class="line">expected=y</span><br><span class="line">predicted = model.predict(x)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(metrics.classification_report(expected, predicted))</span><br><span class="line"><span class="built_in">print</span>(metrics.confusion_matrix(expected, predicted))</span><br><span class="line"></span><br><span class="line"><span class="comment">#predict and write</span></span><br><span class="line">reader=csv.reader(file(<span class="string">&#x27;test.csv&#x27;</span>,<span class="string">&#x27;rb&#x27;</span>))</span><br><span class="line">testData=[]</span><br><span class="line">start=<span class="literal">True</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> reader:</span><br><span class="line">    <span class="keyword">if</span> start:</span><br><span class="line">        start=<span class="literal">False</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    newItem=[]</span><br><span class="line">    newItem.append(-<span class="number">1</span>)</span><br><span class="line">    newItem.append(item[<span class="number">0</span>])</span><br><span class="line">    newItem.extend(item[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">if</span>(newItem[<span class="number">5</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        newItem[<span class="number">5</span>]=meanAge</span><br><span class="line">    <span class="keyword">if</span>(newItem[<span class="number">9</span>]==<span class="string">&#x27;&#x27;</span>):</span><br><span class="line">        newItem[<span class="number">9</span>]=meanPrice</span><br><span class="line"></span><br><span class="line">    testData.append(newItem)</span><br><span class="line"></span><br><span class="line">testX=[]</span><br><span class="line">testId=[]</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> testData:</span><br><span class="line">    f,Id=getFeature(item)</span><br><span class="line">    testX.append(f)</span><br><span class="line">    testId.append(Id)</span><br><span class="line"></span><br><span class="line">predictY=model.predict(testX)</span><br><span class="line"></span><br><span class="line">writer=csv.writer(file(<span class="string">&#x27;result.csv&#x27;</span>,<span class="string">&#x27;wb&#x27;</span>))</span><br><span class="line"></span><br><span class="line">writer.writerow([<span class="string">&#x27;PassengerId&#x27;</span>,<span class="string">&#x27;Survived&#x27;</span>])</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(testId)):</span><br><span class="line">    writer.writerow([testId[i],predictY[i]])</span><br></pre></td></tr></table></figure>
-
-<p>要注意以下几点：</p>
-<ol>
-<li>在对csv文件进行读取时，我们从reader中只能逐行读取一遍，因此需要将他读到临时list里方便后续处理；</li>
-<li>区分list的append和extend方法的使用，一个是添加一个元素，一个是合并两个list。</li>
-<li>传入的学习参数时必须都是float数据类型。</li>
-<li>学习模型可以非常容易进行替换，我当前用的是高斯朴素贝叶斯模型，其实完全可以换成决策树（DecisionTreeClassifier）、SVM（SVC）等其他分类模型，而我们要改的只是<code>model = GaussianNB()</code>一行而已。</li>
-</ol>
-<p><strong>输出结果：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          0       0.83      0.83      0.83       549</span><br><span class="line">          1       0.72      0.72      0.72       342</span><br><span class="line"></span><br><span class="line">avg / total       0.79      0.79      0.79       891</span><br><span class="line"></span><br><span class="line">[[454  95]</span><br><span class="line"> [ 96 246]]</span><br></pre></td></tr></table></figure>
-<p>第一块是对于每一个分类所得到的准确率、召回率、f1-score，和分出的总数；</p>
-<p>第二块是混淆矩阵；</p>
-<p>具体含义可见<a href="/2016/04/09/2">机器学习中分类准确率的评估方法</a>。</p>
-<p>最后尝试了下决策树跟SVM，发现使用决策树的结果是最好的（准确率甚至到了99%）。不过最终提交上去才发现最终的识别率还是好低(72%)。。。不过仔细想想，想这种的预测还是挺不靠谱的，毕竟偶然因素太大了，仅仅凭着这些东西感觉完全不可能达到100%的准确率啊。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/08/%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/08/%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8/" itemprop="url">朴素贝叶斯分类器</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-08T15:50:05+00:00">
-                2016-04-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>朴素贝叶斯分类器是机器学习中最基础的分类算法了，之前一直忽视这个算法，感觉这种简单利用贝叶斯公式的方法的确很Naive。但是事实上这个算法在对于特征相互独立的分类问题来说还是非常好用的。其基本思想就是在给定在各种情况下一个事件发生的先验概率的情况下，套用贝叶斯公式求出给定各种情况下给定事件发生的后验概率。思想非常简单，但是在某些情况下效果还是非常好的，值得掌握。</p>
-<h2 id="贝叶斯公式"><a href="#贝叶斯公式" class="headerlink" title="贝叶斯公式"></a>贝叶斯公式</h2><p>贝叶斯公式很简单了，对于事件A和事件B，下面的公式显然成立：</p>
-<p>$$P(A|B)&#x3D;\frac{P(A)P(B|A)}{P(B)}$$</p>
-<p>这也基本不用证明，分母移过来两边就显然相等了。</p>
-<p>在实际应用中，只要把事件B换成$F_1F_2F_3…F_n$等几个特征就可以了。有了这个公式，对于有互不相关的离散特征的分类问题就可以对数据进行简单统计然后对于给定特征求出预期事件了。</p>
-<h2 id="连续特征处理"><a href="#连续特征处理" class="headerlink" title="连续特征处理"></a>连续特征处理</h2><p>从贝叶斯公式的使用可以了解到，这个方法只能处理离散性质的问题，比如性别、身份、地区等特征，但是对于类似年龄、身高、体重等连续性比较强的特征就不太好用概率来表示了。这时通常有下面两种处理方式：</p>
-<p><strong>分段处理</strong></p>
-<p>比如对于年龄，可以分为[0-10],[10-20],[20-30]。。。等较小的区间，这样就可以把他看成是一个离散的特征了。</p>
-<p><strong>高斯化处理</strong></p>
-<p>把连续的值看成是近似高斯分布，求出均值和标准差（最大似然值），这样对于某一个值我们就可以求出一个值，用这个值来表示概率即可。</p>
-<h2 id="除零问题处理"><a href="#除零问题处理" class="headerlink" title="除零问题处理"></a>除零问题处理</h2><p>很明显，在某些特殊的情况下贝叶斯分类器的分母可能为零，这样就会导致一些不令人愉悦的错误。这时我们只要将所有的计数都加一，这样在数据较大时就完全可以忽略这点误差，这就叫<strong>Laplace校准</strong>。</p>
-<p>上面就是朴素贝叶斯分类的基本内容，相比与这个“朴素”的算法，还有一个应用贝叶斯公式的算法叫“<strong>贝叶斯网络</strong>”，暂时还没研究到，以后有机会再来学习。</p>
-<h2 id="相关参考"><a href="#相关参考" class="headerlink" title="相关参考"></a>相关参考</h2><p><a target="_blank" rel="noopener" href="http://scikit-learn.org/stable/modules/naive_bayes.html">Scikit-learn:Naive Bayes</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/leoo2sk/archive/2010/09/17/naive-bayesian-classifier.html">分类算法之朴素贝叶斯分类</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/lsldd/article/details/41542107">用Python开始机器学习之朴素贝叶斯分类器</a><br><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2013/12/naive_bayes_classifier.html">朴素贝叶斯分类器的应用</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1914,7 +1910,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">564</span>
+                  <span class="site-state-item-count">566</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1925,7 +1921,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">67</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1936,7 +1932,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-count">278</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

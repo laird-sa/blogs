@@ -307,6 +307,324 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/11/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Bctags%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/11/vim%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E4%B9%8Bctags%E5%B7%A5%E5%85%B7/" itemprop="url">vim高级用法之ctags工具</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-11T14:59:32+00:00">
+                2016-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>都说vim强大，然而之前的简单用法并没有让我觉得vim有多强大，顶多是一个功能齐全的记事本，只到我发现了这个工具－－ctags，以及由他衍生出来的很多插件，让我明白了，“哦，vim 至少可以作为一个很不错的C语言的IDE”。～～</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>ctags工具其实可以认为是为C语言的文件添加索引的工具。C文件经过他的处理后会生成一个tags文件来保存文件中所有函数、变量、宏的索引，通过这个索引，就能非常方便的在后续的编辑过程中获取这些信息，从而达到自动补全、识别函数和变量等一系列的功能。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>ctags工具有他的官网可以下载，但是实际上我们并不需要手动安装。一般情况下ubuntu系统内会自带ctags工具，他的名字叫：exuberant-ctags（朝气蓬勃的C标签0.0）。可以通过<code>$ ctags --version </code>命令来查看版本。如果没有，则只需要<code>$ sudo apt-get install exuberant-ctags</code> 就可以直接下载使用了。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>首先，对我们需要索引的文件进行预处理：<code>$ctags foo.cpp</code>（当然，如果需要递归处理所有子文件夹的话可以加 -R 参数，如： <code>$ctags -R</code>）。</p>
+<p>预处理后，我们会发现在当前文件夹下出现了名叫tags的文件。比如，对于如下的cpp文件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FOO</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">fun</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> global;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">fun</span>();</span><br><span class="line">        FOO foo;</span><br><span class="line">        <span class="type">int</span> local;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成的tags文件是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">!_TAG_FILE_FORMAT       2       /extended format; --format=1 will not append ;&quot; to lines/</span><br><span class="line">!_TAG_FILE_SORTED       1       /0=unsorted, 1=sorted, 2=foldcase/</span><br><span class="line">!_TAG_PROGRAM_AUTHOR    Darren Hiebert  /dhiebert@users.sourceforge.net/</span><br><span class="line">!_TAG_PROGRAM_NAME      Exuberant Ctags //</span><br><span class="line">!_TAG_PROGRAM_URL       http://ctags.sourceforge.net    /official site/</span><br><span class="line">!_TAG_PROGRAM_VERSION   5.9~svn20110310 //</span><br><span class="line">FOO     a.cpp   /^struct FOO&#123;$/;&quot;       s       file:</span><br><span class="line">fun     a.cpp   /^void fun()&#123;$/;&quot;       f</span><br><span class="line">global  a.cpp   /^int global;$/;&quot;       v</span><br><span class="line">main    a.cpp   /^int main()&#123;$/;&quot;       f</span><br></pre></td></tr></table></figure>
+<p>大概解释一下他的文件格式就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">格式：&#123;tagname&#125; &#123;TAB&#125; &#123;tagfile&#125; &#123;TAB&#125; &#123;tagaddress&#125; &#123;term&#125; &#123;field&#125; ..</span><br><span class="line">• &#123;tagname&#125; - 标识符名字,例如函数名、类名、结构名、宏等。不能包含制表符。</span><br><span class="line">• &#123;tagfile&#125; - 包含 &#123;tagname&#125; 的文件。它不能包含制表符。</span><br><span class="line">• &#123;tagaddress&#125; - 可以定位到 &#123;tagname&#125;光标位置的 Ex 命令。通常只包含行号或搜索命令。出于安全的考虑,vim会限制其中某些命令的执行。</span><br><span class="line">• &#123;term&#125; - 设为 ;&quot; ,这是为了兼容Vi编辑器,使Vi忽略后面的&#123;field&#125;字段。</span><br><span class="line">• &#123;field&#125; .. - 此字段可选,通常用于表示此&#123;tagname&#125;的类型是函数、类、宏或是其它。</span><br><span class="line">!_TAG_FILE_SORTED&lt;Tab&gt;1&lt;Tab&gt;&#123;anything&#125;</span><br><span class="line">上面这个标记说明tag文件是经过排序的,并且排序时区分了大小写,对排序的tag,vim会使用二分法来进行查找,大大加快了查找速度;如果值为0,则表示tag文件未经排序;如果值为2,则表示tag文件是忽略大小写排序的。</span><br></pre></td></tr></table></figure>
+<p>其实就是规定一种保存结构体、函数名、和全局变量的索引了。</p>
+<p>经过这样的处理之后，我们就可以使用他带来的非常实用的操作了：</p>
+<ol>
+<li>对于已经建立索引的条目，我们可以用<code>Ctrl+]</code> 的快捷键来快速找到他的声明，即使是位于不同文件（就像很多IDE中的F12用来查看声明一样），查看完之后可以通过<code>Ctrl+t </code> 或<code>Ctrl+o</code> 来返回原来的地方。</li>
+<li>选中局部变量，按<code>gd</code> 可以搜索到该变量的声明。</li>
+<li>选中单词，按<code>*</code>可以转到该单词下一次出现的地方。</li>
+<li>选中单词，按<code>#</code>可以转到该单词上一次出现的地方。</li>
+<li>在行末模式下输入<code>:ta foo</code> 可以立刻找到foo函数的声明。</li>
+</ol>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>要使用tags文件，默认是必须要在当前含有tags文件的地方打开vim才能加载到tags文件，否则需要在行末模式下手动指定<code>:set tags=（你存放tags文件的路径，如果有多个路径的话中间用,隔开，而且貌似不支持*之类的通配符）</code> 或者在<code>/etc/vim/vimrc</code>里面加上这句话，或者在<code>~/.vimrc</code> 里面加上这句话。</p>
+<p>晓得了这个工具，就像是打开了vim 插件类工具的大门，强大的 vim 配置就要诞生了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/10/%E4%BF%9D%E6%8C%81SSH%E8%BF%9E%E6%8E%A5%E6%8C%81%E7%BB%AD%E4%B8%8D%E6%96%AD%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/10/%E4%BF%9D%E6%8C%81SSH%E8%BF%9E%E6%8E%A5%E6%8C%81%E7%BB%AD%E4%B8%8D%E6%96%AD%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/" itemprop="url">保持SSH连接持续不断的配置方法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-10T12:40:47+00:00">
+                2016-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SSH/" itemprop="url" rel="index">
+                    <span itemprop="name">SSH</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在修改服务器的一些文件的过程中，经常碰到的情况就是需要隔一段时间修改一下文件，然后需要去查阅相关的资料，等下一次想修改的时候发现ssh连接由于长时间未相应已经断开了。而且这时候终端会卡在那里，十分的不方便。所以在网上找了几个配置SSH的方法，能保证连接能够长时间不断开。<br>方法有两种，一般配置一种就可以。但是我为了效果更好，把他们同时配置一下：</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>在<code>/etc/ssh/ssh_config</code> 配置文件中，将<code>Host *</code> 后面添加<code>ServerAliveInterval 30 </code> ，再保存即可。</p>
+<p>那么这个条目哪来的呢？其实在他配置文件本身早就有这个的说明了。</p>
+<p>打开配置文件<code>/etc/ssh/ssh_config</code> ，我们大概会看到这样的样子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"># This is the ssh client system-wide configuration file.  See</span><br><span class="line"># ssh_config(5) for more information.  This file provides defaults for</span><br><span class="line"># users, and the values can be changed in per-user configuration files</span><br><span class="line"># or on the command line.</span><br><span class="line"></span><br><span class="line"># Configuration data is parsed as follows:</span><br><span class="line">#  1\. command line options</span><br><span class="line">#  2\. user-specific file</span><br><span class="line">#  3\. system-wide file</span><br><span class="line"># Any configuration value is only changed the first time it is set.</span><br><span class="line"># Thus, host-specific definitions should be at the beginning of the</span><br><span class="line"># configuration file, and defaults at the end.</span><br><span class="line"></span><br><span class="line"># Site-wide defaults for some commonly used options.  For a comprehensive</span><br><span class="line"># list of available options, their meanings and defaults, please see the</span><br><span class="line"># ssh_config(5) man page.</span><br><span class="line"></span><br><span class="line">Host *</span><br><span class="line">#   ForwardAgent no</span><br><span class="line">#   ForwardX11 no</span><br><span class="line">#   ForwardX11Trusted yes</span><br><span class="line">#   RhostsRSAAuthentication no</span><br><span class="line">#   RSAAuthentication yes</span><br><span class="line">#   PasswordAuthentication yes</span><br><span class="line">#   HostbasedAuthentication no</span><br><span class="line">。。。。。</span><br></pre></td></tr></table></figure>
+<p>注意到在最后有很多的注释掉的配置，很明显，这就是常用的可选条目。但是看了下并没有我们想配置的内容。</p>
+<p>再仔细的看了下开头的说明，注意到有这样一句话：<code># ssh_config(5) man page.</code> ，哦～，原来这个配置文件有man文档，OK，打开之后果然在当中找到了这样的配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ServerAliveInterval</span><br><span class="line">             Sets a timeout interval in seconds after which if no</span><br><span class="line">             data has been received from the server, ssh(1) will</span><br><span class="line">             send a message through the encrypted channel to request</span><br><span class="line">             a response from the server.  The default is 0, indicat‐</span><br><span class="line">             ing that these messages will not be sent to the server,</span><br><span class="line">             or 300 if the BatchMode option is set.  This option</span><br><span class="line">             applies to protocol version 2 only.  ProtocolKeepAlives</span><br><span class="line">             and SetupTimeOut are Debian-specific compatibility</span><br><span class="line">             aliases for this option.</span><br></pre></td></tr></table></figure>
+<p>那么一切都清楚了～～～原理就是让客户端每隔一段时间向服务端发送信息来保持唤醒。</p>
+<h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><p>服务段的原理和客户端一样，只不过由于是服务器，所以配置文件不一样。服务端的配置文件是<code>/etc/ssh/sshd_config</code> 。查看<code>man sshd_config</code> ，我们可以看到这样两个配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveCountMax</span><br><span class="line">             Sets the number of client alive messages (see below)</span><br><span class="line">             which may be sent without sshd(8) receiving any mes‐</span><br><span class="line">             sages back from the client.  If this threshold is</span><br><span class="line">             reached while client alive messages are being sent,</span><br><span class="line">             sshd will disconnect the client, terminating the ses‐</span><br><span class="line">             sion.  It is important to note that the use of client</span><br><span class="line">             alive messages is very different from TCPKeepAlive</span><br><span class="line">             (below).  The client alive messages are sent through</span><br><span class="line">             the encrypted channel and therefore will not be spoofa‐</span><br><span class="line">             ble.  The TCP keepalive option enabled by TCPKeepAlive</span><br><span class="line">             is spoofable.  The client alive mechanism is valuable</span><br><span class="line">             when the client or server depend on knowing when a con‐</span><br><span class="line">             nection has become inactive.</span><br><span class="line"></span><br><span class="line">             The default value is 3\.  If ClientAliveInterval (see</span><br><span class="line">             below) is set to 15, and ClientAliveCountMax is left at</span><br><span class="line">             the default, unresponsive SSH clients will be discon‐</span><br><span class="line">             nected after approximately 45 seconds.  This option</span><br><span class="line">             applies to protocol version 2 only.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveInterval</span><br><span class="line">             Sets a timeout interval in seconds after which if no</span><br><span class="line">             data has been received from the client, sshd(8) will</span><br><span class="line">             send a message through the encrypted channel to request</span><br><span class="line">             a response from the client.  The default is 0, indicat‐</span><br><span class="line">             ing that these messages will not be sent to the client.</span><br><span class="line">             This option applies to protocol version 2 only.</span><br></pre></td></tr></table></figure>
+<p>根据说明，添加如下两行即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveInterval 60</span><br><span class="line">ClientAliveCountMax 3</span><br></pre></td></tr></table></figure>
+<p>这样就可以保证连接始终唤醒了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/08/%E4%B8%80%E4%B8%AA%E5%AE%9E%E7%94%A8%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9F%A5%E9%87%8D%E7%A8%8B%E5%BA%8Fsim%E5%B7%A5%E5%85%B7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1544,306 +1862,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/" itemprop="url">一款开源的车牌号码识别系统openalpr</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-27T15:56:49+00:00">
-                2015-12-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>关于车牌号码的识别，其实研究也很多了。但是对于普通的开发者而言，本身不想去研究这些算法层面的东西，只是想能够直接应用来做我们自己需要的事情。虽然很多网站提供了Api接口，但是毫无疑问这是要money的。之前看到国人发的一片博客介绍他自己写的开源车牌识别系统叫Easypr，我自己也下载下来研究了一下。然而使用的时候发现错误有很多，而且没有正规的接口文档，做的也特别粗糙，显然不太适合直接使用。百度不到我就直接去google，果然还是发现了老外写的一款开源的识别软件–openalpr(Open Automatic License Plate Recognition 开源自动车牌识别)，发布在<a target="_blank" rel="noopener" href="https://github.com/openalpr/openalpr">github</a>上。拿过来测试之后发现效果还挺好的，而且文档清楚，虽然不能识别中文，但是对字母和数字的识别准确性还是挺好的。不管怎么说，先记下来以防以后用到。</p>
-<p>这个程序有很多版本，有各种语言的接口，也有Linux下的二进制文件。鉴于现在不需要用来开发，我们直接用他编译成的二进制命令即可。当然如果有需要，也可以去下载他的源码，调用他的函数库。如果有闲工夫的话也可以尝试这改一改。。。。让他能识别中文，造福国人。</p>
-<p>安装：</p>
-<p>使用github上提供的最简单的方法–</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget -O - http://deb.openalpr.com/openalpr.gpg.key | sudo apt-key add -</span><br><span class="line">echo &quot;deb http://deb.openalpr.com/master/ openalpr main&quot; | sudo tee /etc/apt/sources.list.d/openalpr.list</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install openalpr openalpr-daemon openalpr-utils libopenalpr-dev</span><br></pre></td></tr></table></figure>
-<p>帮助：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">alpr  [-c &lt;country_code&gt;] [--config &lt;config_file&gt;] [-n &lt;topN&gt;] [--seek</span><br><span class="line">         &lt;integer_ms&gt;] [-p &lt;pattern code&gt;] [--clock] [-d] [-j] [--]</span><br><span class="line">         [--version] [-h] &lt;image_file_path&gt;</span><br><span class="line"></span><br><span class="line">Where: </span><br><span class="line"></span><br><span class="line">   -c &lt;country_code&gt;,  --country &lt;country_code&gt;</span><br><span class="line">     Country code to identify (either us for USA or eu for Europe). </span><br><span class="line">     Default=us</span><br><span class="line"></span><br><span class="line">   --config &lt;config_file&gt;</span><br><span class="line">     Path to the openalpr.conf file</span><br><span class="line"></span><br><span class="line">   -n &lt;topN&gt;,  --topn &lt;topN&gt;</span><br><span class="line">     Max number of possible plate numbers to return.  Default=10</span><br><span class="line"></span><br><span class="line">   --seek &lt;integer_ms&gt;</span><br><span class="line">     Seek to the specified millisecond in a video file. Default=0</span><br><span class="line"></span><br><span class="line">   -p &lt;pattern code&gt;,  --pattern &lt;pattern code&gt;</span><br><span class="line">     Attempt to match the plate number against a plate pattern (e.g., md</span><br><span class="line">     for Maryland, ca for California)</span><br><span class="line"></span><br><span class="line">   --clock</span><br><span class="line">     Measure/print the total time to process image and all plates. </span><br><span class="line">     Default=off</span><br><span class="line"></span><br><span class="line">   -d,  --detect_region</span><br><span class="line">     Attempt to detect the region of the plate image.  [Experimental] </span><br><span class="line">     Default=off</span><br><span class="line"></span><br><span class="line">   -j,  --json</span><br><span class="line">     Output recognition results in JSON format.  Default=off</span><br><span class="line"></span><br><span class="line">   --,  --ignore_rest</span><br><span class="line">     Ignores the rest of the labeled arguments following this flag.</span><br><span class="line"></span><br><span class="line">   --version</span><br><span class="line">     Displays version information and exits.</span><br><span class="line"></span><br><span class="line">   -h,  --help</span><br><span class="line">     Displays usage information and exits.</span><br><span class="line"></span><br><span class="line">   &lt;image_file_path&gt;</span><br><span class="line">     Image containing license plates</span><br><span class="line"></span><br><span class="line">   OpenAlpr Command Line Utility</span><br></pre></td></tr></table></figure>
-<p>效果：</p>
-<p><img src="/images/2015/12/27/1/1.jpg"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/Download$ alpr a.jpg</span><br><span class="line">plate0: 10 results</span><br><span class="line">    - EHL5747	 confidence: 90.5541</span><br><span class="line">    - EHL577	 confidence: 83.4746</span><br><span class="line">    - EHLS747	 confidence: 82.0519</span><br><span class="line">    - EH5747	 confidence: 80.6372</span><br><span class="line">    - EHLB747	 confidence: 78.9456</span><br><span class="line">    - EHE5747	 confidence: 78.337</span><br><span class="line">    - EHC5747	 confidence: 77.903</span><br><span class="line">    - EHL747	 confidence: 77.4477</span><br><span class="line">    - EBL5747	 confidence: 76.8316</span><br><span class="line">    - EL5747	 confidence: 75.6551</span><br></pre></td></tr></table></figure>
-<p>对于正面的牌照识别的效果还是很好的，但是对于中国的车牌来说识别的效果就很差了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/26/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C3-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/26/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C3-3/" itemprop="url">苏大Mooc系统的刷课脚本的制作（3/3）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-26T15:36:09+00:00">
-                2015-12-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最后决定用最简单的python脚本进行实现。具体过程部分析了，不过值得一提的是，在登陆获取用户的cookie的时候，他也发送了一个挺长的“随机”串，研究了半天才发现他是使用了md5摘要算法，将密码和密码的摘要一同发给了服务器。。。。。。</p>
-<p>以下是源码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cheat.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> urllib,urllib2,cookielib,md5,re,json,sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">login</span>(<span class="params">name,pwd</span>):</span><br><span class="line">	url_login=<span class="string">&quot;http://ids1.suda.edu.cn/amserver/UI/Login?goto=http://myauth.suda.edu.cn/default.aspx?app=kczx&quot;</span></span><br><span class="line">	m=md5.new()</span><br><span class="line">	m.update(pwd)</span><br><span class="line">	pwd_md5=m.hexdigest()</span><br><span class="line">	cj=cookielib.CookieJar()</span><br><span class="line">	post_data=urllib.urlencode(&#123;</span><br><span class="line">		<span class="string">&#x27;IDButton&#x27;</span>:<span class="string">&#x27;Submit&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;encoded&#x27;</span>:<span class="string">&#x27;false&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;goto&#x27;</span>:<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;gx_charset&#x27;</span>:<span class="string">&#x27;UTF-8&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;IDToken0&#x27;</span>:<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;IDToken1&#x27;</span>:name,</span><br><span class="line">		<span class="string">&#x27;IDToken9&#x27;</span>:pwd,</span><br><span class="line">		<span class="string">&#x27;IDToken2&#x27;</span>:pwd_md5,</span><br><span class="line">	&#125;)</span><br><span class="line">	opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">	opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36))&#x27;</span>)]</span><br><span class="line">	urllib2.install_opener(opener)</span><br><span class="line">	req=urllib2.Request(url_login,post_data)</span><br><span class="line">	urllib2.urlopen(req)</span><br><span class="line">	<span class="keyword">return</span> opener</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">watch</span>(<span class="params">PlainId,fPartName,fPartId,fSecond,fVideoSecond,fVideoFileId,opener</span>):</span><br><span class="line">	<span class="keyword">if</span> fVideoFileId==<span class="string">u&#x27;0&#x27;</span>:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	url=<span class="string">&#x27;http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SSetStageLearnPartStudent&amp;fPlanID=&#x27;</span>+PlainId+<span class="string">&#x27;&amp;fPartID=&#x27;</span>+fPartId+<span class="string">&#x27;&amp;fSecond=&#x27;</span>+fVideoSecond</span><br><span class="line">	urllib2.install_opener(opener)</span><br><span class="line">	urllib2.urlopen(url)</span><br><span class="line">	<span class="built_in">print</span> fPartName+<span class="string">&#x27;has been watched&#x27;</span></span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">	<span class="comment">#url_lecture=&#x27;http://kczx.suda.edu.cn/G2S/Learning/Learning.htm?Part=&amp;Plan=34&amp;type=2&#x27;</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(sys.argv)!=<span class="number">4</span>:</span><br><span class="line">		<span class="built_in">print</span> <span class="string">&#x27;Please enter &lt;number&gt; &lt;pwd&gt; &lt;url&gt;&#x27;</span></span><br><span class="line">		sys.exit();</span><br><span class="line">	name=sys.argv[<span class="number">1</span>]</span><br><span class="line">	pwd=sys.argv[<span class="number">2</span>]</span><br><span class="line">	url_lecture=sys.argv[<span class="number">3</span>]</span><br><span class="line">	opener=login(name,pwd)</span><br><span class="line">	urllib2.install_opener(opener)</span><br><span class="line">	PlainId=re.findall(<span class="string">r&#x27;(?&lt;=Plan=).*?(?=&amp;)&#x27;</span>,url_lecture)[<span class="number">0</span>]</span><br><span class="line">	url_ajax=<span class="string">&#x27;http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SStageLearnGetChapter&amp;fPlanID=&#x27;</span>+PlainId</span><br><span class="line">	ajax_text=urllib2.urlopen(url_ajax).read()</span><br><span class="line">	ajax_text=ajax_text.replace(<span class="string">&#x27;RowCount&#x27;</span>,<span class="string">&#x27;&quot;RowCount&quot;&#x27;</span>)</span><br><span class="line">	ajax_text=ajax_text.replace(<span class="string">&#x27;Rows&#x27;</span>,<span class="string">&#x27;&quot;Rows&quot;&#x27;</span>)</span><br><span class="line">	s=json.loads(ajax_text)</span><br><span class="line">	fPartName=[]</span><br><span class="line">	fPartId=[]</span><br><span class="line">	fSecond=[]</span><br><span class="line">	fVideoFileId=[]</span><br><span class="line">	fVideoSecond=[]</span><br><span class="line">	<span class="keyword">for</span> k <span class="keyword">in</span> s[<span class="string">&#x27;Rows&#x27;</span>]:</span><br><span class="line">		fPartName.append(k[<span class="string">&#x27;fPartName&#x27;</span>])</span><br><span class="line">		fPartId.append(k[<span class="string">&#x27;fPartID&#x27;</span>])</span><br><span class="line">		fSecond.append(k[<span class="string">&#x27;fSecond&#x27;</span>])</span><br><span class="line">		fVideoSecond.append(k[<span class="string">&#x27;fvideoSecond&#x27;</span>])</span><br><span class="line">		fVideoFileId.append(k[<span class="string">&#x27;fVideoFileID&#x27;</span>])</span><br><span class="line">	<span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(fPartName)):</span><br><span class="line">		watch(PlainId,fPartName[k],fPartId[k],fSecond[k],fVideoSecond[k],fVideoFileId[k],opener)</span><br></pre></td></tr></table></figure>
-<p>当然，为了省事，没有任何的容错处理和用户界面。。。使用时，输入：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ python cheat.py &lt;学号&gt; &lt;密码&gt; &lt;课程网址&gt;</span><br></pre></td></tr></table></figure>
-<p>而且在Linux下，课程网址中的“&amp;”符号需要转义为”&amp;“才能用。。。。。。</p>
-<p>基本就是这些了，按理说如果管理员有心，是可以查出我们提交的数据其实是有问题的，不过目测应该是没人看的吧～～～</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1894,7 +1912,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">564</span>
+                  <span class="site-state-item-count">566</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1905,7 +1923,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">67</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1916,7 +1934,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-count">278</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
