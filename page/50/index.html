@@ -307,6 +307,923 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/07/sudo%E5%91%BD%E4%BB%A4%E5%85%8D%E8%BE%93%E5%AF%86%E7%A0%81%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/07/sudo%E5%91%BD%E4%BB%A4%E5%85%8D%E8%BE%93%E5%AF%86%E7%A0%81%E9%85%8D%E7%BD%AE/" itemprop="url">sudo命令免输密码配置</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-07T03:42:12+00:00">
+                2016-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>闲来无聊再次作死权限的管理，这次是想实现一下输入sudo 命令时无需输入密码的配置。之前看了教程，感觉挺简单的，就没试过。今天突然心血来潮想配置下，结果就被权限玩的很惨，重启了好几次电脑。。。。。。</p>
+<p>网上说的很简单，就是在&#x2F;etc&#x2F;sudoers文件里的<code>%admin ALL=(ALL)  ALL</code> 改成<code>%admin ALL=(ALL) NOPASSWD: ALL</code> 即可。其实他说的也没错，可是自己手敲的时候敲残了，结果保存之后再用sudo 命令就报错了，说无法正确读取sudo！本来修改sudoers文件就需要sudo 命令，现在sudo 命令也用不了了。。。没辙，只能重启电脑进recovery模式重新配置一下了。（方法见：<a href="/2015/10/05/1/">这里</a>）</p>
+<p>好了，修改完之后发现还是不能实现免密码登陆。想了想有可能是我当前的用户不在admin组里，于是打开&#x2F;etc&#x2F;group文件看了看，竟然没有admin这个组。没事，我记得我的用户是在sudo这个组里的，那么再次修改下sudoers文件，在sudo 组里加上<code>NOPASSWD:ALL</code> 即可了。（手残又敲错，重启电脑中。。。。）</p>
+<p>这样配置完之后，试了下果然可行。</p>
+<p>后来想了想，如果每次不小心配置错sudoers 文件都要重启的话，岂不是很麻烦。肯定有更好的方法。查了下发现可以用　visudo 这个命令来修改&#x2F;etc&#x2F;sudoers文件。用这个修改之后，他会检查语法，如果语法不合规范，他是不会让你保存的。这倒是蛮人性化的，只是这个命令用的是nano 编辑器，vim 用惯了就完全不习惯这种东西了。不高兴。</p>
+<p>网上找了下还有一个办法，就是先给sudoers文件740的权限，修改，修改完再改回440。这样就可以在出错的时候有修改的权限了。然而试了下并没有卵用，就算有440的权限，修改这个还是要用sudo 命令的，此法不通。。。（作死重启修改配置中。。。）</p>
+<p>然后突发奇想，何不把权限改成777，这样不就能修改了么，大不了最后再改回来就行了。试了下，发现ubuntu有一个坑爹、但是很有道理的策略，就是sudoers文件的不能对所有用户都有７的权限，否则就不给你用。。。。无奈，再次啥都动不了（作死重启修改配置中。。。）</p>
+<p>最后突然意识到－－－－为什么不在一开始就用　sudo  -i　进入root 模式呢，这样不就不用输入sudo 来修改文件了么。。。。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/06/Hustoj%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%89%E8%A3%85%E6%90%AD%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/06/Hustoj%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%89%E8%A3%85%E6%90%AD%E5%BB%BA/" itemprop="url">Hustoj系统的安装搭建</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-06T15:32:46+00:00">
+                2016-01-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本来一直觉得没什么事情做，最近想了想还是学着写些网页吧，于是就打算用一些平台来学习web开发。想来想去还是研究一下OnlineJudge系统之类的网页。一方面自己之前经常使用，另一方面，觉得以后或许在当助教的过程中能用的到。于是找到了华中科技大学开源的一个OJ系统，据说很出名，但是搭建果断还是费了一点功夫的。</p>
+<p>首先得找到正确的渠道，本来一直是在github上找的，然而找到后安装好了发现效果并不好，运行也特别的慢。后来发现了作者的博客 <a target="_blank" rel="noopener" href="http://blog.csdn.net/zhblue/article/details/9125387">zhblue的博客</a>，才知道原来github上的是个beta版的，稳定版的在<a target="_blank" rel="noopener" href="https://code.google.com/p/hustoj/downloads/list">googleCode</a>上。（然而据说googlecode 就要关了，估计就要下不到了。。。）</p>
+<p>把下载的文件包解压缩会的到这么多的文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:~/下载/install$ ls</span><br><span class="line">db.sql            install-interactive.sh  java0.policy  judged</span><br><span class="line">hustoj-read-only  install.sh              judge.conf    README</span><br></pre></td></tr></table></figure>
+<p>老规矩先看README，晓得文件的结构，然后看先install.sh（不要手残直接执行，，很多东西都要事先配置下的）</p>
+<p>我们打开install.sh会看到开头的一段话：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:~/下载/install$ head install.sh</span><br><span class="line">#!/bin/bash</span><br><span class="line">#before install check DB setting in</span><br><span class="line">#	judge.conf</span><br><span class="line">#	hustoj-read-only/web/include/db_info.inc.php</span><br><span class="line">#	and down here</span><br><span class="line">#and run this with root</span><br><span class="line"></span><br><span class="line">#CENTOS/REDHAT/FEDORA WEBBASE=/var/www/html APACHEUSER=apache</span><br><span class="line">WEBBASE=/var/www</span><br><span class="line">APACHEUSER=www-data</span><br></pre></td></tr></table></figure>
+<p>这样我们就知道了，我们需要配置下judge.conf等的文件，来确保网页能访问到数据库，主要就是提供下数据库的用户名和密码。</p>
+<p>还有就是默认的站点的位置，apache2默认应该是要放在&#x2F;var&#x2F;www&#x2F;html下，改下就好了。</p>
+<p>然后还要注意一点，就是我们会发现install.sh脚本里会执行其他的脚本，而执行的命令是:<code>sudo ./make.sh</code> 这样的。而事实上这谢文件又没有可执行的权限。想直接执行的需要用：<code>sudo bash ./make.sh</code>才行。那么我们要做的就是要么修改脚本，要么给所有的.sh文件都赋予x权限。（之前没有注意到这个脚本没有得到执行，结果导致无法进行判题，后来手动执行了一下就好了）</p>
+<p>最后直接install.sh即可，完美不报错，打开&#x2F;JudgeOnline 目录可以看到已经搭建的网站了。</p>
+<p>搭建完成后发现并不能直接用，因为没有设置管理员的权限，回头看下README，发现原来第一个管理员账户是要手动敲进数据库的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">注册用户</span><br><span class="line">	http://127.0.0.1/JudgeOnline/registerpage.php</span><br><span class="line">	注册一个普通帐号</span><br><span class="line">创建管理员</span><br><span class="line">    insert into privilege(user_id,rightstr) values(&#x27;zhblue&#x27;,&#x27;administrator&#x27;);</span><br><span class="line">    zhblue 为需要加管理员权限的帐号</span><br></pre></td></tr></table></figure>
+<p>照着弄就好了，最后就可以进入&#x2F;JudgeOnline&#x2F;admin看到后台了。</p>
+<p>另：这里还有一个坑，不知道什么原因，实验室的电脑能用svn下载评测机的内核，而服务器的电脑不能下载（日了狗了，明明hosts什么的都是一样的而且都是用的校园网）。。。而在install.sh中需要下载最新版本的内核，这导致了服务器上搭建的网站不能进行编译。。。这个问题最后通过将本地下载的最新内核上传上去解决的。。。也是醉了。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/05/Ubuntu%E4%B8%AD%E4%BF%AE%E6%94%B9%E4%B8%BB%E6%9C%BA%E5%90%8D%E7%9A%84%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/05/Ubuntu%E4%B8%AD%E4%BF%AE%E6%94%B9%E4%B8%BB%E6%9C%BA%E5%90%8D%E7%9A%84%E6%96%B9%E6%B3%95/" itemprop="url">Ubuntu中修改主机名的方法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-05T13:58:37+00:00">
+                2016-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在实验室的电脑上安装了Ubuntu，安装的时候填写主机名时没注意，使用的时候才发现命令行是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-HP-ProDesk-498-G3-MT-Business-PC:~$</span><br></pre></td></tr></table></figure>
+
+<p>名字长的很蛋疼，本来挺小的命令行硬是被占满了一行，使用的时候怪怪的。</p>
+<p>其实修改的方法也很简单，打开&#x2F;etc&#x2F;hostname 文件，填写一个新的主机名就好了。</p>
+<p>别急，修改完成后还要再修改一下hosts文件的配置，因为hosts里有这样的开头：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-HP-ProDesk-498-G3-MT-Business-PC:~$ head /etc/hosts</span><br><span class="line">127.0.0.1	localhost</span><br><span class="line">127.0.1.1	myths-HP-ProDesk-498-G3-MT-Business-PC</span><br><span class="line"></span><br><span class="line"># The following lines are desirable for IPv6 capable hosts</span><br><span class="line">::1     ip6-localhost ip6-loopback</span><br><span class="line">fe00::0 ip6-localnet</span><br><span class="line">ff00::0 ip6-mcastprefix</span><br><span class="line">ff02::1 ip6-allnodes</span><br><span class="line">ff02::2 ip6-allrouters</span><br></pre></td></tr></table></figure>
+<p>我们还得把本地的主机名也改过来，否则在运行sudo 命令的时候会报一个”无法解析主机名”的错误，而且会特别的慢。</p>
+<p>最后重启一下电脑，更新下配置就好了。</p>
+<p>配置完成后：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:~$</span><br></pre></td></tr></table></figure>
+<p>干净了好多～～</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/02/Ubuntu%E4%B8%AD%E6%B7%BB%E5%8A%A0%E8%BD%AF%E4%BB%B6%E6%BA%90%E4%B8%8Eppa%E6%BA%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/02/Ubuntu%E4%B8%AD%E6%B7%BB%E5%8A%A0%E8%BD%AF%E4%BB%B6%E6%BA%90%E4%B8%8Eppa%E6%BA%90/" itemprop="url">Ubuntu中添加软件源与ppa源</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-02T15:54:44+00:00">
+                2016-01-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Ubuntu下的软件的更新是以一种不同与windows下的方式进行的。windows下的软件更新，是通过打开应用后，应用自动联网查看更新然后来提醒用户。而Ubuntu下，用户只需要隔三差五的运行下<code>apt-get update </code> 命令就可以通过查看软件的各个源来获取所有软件的更新信息。那么，apt-get 命令为什么能做到这个呢？其实是因为apt-get 命令有一个源列表，他所有提供的软件都是从这个列表上获取的，那么很自然，每当软件有了最新的版本，apt总能够通过查看当前的列表获取得到，从而反馈给用户。</p>
+<h2 id="软件源"><a href="#软件源" class="headerlink" title="软件源"></a>软件源</h2><p>这个源列表就是<code>/etc/apt/sources.list</code> 。这里记录了源的地址，格式基本如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># deb cdrom:[Ubuntu 14.04.2 LTS _Trusty Tahr_ - Release amd64 (20150218.1)]/ trusty main restricted</span><br><span class="line"></span><br><span class="line"># See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to</span><br><span class="line"># newer versions of the distribution.</span><br><span class="line">deb http://ubuntu.cn99.com/ubuntu/ trusty main restricted</span><br><span class="line">deb-src http://ubuntu.cn99.com/ubuntu/ trusty main restricted</span><br><span class="line"></span><br><span class="line">## Major bug fix updates produced after the final release of the</span><br><span class="line">## distribution.</span><br><span class="line">deb http://ubuntu.cn99.com/ubuntu/ trusty-updates main restricted</span><br><span class="line">deb-src http://ubuntu.cn99.com/ubuntu/ trusty-updates main restricted</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p>这里的ubuntu.cn99.com就是我们镜像的地址，决定着源的更新访问的速度。可以通过修改这个来使用最佳的源。当然，每次修改完源之后，还要执行update 命令来使系统重新识别一下。</p>
+<h2 id="ppa源"><a href="#ppa源" class="headerlink" title="ppa源"></a>ppa源</h2><p>当然，系统自带的源是很有限的，我们肯定需要一些其他的软件包，然而如果是直接下载deb格式的文件的话，又不能获取到更新和维护。所以这就用到了十分重要的ppa源了。</p>
+<p>所谓ppa源，就是指“Personal Package Archives”，也就是个人软件包集。这其实是一个网站，即－<a target="_blank" rel="noopener" href="http://launchpad.net/">launchpad.net</a>　。Launchpad是Ubuntu母公司canonical有限公司所架设的网站，是一个提供维护、支援或联络Ubuntu开发者的平台。由于不是所有的软件都能进入Ubuntu的官方的软件库，launchpad.net 提供了ppa，允许开发者建立自己的软件仓库，自由的上传软件。供用户安装和查看更新。</p>
+<p>加入ppa源的命令：<code>sudo add-apt-repository ppa:user/ppa-name</code></p>
+<p>删除ppa源的命令：<code>sudo add-apt-repository -r ppa:user/ppa-name</code></p>
+<p>比如我们要添加wine的源，就可以执行：<code>sudo add-apt-repository ppa:ubuntu-wine/ppa</code></p>
+<p>好了，让我们看看添加完ppa源之后到底发生了什么：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:~$ cd /etc/apt/sources.list.d/</span><br><span class="line">myths@Business:/etc/apt/sources.list.d$ ls</span><br><span class="line">myie-browser.list       sogoupinyin.list</span><br><span class="line">myie-browser.list.save  sogoupinyin.list.save</span><br><span class="line">openalpr.list           ubuntu-wine-ppa-trusty.list</span><br><span class="line">openalpr.list.save</span><br></pre></td></tr></table></figure>
+<p>恩，其实是在<code>/etc/apt/sources.list.d/</code>文件夹里放了一个文件，我们打开来看看：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:/etc/apt/sources.list.d$ cat ubuntu-wine-ppa-trusty.list </span><br><span class="line">deb http://ppa.launchpad.net/ubuntu-wine/ppa/ubuntu trusty main</span><br><span class="line"># deb-src http://ppa.launchpad.net/ubuntu-wine/ppa/ubuntu trusty main</span><br></pre></td></tr></table></figure>
+<p>原来就是添加了一个跟软件源一模一样的东西，他们的作用殊途同归啊。我想其实只是为了分辨官方的源和第三方的源，Ubuntu才设计成在sources.list 和 sources.list.d&#x2F;　这两个地方中存储源。因为第三方的源毕竟不太可信，如果随便更新的话可是会出事情的。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/30/Ubuntu%E7%9A%84OCR%E8%AF%86%E5%88%AB%E8%BD%AF%E4%BB%B6%E5%8C%85tesseract/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/30/Ubuntu%E7%9A%84OCR%E8%AF%86%E5%88%AB%E8%BD%AF%E4%BB%B6%E5%8C%85tesseract/" itemprop="url">Ubuntu的OCR识别软件包tesseract</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-30T14:53:51+00:00">
+                2015-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>这个包据说是开源的OCR中非常好用的一个，在图像识别的领域里，tesseract-ocr引擎曾是1995年UNLV准确度测试中最顶尖的三个引擎之一。在1995年到2006年期间，它几乎没有什么改动，但是它可能仍然是现在最准确的开源OCR引擎之一。它会读取二进制的灰度或者彩色的图像，并输出文字。一个内建的tiff阅读器让它可以读取未压缩的TIFF图像，但是如果要读取压缩过的TIFF图像，它还需要一个附加的libtiff库。</p>
+<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>下载地址是：<a target="_blank" rel="noopener" href="http://code.google.com/p/tesseract-ocr/downloads/list">http://code.google.com/p/tesseract-ocr/downloads/list</a></p>
+<p>这里有比较全的文档、源码、语言包等必要数据。当然我们主要是下载　<a target="_blank" rel="noopener" href="http://code.google.com/p/tesseract-ocr/downloads/detail?name=tesseract-ocr-3.02.02.tar.gz&can=2&q=">tesseract-ocr-3.02.02.tar.gz</a>　然后根据README进行配置编译。</p>
+<p>当然，如果图方便也可以直接在ubuntu中用apt来下载：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sudo apt-get install tesseract-ocr</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>基本上按照README 的提示去做就可以了，不过有两点需要注意:</p>
+<p>１、这里用的是autorun.sh进行的生成，需要执行aclocal命令，没有安装这个命令会报错。安装方法见<a href="/2015/12/28">aclocal的安装</a>。</p>
+<p>２、在执行.&#x2F;configure的时候发现这个还需要一个依赖包leptonica，否则无法配置。这个包可以在<a target="_blank" rel="noopener" href="http://code.google.com/p/leptonica/downloads/list">这里</a>下载。查看README直接安装即可。</p>
+<h2 id="语言包"><a href="#语言包" class="headerlink" title="语言包"></a>语言包</h2><p>除了下载源码，我们还需要下载语言包，根据需要可以在之前的页面中下载。下载后会得到一个tessdata文件夹，文件夹下有一堆的文件。</p>
+<p>接下来我们只需要把这里的东西丢到&#x2F;usr&#x2F;local&#x2F;share&#x2F;tessdata　里去就可以了，这里保存的就是语言库。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tesseract  b.png res</span><br></pre></td></tr></table></figure>
+<p>程序会生成res.txt　文件显示识别到的内容。</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>测试了好多组数据，无论是规范的文字还是不规范的验证码，识别的效果都很不理想。。。看来这个东西还是没得用。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/28/%E7%94%A8autogen.sh%E5%AE%89%E8%A3%85%E6%BA%90%E7%A0%81%E6%97%B6%E7%9A%84%E9%87%8D%E8%A6%81%E7%BB%84%E4%BB%B6aclocal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/28/%E7%94%A8autogen.sh%E5%AE%89%E8%A3%85%E6%BA%90%E7%A0%81%E6%97%B6%E7%9A%84%E9%87%8D%E8%A6%81%E7%BB%84%E4%BB%B6aclocal/" itemprop="url">用autogen.sh安装源码时的重要组件aclocal</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-28T15:48:10+00:00">
+                2015-12-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>试着在Linux上构建一个程序，该程序的开发版本是使用“autogen.sh”脚本进行的。当我运行它来创建配置脚本时，却发生了下面的错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-Business-PC:~$ ./autogen.sh</span><br><span class="line">Running aclocal</span><br><span class="line">./autogen.sh: 50: ./autogen.sh: aclocal: not found</span><br><span class="line"></span><br><span class="line">  Something went wrong, bailing out!</span><br></pre></td></tr></table></figure>
+<p>说是找不到aclocal文件。查看了下文件目录，发现了一个叫aclocal.m4的脚本，感觉大概是这个文件没有得到解析。</p>
+<p>百度了一下发现了，在用类似autogen.sh脚本来生成源代码的时候，通常需要以下三个依赖包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">autoconf    automake    libtool</span><br></pre></td></tr></table></figure>
+<p>那么我们就可以通过下载这三个包来解决问题了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-Business:~$ sudo apt-get install libtool autoconf automake </span><br></pre></td></tr></table></figure>
+<p>安装好这几个包就可以了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/27/%E4%B8%80%E6%AC%BE%E5%BC%80%E6%BA%90%E7%9A%84%E8%BD%A6%E7%89%8C%E5%8F%B7%E7%A0%81%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9Fopenalpr/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -908,1105 +1825,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/22/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C1-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/22/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C1-3/" itemprop="url">苏大Mooc系统的刷课脚本的制作（1/3）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-22T15:56:38+00:00">
-                2015-12-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>闲话不说，其实写这个目的大家都懂，懒得看那些无聊的网路课。但是由于课程的要求，这些课程必须要看，而且由于技术原因，又不能跳着看，视频的播放条不能拖动，只能硬着头皮的刷时间。很多同学都是开着视频开着静音做其他的事，想想也是悲哀。</p>
-<p>当然，我写这个程序的初衷并不是为了偷懒，而是纯粹的学习。用技术手段做出一些别人难以实现的事情可是很有成就感的。为了实现这样一个简单的目的其实也不是那么简单的（至少对我这个前几天刚接触web的人而言）。。。</p>
-<h2 id="课程首页"><a href="#课程首页" class="headerlink" title="课程首页"></a>课程首页</h2><p><img src="/images/2015/12/22/1/1.png"></p>
-<p>从右边点击课程名字就会打开视频，学习完的视频前面会有绿色的钩钩；每个视频下面有播放条，播放条只能在已经看过的部分任意拖动，不能向前拖动。</p>
-<p>这就是课程首页的情况，接下来就是想查看源码。结果发现网页是动态生成的，而不是之前学习的静态网页。这两者最直观的感受就是源代码和审查元素得到的代码不一样，也就是用javascript之类的语言根据即时的情况生成的网页。这时候就需要细致的分析js代码了。</p>
-<p>&nbsp;</p>
-<h2 id="封包分析"><a href="#封包分析" class="headerlink" title="封包分析"></a>封包分析</h2><p>很自然的想法就是查看下封包，弄清楚在观看视频的时候到底是发送了什么东西给后台让后台标记当前视频为已看。经过一番查找（需要细心的找），在用chrome找到了这样的一个包：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">General：</span><br><span class="line"></span><br><span class="line">Request URL:http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SSetStageLearnPartStudent&amp;fPlanID=34&amp;fPartID=359&amp;fSecond=550&amp;_=1451308953409</span><br><span class="line">Request Method:GET</span><br><span class="line">Status Code:200 OK</span><br><span class="line">Remote Address:42.244.42.191:80</span><br><span class="line"></span><br><span class="line">Request Headers：</span><br><span class="line"></span><br><span class="line">Accept:*/*</span><br><span class="line">Accept-Encoding:gzip, deflate, sdch</span><br><span class="line">Accept-Language:zh-CN,zh;q=0.8</span><br><span class="line">Connection:keep-alive</span><br><span class="line">Cookie:ASP.NET_SessionId=zh4ifl55q521xx45bmbjwa45; amlbcookie=01; iPlanetDirectoryPro=AQIC5wM2LY4SfcxX1vREajjp5zIi4s9GtkPT1Ivxjw%2BJfo4%3D%40AAJTSQACMDE%3D%23</span><br><span class="line">Host:kczx.suda.edu.cn</span><br><span class="line">Referer:http://kczx.suda.edu.cn/G2S/Learning/Learning.htm?Part=&amp;Plan=34&amp;type=2</span><br><span class="line">User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36</span><br><span class="line">X-Requested-With:XMLHttpRequest</span><br><span class="line"></span><br><span class="line">Query String Parameters：</span><br><span class="line"></span><br><span class="line">action:GetG2SSetStageLearnPartStudent</span><br><span class="line">fPlanID:34</span><br><span class="line">fPartID:359</span><br><span class="line">fSecond:550</span><br><span class="line">_:1451308953409</span><br></pre></td></tr></table></figure>
-<p>看到了顿时就豁然开朗了，原来每隔一段时间，网页会通过一个get请求，将当前看的视频的名称、看到的时间发送给后台，让后台加以记录，确认已经看到的地方。fPlanID很明显是课程的编号，fPartID应该是视频的编号，而fSecond应该是当前看到的时间了（最后哪个_:的值，可能是token值，然而翻遍代码，并没有找到对应的值，我想应该是一个随机数，暂时不去管他，应该也无妨）。所以，“作弊”的方法也就很简单了，就是根据这个信息，将描述视频的信息和当前看到（伪造）的时间发送给后台就可以了。</p>
-<p>经过一番尝试，这样做果断是合理的。那么，通过这个手段，我们就可以手动的通过输入地址发送get请求来“刷课”了。虽然这显然不够帅，然而对那些没有编程基础的人来说，这种方法倒也是简单快捷的（总比挂着视频方便）。</p>
-<p>&nbsp;</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/21/python%E4%B8%8B%E8%A7%A3%E6%9E%90json%E6%A0%BC%E5%BC%8F%E6%96%87%E4%BB%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/21/python%E4%B8%8B%E8%A7%A3%E6%9E%90json%E6%A0%BC%E5%BC%8F%E6%96%87%E4%BB%B6/" itemprop="url">python下解析json格式文件</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-21T15:44:46+00:00">
-                2015-12-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>解析json文件无非编码和解码，这里我们用了python下自带的json模块。当然还要结合python本身特有的dict类型的操作。</p>
-<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>编码用到的是json.dumps()函数，将字典转化为json对象。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line">data = [&#123;<span class="string">&#x27;a&#x27;</span>:<span class="string">&quot;A&quot;</span>,<span class="string">&#x27;b&#x27;</span>:(<span class="number">2</span>,<span class="number">4</span>),<span class="string">&#x27;c&#x27;</span>:<span class="number">3.0</span>&#125;]  <span class="comment">#list对象</span></span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;DATA:&quot;</span>,<span class="built_in">repr</span>(data)</span><br><span class="line">data_string = json.dumps(data)<span class="comment">#dumps函数</span></span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;JSON:&quot;</span>,data_string</span><br></pre></td></tr></table></figure>
-<p>输出的结果是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DATA: [&#123;&#x27;a&#x27;:&#x27;A&#x27;,&#x27;c&#x27;:3.0,&#x27;b&#x27;:(2,4)&#125;] #python的dict类型的数据是没有顺序存储的</span><br><span class="line">JSON: [&#123;&quot;a&quot;:&quot;A&quot;,&quot;c&quot;:3.0,&quot;b&quot;:[2,4]&#125;]</span><br></pre></td></tr></table></figure>
-
-<h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><p>解码用json.loads()函数，将json格式转化为dict。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line">data = <span class="string">&#x27;&#123;&quot;a&quot;:&quot;A&quot;,&quot;b&quot;:[2,4],&quot;c&quot;:3.0&#125;&#x27;</span>  <span class="comment">#json格式</span></span><br><span class="line"></span><br><span class="line">decoded = json.loads(data)</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;DECODED:&quot;</span>,decoded</span><br></pre></td></tr></table></figure>
-<p>输出的结果是</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DECODED: [&#123;u&#x27;a&#x27;: u&#x27;A&#x27;, u&#x27;c&#x27;: 3.0, u&#x27;b&#x27;: [2, 4]&#125;]</span><br></pre></td></tr></table></figure>
-
-<p>编码和解码的过程中，元组会被变成无次序的列表，而字典的次序也并不能保证不变。</p>
-<p>现在，处理json格式的重点便成了正确处理dict类型数据了。</p>
-<h2 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h2><p>python的json模块不支持单引号，所以类似<code>&quot;&#123;&#39;a&#39;:&#39;A&#39;,&#39;b&#39;:[2,4],&#39;c&#39;:3.0&#125;&quot;</code>的字符串是会报以下错误的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ValueError: Expecting property name: line 1 column 2 (char 1)</span><br></pre></td></tr></table></figure>
-<p>这时候我们只需要把他单双引号互换即可：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;&#123;&quot;a&quot;:&quot;A&quot;,&quot;b&quot;:[2,4],&quot;c&quot;:3.0&#125;&#x27;</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/20/Vim%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/20/Vim%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/" itemprop="url">Vim基本命令</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-20T15:41:22+00:00">
-                2015-12-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>很久不用vim了，发现什么命令都忘光了，敲起代码来连复制粘贴都不会了，还得用gedit去搞，真的相当蛋疼。这里把常用的命令汇总一下，趁机好好系统的记一下。不看不知道，看了才晓得原来vim还有很多非常炫的特性。</p>
-<h2 id="帮助文档"><a href="#帮助文档" class="headerlink" title="帮助文档"></a>帮助文档</h2><p>首先，我们得晓得vim的帮助文档。当然man vim 是一个不错的选择，不过他主要是基于在bash中使用，而不是在vim界面中的使用。非常感人的是，vim有一个自带的中文教程（中文！），讲的非常清楚（不过我没耐心看完）。<br><code>myths@myths-X450LD:~$ vimtutor </code></p>
-<h2 id="vim的模式"><a href="#vim的模式" class="headerlink" title="vim的模式"></a>vim的模式</h2><p>指令模式（任意模式下按Esc或Ctrl+[进入） 用来正常情况下的快捷指令，是各个模式之间切换的桥梁</p>
-<p>插入模式（指令模式下按i进入） 左下角显示–INSERT– 实际上就是普通的文本编辑器</p>
-<p>可视模式（指令模式下按v进入） 左下角显示–VISUAL–</p>
-<p>末行模式（指令模式下按： 或 &#x2F; 进入，在屏幕最下面可以输入命令）</p>
-<h2 id="命令历史"><a href="#命令历史" class="headerlink" title="命令历史"></a>命令历史</h2><p>所有以 行末模式输入的命令都有历史，键入 ：  &#x2F; 或？后然后按上下方向键即可翻阅之前的命令。</p>
-<h2 id="文件命令"><a href="#文件命令" class="headerlink" title="文件命令"></a>文件命令</h2><p>其实vim可以在bash中一次打开多个文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ vim file1 file2 file3</span><br></pre></td></tr></table></figure>
-<p>也可以在vim中打开新的文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open foo.txt</span><br></pre></td></tr></table></figure>
-<p>也可以用拆分的试图打开新的文件：(不太会用)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">split foo.txt</span><br></pre></td></tr></table></figure>
-<p>如果一次性打开了多个文件，那么可以用以下命令来切换文件：（上下切换）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:bn</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:bp</span><br></pre></td></tr></table></figure>
-<p>如果忘记了当前的文件叫啥，可以用如下命令查看当前的文件名：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:arg</span><br></pre></td></tr></table></figure>
-<p>（其实在用：w 保存的时候也会在左下角显示文件名）</p>
-<h2 id="插入命令"><a href="#插入命令" class="headerlink" title="插入命令"></a>插入命令</h2><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>用法</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>i</td>
-<td>在当前位置生前插入</td>
-</tr>
-<tr>
-<td>a</td>
-<td>在当前位置后插入</td>
-</tr>
-<tr>
-<td>I</td>
-<td>在当前行首插入</td>
-</tr>
-<tr>
-<td>A</td>
-<td>在当前行尾插入</td>
-</tr>
-<tr>
-<td>o</td>
-<td>在当前行之后插入一行</td>
-</tr>
-<tr>
-<td>O</td>
-<td>在当前行之前插入一行</td>
-</tr>
-</tbody></table>
-<p>一般是灵活使用 i o 即可。</p>
-<h2 id="查找命令"><a href="#查找命令" class="headerlink" title="查找命令"></a>查找命令</h2><p>这个非常简单实用！</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/text</span><br></pre></td></tr></table></figure>
-<p>text是你要查找的内容。。。然后查找下一个只需要按n，查找上一个按N。</p>
-<p>或者是？text反向查找（可以不去管他了）</p>
-<h2 id="替换命令"><a href="#替换命令" class="headerlink" title="替换命令"></a>替换命令</h2><p>替换光标所在字符可以在指令模式下按r 再按替换的字符即可。</p>
-<p>替换字符串：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:s/old/new/</span><br></pre></td></tr></table></figure>
-<p>这里表示在当前行用new来替换old字符第一个匹配到的字符</p>
-<p>如果需要全局替换，需要输入：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:s/old/new/g</span><br></pre></td></tr></table></figure>
-<p>g表示全局替换</p>
-<p>匹配的串可以用正则来表示，而且s可以替换为一个区间，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:10,20 s/^/haha/g</span><br></pre></td></tr></table></figure>
-<p>表示在10到20行的行首添加haha，非常好理解。</p>
-<p>！注意，Vim默认的替换方式是单行替换，也就是说上面的所有替换方法都是对于单行，是指定行的替换，&#x2F;g也是指在选定行下进行的全局替换，如果是要在全文中进行替换，则需要用％s参数，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%s/old/new/g</span><br></pre></td></tr></table></figure>
-<p>表示在全文中将old 替换成new 。</p>
-<h2 id="移动命令"><a href="#移动命令" class="headerlink" title="移动命令"></a>移动命令</h2><pre><code>h 左移 ；l 右移 ；k 上移 ；j 下移；
-
-w 前移一个单词 ；b 后移一个单词；
-
-当然，所有的移动都可以在前面加数字表示移动的距离。
-
-&lt;home&gt; 行首；&lt;end&gt;行尾；
-
-gg 文件头；G 文件尾；
-
-Ctrl + e 向下滚动一行
-
-Ctrl + y 向上滚动一行
-
-Ctrl + d 向下滚动半屏
-
-Ctrl + u 向上滚动半屏
-
-Ctrl + f 向下滚动一屏
-
-Ctrl + b 向上滚动一屏
-</code></pre>
-<h3 id="撤销和重做："><a href="#撤销和重做：" class="headerlink" title="撤销和重做："></a><strong>撤销和重做：</strong></h3><pre><code>实用！
-
-u 撤销
-
-Ctrl + r 重做
-</code></pre>
-<h3 id="删除操作："><a href="#删除操作：" class="headerlink" title="删除操作："></a><strong>删除操作：</strong></h3><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>功能</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>x</td>
-<td>删除当前字符用</td>
-</tr>
-<tr>
-<td>dd</td>
-<td>删除当前行用</td>
-</tr>
-<tr>
-<td>dj</td>
-<td>删除上一行</td>
-</tr>
-<tr>
-<td>dk</td>
-<td>删除下一行</td>
-</tr>
-<tr>
-<td>10d</td>
-<td>删除当前行开始的10行.</td>
-</tr>
-<tr>
-<td>D</td>
-<td>删除当前字符至行尾</td>
-</tr>
-<tr>
-<td>:1,10d</td>
-<td>删除1-10行</td>
-</tr>
-</tbody></table>
-<h2 id="拷贝粘贴"><a href="#拷贝粘贴" class="headerlink" title="拷贝粘贴"></a>拷贝粘贴</h2><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>功能</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>yy</td>
-<td>拷贝当前行</td>
-</tr>
-<tr>
-<td>10yy</td>
-<td>拷贝当前后开始的10行</td>
-</tr>
-<tr>
-<td>p</td>
-<td>在当前光标后粘贴,如果之前使用了yy命令来复制一行，那么就在当前行的下一行粘贴。</td>
-</tr>
-<tr>
-<td>:1,10 co 20</td>
-<td>将1-10行插入到第20行之后。</td>
-</tr>
-<tr>
-<td>ddp</td>
-<td>交换当前行和其下一行，实际上就是删除当前行然后放在下一行的后面</td>
-</tr>
-</tbody></table>
-<p>在可视模式下，用jklh命令移动即可选择某些行或字符，再按y即可复制。</p>
-<h2 id="剪切命令"><a href="#剪切命令" class="headerlink" title="剪切命令"></a>剪切命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:1, 10 m 20</span><br></pre></td></tr></table></figure>
-
-<p>将第1-10行移动到第20行之后</p>
-<h2 id="退出命令"><a href="#退出命令" class="headerlink" title="退出命令"></a>退出命令</h2><table>
-<thead>
-<tr>
-<th>命令</th>
-<th>功能</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>:x或  :wq</td>
-<td>保存并退出</td>
-</tr>
-<tr>
-<td>:q!</td>
-<td>强制退出并忽略所有更改</td>
-</tr>
-<tr>
-<td>:e!</td>
-<td>放弃所有修改，并打开原来文件。</td>
-</tr>
-</tbody></table>
-<h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><p>vim竟然可以实现宏功能，微醺。</p>
-<p>在指令模式下按p再按一个字母比如a，然后输入想要的指令最后再按q即可录制出宏，保存在的@a里。下次想用的时候只需要在指令模式下按@a即可使用宏。</p>
-<p>&nbsp;</p>
-<h2 id="执行shell"><a href="#执行shell" class="headerlink" title="执行shell"></a>执行shell</h2><p>在行末模式下输入！再输入命令即可：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:!g++ test.cpp</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/19/Json%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E6%A6%82%E8%BF%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/19/Json%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E6%A6%82%E8%BF%B0/" itemprop="url">Json文件格式概述</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-19T15:58:21+00:00">
-                2015-12-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>我们知道现如今，json格式很多网页在前端和后端交互的过程中都会用到的一种文件格式，尤其是在使用ajax进行交互的场合。他的语法简单，而且条理十分清晰，适合处理大量的有着逻辑关系的数据。</p>
-<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>什么是 JSON ？</p>
-<ol>
-<li>JSON 指的是 JavaScript 对象表示法（JavaScript Object Notation）</li>
-<li>JSON 是轻量级的文本数据交换格式</li>
-<li>JSON 独立于语言</li>
-<li>JSON 具有自我描述性，更易理解</li>
-<li>JSON 使用 JavaScript 语法来描述数据对象，但是 JSON 仍然独立于语言和平台。JSON 解析器和 JSON 库支持许多不同的编程语言。</li>
-</ol>
-<p>w3c的标准说明如下：<br>JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使json成为理想的数据交换语言。</p>
-<p>所以几乎所有的语言都会有支持json格式转化的库。</p>
-<h2 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h2><p>json的格式只有两种！所以非常简单方便：</p>
-<p>1.键值对</p>
-<p>对象是一个无序的“‘名称&#x2F;值’对”集合。一个对象以“{”开始，“}”结束。每个“名称”后跟一个“:”；“键值对”之间使用“,”分隔。</p>
-<p>2.数组</p>
-<p>数组是值（value）的有序集合。一个数组以“[”开始，“]”结束。值之间使用“,”分隔。</p>
-<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;employees&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;firstName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Bill&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;lastName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Gates&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;firstName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;George&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;lastName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Bush&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;firstName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Thomas&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;lastName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Carter&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-<p>要注意的是，每一个非数值的字符串都应当带引号，否则标准的解析库是无法解析的。</p>
-<p>网上也有很多json的在线格式化的网站，在遇到json无法解析的时候可以去那里找找错。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/16/Ubuntu%E4%B8%8B%E5%8D%B8%E8%BD%BD%E5%A4%9A%E4%BD%99%E7%9A%84Ubuntu%E7%B3%BB%E7%BB%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/16/Ubuntu%E4%B8%8B%E5%8D%B8%E8%BD%BD%E5%A4%9A%E4%BD%99%E7%9A%84Ubuntu%E7%B3%BB%E7%BB%9F/" itemprop="url">Ubuntu下卸载多余的Ubuntu系统</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-16T15:44:53+00:00">
-                2015-12-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前由于种种原因，折腾了很多个Ubuntu系统，也换了好多个，重新安装了很多次系统，终于找到了当前这个能用的了。本以为万事大吉了，然而最近突然发现之前安装的没用的Ubuntu系统竟然还在我的磁盘中！不说了，接下来我们的任务肯定得把这个删干净了。</p>
-<p>然而百度了一下发现并没有这样的教程，有的很多都是在win+ubuntu双系统下删除ubuntu以及grub。显然我们不需要删除grub，而且万一我们没有windows系统呢？学Linux肯定得在Linux下解决问题了。</p>
-<p>本打算用fdisk命令之类的进行操作，然而命令还是太烦了点，对于我这种第一次接触磁盘分区的人来说有点吃力，还好我在网上找到了一个图形化控制磁盘分区的小软件—-gparted。</p>
-<p>安装命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:~# apt-get install gparted</span><br></pre></td></tr></table></figure>
-<p>这个软件就像windows下自带的那个磁盘操作界面一样，把磁盘的层次显示的非常清楚。运行起来界面是这样的（当然，这种操作磁盘的动作是需要root权限的）：</p>
-<p><img src="/images/2015/12/16/1/1.png"></p>
-<p>这样我们就非常清楚的掌握了分区的情况了。ntfs是windows的文件系统，ext是Linux的文件系统。分区从sda1到sda11，其中少了sda3和sda4，这是因为约定sda1到sda4为主分区，而我这里只有两个主分区所以剩下的就不显示了。sda1就是我们windows的c盘了，可见其特殊性。sda5到sda11都是扩展分区，可供我们调节使用的。</p>
-<p>现在，如果要删除多余的ubuntu系统，我们只要搞清楚他的分区，然后格式化即可。最后在格式化之后，用update-grub命令更新下grub列表就好了。</p>
-<p>（这个工具要小心使用。。。不解释，分区中加锁的几项表示是已经加载的分区，这是无法修改的，或者必须卸载后才能修改的）</p>
-<p>格式化结束后，我们可以选择删除区号，前提是不能有比他数字更大的分区，比如我删除了sda9，然而我的sda11是我当前的系统，显然不能删。那我就不能删除这个已格式化的分区了。</p>
-<p>那么这些分区留着有什么用呢？其实我们完全可以当做一个磁盘来用。在系统重启后，这两个分区会被自动装载到&#x2F;media文件夹下，并且在桌面的文件夹下显示，我们可以方便的使用。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/15/DIY%E7%99%BE%E5%BA%A6%E9%A6%96%E9%A1%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/15/DIY%E7%99%BE%E5%BA%A6%E9%A6%96%E9%A1%B5/" itemprop="url">DIY百度首页</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-15T15:55:44+00:00">
-                2015-12-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>花了一天时间DIY了一个百度首页，学习了好多东西，特别是关于页面的dom布局，和css的属性设置，还有关于图片的使用和jquery等等的知识，算是web前端入了个门。贴下代码纪念下，效果页面我觉得差不多能以假乱真了。。。</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;content-type&quot;</span>  <span class="attr">content</span>=<span class="string">&quot;text/html&quot;</span> <span class="attr">charset</span>=<span class="string">&quot;utf-8&quot;</span> &gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">style</span>  <span class="attr">type</span>=<span class="string">&quot;text/css&quot;</span> &gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#header</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:absolute;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">right</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">top</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">19px</span> <span class="number">0</span> <span class="number">5px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">20px</span> <span class="number">0</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css"></span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#header</span> <span class="selector-tag">div</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:relative;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:right</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.b</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:<span class="number">#333</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-weight</span>:bold;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">line-height</span>:<span class="number">24px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:<span class="number">21px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">13px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:underline;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.b</span><span class="selector-pseudo">:hover</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:blue;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#setting</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-weight</span>:normal;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">6px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">display</span>:none;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:relative;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">left</span>:<span class="number">24px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:-<span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#d1d1d1</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">70px</span>;</span></span><br><span class="line"><span class="language-css">				-webkit-<span class="attribute">box-shadow</span>: <span class="number">1px</span> <span class="number">1px</span> <span class="number">5px</span> <span class="number">#d1d1d1</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.clear</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">clear</span>:both;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#setting</span> <span class="selector-tag">a</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:black;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">1px</span> <span class="number">2px</span> <span class="number">1px</span> <span class="number">2px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">22px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">1px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">display</span>:block;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">12px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:none;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#setting</span> <span class="selector-tag">a</span><span class="selector-pseudo">:hover</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#6495ED</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			*&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;			</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#logo</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">270px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">129px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#mid</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">70px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css"></span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#input</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">20px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">539px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">34px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">16px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>: <span class="number">1px</span> solid <span class="number">#3385ff</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#submit</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">95px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">34px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>:<span class="number">0px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">15px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#3385ff</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.more</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:right</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">line-height</span>:<span class="number">24px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:<span class="number">21px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#38f</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">4px</span> <span class="number">0</span> <span class="number">4px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:<span class="number">25px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-right</span>:-<span class="number">8px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">13px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:none;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#right</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border-left</span>:solid <span class="number">1px</span> <span class="number">#f0f0f0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:absolute;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">display</span>:none;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">top</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">right</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">bottom</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#f9f9f9</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">85px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.cover</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding-top</span>:<span class="number">10px</span>;	</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:none;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.r</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">10px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border-bottom</span>:solid <span class="number">1px</span> <span class="number">#f0f0f0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">75px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">11px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:<span class="number">#666</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">cursor</span>:pointer;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;icon.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">36px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">36px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-bottom</span>:<span class="number">10px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic1</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">72px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">40px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic2</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">112px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css"></span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic3</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">36px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic4</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">148px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic5</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">184px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic6</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">220px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.clear</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">clear</span>:both;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.footer</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">280px</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> ;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.wrapper</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">660px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.mobile</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;mobile.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.nuomi</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;nuomi.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.bt</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:left</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span><span class="selector-pseudo">:left</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#btn</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;btn.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:left</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">600px</span> -<span class="number">96px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">14px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">17px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">		</span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;jquery.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">			$(<span class="variable language_">document</span>).<span class="title function_">ready</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#m&quot;</span>).<span class="title function_">mouseover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#setting&quot;</span>).<span class="title function_">show</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#m&quot;</span>).<span class="title function_">mouseout</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#setting&quot;</span>).<span class="title function_">hide</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;.more&quot;</span>).<span class="title function_">mouseover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">show</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">mouseover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">show</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;)</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">mouseout</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">hide</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;.r&quot;</span>).<span class="title function_">hover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="variable language_">this</span>).<span class="title function_">css</span>(<span class="string">&quot;text-decoration&quot;</span>,<span class="string">&quot;underline&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">				&#125;,<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="variable language_">this</span>).<span class="title function_">css</span>(<span class="string">&quot;text-decoration&quot;</span>,<span class="string">&quot;none&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">				&#125;)</span></span><br><span class="line"><span class="language-javascript">			&#125;);</span></span><br><span class="line"><span class="language-javascript">		</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;header&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;more&quot;</span> &gt;</span>更多产品<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;m&quot;</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">id</span>=<span class="string">&#x27;set&#x27;</span> <span class="attr">href</span>=<span class="string">&quot;javascript:;&quot;</span>&gt;</span>设置<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;clear&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;setting&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>搜索设置<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>高级搜索<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>关闭预测<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>搜索历史<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span>	</span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;https://passport.baidu.com/&quot;</span>&gt;</span>登录<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://tieba.baidu.com&quot;</span>&gt;</span>贴吧<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://v.baidu.com&quot;</span>&gt;</span>视频<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://map.baidu.com&quot;</span>&gt;</span>地图<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://www.hao123.com&quot;</span>&gt;</span>hao123<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://news.baidu.com&quot;</span>&gt;</span>新闻<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://www.nuomi.com/?cid=002540&quot;</span>&gt;</span>糯米<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;clear&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;right&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r cover&quot;</span> <span class="attr">style</span>=<span class="string">&quot;height:50px;&quot;</span>&gt;</span>更多产品&lt;/div &gt;</span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">music.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic1&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>音乐<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">image.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic2&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>图片<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">zhidao.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic3&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>知道<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">wenku.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic4&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>文库<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">top.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic5&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>风云榜<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">e.baidu.com</span>/?<span class="attr">refer</span>=<span class="string">888</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic6&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>百度推广<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">www.baidu.com</span>/<span class="attr">more</span>/&quot;)&gt;</span>全部产品&gt;&gt;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;mid&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;logo.png&quot;</span> <span class="attr">id</span>=<span class="string">&quot;logo&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">form</span> <span class="attr">method</span>=<span class="string">&#x27;get&#x27;</span> <span class="attr">action</span>=<span class="string">&quot;https://www.baidu.com/s&quot;</span> <span class="attr">id</span>=<span class="string">&quot;form&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">&#x27;input&#x27;</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">name</span>=<span class="string">&#x27;wd&#x27;</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">&#x27;submit&#x27;</span> <span class="attr">type</span>=<span class="string">&#x27;submit&#x27;</span> <span class="attr">value</span>=<span class="string">&quot;百度一下&quot;</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;footer&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;wrapper&quot;</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;mobile bt&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;bt&quot;</span> <span class="attr">style</span>=<span class="string">&quot;width:90px&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;padding-top:10px;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>手机百度<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span><span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>快人一步<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;nuomi bt&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;bt&quot;</span> <span class="attr">style</span>=<span class="string">&quot;width:90px&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>百度糯米<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span><span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>一毛大餐<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;bt&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&quot;float:left;&quot;</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">https:</span>//<span class="attr">www.baidu.com</span>/<span class="attr">cache</span>/<span class="attr">sethelp</span>/<span class="attr">help.html</span>&quot;)&gt;</span>把百度设为首页<span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">home.baidu.com</span>/&quot;)&gt;</span>关于百度<span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">ir.baidu.com</span>/&quot;)&gt;</span>About Baidu<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&quot;float:left&quot;</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span>@2015<span class="symbol">&amp;nbsp;</span>baidu<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">www.baidu.com</span>/<span class="attr">duty</span>/&quot;)&gt;</span>使用百度前必读<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">jianyi.baidu.com</span>/&quot;)&gt;</span>意见反馈<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span>京ICP证030173号<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;btn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;clear&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/49/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><span class="page-number current">50</span><a class="page-number" href="/page/51/">51</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/51/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/49/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><span class="page-number current">50</span><a class="page-number" href="/page/51/">51</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/51/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2052,7 +1875,7 @@ Ctrl + r 重做
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2063,7 +1886,7 @@ Ctrl + r 重做
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -2074,7 +1897,7 @@ Ctrl + r 重做
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

@@ -307,6 +307,938 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/" itemprop="url">结合连通块平均分割以及投影矫正的验证码分割算法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-17T11:16:24+00:00">
+                2016-04-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在<a href="/2016/04/16/1/">上一节</a> 中记录了基于投影的验证码矫正算法的实现。通过矫正，我们可以比较好的将倾斜的字符归一成较为规整的字符，接下来我们需要对矫正后的字符进行分割。简单的方法大概是投影法了，但是很明显，这样做的可靠性并不够。我们也可以找到整张图的最左端和最右端然后平均分割，但是在字符大小不一样的情况下效果也太好。还有个朴素的方法就是找连通块，但是由于存在字符粘连问题，连通块也不能完全区分字符。那么我这里就结合后两种方法，先进行连通块分割，对于能分割的字符直接进行后续处理，对于不能分割的字符再用平均分割的方法分割处理。实践表明这种方法对于那些干扰线不明显的验证码（比如新浪微博的验证码）的分割效果还是不错的。</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2,os,sys,math</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getBinary</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：图片路径名称</span></span><br><span class="line"><span class="string">    输出：黑底二值化的图片</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    im=cv2.imread(path,<span class="number">0</span>)</span><br><span class="line">    thresh,im=cv2.threshold(<span class="number">255</span>-im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line">    <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadow</span>(<span class="params">im,angel</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图片，投影角度</span></span><br><span class="line"><span class="string">    输出：投影大小</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    x=[]</span><br><span class="line">    height , width = im.shape</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                x.append(j-<span class="number">1.0</span>*i/math.tan(math.radians(angel)))</span><br><span class="line">    x=np.array(x)</span><br><span class="line">    <span class="keyword">return</span> x.<span class="built_in">max</span>()-x.<span class="built_in">min</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadowTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试shadow函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">1</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> shadow(im,<span class="number">50</span>)</span><br><span class="line">        figure()</span><br><span class="line">        gray()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngle</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图</span></span><br><span class="line"><span class="string">    输出：最优的投影角度</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    minShadow=<span class="number">500</span></span><br><span class="line">    ans=<span class="number">90</span></span><br><span class="line">    <span class="keyword">for</span> angle <span class="keyword">in</span> np.linspace(<span class="number">45</span>,<span class="number">135</span>,<span class="number">91</span>):</span><br><span class="line">        thisShadow=shadow(im,angle)</span><br><span class="line">        <span class="keyword">if</span> minShadow&gt;thisShadow:</span><br><span class="line">            ans=angle</span><br><span class="line">            minShadow=thisShadow</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngleTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试getAngle函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">5</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> getAngle(im)</span><br><span class="line">        gray()</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affine</span>(<span class="params">im,angle=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图，仿射变换角度（默认为自适应最优角度）</span></span><br><span class="line"><span class="string">    输出：旋转后的灰度图</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    height,width=im.shape</span><br><span class="line">    <span class="keyword">if</span> angle==<span class="literal">None</span>:</span><br><span class="line">        angle=getAngle(im)</span><br><span class="line">    pts1=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>,<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line">    pts2=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>+height/<span class="number">2</span>/math.tan(math.radians(angle)),<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line">    M=cv2.getAffineTransform(pts1,pts2)</span><br><span class="line">    dst=cv2.warpAffine(im,M,(width,height))</span><br><span class="line">    <span class="keyword">return</span> dst</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affineTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试affine函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">50</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        dst=affine(im)</span><br><span class="line">        gray() </span><br><span class="line">        figure()</span><br><span class="line">        imshow(np.hstack([im,dst]))</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">splitImg</span>(<span class="params">im,num</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图，图中包含的字符个数</span></span><br><span class="line"><span class="string">    输出：分割后的图片数组</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    height,width=im.shape</span><br><span class="line">    maxPos=<span class="number">0</span></span><br><span class="line">    minPos=width</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                maxPos=<span class="built_in">max</span>(maxPos,j)</span><br><span class="line">                minPos=<span class="built_in">min</span>(minPos,j)</span><br><span class="line">    points=[]</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num+<span class="number">1</span>):</span><br><span class="line">        points.append(minPos+(maxPos-minPos)/num*i)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(num):</span><br><span class="line">        left=points[i]</span><br><span class="line">        right=points[i+<span class="number">1</span>]</span><br><span class="line">        p1=np.zeros((height,left))</span><br><span class="line">        p2=np.ones((height,right-left+<span class="number">1</span>))*<span class="number">255</span></span><br><span class="line">        p3=np.zeros((height,width-right))</span><br><span class="line">        new_im=np.hstack([p1,p2,p3])</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> im[i][j]==<span class="number">0</span>:</span><br><span class="line">                    new_im[i][j]=<span class="number">0</span></span><br><span class="line">        ans.append(new_im)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seedSplit</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：灰度图</span></span><br><span class="line"><span class="string">    输出：从图中高亮提取出的字符图片数组</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    angle=getAngle(im)</span><br><span class="line">    height,width = im.shape</span><br><span class="line">    vis=np.zeros((height,width))</span><br><span class="line">    vis2=np.zeros((height,width))</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mark</span>(<span class="params">i,j</span>):</span><br><span class="line">        vis2[i][j]=<span class="number">1</span></span><br><span class="line">        points=[]</span><br><span class="line">        points.append((i,j))</span><br><span class="line">        <span class="keyword">for</span> dx <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">            <span class="keyword">for</span> dy <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> i+dx&gt;=<span class="number">0</span> <span class="keyword">and</span> i+dx&lt;height <span class="keyword">and</span> j+dy&gt;=<span class="number">0</span> <span class="keyword">and</span> j+dy&lt;width <span class="keyword">and</span> im[i+dx][j+dy]==<span class="number">255</span> <span class="keyword">and</span> vis2[i+dx][j+dy]==<span class="number">0</span>:</span><br><span class="line">                     points.extend(mark(i+dx,j+dy))</span><br><span class="line">        <span class="keyword">return</span> points</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">delete</span>(<span class="params">i,j</span>):</span><br><span class="line">        vis[i][j]=<span class="number">1</span></span><br><span class="line">        ans=<span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> dx <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">            <span class="keyword">for</span> dy <span class="keyword">in</span> [-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> i+dx&gt;=<span class="number">0</span> <span class="keyword">and</span> i+dx&lt;height <span class="keyword">and</span> j+dy&gt;=<span class="number">0</span> <span class="keyword">and</span> j+dy&lt;width <span class="keyword">and</span> im[i+dx][j+dy]==<span class="number">255</span> <span class="keyword">and</span> vis[i+dx][j+dy]==<span class="number">0</span>:</span><br><span class="line">                    ans+=delete(i+dx,j+dy)</span><br><span class="line">        <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getImg</span>(<span class="params">points</span>):</span><br><span class="line">        new_im=np.zeros((height,width))</span><br><span class="line">        <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">            i,j=point         </span><br><span class="line">            new_im[i][j]=<span class="number">255</span></span><br><span class="line">        <span class="keyword">return</span> new_im,<span class="built_in">len</span>(points)</span><br><span class="line"></span><br><span class="line">    imgs=[]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> vis[i][j]==<span class="number">1</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                num=delete(i,j)   </span><br><span class="line">                <span class="keyword">if</span> num&lt;=<span class="number">50</span>:</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                points=mark(i,j)</span><br><span class="line">                imgs.append(getImg(points))</span><br><span class="line">            vis[i][j]=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    imgs.sort(<span class="keyword">lambda</span> left,right:cmp(left[<span class="number">1</span>],right[<span class="number">1</span>]))</span><br><span class="line">    new_imgs=[]</span><br><span class="line">    <span class="keyword">for</span> i,j <span class="keyword">in</span> imgs:</span><br><span class="line">        new_imgs.append((affine(i,angle),j))</span><br><span class="line">    imgs=new_imgs</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(imgs)&gt;<span class="number">4</span>:</span><br><span class="line">        imgs=imgs[<span class="built_in">len</span>(imgs)-<span class="number">4</span>:]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs[<span class="built_in">len</span>(imgs)-<span class="number">4</span>:]:</span><br><span class="line">            ans.append(i[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">4</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs:</span><br><span class="line">            ans.append(i[<span class="number">0</span>])</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">3</span>:</span><br><span class="line">        ans.append(imgs[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">        ans.append(imgs[<span class="number">1</span>][<span class="number">0</span>])</span><br><span class="line">        ans.extend(splitImg(imgs[<span class="number">2</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">len</span>(imgs)==<span class="number">2</span>:</span><br><span class="line">        rate=imgs[<span class="number">0</span>][<span class="number">1</span>]*<span class="number">1.0</span>/imgs[<span class="number">1</span>][<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> rate&gt;<span class="number">0.6</span>:</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">0</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">1</span>][<span class="number">0</span>],<span class="number">2</span>))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            ans.append(imgs[<span class="number">0</span>][<span class="number">0</span>])</span><br><span class="line">            ans.extend(splitImg(imgs[<span class="number">1</span>][<span class="number">0</span>],<span class="number">3</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        ans.extend(splitImg(imgs[<span class="number">0</span>][<span class="number">0</span>],<span class="number">4</span>))</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">seedSplitTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试seedSplit函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    gray()</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[<span class="number">5</span>:<span class="number">15</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line">        imgs=seedSplit(im)   </span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> imgs:</span><br><span class="line">            figure()</span><br><span class="line">            imshow(i)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getTrainPic</span>(<span class="params">im</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    输入：图片</span></span><br><span class="line"><span class="string">    输出：依次输出图片中包含的字符，并归一化成统一大小</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getCenterx</span>(<span class="params">img</span>):</span><br><span class="line">        height,width=im.shape</span><br><span class="line">        points=[]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> img[i][j]==<span class="number">255</span>:</span><br><span class="line">                    points.append(j)</span><br><span class="line">        <span class="keyword">return</span> np.average(points)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getResult</span>(<span class="params">im,row=<span class="number">30</span>,column=<span class="number">30</span></span>):</span><br><span class="line">        height,width=im.shape</span><br><span class="line">        maxX=<span class="number">0</span></span><br><span class="line">        maxY=<span class="number">0</span></span><br><span class="line">        minX=<span class="number">99999</span></span><br><span class="line">        minY=<span class="number">99999</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">                <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                    maxX=<span class="built_in">max</span>(maxX,j)</span><br><span class="line">                    minX=<span class="built_in">min</span>(minX,j)</span><br><span class="line">                    maxY=<span class="built_in">max</span>(maxY,i)</span><br><span class="line">                    minY=<span class="built_in">min</span>(minY,i)</span><br><span class="line">        im=im[minY:maxY+<span class="number">1</span>].T[minX:maxX+<span class="number">1</span>].T</span><br><span class="line">        im=cv2.copyMakeBorder(im,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="number">3</span>,cv2.BORDER_CONSTANT)</span><br><span class="line">        im=cv2.resize(im,(<span class="number">30</span>,<span class="number">30</span>))</span><br><span class="line">        <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line">    imgs=seedSplit(im)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="built_in">len</span>(imgs)):</span><br><span class="line">        imgs[i]=(imgs[i],getCenterx(imgs[i]))</span><br><span class="line">    imgs.sort(<span class="keyword">lambda</span> x,y:cmp(x[<span class="number">1</span>],y[<span class="number">1</span>]))</span><br><span class="line">    ans=[]</span><br><span class="line">    <span class="keyword">for</span> i,j <span class="keyword">in</span> imgs:</span><br><span class="line">        ans.append(getResult(i))</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getTrainPicTest</span>():</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    测试getTrain函数</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    gray()</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">10</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        imgs=getTrainPic(im)</span><br><span class="line">        res=np.hstack([imgs[<span class="number">0</span>],imgs[<span class="number">1</span>],imgs[<span class="number">2</span>],imgs[<span class="number">3</span>]])</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">        figure()</span><br><span class="line">        imshow(res)</span><br><span class="line">        axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">getTrainPicTest()</span><br></pre></td></tr></table></figure>
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p><img src="/images/2016/04/17/1/1.png"><br><img src="/images/2016/04/17/1/2.png"><br><img src="/images/2016/04/17/1/3.png"><br><img src="/images/2016/04/17/1/4.png"><br><img src="/images/2016/04/17/1/5.png"><br><img src="/images/2016/04/17/1/6.png"><br><img src="/images/2016/04/17/1/7.png"><br><img src="/images/2016/04/17/1/8.png"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/15/%E7%94%A8%E6%8A%95%E5%BD%B1%E6%B3%95%E7%9F%AB%E6%AD%A3%E5%AD%97%E7%AC%A6%E6%97%8B%E8%BD%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/15/%E7%94%A8%E6%8A%95%E5%BD%B1%E6%B3%95%E7%9F%AB%E6%AD%A3%E5%AD%97%E7%AC%A6%E6%97%8B%E8%BD%AC/" itemprop="url">用投影法矫正字符旋转</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-15T16:35:02+00:00">
+                2016-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>这是段简单的代码，目的是处理旋转验证码的问题，主要思想就是通过将字符以45°到135°的角度投影下来，得到一系列的投影范围，然后得到这当中投影长度最小的一个角度。这个角度我们就可以简单的把他看成是字符的偏转角。然后用这个角度通过仿射变换得到矫正后的字符。</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2,os,sys,Image,math</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getBinary</span>(<span class="params">path</span>):<span class="comment">#传入图片名，返回二值化的图片</span></span><br><span class="line"> im=cv2.imread(path,<span class="number">0</span>)</span><br><span class="line"> thresh,im=cv2.threshold(<span class="number">255</span>-im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line"> <span class="keyword">return</span> im</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadow</span>(<span class="params">im,angel</span>):<span class="comment">#传入图像im以及角度(角度制)angle，返回图像在该角度下的投影长度</span></span><br><span class="line">    x=[]</span><br><span class="line">    height , width = im.shape</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">            <span class="keyword">if</span> im[i][j]==<span class="number">255</span>:</span><br><span class="line">                x.append(j-<span class="number">1.0</span>*i/math.tan(math.radians(angel)))</span><br><span class="line">    x=np.array(x)</span><br><span class="line">    <span class="keyword">return</span> x.<span class="built_in">max</span>()-x.<span class="built_in">min</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">shadowTest</span>():<span class="comment">#测试shadow函数,需要weibo文件夹下的图片</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">10</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> shadow(im,<span class="number">50</span>)</span><br><span class="line">        figure()</span><br><span class="line">        gray()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngle</span>(<span class="params">im</span>):<span class="comment">#传入图片，返回使他投影最小的角度</span></span><br><span class="line">    minShadow=<span class="number">500</span></span><br><span class="line">    ans=<span class="number">90</span></span><br><span class="line">    <span class="keyword">for</span> angle <span class="keyword">in</span> np.linspace(<span class="number">45</span>,<span class="number">135</span>,<span class="number">91</span>):<span class="comment">#我这里范围设置的是45到135度，分度值是１度</span></span><br><span class="line">        thisShadow=shadow(im,angle)</span><br><span class="line">        <span class="keyword">if</span> minShadow&gt;thisShadow:</span><br><span class="line">            ans=angle</span><br><span class="line">            minShadow=thisShadow</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getAngleTest</span>():<span class="comment">#测试getAngle函数</span></span><br><span class="line">    directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line">    pics=os.listdir(directory)</span><br><span class="line">    <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">5</span>]:</span><br><span class="line">        im=getBinary(os.path.join(directory,pic))</span><br><span class="line">        <span class="built_in">print</span> getAngle(im)</span><br><span class="line">        figure()</span><br><span class="line">        imshow(im)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affine</span>(<span class="params">im</span>):<span class="comment">#将结合上面的函数，输入图片，输出矫正后的图片</span></span><br><span class="line"> height,width=im.shape</span><br><span class="line"> angle=getAngle(im)</span><br><span class="line"> <span class="comment">#下面是仿射变换，通过确定三点的原值和新值来确定变换的过程，这里我们选取的三点是中心点，顶部中心点，和左部中心点。</span></span><br><span class="line"> pts1=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>,<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line"> pts2=np.float32([[width/<span class="number">2</span>,height/<span class="number">2</span>],[width/<span class="number">2</span>+height/<span class="number">2</span>/math.tan(math.radians(angle)),<span class="number">0</span>],[<span class="number">0</span>,height/<span class="number">2</span>]])</span><br><span class="line"> M=cv2.getAffineTransform(pts1,pts2)</span><br><span class="line"> dst=cv2.warpAffine(im,M,(width,height))</span><br><span class="line"></span><br><span class="line"> <span class="keyword">return</span> dst</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">affineTest</span>():<span class="comment">#测试affine函数</span></span><br><span class="line"> directory=<span class="string">&#x27;weibo&#x27;</span></span><br><span class="line"> pics=os.listdir(directory)</span><br><span class="line"> <span class="keyword">for</span> pic <span class="keyword">in</span> pics[:<span class="number">1</span>]:</span><br><span class="line"> im=getBinary(os.path.join(directory,pic))</span><br><span class="line"> dst=affine(im)</span><br><span class="line"> gray()</span><br><span class="line"> figure()</span><br><span class="line"> imshow(np.hstack([im,dst]))</span><br><span class="line"> axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">affineTest()<span class="comment">#测试效果</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="/images/2016/04/16/1/1.png"><br><img src="/images/2016/04/16/1/2.png"><br><img src="/images/2016/04/16/1/3.png"><br><img src="/images/2016/04/16/1/4.png"><br><img src="/images/2016/04/16/1/5.png"></p>
+<p>可以发现这个方法还是有点效果的。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/15/%E5%85%B3%E4%BA%8EWordPress%E4%B8%AD%E5%AD%97%E4%BD%93%E5%8A%A0%E8%BD%BD%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/15/%E5%85%B3%E4%BA%8EWordPress%E4%B8%AD%E5%AD%97%E4%BD%93%E5%8A%A0%E8%BD%BD%E6%85%A2%E7%9A%84%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" itemprop="url">关于WordPress中字体加载慢的问题解决方案</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-15T11:48:03+00:00">
+                2016-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近发现Wordpress有时候加载的特别慢，于是就想办法找了下原因。之前听网上说是因为wordpress用的是Google的字体库，而且是每次都要加载，导致访问慢的，于是当时装了个Disable Google Fonts的插件，禁用了Google字体，然后装了一个Useso take over Google插件，将字体文件改为360托管的字体库，这样就可以访问快点了。当时的效果的确挺好的，结果最近在使用的时候又发现网站访问慢了，用Chrome查了下资源加载的情况，发现访问useso的字体库的时间特别的长。这时候改用Google字体的时候反而更快了。。。这就十分令人惆怅了，有时候用useso的快，有时候用google的快，真的挺麻烦的。后来想想干脆把这个文件下到服务器上不就好了么。。。于是就倒腾出了下面的办法，将当前主题的字体文件下载到了服务器上。</p>
+<h2 id="一"><a href="#一" class="headerlink" title="一"></a>一</h2><p>首先在源代码中找到加载字体文件的位置，在博客首页的源代码中找到了下面这行：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&#x27;stylesheet&#x27;</span> <span class="attr">id</span>=<span class="string">&#x27;baskerville_googleFonts-css&#x27;</span>  <span class="attr">href</span>=<span class="string">&#x27;//fonts.googleapis.com/css?family=Roboto+Slab%3A400%2C700%7CRoboto%3A400%2C400italic%2C700%2C700italic%2C300%7CPacifico%3A400<span class="symbol">&amp;#038;</span>ver=4.5&#x27;</span> <span class="attr">type</span>=<span class="string">&#x27;text/css&#x27;</span> <span class="attr">media</span>=<span class="string">&#x27;all&#x27;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其实搜索fonts就可以找到了这行。根据这行，我们晓得他引用了googleapis的字体包，命名为’baskerville_googleFonts-css’，而’baskerville’事实上就是我当前的主题名。</p>
+<h2 id="二"><a href="#二" class="headerlink" title="二"></a>二</h2><p>然后我们需要在后台找到上面id对应的那个超链接的位置。打开wordpress的根文件夹，直接搜索’fonts.googleapis.com’这个关键字：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$find . -type f |xargs grep fonts.googleapis.com</span><br></pre></td></tr></table></figure>
+<p>查找结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">./wp-admin/includes/class-wp-press-this.php:	$open_sans_font_url = &#x27;,&#x27; . add_query_arg( $query_args, &#x27;https://fonts.googleapis.com/css&#x27; );</span><br><span class="line">./wp-content/themes/baskerville/functions.php:	    wp_register_style(&#x27;baskerville_googleFonts&#x27;,  &#x27;//fonts.googleapis.com/css?family=Roboto+Slab:400,700|Roboto:400,400italic,700,700italic,300|Pacifico:400&#x27; );</span><br><span class="line">./wp-content/themes/baskerville/functions.php:    $font_url = &#x27;//fonts.googleapis.com/css?family=Roboto+Slab:400,700|Roboto:400,400italic,700,700italic,300&#x27;;</span><br><span class="line">./wp-includes/js/tinymce/plugins/compat3x/css/dialog.css:@import url(&quot;https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600&amp;subset=latin-ext,latin&quot;);</span><br><span class="line">./wp-includes/script-loader.php:	$open_sans_font_url = &quot;https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600&amp;subset=$subsets&quot;;</span><br></pre></td></tr></table></figure>
+<p>这样我们就找到了所在文件的位置。大概看一下，实际上用处比较大的是第二行的那串在主体中的定义（对比第一步的内容）（.&#x2F;wp-content&#x2F;themes&#x2F;baskerville&#x2F;functions.php的内容）（其余都是写无关紧要的插件所用的字体）。很明显可以看出来，接下来我们只要把后面那个url换成本地的字体包就可以了。</p>
+<h2 id="三"><a href="#三" class="headerlink" title="三"></a>三</h2><p>现在就来下字体包，打开第一步中的那个链接，可以看到是下面的内容：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* latin */</span></span><br><span class="line"><span class="keyword">@font-face</span> &#123;</span><br><span class="line">  <span class="attribute">font-family</span>: <span class="string">&#x27;Pacifico&#x27;</span>;</span><br><span class="line">  <span class="attribute">font-style</span>: normal;</span><br><span class="line">  <span class="attribute">font-weight</span>: <span class="number">400</span>;</span><br><span class="line">  <span class="attribute">src</span>: <span class="built_in">local</span>(<span class="string">&#x27;Pacifico Regular&#x27;</span>), <span class="built_in">local</span>(<span class="string">&#x27;Pacifico-Regular&#x27;</span>), <span class="built_in">url</span>(<span class="string">http://fonts.gstatic.com/s/pacifico/v7/Q_Z9mv4hySLTMoMjnk_rCfesZW2xOQ-xsNqO47m55DA.woff2</span>) <span class="built_in">format</span>(<span class="string">&#x27;woff2&#x27;</span>);</span><br><span class="line">  unicode-range: U+<span class="number">0000</span>-<span class="number">00</span>FF, U+<span class="number">0131</span>, U+<span class="number">0152</span>-<span class="number">0153</span>, U+<span class="number">02</span>C6, U+<span class="number">02</span>DA, U+<span class="number">02</span>DC, U+<span class="number">2000</span>-<span class="number">206</span>F, U+<span class="number">2074</span>, U+<span class="number">20</span>AC, U+<span class="number">2212</span>, U+<span class="number">2215</span>, U+E0FF, U+EFFD, U+F000;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* cyrillic-ext */</span></span><br><span class="line"><span class="keyword">@font-face</span> &#123;</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>发现是一段css，使用了很多的外部资源，下面我们就用一个爬虫来把他直接下下来并打包好：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> urllib2,cookielib,sys,re,os,urllib</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment">#网站登陆</span></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36))&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line"></span><br><span class="line">path=<span class="string">&#x27;http://fonts.googleapis.com/css?family=Roboto+Slab:400,700|Roboto:400,400italic,700,700italic,300|Pacifico:400&#x27;</span></span><br><span class="line">request=urllib2.Request(path)</span><br><span class="line">response=urllib2.urlopen(request)</span><br><span class="line"></span><br><span class="line">html=response.read()</span><br><span class="line">urls=re.findall(<span class="string">r&#x27;url\ ((.*?)\ )&#x27;</span>,html.replace(<span class="string">&#x27;\n&#x27;</span>,<span class="string">&#x27; &#x27;</span>))<span class="comment">#由于这里排版会和latex冲突，所以在\和(，以及\和)之间加了空格，使用的时候要删掉</span></span><br><span class="line"></span><br><span class="line">path=<span class="string">&#x27;font_cache/&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(path):</span><br><span class="line">    os.mkdir(path)</span><br><span class="line"><span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">    urllib.urlretrieve(url,path+url.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>])<span class="comment">#下载文件</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">    html=html.replace(url,url.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>])<span class="comment">#更新改css文件</span></span><br><span class="line"></span><br><span class="line">font=<span class="built_in">open</span>(path+<span class="string">&#x27;font-css&#x27;</span>,<span class="string">&#x27;w+&#x27;</span>)</span><br><span class="line">font.write(html)<span class="comment">#保存</span></span><br></pre></td></tr></table></figure>
+<p>这样就生成了一个font_cache文件夹，在这里有所有下好的字体文件以及更新新后的css文件</p>
+<h2 id="四"><a href="#四" class="headerlink" title="四"></a>四</h2><p>最后把这个文件上传到wordpress的根目录下（放到其他目录有时候会没有权限访问，有点麻烦），然后将function.php中的那个url改成<code>/font_cache/font-css</code>（相对于wordpress的根）即可。（记得备份初始文件防止改错。。。。）</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/14/%E5%88%A9%E7%94%A8Python%E5%9C%A8%E5%9B%BE%E7%89%87%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%96%87%E5%AD%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/14/%E5%88%A9%E7%94%A8Python%E5%9C%A8%E5%9B%BE%E7%89%87%E4%B8%AD%E6%B7%BB%E5%8A%A0%E6%96%87%E5%AD%97/" itemprop="url">利用Python在图片中添加文字</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-14T12:59:35+00:00">
+                2016-04-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="使用OpenCV"><a href="#使用OpenCV" class="headerlink" title="使用OpenCV"></a>使用OpenCV</h2><p>在图片中添加文字看上去很简单，但是如果是利用OpenCV来做却很麻烦。OpenCV中并没有使用自定义字体文件的函数，这不仅意味着我们不能使用自己的字体，而且意味着他无法显示中文字符。这还是非常要命的事情。而且他显示出来的文字位置也不太好控制。比如下面的代码，他想做的仅仅是显示数字3：</p>
+<p><strong>代码：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line">font=cv2.FONT_HERSHEY_SIMPLEX<span class="comment">#使用默认字体</span></span><br><span class="line">im=np.zeros((<span class="number">50</span>,<span class="number">50</span>,<span class="number">3</span>),np.uint8)＃新建图像，注意一定要是uint8</span><br><span class="line">img=cv2.putText(im,<span class="string">&#x27;3&#x27;</span>,(<span class="number">0</span>,<span class="number">40</span>),font,<span class="number">1.2</span>,(<span class="number">255</span>,<span class="number">255</span>,<span class="number">255</span>),<span class="number">2</span>)<span class="comment">#添加文字，1.2表示字体大小，（0,40）是初始的位置，(255,255,255)表示颜色，2表示粗细</span></span><br><span class="line">imshow(img)</span><br></pre></td></tr></table></figure>
+
+<p><strong>结果：</strong></p>
+<p><img src="/images/2016/04/14/1/1.png">)</p>
+<p>我么可以发现文字出现的位置并不怎么好把握，初始的坐标默认是指左下角的坐标，不怎么方便。而且显示出文字以后，我们不好掌握他实际占的位置和大小。</p>
+<p>不过有一点方便的是，我们可以随意改变他的粗细，而不用更换字体。这一点是下面使用PIL进行绘图所不具备的优点。</p>
+<h2 id="使用PIL"><a href="#使用PIL" class="headerlink" title="使用PIL"></a>使用PIL</h2><p>同样为了生成数字３，下面是使用PIL进行的操作：</p>
+<p><strong>代码：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Image,ImageFont,ImageDraw</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line">font = ImageFont.truetype(<span class="string">&#x27;3.ttf&#x27;</span>,<span class="number">50</span>)　<span class="comment">#使用自定义的字体，第二个参数表示字符大小</span></span><br><span class="line">im = Image.new(<span class="string">&quot;RGB&quot;</span>,(<span class="number">50</span>,<span class="number">50</span>))　　　　　　<span class="comment">#生成空白图像</span></span><br><span class="line">draw = ImageDraw.Draw(im)　　　　　　　　 <span class="comment">#绘图句柄</span></span><br><span class="line">x,y=(<span class="number">0</span>,<span class="number">0</span>)　　　　　　　　　　　　　　　　　　<span class="comment">#初始左上角的坐标</span></span><br><span class="line">draw.text((x,y), <span class="string">&#x27;3&#x27;</span>, font=font)　　　　<span class="comment">#绘图</span></span><br><span class="line">offsetx,offsety=font.getoffset(<span class="string">&#x27;3&#x27;</span>)　　<span class="comment">#获得文字的offset位置</span></span><br><span class="line">width,height=font.getsize(<span class="string">&#x27;3&#x27;</span>)　　　　　<span class="comment">#获得文件的大小</span></span><br><span class="line">im=np.array(im)</span><br><span class="line">cv2.rectangle(im,(offsetx+x,offsety+y),(offsetx+x+width,offsety+y+height),(<span class="number">255</span>,<span class="number">255</span>,<span class="number">255</span>),<span class="number">1</span>)<span class="comment">#绘出矩形框</span></span><br><span class="line">imshow(im)</span><br></pre></td></tr></table></figure>
+<p><strong>结果：</strong></p>
+<p><img src="/images/2016/04/14/1/2.png">)</p>
+<p>我们可以发现，PIL支持使用自定义的字体文件，而且能够提供字体所占位置的详细信息，我们可以精确的确定文字所占的位置，在应用中特别有用。唯一的不足就是他不能改变字体的粗细（毕竟这用的是字体模板）。</p>
+<p>实际应用中看来还要在这两种方法中择优使用。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/13/OpenCV%E7%9A%84%E6%89%A9%E5%B1%95%E5%8C%85opencv_contrib%E7%9A%84%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/13/OpenCV%E7%9A%84%E6%89%A9%E5%B1%95%E5%8C%85opencv_contrib%E7%9A%84%E5%AE%89%E8%A3%85/" itemprop="url">OpenCV的扩展包opencv_contrib的安装</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-13T15:50:41+00:00">
+                2016-04-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>近日想使用OpenCV里面的诸如SIFT、SURF之类的特征提取算法，结果突然发现OpenCV3.0.0这里并没有书上讲的关于SIFT的函数。查了半天才知道，原来有大量的函数并不在OpenCV的稳定发布版本里，而是在OpenCV_contrib这个扩展包里面。搞了半天才把这玩意搞定（自己傻），下面记录下安装的过程，方便日后的安装。</p>
+<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>opencv_contrib包独立于opencv的主体，发布在他的<a target="_blank" rel="noopener" href="https://github.com/Itseez/opencv_contrib/tree/master">github</a>上。直接在这里下载适合的版本即可。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这个玩意的安装其实不难，照着解压下来的README操作就行了，只是要重新下载编译opencv，过程跟<a href="/2016/02/11/1/">OpenCV安装方法</a>差不多，只是要在cmake的配置中加上<code>-D OPENCV_EXTRA_MODULES_PATH=&lt;path to opencv_contrib/modules/&gt;</code> 参数，（其中<code>&lt;path to opencv_contrib&gt;</code>是opencv_contrib的解压地址）</p>
+<p>需要注意的是一定要加上<code>-D BUILD_PYTHON_SUPPORT=ON</code> 选项才能有python接口。如果是直接复制cv2.so文件到python的路径的话则会报“AttributeError: ‘module’ object has no attribute ‘SIFT’”之类的错误。</p>
+<h2 id="README的解读"><a href="#README的解读" class="headerlink" title="README的解读"></a>README的解读</h2><p>他这里的README很有意思，不仅介绍了他的安装方法，而且也介绍了为什么我们会把很多比较厉害的模块（比如SIFT,SURF等）单独放在一个地方，而不把他融入OpenCV的主体程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">This repository is intended for development of so-called &quot;extra&quot; modules,</span><br><span class="line">contributed functionality. New modules quite often do not have stable API,</span><br><span class="line">and they are not well-tested. Thus, they shouldn&#x27;t be released as a part of</span><br><span class="line">official OpenCV distribution, since the library maintains binary compatibility,</span><br><span class="line">and tries to provide decent performance and stability.</span><br><span class="line"></span><br><span class="line">So, all the new modules should be developed separately, and published in the</span><br><span class="line">`opencv_contrib` repository at first. Later, when the module matures and gains</span><br><span class="line">popularity, it is moved to the central OpenCV repository, and the development team</span><br><span class="line">provides production quality support for this module.</span><br></pre></td></tr></table></figure>
+<p>原来是因为这些模块的困难度比较大，而且使用的时候效果不太稳定，而发布版本（Release）则需要稳定性和可靠性；同时，这些模块的使用程度比较低，大多数的开发人员用不到这些包；况且这些模块是独立于主程序开发的，因此也就应当把他们跟主程序分开。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/09/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E5%88%86%E7%B1%BB%E5%87%86%E7%A1%AE%E7%8E%87%E7%9A%84%E8%AF%84%E4%BC%B0%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/09/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E5%88%86%E7%B1%BB%E5%87%86%E7%A1%AE%E7%8E%87%E7%9A%84%E8%AF%84%E4%BC%B0%E6%96%B9%E6%B3%95/" itemprop="url">机器学习中分类准确率的评估方法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-09T07:01:48+00:00">
+                2016-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>对机器学习的分类结果进行分析是一个很重要的过程，之前一直忽略了这一个过程，一直到使用了Scikit-learn之后才发现有一堆不懂的名词需要学习。下面主要解释下混淆矩阵、准确率、召回率、f1-score等概念。这些概念其实也是模式识别和信息检索里面经常碰到的东西。</p>
+<h2 id="混淆矩阵（Confusion-Matrix）"><a href="#混淆矩阵（Confusion-Matrix）" class="headerlink" title="混淆矩阵（Confusion Matrix）"></a>混淆矩阵（Confusion Matrix）</h2><p>混淆矩阵其实很好理解，就是把预测值和实际值写在同一个矩阵里。假设总共需要分为两类，那么混淆矩阵就是2x2的大小。每一行就是每一类的实际值，每一列就代表的是每一类的预测值。具体含义见下面的表格：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>预测类1</th>
+<th>预测类2</th>
+<th>预测类3</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>实际类1</td>
+<td>43</td>
+<td>5</td>
+<td>2</td>
+</tr>
+<tr>
+<td>实际类2</td>
+<td>2</td>
+<td>45</td>
+<td>3</td>
+</tr>
+<tr>
+<td>实际类3</td>
+<td>0</td>
+<td>1</td>
+<td>49</td>
+</tr>
+</tbody></table>
+<p>比方下面这个混淆矩阵：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[515  34]</span><br><span class="line">[ 80 262]</span><br></pre></td></tr></table></figure>
+<p>表达的含义是对于一个０１的二分类问题，实际值是０且预测值也为０的有515个，实际值是０但预测值为１的有34个，实际值是１但预测值也为０的有80个，实际值是１但预测值为１的有262个。</p>
+<h2 id="Accuracy、Recall、F1-score的含义"><a href="#Accuracy、Recall、F1-score的含义" class="headerlink" title="Accuracy、Recall、F1-score的含义"></a>Accuracy、Recall、F1-score的含义</h2><p>准确率和召回率是最常用的评估方法，听上去玄乎其实很简单。</p>
+<p><strong>准确率</strong>是指对于预测而言，我的预测正确的概率。比如上面的那个混淆矩阵表示的结果，预测值为０的准确率就是515&#x2F;(515+80)&#x3D;0.87。</p>
+<p><strong>召回率</strong>是指对于实际而言，我的实际结果能够被正确预测出来的概率。比如上面的混淆矩阵中，实际值为０的召回率就是515&#x2F;(515+34)&#x3D;0.94</p>
+<p>分出这两个判断标准也是有着实际的重要意义的。</p>
+<p>比如通常我们在判断正确率的时候，用Accuracy表示就可以了，但是如果我们面对的是类似地震的预测时，我们并不特别在意他实际的准确率，宁可多预警几次来避免大的损失。此时召回率就显得特别重要了。</p>
+<p>最后<strong>F1-score</strong>其实是准确率和召回率的综合考量，$f1score&#x3D;\frac{2*Accuracy*Recall}{Accuracy+Recall}$。</p>
+<h2 id="相关参考"><a href="#相关参考" class="headerlink" title="相关参考"></a>相关参考</h2><p><a target="_blank" rel="noopener" href="http://www.w2bc.com/Article/88963">机器学习 F1-Score, recall, precision</a><br><a target="_blank" rel="noopener" href="http://blog.sina.com.cn/s/blog_900690c60101czyo.html">召回率 Recall、精确度Precision、准确率Accuracy、虚警、漏警等分类判定指标</a><br><a target="_blank" rel="noopener" href="https://argcv.com/articles/1036.c">准确率(Accuracy), 精确率(Precision), 召回率(Recall)和F1-Measure</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/09/Scikit-learn%E5%8C%85%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -912,944 +1844,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/" itemprop="url">OpenCV计算图像的梯度特征</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-29T15:52:28+00:00">
-                2016-03-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>计算图像的梯度是在进行图像处理时经常用到的方法，但是这玩意自己手写未免效率低而且容易出错。OpenCV里集成了相应的函数，只不过用的人好像并不多导致我找了半天才找到。姑且记一下以备日后使用。</p>
-<h2 id="计算像素梯度的绝对值"><a href="#计算像素梯度的绝对值" class="headerlink" title="计算像素梯度的绝对值"></a>计算像素梯度的绝对值</h2><p>这个用到了cv2.magnitude方法，具体用法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sobelx=cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3)#1,0表示只在x方向求一阶导数</span><br><span class="line">sobely=cv2.Sobel(im,cv2.CV_64F,0,1,ksize=3)#0,1表示只在y方向求一阶导数</span><br><span class="line">mag=cv2.magnitude(x,y)</span><br></pre></td></tr></table></figure>
-<p>这里传入两个参数，分别是x和y方向的梯度，这里我用的是Sobel算子分别求x和y方向的梯度，卷积核的大小我设置的是３。得到的mag就是对应每个像素的梯度矩阵。实际上这也可以算成边缘检测吧。</p>
-<p>对于Sobel函数有个注意点，他的第二个参数是扩展了像素的数值范围，因为梯度是有方向的，所以sobel函数得到的是有正有负的值，所以相当于扩大了取值。通常情况下我们会加上下面的函数来得到梯度的绝对值：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sobelx=cv2.convertScaleAbs(cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3))</span><br></pre></td></tr></table></figure>
-<p>在外面套一个取绝对值的函数，或者也可以直接套一个np.abs()。。。不过效果不太一样。</p>
-<h2 id="计算像素梯度的方向"><a href="#计算像素梯度的方向" class="headerlink" title="计算像素梯度的方向"></a>计算像素梯度的方向</h2><p>这个用到了cv2.parse方法，具体用法如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase= cv2.phase(cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3),cv2.Sobel(im,cv2.CV_64F,0,1,ksize=3),angleInDegrees=True)</span><br></pre></td></tr></table></figure>
-<p>Sobel的用法跟上面一样，最后一个参数为True表示结果用角度制表示，否则用弧度制。</p>
-<p>得到的结果通常会用直方图来表示，</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hist(phase.ravel(),256,[0,256])</span><br></pre></td></tr></table></figure>
-<p>输出的图像就是梯度按照角度的分布。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" itemprop="url">Tomcat Servlet编程基础</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-27T15:51:24+00:00">
-                2016-03-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前一直使用的是Apache服务器，对于Tomcat的工作方式反而不那么习惯。给我一个Java web程序源码我都不晓得他应该怎么连接到Tomcat上。于是趁着无聊的时候看了个J2EE的Servlet教程，终于对怎么把java部署到Tomcat上、以及Tomcat的基本工作流程有了简要的认识。当然，这里仅仅指的是简单的Servlet程序的部署方法，不过这点方法从理论上讲已经具备了写一个简单web 应用的能力了。</p>
-<h2 id="Tomcat基本配置"><a href="#Tomcat基本配置" class="headerlink" title="Tomcat基本配置"></a>Tomcat基本配置</h2><p>Tomcat的配置文件是%TOMCAT_HOME%&#x2F;conf&#x2F;server.xml，这里配置了Tomcat的基本信息，最重要的是下面这两个：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;</span><br><span class="line">               connectionTimeout=&quot;20000&quot;</span><br><span class="line">               redirectPort=&quot;8443&quot; /&gt;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;localhost&quot;  appBase=&quot;webapps&quot;</span><br><span class="line">            unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br></pre></td></tr></table></figure>
-<p>第一个指定了Tomcat监听的端口，默认是8080，如果和其他应用冲突了可以在这里修改。</p>
-<p>第二个指定了Tomcat映射的根目录，就像apache中的&#x2F;var&#x2F;www&#x2F;html&#x2F;的作用一样，但又不完全一样。因为这下面放的都应该是一套完整的应用而不是单一的html文件。</p>
-<h2 id="HttpServlet类基本用法"><a href="#HttpServlet类基本用法" class="headerlink" title="HttpServlet类基本用法"></a>HttpServlet类基本用法</h2><p>Servlet程序就是服务器小程序，现在我们的目的是编写web服务器，那么自然就用到了HttpServlet类来实现一个Http服务器应用。它的基本框架是：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebServlet(&quot;/MyServlet&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> <span class="number">1L</span>;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		response.getWriter().append(<span class="string">&quot;&lt;a href=&#x27;http://www.baidu.com&#x27;&gt;baidu&lt;/a&gt;&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		doGet(request, response);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里最常用的就是重载它的doGet和doPost方法，每个方法都传入Request和Response方法，可以从Request中读入用户传过来的数据，并且将需要显示的内容写在Response中，这样就可以达到简单的动态显示网页的效果了。（注意加@WebServlet标注）</p>
-<h2 id="Webapps下项目基本配置"><a href="#Webapps下项目基本配置" class="headerlink" title="Webapps下项目基本配置"></a>Webapps下项目基本配置</h2><p>这个是Tomcat和Apache非常不同的东西，也是我花了半天才理清楚的。</p>
-<p>把Servlet应用放在Webapps文件夹下必须要有web.xml配置文件，这个文件应该放在 项目根目录&#x2F;WEB-INF&#x2F; 下，这是用来配置整个项目的配置文件。他一定要有如下格式：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;ISO-8859-1&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee</span></span></span><br><span class="line"><span class="string"><span class="tag">                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">metadata-complete</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>实际上就是把<code>%TOMCAT_HOME%/conf/web.xml</code>文件的中间部分去掉，留下了外壳，以后需要在这里面慢慢添加配置文件。</p>
-<p>当然， 为了让他能访问到一个特定的Servlet程序，我们还要的对他进行注册:</p>
-<p>首先，我们要把编译过的MyServlet.class文件放在WEB-INF&#x2F;下的classes&#x2F;文件夹下；</p>
-<p>然后，在上面的web.xml中间写入这样的内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">      &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">      &lt;servlet-class&gt;MyServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;/servlet&gt;</span><br><span class="line"></span><br><span class="line">    &lt;servlet-mapping&gt;</span><br><span class="line">        &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">        &lt;url-pattern&gt;/MyServlet&lt;/url-pattern&gt;</span><br><span class="line">    &lt;/servlet-mapping&gt;</span><br></pre></td></tr></table></figure>
-<p>意思很清楚，就是对这个Servlet起个名字，然后把他映射到项目根目录下的MyServlet上，这样就能够通过浏览器访问到了。（事实上，上面的操作的目的就是之前那个类文件中的<code>@WebServlet(&quot;/MyServlet&quot;)</code> 。</p>
-<p>上面是比较基础的操作方法，如果是用Eclipse的话就简单的很了，什么配置web.xml啊，新建文件夹啊都不用操心，只要新建动态网页应用，写个Servlet类，然后直接就能跑起来。不过有一个要注意的就是在用Eclipse查看浏览页面的时候是不用手动开启Tomcat服务器的，如果手动开了的话还会报错。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" itemprop="url">Python面向对象编程基础</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-25T14:34:08+00:00">
-                2016-03-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近一直在用Python写代码，发现了很多代码重复的问题，总是复制粘贴显得特别凌乱，于是就想用类来封装一下。下面就记录下Python中最基础的面向对象编程方法。python的面向对象跟java，c++的面向对象意思都差不多，从他们类比过来还是非常好理解的。</p>
-<h2 id="类定义"><a href="#类定义" class="headerlink" title="类定义"></a>类定义</h2><p>python的类定义比较简单格式基本是这样的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>():</span><br><span class="line"></span><br><span class="line">    publicAttr= <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">instanceMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">staticMethod</span>():</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">classMethod</span>(<span class="params">cls</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__del__</span>():</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>直接定义一个Test类，括号里面表示他的父类，默认是Object。</li>
-<li>构造函数名字叫__init__，括号内表示构造的参数，但是第一个参数必须是self，表示传入自己的引用，而且之后调用的所有类属性类方法都需要用self来引导。</li>
-<li>类的方法分为实例方法、静态方法和类方法。除了实例方法外，其他方法是在方法上方用‘@staticmethod’或‘@classmethod’来表示的。而且只有实例方法必须先生成一个实例才可以调用。</li>
-<li>注意类方法默认传入的参数不是self，而是cls，表示他是类方法。类方法跟静态方法基本差不多，不同的就是这个参数，以及在继承中的差异。</li>
-<li>析构函数名字叫__del__，传入self参数。由于python本身具有垃圾回收机制，我们既可以用<code>del myinstance</code>来显式调用，也可以让系统自己调用。</li>
-</ul>
-<h2 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h2><p>python中并没有权限控制的关键字，所以默认的权限都是public，他相信程序员知道自己正在做什么。不过他也提供了权限控制的机制，就是通过方法名。如果方法名或属性名前面由‘__’修饰，那么python就认为他是私有的。</p>
-<p>比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>():</span><br><span class="line">    __privateAttr=<span class="number">1</span></span><br><span class="line">    publicAttr= <span class="number">2</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__privateMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span> self.__private</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">publicMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span> self.publicAttr</span><br><span class="line"></span><br><span class="line">test=Test()             <span class="comment">#constructor</span></span><br><span class="line"><span class="built_in">print</span> test.publicAttr</span><br><span class="line"><span class="comment">#print test.__privateAttr</span></span><br><span class="line">test.publicMethod()</span><br><span class="line"><span class="comment">#test.__privateMethod()</span></span><br></pre></td></tr></table></figure>
-<p>类外部调用私有属性是会报错的。</p>
-<p>不过事实上，私有属性也是可以在类外被访问到的，只要在他的名字前面加上“_类名”就可以了。</p>
-<h2 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h2><p>python支持多重继承（具体内容暂时不研究），父类名写在类声明的括号里面。具体用法跟其他的支持OOP语言的使用方法类似。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/23/Eclipse+Tomcat%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E5%BF%83%E5%BE%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/23/Eclipse+Tomcat%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E5%BF%83%E5%BE%97/" itemprop="url">Eclipse+Tomcat平台搭建心得</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-23T15:56:49+00:00">
-                2016-03-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>突然被要求搭建个Java 动态网页开发环境，好久不用eclipse的我着实懵逼好久。这当中遇到了好多好多的坑，姑且记录下一些注意事项，加深下对Eclipse和Tomcat的理解。</p>
-<ul>
-<li><p>java环境和Tomcat的环境一定要搭建正确，windows下注意配置下环境变量即可，ubuntu下还要注意尽量要自己下载源码编译，不要用apt-get里面的包。。。apt-get里的东西满满的都是坑，懒人化操作固然方便，但是这就导致了我们对他的路径、环境变量的存储位置都不清楚，这对接下来的配置会带来极大的困难。</p>
-</li>
-<li><p>eclipse的版本一定要看准了，不一定要是最新的，但是尽量用eclipse for j2ee 版本的。虽说理论上任何的eclipse版本之间都可以通过安装插件来达到同样的效果，但是这还是有很多不一样的地方。当你对着教程学习的时候，发现自己的菜单选项和人家的选项不一样的时候还是非常的蛋疼的。</p>
-</li>
-<li><p>eclipse在配置Server的时候一定要选择到我们下载的Tomcat路径。因为无论我们是否安装了Tomcat，在preference-&gt;server-&gt;runtime environment 选项中eclipse总会提供所有的Tomcat版本供我们选择，然而这些并没有卵用，如果想让eclipse连接本机的Tomcat，必须在search选项中选择Tomcat安装路径。这样选择的server才能用。</p>
-</li>
-<li><p>一定要添加全所有需要的jar包，在build path里添加需要的包（这里通常有很多很多，比如struts，spring，javax，json之类的），尤其是Tomcat的包（即javax之类的包，如果不是eclipse for j2ee的话是很难找到的）。而且还要注意选择jre包，选择不对的话是会报错的，而且很难看出来。</p>
-</li>
-<li><p>一定要记得，要在WEB-INF&#x2F;lib&#x2F;文件夹下把之前build path中添加的包通通添加进来， 否则会迷之报错，最典型的就是在Tomcat启动时报类似“Error configuring application listener of class org.springframework.web.context.ContextLoaderListener”的错误。。。话说报这个错的时候谁会想到是因为jar包没有加对地方造成的。。。另外提一句，如果是绕过eclipse直接在Tomcat中启动项目的话，还得会看日志，日志文件是在<code>%TOMCAT_HOME%/logs/catalina.out</code>文件中。如果不会看日志文件，你看到的只能是404 not found，并不能研究错误是什么。。。</p>
-</li>
-<li><p>通常情况下，第一次在Tomcat里跑自己的项目肯定会报类似这样的错误<code>“The Apache Tomcat Native library which allows optimal performance in production environments was not found...”</code>这是因为我们缺少APR（Apache Portable Runtime）这个东西，在windows下可以直接下tcnative-1.dll文件，并放在c:&#x2F;windows&#x2F;system32&#x2F;下（注意选择架构）。如果是在ubuntu下就有点麻烦了，还得去下apr和apr-util文件来配置编译。。。甚是麻烦以至于我到现在都没弄好。。。</p>
-</li>
-</ul>
-<p>差不多上面就是我搭建Eclipse+Tomcat服务器遇到的问题和解决的方法。以后遇到问题还是要善于去找日志文件，并勤于利用搜索引擎，这样才能将问题进行有针对性的解决。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/14/Markdown%E6%96%87%E6%9C%AC%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80%E5%88%9D%E8%AF%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/14/Markdown%E6%96%87%E6%9C%AC%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80%E5%88%9D%E8%AF%86/" itemprop="url">Markdown文本标记语言初识</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-14T13:22:53+00:00">
-                2016-03-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>一直听说用Markdown写博文挺方便的，也一直没有在意，然而最近在用jupyter的时候突然发现jupyter是自带Markdown的，这让没用过的我很是尴尬。而且后来在网上翻博客的时候，发现<a target="_blank" rel="noopener" href="http://www.jianshu.com/">“简书”</a> 上的博客格式都非常漂亮，特别是层次非常清楚，排版也和工整，后来才知道这个就是用markdown写的。于是我也萌生了一个用markdown写文章的想法。 当然在这之前，肯定要了解下markdown的语法什么的。</p>
-<h2 id="平台"><a href="#平台" class="headerlink" title="平台"></a>平台</h2><p>首先我需要一个Linux下写Markdown的小工具，有一个开源的小软件叫‘retext’（用pyqt写的）能够挺好的支持markdown的语法的。</p>
-<p>如果是在web上直接写markdown，也有很多平台，百度一下就晓得了。当然，类似jupyter、简书甚至wordpress也都能够很好的支持markdown</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>用法十分简单，一张表就可以基本解决：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#Header 1</span><br><span class="line">##Heaer 2</span><br><span class="line">###Header 3</span><br><span class="line">####header 4</span><br><span class="line">#####header 5</span><br><span class="line">######header 6</span><br><span class="line"></span><br><span class="line">Header</span><br><span class="line">====</span><br><span class="line"></span><br><span class="line">SubHeader</span><br><span class="line">----</span><br><span class="line"></span><br><span class="line">**bold**</span><br><span class="line"></span><br><span class="line">*italics*</span><br><span class="line"></span><br><span class="line">*emphasize*</span><br><span class="line"></span><br><span class="line">label [^1]</span><br><span class="line"></span><br><span class="line">&gt; This is the quote</span><br><span class="line"></span><br><span class="line">    #include&lt;iostream&gt;</span><br><span class="line">    using namespace std;</span><br><span class="line">    int main()&#123;</span><br><span class="line">        printf(&quot;hello world\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">[This is the label](http://www.baidu.com)</span><br><span class="line"></span><br><span class="line">![alt](/images/2016/03/14/1/1.png)</span><br><span class="line"></span><br><span class="line">*  1</span><br><span class="line">* * 1</span><br><span class="line">* * * 1</span><br><span class="line"></span><br><span class="line">[^1]: This is my first footnote</span><br></pre></td></tr></table></figure>
-<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="/images/2016/03/14/1/2.png"></p>
-<p>需要说明的几点：</p>
-<ul>
-<li>换行是用位于行末的两个空格来确定的，而不是直接回车。</li>
-<li>代码是用同一的一个缩进位来表示的。</li>
-<li>引用链接是用<code>[text](url)</code>来确定的，如果是引用图片，则在前面加！号即可。</li>
-<li>标注是用<code>[^n]</code>来确定的，在需要使用的时候用<code>[^n]</code>，在文章末尾用<code>[^n]:description</code>来加以说明。</li>
-<li>多级分点是用<code>*</code>来表示的，当然，多个<code>*</code>之间要有空格。</li>
-<li>其他用法可以查看文档</li>
-</ul>
-<p>Markdown之所以这么红，我想就是因为他的宗旨非常切合大众的需要，那就是“成为一种适用于网络的书写语言”，他的宗旨就是易读易写。这也就难怪他成为写博客，构建cms站点，甚至是写论文的一个非常好的工具了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/12/%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96%E5%A4%84%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/12/%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96%E5%A4%84%E7%90%86/" itemprop="url">直方图均衡化处理</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-12T15:49:25+00:00">
-                2016-03-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>直方图均衡化方法属于图像增强的范畴，是一种对图像进行灰度级修正的方法。简而言之，就是对一个灰度图像进行处理，使他的特征更加明显。通常情况下，在对图像进行进一步的处理之前，直方图均衡化是一种对灰度进行归一化处理的好方法，而且也可以增强图像的对比度。</p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这个方法的思路非常简单，就是我们把一个灰度图像以0-255个灰度值为横坐标，灰度对应的像素点的个数为纵坐标，构成一个灰度直方图。对于那些灰度分布非常不均衡的图像来说，我们要做的就是通过对灰度值进行一个映射，将他灰度直方图尽可能的拉伸。通常情况下我们可以对他的累计分布函数（CDF）进行线性插值即可，实现起来也很简单。</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>当然我们并不需要每次都自己写，调用matplotlib的函数可以很轻松的画出直方图，调用OpenCV的函数可以很轻松的进行均衡化：</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> Image,cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">raw=Image.<span class="built_in">open</span>(<span class="string">&#x27;test.png&#x27;</span>)</span><br><span class="line">im=np.array(raw.convert(<span class="string">&#x27;L&#x27;</span>))</span><br><span class="line"></span><br><span class="line">gray()</span><br><span class="line">figure()</span><br><span class="line">hist(im.ravel(),<span class="number">256</span>,[<span class="number">0</span>,<span class="number">256</span>])<span class="comment">#matplotlib的函数，hist用来绘直方图，ravel是将二维图像数组转换成一维数组</span></span><br><span class="line">xlim([<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line"></span><br><span class="line">equ=cv2.equalizeHist(im)    <span class="comment">#OpenCV直方图均衡化的接口</span></span><br><span class="line">figure()</span><br><span class="line">hist(equ.ravel(),<span class="number">256</span>,[<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line">xlim([<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line"></span><br><span class="line">figure()</span><br><span class="line">imshow(raw)</span><br><span class="line"></span><br><span class="line">res=np.hstack((im,equ))    <span class="comment">#将两个图像水平合并方便查看</span></span><br><span class="line">figure()</span><br><span class="line">imshow(res)</span><br><span class="line"></span><br><span class="line">show()</span><br></pre></td></tr></table></figure>
-
-<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="/images/2016/03/12/1/1.png"><br><img src="/images/2016/03/12/1/2.png"><br><img src="/images/2016/03/12/1/3.png"><br><img src="/images/2016/03/12/1/4.png"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/43/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/43/">43</a><span class="page-number current">44</span><a class="page-number" href="/page/45/">45</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/45/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/43/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/43/">43</a><span class="page-number current">44</span><a class="page-number" href="/page/45/">45</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/45/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1895,7 +1894,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1906,7 +1905,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1917,7 +1916,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

@@ -307,6 +307,915 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/10/14/Linux-C%E7%AE%80%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/10/14/Linux-C%E7%AE%80%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%88%86%E6%9E%90/" itemprop="url">Linux-C简单多线程编程分析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-14T09:39:39+00:00">
+                2016-10-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们都知道多线程可以提高程序运行的速度，但是至于能够提高多少却一直没有一个直观的印象，下面就用Linux C的多线程编程技术，简要分析下多线程的运行效率。</p>
+<h2 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h2><p>下面就用1000*1000的矩阵之间的乘法来做一个实验，我们分别用单线程和多线程分别实现，算法都采用$O(n^3)$的朴素算法。测试代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LEN 1000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXNUM 1000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXTHREADNUM 16</span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> matrix1[LEN][LEN]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> matrix2[LEN][LEN]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> sum[MAXTHREADNUM]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> ans=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">getCurrentTime</span><span class="params">()</span></span>&#123;</span><br><span class="line">   <span class="keyword">struct</span> <span class="title class_">timeval</span> tv;</span><br><span class="line">   <span class="built_in">gettimeofday</span>(&amp;tv,<span class="literal">NULL</span>);</span><br><span class="line">   <span class="keyword">return</span> tv.tv\_sec * <span class="number">1000</span> + tv.tv\_usec / <span class="number">1000</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">genMatrix</span><span class="params">(<span class="type">char</span> *file)</span></span>&#123;</span><br><span class="line">    FILE *fp=<span class="built_in">fopen</span>(file,<span class="string">&quot;w&quot;</span>);</span><br><span class="line">    <span class="built_in">srand</span>(<span class="built_in">time</span>(<span class="literal">NULL</span>));</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;LEN;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;LEN;j++)&#123;</span><br><span class="line">            <span class="type">int</span> random=<span class="built_in">rand</span>()%MAXNUM;</span><br><span class="line">            <span class="built_in">fprintf</span>(fp,<span class="string">&quot;\t%d&quot;</span>,random);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">fprintf</span>(fp,<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fclose</span>(fp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">getMatrix</span><span class="params">(<span class="type">long</span> <span class="type">long</span> matrix[LEN][LEN],<span class="type">char</span> *file)</span></span>&#123;</span><br><span class="line">    FILE *fp=<span class="built_in">fopen</span>(file,<span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;LEN;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;LEN;j++)&#123;</span><br><span class="line">            <span class="built_in">fscanf</span>(fp,<span class="string">&quot;\t%lld&quot;</span>,&amp;matrix[i][j]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">char</span> tmp;</span><br><span class="line">        <span class="built_in">fscanf</span>(fp,<span class="string">&quot;%c&quot;</span>,&amp;tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fclose</span>(fp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> threadNum;</span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">runner</span><span class="params">(<span class="type">void</span> *p)</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> pid=*(<span class="type">int</span>*)p;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> sumT=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=pid;i&lt;LEN;i+=threadNum)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;LEN;j++)&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> k=<span class="number">0</span>;k&lt;LEN;k++)&#123;</span><br><span class="line">                sumT+=matrix1[i][k]*matrix2[k][j];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    sum[pid]=sumT;</span><br><span class="line">    <span class="built_in">free</span>((<span class="type">int</span> *)p);</span><br><span class="line">    <span class="built_in">pthread_exit</span>(<span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">multiThread</span><span class="params">(<span class="type">int</span> num)</span></span>&#123;</span><br><span class="line">    threadNum=num;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> clock1=<span class="built_in">clock</span>();</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> time1=<span class="built_in">getCurrentTime</span>();</span><br><span class="line">    <span class="type">pthread_t</span> id[MAXTHREADNUM];</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;threadNum;i++)&#123;</span><br><span class="line">        <span class="type">int</span> *p=(<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">        *p=i;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;id[i],<span class="literal">NULL</span>,runner,p);</span><br><span class="line">    &#125;</span><br><span class="line">    ans=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;threadNum;i++)&#123;</span><br><span class="line">        <span class="built_in">pthread_join</span>(id[i],<span class="literal">NULL</span>);</span><br><span class="line">        ans+=sum[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> clock2=<span class="built_in">clock</span>();</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> time2=<span class="built_in">getCurrentTime</span>();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Multi Thread %d:\n&quot;</span>,num);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Ans =\t%lld\nClock time =\t%lldms\nUnix time =\t%lldms\n\n&quot;</span>,ans,(clock2-clock1)/<span class="number">1000</span>,time2-time1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">char</span> name1[<span class="number">50</span>]=<span class="string">&quot;matrix1.txt&quot;</span>;</span><br><span class="line">    <span class="type">char</span> name2[<span class="number">50</span>]=<span class="string">&quot;matrix2.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">    FILE *fp=<span class="built_in">fopen</span>(name1,<span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(fp==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">genMatrix</span>(name1);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">fclose</span>(fp);</span><br><span class="line">    &#125;</span><br><span class="line">    fp=<span class="built_in">fopen</span>(name2,<span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(fp==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">genMatrix</span>(name2);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">fclose</span>(fp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">getMatrix</span>(matrix1,name1);</span><br><span class="line">    <span class="built_in">getMatrix</span>(matrix2,name2);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=<span class="number">16</span>;i++)&#123;</span><br><span class="line">        <span class="built_in">multiThread</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="程序简要分析"><a href="#程序简要分析" class="headerlink" title="程序简要分析"></a>程序简要分析</h2><p>注：为了方便验证结果的正确性，我计算了$\sum x_{ij}$来进行对比。</p>
+<p>单线程的部分自不必说，多线程的部分我采用的并不是通用的线程池，也不是对每一个任务都创建一个线程，而是根据行数模线程数的值来分配给不同的线程。这样总线程数一直不变，相对简化了线程创建的开销，以及代码量。</p>
+<p>关于pthread库的使用也是很讲究的。</p>
+<p>对于pthread_create 来说，为了保证能够兼容不同的回调函数，他在创建进程的时候将回调函数的参数和返回值都定义为void*。那么如果想传入自己的参数就要用一个指针来传入数据并强制转换为void *，然后在回调函数里强制类型转换为实际的类型。如果要传入多个参数，就要自己写一个结构体来传，还是非常麻烦的。而且这里还要注意一点，就是不能把临时变量的引用当做参数传给回调函数，因为临时变量是会在循环结束后立即被释放的，这样会导致回调函数得不到正确的值。正确的做法应该是malloc一块内存，并用指针把这块内存传给回调函数，回调函数在执行完任务逻辑后再自行释放。</p>
+<p>对于pthread_exit 和pthread_join 来说，我们要知道的是，pthread_exit才是真正传递回调函数返回值的地方。我们将需要返回的值传递给他，然后再用pthread_join 的第二个参数来接受这个参数。不过通常为了简单起见都会开一个全局数组来接受不同线程的计算结果。</p>
+<p>当然，多线程最怕的就是不同线程对同一数据的修改，如果必须修改，那么就得对这块代码块加锁。</p>
+<p>关于程序的逻辑，我们需要注意的就是计算结果可能会过大导致数据溢出，因此我们要小心控制下数据的大小。</p>
+<p>还有一个小细节，就是如何用Linux C来获取Unix 时间戳，一开始以为是clock()函数，不过后来才发现，clock()函数是cpu时间，不是真正的时间。比如说我的cpu有四个核，这四个核同时工作了1s，那么用clock()函数做差可以发现结果是接近4s。因此，正确的做法是重写一个getCurrentTime函数，这样就能得到真正的Unix时间戳。</p>
+<p>最后需要注意的就是程序在编译时需要加上-lpthread 参数。</p>
+<h2 id="运行结果分析"><a href="#运行结果分析" class="headerlink" title="运行结果分析"></a>运行结果分析</h2><p>对于一个四核的电脑，我们运行的结果是：<br><img src="/images/2016/10/14/1/1.png"></p>
+<p>对于一个九十六核的服务器，我们运行的结果是：<br><img src="/images/2016/10/14/1/2.png"></p>
+<p>我们可以发现，对于九十六核的服务器而言，UNIX时间*线程数近似等于CPU时间，而CPU时间近似保持不变，多线程的特性发挥的很完美。而对于四核的电脑来说，当线程数大于四的时候，我们就发现程序的执行时间就开始发生波动，执行效率并没有随着线程数增加而有所提高。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/10/03/openwrt-port-forward/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/10/03/openwrt-port-forward/" itemprop="url">NAT穿透和内网访问</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-03T22:55:18+00:00">
+                2016-10-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>利用minivtun实现点对点非公网NAT穿透，在学校轻松访问家里的路由器。需要一个中心化公网服务器（VPS）作为打洞实现内网访问。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/10/03/openwrt-port-forward/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/10/02/laikai-home/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/10/02/laikai-home/" itemprop="url">莱卡回家</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-02T09:20:00+00:00">
+                2016-10-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%87%AA%E8%A8%80%E8%AF%AD/" itemprop="url" rel="index">
+                    <span itemprop="name">自言语</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <span id="more"></span>
+
+<p>11月3日是个特别的日子。1957年11月3日，前苏联发射了 Sputnik-2 号卫星，这是第二颗进入地球轨道的人造卫星，也是人类发射的第一颗载有活物的卫星。消息发布后，西方世界一片哗然，在美国小得可怜的首枚人造卫星发射之前，苏联的举动彻底夯实了其航天第一强国的地位。美国中情局对此作了大量分析，纠结于苏联卫星究竟是否带了活物之间。在确信苏联发射了活狗，原已令西方震惊，但这只狗的结局，更成为后来数十年的科学悬案。<br>那只随 Sputnik-2 升空的三岁流浪雌性混血萨摩耶犬名叫莱卡。作为第一只进入太空的地球生物，莱卡名垂青史，但它的结局却着实悲惨。从一开始，苏联人就没打算让它回来。10月4日苏联发射首枚人造卫星后一星期后，赫鲁晓夫就建议再次发射更为复杂的卫星，作为伟大十月革命40周年献礼，这意味着工程技术人员只有3周时间来设计和制造新的火箭及卫星。这次苏联决定发射生物上天。<br>一切为了进度， Sputnik-2 使用了 Sputnik-1 的部分备件，为了最大限度提高载荷能力，火箭的部分设备甚至也被拆除。科罗廖夫的助手鲍里斯·切尔托克在回忆中这样写道，“一切火箭技术开发的传统都被抛弃，第二颗卫星的开发根本未经详细设计，或者说根本没有设计。”卫星的大部分部件都是赶工制造的，工程师们甚至被派到工厂协助工人赶工，许多部件甚至省略了蓝图环节。紧张的工期甚至不允许工程师设计出可靠的生命保障系统，更不消说为莱卡铺就一条回家的路。</p>
+<p>发射升空过程中，监测系统显示莱卡的心率达到了每分钟 260 次，比平时高 3 倍，呼吸频率也超出正常水平 4～5 倍，但顽强的莱卡还是活了下来，成功进入轨道。入轨后，载荷舱头锥成功分离，但有些部件却分离失败。造成的一个恶劣后果就是，热控制系统无法正常工作。此外，一些隔热材料被撕裂，舱内温度很快升至 40 度以上。据信在死于焦躁和高热之前，莱卡顶多活了两天，西方人甚至认为只有几个小时，根本不像苏联人宣布的那样长。莱卡用自己的生命告诉人类科学家，通过合理的防护措施，人类能够在太空环境下生存。这个代价对人类而言不大，但对莱卡而言不小。<br>莱卡的悲惨结局，固然可以归结为当时尚不成熟的返回卫星技术，但更为重要的原因，是美苏当时心急火燎的太空竞赛，而竞赛背后，是东西方阵营意识形态的激烈冲突。但无论如何，我们起码可以给莱卡更有尊严的死亡方式，一支安乐死制剂就足以实现。遗憾的是，1957年11月3日的那次发射，这些都没有被详尽计划。<br>每每看到关于莱卡的记述，我都会对身边动物平添几分敬意，提醒自己善待它们。为了人类的文明征程，它们已经付出了太多，我们不能与此同时再让他们成为我们野蛮举止的牺牲。<br>莱卡，回家吧。</p>
+<p><img src="https://bbs-static.nfz.yecdn.com/i/0000160.jpg" alt="0000160.jpg"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/10/01/switch-f2fs-file-system-for-android/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/10/01/switch-f2fs-file-system-for-android/" itemprop="url">Android 切换 F2FS 文件系统</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-01T08:55:00+00:00">
+                2016-10-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E4%BA%AB%E9%95%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">分享镜</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          F2FS 如今也是折腾 Android 的玩家口中的一个常见词汇。本文主要介绍了 F2FS 是什么、F2FS 的优势和将手机切换到 F2FS 文件系统的方式。
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/10/01/switch-f2fs-file-system-for-android/">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/28/Ubuntu%E4%B8%8B%E6%9C%80%E5%85%BC%E5%AE%B9%E7%9A%84Office%E5%A5%97%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/28/Ubuntu%E4%B8%8B%E6%9C%80%E5%85%BC%E5%AE%B9%E7%9A%84Office%E5%A5%97%E4%BB%B6/" itemprop="url">Ubuntu下最兼容的Office套件</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-28T05:40:45+00:00">
+                2016-09-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>虽说用Ubuntu的目的就是不喜欢windows大而杂的作风，但是由于office这类的工具实在是太流行，导致即使在ubuntu下工作还是要经常使用office套件。可是问题来了，无论是ubuntu自带的liboffice套件还是Apache的Openoffice，他们都实在是不好用，不仅界面丑，而且各种工具也经常找不到，更重要的是他不能跟ms office很好的兼容，尤其是word中的表格一类的东西。比方说一个挺好的实验报告，在这里看到的却是下面的效果：</p>
+<p><img src="/images/2016/09/28/1/1.png"></p>
+<p>啥玩意都乱了，十分丑陋。</p>
+<p>不过还好，在网上找了半天，竟然惊奇的发现wps制作了兼容Linux的office套件（<a target="_blank" rel="noopener" href="http://linux.wps.cn/">下载地址</a>），不得不说，wps还是相当有职业道德的。。。</p>
+<p>下载deb包，dpkg安装就行了，打开后发现界面跟ms office真的差不多:</p>
+<p><img src="/images/2016/09/28/1/2.png"></p>
+<p>表格的排版也是很不错的，用起来也很符合office的习惯，重点是。。。不要钱。</p>
+<p>不过，默认的wps是支持IBus的输入法，是不能输入中文的，最典型的问题就是即使装了sogou中文输入法也无法输入中文。问题的解决也很简单，就是在他的启动脚本<code>/usr/bin/wps</code> 和<code>/usr/bin/et</code> 里添加两个环境变量即可：（参照<a target="_blank" rel="noopener" href="http://www.linuxdiyf.com/linux/13396.html">这里</a>）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">export XMODIFIERS=&quot;@im=fcitx&quot;</span><br><span class="line">export QT_IM_MODULE=&quot;fcitx&quot;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/26/Ubuntu%E4%B8%8BvirtualBox%E4%BD%BF%E7%94%A8%E7%AE%80%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/26/Ubuntu%E4%B8%8BvirtualBox%E4%BD%BF%E7%94%A8%E7%AE%80%E8%BF%B0/" itemprop="url">Ubuntu下virtualBox使用简述</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-26T11:22:54+00:00">
+                2016-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>曾经一直由于windows太卡，导致在windows下安装的虚拟机性能都很不好，这就导致我曾经一直以为虚拟机都是巨卡无比。不过这次在ubuntu下面用了虚拟机才发现原来虚拟机技术本身并不会对系统本身带来太多的负面影响，至少在我的ubuntu下面用起来还是挺流畅的。</p>
+<h2 id="VirtualBox"><a href="#VirtualBox" class="headerlink" title="VirtualBox"></a>VirtualBox</h2><p>virtualBox是一个非常有名的开源虚拟机软件，曾经由Sun公司用Qt开发，当然现在归Oracle了。他据说被称为最强的免费虚拟机软件，支持现存绝大多数操作系统，支持快照、共享文件、承载不同系统架构等等很不错的特性。</p>
+<h2 id="安装使用"><a href="#安装使用" class="headerlink" title="安装使用"></a>安装使用</h2><p>在使用virtualbox之前，首先得确认你的电脑支持cpu虚拟化技术(其实就是提高硬件支持)。在BIOS里面可以看到类似的选项，默认是关闭的，我们把他开开就好。</p>
+<p><img src="/images/2016/09/26/1/1.png"></p>
+<p>当然，并不是所有的虚拟机软件都必须要开启cpu虚拟化的，只是开启了这个选项后会使虚拟机运行更流畅。</p>
+<p>对于具体的安装而言，ubuntu下安装当然是很简单的了，<code>$sudo apt install virtualbox</code> 即可。</p>
+<p>然后打开他，按照要求选择需要的操作系统和版本，然后开启虚拟机，选择下载好的镜像。<br><img src="/images/2016/09/26/1/2.png"></p>
+<p>这样就会进入镜像的安装程序，跟普通U盘启动装机差不多，如下图所示：</p>
+<p><img src="/images/2016/09/26/1/3.png"></p>
+<p>接下来就是很傻瓜的操作了，完成后就会显示我们熟悉的界面了。</p>
+<p><img src="/images/2016/09/26/1/4.png"></p>
+<p>这样就可以正常使用虚拟机了。</p>
+<h2 id="共享文件"><a href="#共享文件" class="headerlink" title="共享文件"></a>共享文件</h2><p>虽然有了虚拟机，但是如果需要主机能够和虚拟机进行通信的话则还要另外下载一个iso扩展包。不过好在这个东西也可以很方便的用<code>$ sudo apt install virtualbox-guest-additions-iso</code>来下载。</p>
+<p>我们来看看他把东西放在哪里了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ dpkg -L virtualbox-guest-additions-iso </span><br><span class="line">/.</span><br><span class="line">/usr</span><br><span class="line">/usr/share</span><br><span class="line">/usr/share/virtualbox</span><br><span class="line">/usr/share/virtualbox/VBoxGuestAdditions.iso</span><br><span class="line">/usr/share/doc</span><br><span class="line">/usr/share/doc/virtualbox-guest-additions-iso</span><br><span class="line">/usr/share/doc/virtualbox-guest-additions-iso/copyright</span><br><span class="line">/usr/share/doc/virtualbox-guest-additions-iso/changelog.Debian.gz</span><br></pre></td></tr></table></figure>
+<p>找到那个VBoxGuestAdditions.iso文件，这就是我们需要的。</p>
+<p>接着，对于需要进行文件共享的虚拟机系统，我们在他的Storage设置里添加上面这个镜像文件，替代之前安装时的镜像文件：</p>
+<p><img src="/images/2016/09/26/1/5.png"></p>
+<p>然后我们在Shared Folders设置里添加一个本机中的文件夹作为共享文件夹，设置为自动挂载（共享文件分为Transient Folder和Permanent Folder，一般用永远共享就好）。</p>
+<p>接着打开虚拟机，如果是windows虚拟机的话，他会提示你安装下驱动程序，然后他会提示你有新媒体被发现，也就是以一个网络位置的形式呈现在下面，而这个其实就是和主系统公用的共享文件夹。</p>
+<p><img src="/images/2016/09/26/1/6.png"></p>
+<p>如果是ubuntu虚拟机的话，他会默认把共享文件夹挂载在&#x2F;media下，其实我们可以直接把他看成个文件夹了。</p>
+<p><img src="/images/2016/09/26/1/7.png"></p>
+<h2 id="关于Android虚拟机"><a href="#关于Android虚拟机" class="headerlink" title="关于Android虚拟机"></a>关于Android虚拟机</h2><p>其实virtualbox也能支持模拟安卓机子，不过一般的ROM是不能直接用的。不过还好，有个叫<a target="_blank" rel="noopener" href="http://www.android-x86.org/">android-x86</a>的项目，把很多安卓ROM搞成了适合电脑直接安装的iso镜像，这样就可以直接装了。镜像的下载地址在<a target="_blank" rel="noopener" href="http://www.android-x86.org/download">这里</a>。</p>
+<p>有两个具体介绍的<a target="_blank" rel="noopener" href="http://blog.csdn.net/roland_sun/article/details/49659351">博客1</a>，<a target="_blank" rel="noopener" href="http://blog.csdn.net/roland_sun/article/details/49659351">博客2</a>，详细介绍了安卓虚拟机的安装细节，讲的还是不错的，照着弄基本就没问题了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/19/%E5%B8%B8%E8%A7%81%E7%9A%84%E8%B7%9D%E7%A6%BB%E6%B5%8B%E5%BA%A6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -926,958 +1835,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/16/%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%BA%A6%E9%87%8F%E6%A0%87%E5%87%86%E4%B9%8BJaccard%E7%9B%B8%E4%BC%BC%E5%BA%A6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/16/%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%BA%A6%E9%87%8F%E6%A0%87%E5%87%86%E4%B9%8BJaccard%E7%9B%B8%E4%BC%BC%E5%BA%A6/" itemprop="url">相似度度量标准之Jaccard相似度</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-16T10:19:46+00:00">
-                2016-09-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
-                    <span itemprop="name">Data Mining</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>Jaccard相似度(杰卡德相似度)是一个用于衡量两个集合相似程度的度量标准，他的定义如下：给定两个集合$S,T$，那么我们记这两个集合的Jaccard相似度$SIM(S,T)$为:<br>$$SIM(S,T)&#x3D;|S\cap T|&#x2F;|S\cup T|$$<br>也就是两个集合交集的大小除以两个集合并集的大小。显然他的取值在[0,1]区间。</p>
-<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>原始的Jaccard相似度定义的仅仅是两个集合(set)之间的相似度，而实际上更常见的情况是我们需要求两个包(bag,multiset)的相似度，即每个元素可能会出现多次。那么在这种情况下，Jaccard相似度的分子就便成了取每个元素在两个包中出现的最小次数之和，分母是两个包中元素的数目之和。比如$\{a,a,a,b\},\{a,a,b,b,c\}$之间的Jaccard相似度就是(2+1)&#x2F;(4+5)&#x3D;33%。</p>
-<p>这里分子的设计是很容易理解的，那么为什么分母设计成两个集合中元素数目之和而不是并集(包的并集通常定义为元素的叠加)中的数目之和呢？因为那样会使最大的Jaccard相似度为1&#x2F;2，而不是习惯理解的1。当然，我们也可以把包的并集中的元素数目定义为在两个集合中出现的最大次数，这样的度量标准也比较符合我们的认知习惯。</p>
-<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><p>Jaccard的应用很广，最常见的应用就是求两个文档的文本相似度，通过一定的办法(比如shinging)对文档进行分词，构成词语的集合，再计算Jaccard相似度即可。当然，用途还有很多，不过大多需要结合其他的技术。</p>
-<h2 id="一道习题"><a href="#一道习题" class="headerlink" title="一道习题"></a>一道习题</h2><p>问：假定全集$U$有$n$个元素，随机选择两个子集$S,T$，每个子集都有m个元素，求$S,T$的Jaccard相似度的期望值。</p>
-<p>解：显然，若有k个元素重合，那么贡献的Jaccard相似度就是$\frac{k}{2m-k}$，且这个事件出现的概率是$\frac{C^k_mC^{m-k}_{n-m}}{C^m_n}$，因此对这k种可能求和即可：</p>
-<p>$Exp(SIM(S,T))&#x3D;\sum^m_{k&#x3D;0}\frac{k}{2m-k}\frac{C^k_mC^{m-k}_{n-m}}{C^m_n}$</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/13/SDL2%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/13/SDL2%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97/" itemprop="url">SDL2安装指南</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-13T11:31:44+00:00">
-                2016-09-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>SDL（Simple DirectMedia Layer）是一套开放源代码的跨平台多媒体开发库，使用C语言写成。SDL提供了数种控制图像、声音、输出入的函数，让开发者只要用相同或是相似的代码就可以开发出跨多个平台（Linux、Windows、Mac OS X等）的应用软件。目前SDL多用于开发游戏、模拟器、媒体播放器等多媒体应用领域。下面主要介绍一下在Windows下搭建SDL2开发环境的过程。</p>
-<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>下载自<a target="_blank" rel="noopener" href="http://www.libsdl.org/download-2.0.php">SDL官网</a>，在Development Libraries中选择相应的版本。我这里选择的是Windows平台下的Visual C++版，因为我接下来使用的环境是VS2013。</p>
-<p><img src="/images/2016/09/13/1/1.png"></p>
-<h2 id="文件"><a href="#文件" class="headerlink" title="文件"></a>文件</h2><p>把文件下载下来解压后的文档树应该是这样的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">└─SDL2-2.0.4</span><br><span class="line">    │  BUGS.txt</span><br><span class="line">    │  COPYING.txt</span><br><span class="line">    │  README-SDL.txt</span><br><span class="line">    │  README.txt</span><br><span class="line">    │  WhatsNew.txt</span><br><span class="line">    │</span><br><span class="line">    ├─docs</span><br><span class="line">    │      doxyfile</span><br><span class="line">    │      README-android.md</span><br><span class="line">    │      README-cmake.md</span><br><span class="line">    │      README-directfb.md</span><br><span class="line">    │      ......</span><br><span class="line">    │</span><br><span class="line">    ├─include</span><br><span class="line">    │      begin_code.h</span><br><span class="line">    │      close_code.h</span><br><span class="line">    │      SDL.h</span><br><span class="line">    │      SDL_assert.h</span><br><span class="line">    │      SDL_atomic.h</span><br><span class="line">    │      SDL_audio.h</span><br><span class="line">    │      ......</span><br><span class="line">    │</span><br><span class="line">    └─lib</span><br><span class="line">        ├─x64</span><br><span class="line">        │      SDL2.dll</span><br><span class="line">        │      SDL2.lib</span><br><span class="line">        │      SDL2main.lib</span><br><span class="line">        │      SDL2test.lib</span><br><span class="line">        │</span><br><span class="line">        └─x86</span><br><span class="line">                SDL2.dll</span><br><span class="line">                SDL2.lib</span><br><span class="line">                SDL2main.lib</span><br><span class="line">                SDL2test.lib</span><br></pre></td></tr></table></figure>
-<p>主要包含使用说明、doc文档、头文件、以及库文件。这里的库文件包括x86和x64两种架构的，每种都含有一个动态链接库和三个静态链接库。</p>
-<h2 id="VS中的项目配置"><a href="#VS中的项目配置" class="headerlink" title="VS中的项目配置"></a>VS中的项目配置</h2><p>SDL2说白了其实只是一个C语言库，因此配置他就跟配置其他任意的库一样，主要分为三步：</p>
-<p>一、包含必需的头文件和库文件</p>
-<p>因为我们需要能够include进SDL2的头文件，并且找到对应的实现代码(库文件)，所以我们必需得让编译器能够找到他们。因此我们只需要在工程的<code>项目-&gt;属性-&gt;配置属性-&gt;VC++目录&lt;</code> 里配置好相应的路径：</p>
-<p><img src="/images/2016/09/13/1/2.png"></p>
-<p>也就是修改图中的包含目录以及库目录，分别对应之前的include文件夹，以及lib&#x2F;x86文件夹(VS默认的是x86架构)。</p>
-<p>二、添加编译指令</p>
-<p>既然用了第三方的库，那么我们在进行编译的时候肯定需要加上-l指令，从而指定编译进去的静态链接库。而按照微软一贯的保姆式作风，在VS中并不需要我们手动输入编译指令，只需要修改一下编译配置，然后就能直接编译了。这个配置在<code>项目-&gt;属性-&gt;配置属性-&gt;链接器-&gt;输入-&gt;附加依赖项&lt;</code> 这里：</p>
-<p><img src="/images/2016/09/13/1/3.png"></p>
-<p>在这里面加上那三个静态库的名字即可(SDL2.lib、SDL2main.lib、SDL2test.lib)。</p>
-<p>三、配置动态库</p>
-<p>只配置了静态库已经是可以编译的了，但却是无法调试的，因为程序运行需要SDL2.dll这个动态库的支持。那么我们只需要将SDL2.dll加入电脑的PATH环境变量里或者是工程目录下，从而保证程序能找到他。</p>
-<p>最后，针对SDL2还需要额外设置一个配置，就是程序的入口，具体原因不明。配置方法就是修改<code>项目-&gt;属性-&gt;配置属性-&gt;链接器-&gt;系统-&gt;子系统</code>，内容改成”<strong>窗口 (&#x2F;SUBSYSTEM:WINDOWS)</strong>“即可：</p>
-<p><img src="/images/2016/09/13/1/4.png"></p>
-<p>搞好上面这个配置，理论上就能跑SDL2的程序了，那我就直接把下面这个显示图片的程序作为Hello World来测试一下吧：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;SDL.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">SDL_Init</span>(SDL_INIT_EVERYTHING) == <span class="number">-1</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Window *win = <span class="literal">nullptr</span>;</span><br><span class="line">	win = <span class="built_in">SDL_CreateWindow</span>(<span class="string">&quot;Hello World!&quot;</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">640</span>, <span class="number">480</span>, SDL_WINDOW_SHOWN);</span><br><span class="line">	<span class="keyword">if</span> (win == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Renderer *ren = <span class="literal">nullptr</span>;</span><br><span class="line">	ren = <span class="built_in">SDL_CreateRenderer</span>(win, <span class="number">-1</span>, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);</span><br><span class="line">	<span class="keyword">if</span> (ren == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Surface *bmp = <span class="literal">nullptr</span>;</span><br><span class="line">	bmp = <span class="built_in">SDL_LoadBMP</span>(<span class="string">&quot;test.bmp&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (bmp == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">		std::cout &lt;&lt; <span class="built_in">SDL_GetError</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SDL_Texture *tex = <span class="literal">nullptr</span>;</span><br><span class="line">	tex = <span class="built_in">SDL_CreateTextureFromSurface</span>(ren, bmp);</span><br><span class="line">	<span class="built_in">SDL_FreeSurface</span>(bmp);</span><br><span class="line">	<span class="built_in">SDL_RenderClear</span>(ren);</span><br><span class="line">	<span class="built_in">SDL_RenderCopy</span>(ren, tex, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="built_in">SDL_RenderPresent</span>(ren);</span><br><span class="line">	<span class="built_in">SDL_Delay</span>(<span class="number">2000</span>);</span><br><span class="line">	<span class="built_in">SDL_DestroyTexture</span>(tex);</span><br><span class="line">	<span class="built_in">SDL_DestroyRenderer</span>(ren);</span><br><span class="line">	<span class="built_in">SDL_DestroyWindow</span>(win);</span><br><span class="line">	<span class="built_in">SDL_Quit</span>();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>程序运行的结果就是显示test.bmp两秒钟。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/12/QR%E4%BA%8C%E7%BB%B4%E7%A0%81%E6%A4%8D%E5%85%A5%E5%9B%BE%E7%89%87%E6%96%B9%E6%B3%95%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/12/QR%E4%BA%8C%E7%BB%B4%E7%A0%81%E6%A4%8D%E5%85%A5%E5%9B%BE%E7%89%87%E6%96%B9%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">QR二维码植入图片方法简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-12T14:33:13+00:00">
-                2016-09-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>我们平时都经常见到二维码，用手机扫一扫就会显示当中的内容，内容大多是url的格式，方便人们访问站点。不过对于人来说，直接看二维码却并没有任何良好的印象。因此很多商家为了让自家的二维码更加形象，会想方设法地让自家的二维码更加形象生动，于是也就诞生出了很多种图像植入的方法。今天就把这些方法稍微汇总一下。</p>
-<h2 id="二维码"><a href="#二维码" class="headerlink" title="二维码"></a>二维码</h2><p>二维码可以说是现今人们生活中经常接触到的东西，简单的讲其实就是把条形码中的竖线变成点，从而增加一个数据维度，达到增加数据内容的目的。事实上二维码的种类有很多，曾经流行的二维码规范大概有下面这几种：</p>
-<p><img src="/images/2016/09/12/1/1.png"></p>
-<p>不过，最终一直流行到现在的二维码规范就剩下一个日本公司率先搞出来的<strong>QR二维码</strong>(Quick Response)了。QR二维码最典型的特征就是在图片的三个角有三个定位用的正方形，信息容量大、定位方便、数据保密和恢复能力强。有个日本的网站简要介绍了他的构造，连接在<a target="_blank" rel="noopener" href="http://www.swetake.com/qrcode/qr1_en.html">这里</a>。接下来的说明主要是围绕这种二维码进行的讨论。</p>
-<h2 id="直接插入图片"><a href="#直接插入图片" class="headerlink" title="直接插入图片"></a>直接插入图片</h2><p>直接插入图片的方法就是在二维码的中间插入设计好的图片，比如下面这些：<br><img src="/images/2016/09/12/1/2.png"></p>
-<p>这样插入的图片比较清楚，显然会使人们对二维码的辨识度变高很多，也更容易被人们接受。但是这中插入图片的方法完全是利用了二维码本身的容错处理，或多或少的影响了二维码本身的容错性，原则上是不安全的方法。</p>
-<h2 id="修改点阵形状"><a href="#修改点阵形状" class="headerlink" title="修改点阵形状"></a>修改点阵形状</h2><p>所谓修改点阵形状，就是用类似设计师的眼光看待这个二维码，把原本的黑点和白点进行艺术化的修饰。这种方法虽然很难添加自己想要的图片，但是却十分具有艺术美感，让人印象深刻。也可以适当结合插入图片的方法，更加具有表现力。</p>
-<p><img src="/images/2016/09/12/1/3.png"><br><img src="/images/2016/09/12/1/4.png"><br><img src="/images/2016/09/12/1/5.png"><br><img src="/images/2016/09/12/1/6.png"><br><img src="/images/2016/09/12/1/7.png"><br><img src="/images/2016/09/12/1/8.png"></p>
-<p>当然，这种方法会增加扫码器识别的难度，万一图像做的过火了，简陋的扫码器扫描不出来就很尴尬了。</p>
-<h2 id="增加背景图案"><a href="#增加背景图案" class="headerlink" title="增加背景图案"></a>增加背景图案</h2><p>简而言之就是为二维码增加背景，不过随之而来的问题跟上面一样，就是如何能让普通的扫码器快速识别出来。作为几年前百度内部hacthon的优胜项目，百度的工程师对点阵图案也做了一些处理，使二维码能呈现这样的图案：<br><img src="/images/2016/09/12/1/9.png"></p>
-<p>基本想法就是把二维码的每个点变小，中间漏出的空隙就用来呈现背景图案。对于某些特定的背景而言，呈现的效果还是很不错的，而且识别起来也相对准确一点。不过对图片的要求也比较高，否则可能会干扰图像的识别。</p>
-<p>与这个方法效果看上取类似的还有一种生成方法，这种方法也结合了下面的修改编码的算法，而且已经发表在<a target="_blank" rel="noopener" href="http://link.springer.com/article/10.1007/s00371-015-1107-x#Sec7">springer</a>里，他能够呈现这样的效果：</p>
-<p><img src="/images/2016/09/12/1/10.png"></p>
-<p>看上去和百度的差不多，不过其实技术含量要高出不知道多少倍。。。</p>
-<h2 id="修改编码算法"><a href="#修改编码算法" class="headerlink" title="修改编码算法"></a>修改编码算法</h2><p>上述的方法都或多或少的影响了图像本身的识别能力，虽然看上去效果不错，但是都会或多或少的影响扫码器的识别。而下面的方法能够利用一定的编码技术和小技巧将一个二值图嵌入到二维码中，完全不影响二维码的识别。虽然显示的图像有点抽象，但是拿出来装逼还是很能够体现出技术含量的。</p>
-<p><img src="/images/2016/09/12/1/11.png"><br><img src="/images/2016/09/12/1/12.png"><br><img src="/images/2016/09/12/1/13.png"><br><img src="/images/2016/09/12/1/14.png"></p>
-<p>上面这些图案的生成其实还是十分繁琐的，需要深入了解QR二维码的实现以及RS编码的特征的编码人员才能真正实现出将二值图和二维码进行融合的算法。</p>
-<p>讲述算法的原理的原文在<a target="_blank" rel="noopener" href="http://research.swtch.com/qart">这里</a>，有个简单(蹩脚)的中文翻译版本在<a target="_blank" rel="noopener" href="http://blog.csdn.net/yanlaizhishi/article/details/8522722">这里</a>，他们实现的程序发布在了<a target="_blank" rel="noopener" href="http://research.swtch.com/qr/draw">这里</a>(不知道怎么回事时而登的上时而登不上)。</p>
-<p>下面就简要介绍一下这个算法的基本思想。</p>
-<p>首先我们要稍微了解一下QR二维码的基本构造。QR二维码的一个经典构造就是下面的这张图：</p>
-<p><img src="/images/2016/09/12/1/15.png"></p>
-<p>简单区分下就是有三类东西，一类是类似小正方形的东西和图中那些黑白相间的条纹，他们主要是用来帮助扫码器定位用的的，所有的QR二维码都具有的部分；还有一类就是格式信息的控制部分，他们就像是配置文件一样，定义了这张二维码的基本信息格式，是必不可少的，主要分布在定位符旁边，毕竟他们是不容许出错的；最后一类就是数据了，当然是经过编码的数据，按照一定的排列规则填充在剩下的空间里，具有一定的容错能力。</p>
-<p>很显然数据是以二进制串的形式存储在图里的，也就是黑点和白点了。一张固定大小的图能保存的数据量显然也是固定的，QR二维码也定义了数据的终止符，也就是说当我们的数据写完之后，写上终止符，编码程序会自动在后面加上一些无用的数据(其实是一个循环的数据串)，使得总长度等于最大数据量。这些数据按照下面的顺序写入二维码中：</p>
-<p><img src="/images/2016/09/12/1/16.png"></p>
-<p>或者换一张图就是这样：</p>
-<p><img src="/images/2016/09/12/1/17.png"></p>
-<p>不过如果直接将这个数据就这么显示出来，那么对于只需要保存少量信息的二维码来说，很大的空间都是相同的内容(就是用来填充的字符串)，这样显然不美观。因此在把数据写进去之后，我们还会对他做一个mask处理，也就是通过一定的选择算法拿下面这八张图片中的一张图和这个图片按位求异或，保证黑点和白点的总体分布最均匀。</p>
-<p><img src="/images/2016/09/12/1/18.png"></p>
-<p>当然，我们得在二维码的格式控制区域说明我们用的是哪个掩膜，保证能够恢复。</p>
-<p>这就是QR二维码直观的构造了。</p>
-<p>但是即使知道了这个构造，我们也无法随意改动某个像素点，因为这些数据都是经过精心处理的，我们首先得知道他的编码方式才能在不破坏编码信息的基础上寻找修改点阵的办法。</p>
-<p>事实上QR二维码对数据采用的是Reed-Solomon编码，具体细节在<a href="/2016/09/11/1/">之前的文章</a>里有所介绍。简单的理解就是他把数据块$(d_1,d_2,d_3,…,d_n)$变成了$(d_1,d_2,d_3,…,d_n,c_1,c_2,…,c_m)$，增加了具有容错能力的冗余码。显然，我们只能直接操控数据，而不能直接决定冗余码。那么我们该怎么修改数据才能既保证数据意义不变，又显示期望的图案呢？这就用到了一个小trick。</p>
-<p>我们知道QR二维码基本是用来表示URL的，而URL有个特点，就是可以任意添加锚点(#)而不影响显示的结果，比如<a target="_blank" rel="noopener" href="https://blog.mythsman.com/">https://blog.mythsman.com</a>和<a target="_blank" rel="noopener" href="https://blog.mythsman.com/#this_is_junk">https://blog.mythsman.com#this_is_junk</a>，这两个url在显示的时候是完全没有区别的。也就是说只要数据是url，我们就可以在他后面添加‘#’再加上任意的数据来控制二维码的图形。这样一来，经过编码后的数据就变成了三部分：开头是原始数据加上’#’符号，中间是我们用来绘图的数据，最后是校验数据块。对于图片而言就是两头是不可控的数据，中间是可控的数据。这样弄完之后，可以呈现的效果大概是这样：</p>
-<p><img src="/images/2016/09/12/1/19.png"></p>
-<p>可以很明显看到中间的图片显示的很清楚，只是两边都看不清。</p>
-<p>可是这种图看上去还是太生硬了，很明显就是刻意修改的数据嘛。不过还好，我们还有另一个办法让他看上去更自然。</p>
-<p>回顾下之前的Reed-Solomon编码，我们知道若将$b_1,b_2$的RS编码后的值$c_1,c_2$进行异或得到$c_3$，那么这个$c_3$恰好就是$b_1,b_2$异或后的值的RS编码。这样我们就可以在保证编码合法的情况下对数据矩阵进行初等变换。原本我们只能操作整个数据中间的区域，可是经过初等变换(也就是高斯约旦消元)之后，我们就可以把能够操作的区域和不能操作的区域进行混合，这样就能把图像的控制区域放大，只是这样会牺牲图像的清晰度。不过这种图像却会给人一种自然朦胧的感觉，还是非常炫的。</p>
-<p><img src="/images/2016/09/12/1/20.png"></p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://coolshell.cn/articles/10590.html">二维码的生成细节和原理</a><br><a target="_blank" rel="noopener" href="http://www.21ic.com/app/ce/201301/157718.htm">二维码 QR码编码原理详解</a><br><a target="_blank" rel="noopener" href="http://research.swtch.com/qart">QArt Codes</a><br><a target="_blank" rel="noopener" href="http://36kr.com/p/35225.html">令人拍案叫绝的15个二维码</a><br><a target="_blank" rel="noopener" href="http://36kr.com/p/204804.html">百度加入二维码之争，推出静态图像版、动态gif版“梦幻二维码”</a><br><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/132241.htm">百度百科-二维码</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/11/%E4%BC%BD%E7%BD%97%E5%8D%8E%E5%9F%9F%E6%80%A7%E8%B4%A8%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/11/%E4%BC%BD%E7%BD%97%E5%8D%8E%E5%9F%9F%E6%80%A7%E8%B4%A8%E7%AE%80%E6%9E%90/" itemprop="url">伽罗华域性质简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-11T15:08:46+00:00">
-                2016-09-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Maths/" itemprop="url" rel="index">
-                    <span itemprop="name">Maths</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>伽罗华域名字听起来挺酷的，其实就是有限域。域这个东西由于他能够进行满足加减乘除四则运算，在加密解密、编码解码当中应用非常广泛。但是我们常见的实数域却无法直接在计算机中精确的保存，因此有限域这类能够支持四则运算而且能够用有限的编码精确保存的东西就非常有用了。</p>
-<h2 id="域"><a href="#域" class="headerlink" title="域"></a>域</h2><p>域的定义在各种与离散数学相关的地方都能看到，看上去定义的十分啰嗦，说白了其实就是从有理数抽象出来的一种集合，能加能减能乘能除，满足各种四则运算律。普通的域没啥特别之处，感觉实际上用处不大。</p>
-<h2 id="有限域-GF-域、伽罗华域"><a href="#有限域-GF-域、伽罗华域" class="headerlink" title="有限域($GF$域、伽罗华域)"></a>有限域($GF$域、伽罗华域)</h2><p>有限域的性质相比域来说就诱人多了，除了域的通用特点外，他还能够将所有运算的值在有限的数位内表示出来。这对数的保存而言特别有利。 常见的有限域当然就是模素数域了，比如模7域$GF(7)&#x3D;\{0,1,2,3,4,5,6\}$，这类域能够生成阶数为指定素数的域。但是很多情况下，我们需要域的阶数不是一个素数，而是一个类似于$2^n$之类的数，比如一个字节的大小$2^8$，如果能把这个范围的数用一个域来映射，那对很多计算是特别有帮助的。在要求不严格的情况下，我们当然可以弃掉一些信息，截取一个小一点的素数，比如对于256来说，我们可以选择251，来构成模251域。不过毕竟信息有丢失，我们需要一个更加方便安全的方法。</p>
-<h2 id="GF-2-n-域"><a href="#GF-2-n-域" class="headerlink" title="$GF(2^n)$域"></a>$GF(2^n)$域</h2><p>这个域的出现解决了上面的问题，他的阶数恰巧适应了二进制表示，比如常见的$GF(2^8)$就能正好表示一个字节的数。他的基本思想就是把数字映射到一个多项式，把他的四则运算变成多项式之间特殊的四则运算。</p>
-<h3 id="映射方法"><a href="#映射方法" class="headerlink" title="映射方法"></a>映射方法</h3><p>对于$GF(2^8)$来说，一个8bit的二进制数就直接按照各个位上的值依次放在$x^i$的系数上(显然这个多项式各个位上的系数只能是0或1)。比如5的二进制表示是101，那么他对应的多项式就是$x^2+1$。</p>
-<h3 id="多项式计算"><a href="#多项式计算" class="headerlink" title="多项式计算"></a>多项式计算</h3><p>多项式的计算是问题解决的核心，普通的多项式以及正常的四则运算显然不是一个域。为了保证多项式能够构成域，我们特地设计了下面的运算。</p>
-<p>正如整数集合不能构成域，但是模素数集合却能构成域一样。普通的多项式不能构成域，但是模素数多项式却能构成域。所谓的素数多项式，就是指不能被因式分解的多项式，这么设计的理由跟模素数域中选用素数的理由一样。对于$GF(2^8)$，素数多项式的最高项一定是8次，至于低次位的是多少我们并不在意。这个素多项式，我们叫做本源多项式。</p>
-<p>加减运算：这上面定义的加减运算就是各个位的系数进行异或操作，显然加法跟减法是一个意思。</p>
-<p>乘除运算：如果按照加减法的定义直接进行乘除运算的话会比较麻烦，通常的做法是用逆元表进行计算。我们知道有限域的生成元g可以直接用其自身的幂表示整个$GF(2^n)$域，那么域中的每个元素都可以表示成$g^i$。我们可以根据生成元g轻松确定这个i，那么他的逆元就是$g^(n-i)$。这样我么就可以打一个逆元的表，若要求$a*b$，我们直接去求$(a^{-1}*b^{-1})^{-1}$即可，只要查三次表。</p>
-<p>当然，在具体的运算过程中还有很多细节可以优化，比如乘法过程可以用异或和位移运算来加速等等。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://research.swtch.com/field">Finite Field Arithmetic and Reed-Solomon Coding</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/luotuo44/article/details/41645597">有限域GF(2^8)的四则运算及拉格朗日插值</a><br><a target="_blank" rel="noopener" href="http://blog.sina.com.cn/s/blog_4572df4e01019wsj.html">DataMatrix编码2——伽罗华域运算</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/11/Reed-Solomon%E7%BA%A0%E5%88%A0%E7%A0%81%E7%AE%80%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/11/Reed-Solomon%E7%BA%A0%E5%88%A0%E7%A0%81%E7%AE%80%E6%9E%90/" itemprop="url">Reed-Solomon纠删码简析</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-11T11:06:44+00:00">
-                2016-09-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Maths/" itemprop="url" rel="index">
-                    <span itemprop="name">Maths</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Reed-Solomon编码（又叫RS编码、里德-所罗门编码）作为一种前向纠错编码，是一种很常见的数据冗余技术，也就是通过对数据增加冗余部分来保证当数据丢失时能够在一定程度上进行恢复。最典型的应用就是在现在最流行的QR二维码的编码设计中。</p>
-<h2 id="实现功能"><a href="#实现功能" class="headerlink" title="实现功能"></a>实现功能</h2><p>他所解决的问题是：给定$n$个数据块$(d_1,d_2,d_3,…,d_n)$，对于一个确定的正整数$m$， RS编码能够根据这$n$个数据块生成$m$个校验块， $(c_1, c_2,…, c_m)$。  我们能够做到，从这$m+n$个数据(或校验)块中任取$n$块就能解码出原始数据。 即对于$n$个数据块进行RS编码后生成的$n+m$个数据块，我们能够容忍丢失至多$m$个数据块。</p>
-<h2 id="编码原理"><a href="#编码原理" class="headerlink" title="编码原理"></a>编码原理</h2><p>实现的功能听上去很强大，其实原理却十分简单，只是他很巧妙的运用了矩阵运算的特点，说起来也十分简单。</p>
-<p>一、对于需要进行冗余处理的$n$个数据块，我们把他写成列向量的形式，其中每个数据块都可以看做是一个数。</p>
-<p>二、生成一个变换矩阵，这个矩阵由$n+m$行和$n$列组成，其中上面的$n\times n$的部分是一个单元矩阵，下面的$m\times n$的部分是一个范德蒙矩阵。</p>
-<p>三、用这个变换矩阵左乘数据列向量得到$n+m$位冗余码列向量。</p>
-<p>算式如下：</p>
-<p>$$\begin{bmatrix}1&amp;0&amp;..&amp;0&amp;0\\0&amp;1&amp;..&amp;0&amp;0\\..&amp;..&amp;..&amp;..&amp;..\\0&amp;0&amp;..&amp;1&amp;0\\0&amp;0&amp;..&amp;0&amp;1\\1^0&amp;1^1&amp;..&amp;1^{n-2}&amp;1^{n-1}\\2^0&amp;2^1&amp;..&amp;2^{n-2}&amp;2^{n-1}\\..&amp;..&amp;..&amp;..&amp;..\\ (m-1)^0&amp;(m-1)^1&amp;..&amp;(m-1)^{n-2}&amp;(m-1)^{n-1}\\m^0&amp;m^1&amp;..&amp;m^{n-2}&amp;m^{n-1}\end{bmatrix}\times \begin{bmatrix}b_1\\b_2\\b_3\\..\\b_n\end{bmatrix}&#x3D;\begin{bmatrix}b_1\\b_2\\b_3\\..\\b_n\\c_1\\c_2\\c_3\\..\\c_m\end{bmatrix}$$</p>
-<p>上面使用单位矩阵显然是为了保证原数据块在编码后不发生变化，从而看上去只是增加了冗余码。</p>
-<p>下面使用范德蒙矩阵其实是为了保证这个矩阵任取$n*n$的部分可逆。</p>
-<h2 id="解码原理"><a href="#解码原理" class="headerlink" title="解码原理"></a>解码原理</h2><p>根据上面的编码方式，我们可以很容易理解他的解码方法。对于编码后的数据块$(b_1,b_2,…,b_n,c_1,c_2,…,c_m)$，只需要任取其中的$m$个数据块，假设为$(b_{a_1},b_{a_2},…,b_{a_x},c_{b_1},c_{b_2},…,c_{b_y})$其中$x+y&#x3D;m$，再用$f_i$表示编码过程中那个矩阵的第$i$行。显然，下面的等式一定成立：<br>$$\begin{bmatrix}f_{a_1}\\f_{a_2}\\..\\f_{a_x}\\f_{n+b_1}\\f_{n+b_2}\\..\\f_{n+b_y}\end{bmatrix}\times\begin{bmatrix}b_1\\b_2\\b_3\\..\\b_n\end{bmatrix}&#x3D;\begin{bmatrix}b_{a_1}\\b_{a_2}\\…\\b_{a_x}\\c_{b_1}\\c_{b_2}\\…\\c_{b_y}\end{bmatrix}$$</p>
-<p>这样一来，我们就可以把中间的数据矩阵解出来了。</p>
-<h2 id="计算域"><a href="#计算域" class="headerlink" title="计算域"></a>计算域</h2><p>上面的方法理论上是能够做到数据冗余处理的，不过由于作为一种编码技术，RS编码需要处理的是特定长度的二进制数据，然而求矩阵逆的过程是在实数域内进行的。显然特定长度的二进制位是无法准确描述实数的。因此RS编码的计算域采用的是能够用二进制位精确编码的伽罗华域$GF(2^n)$。这个域的特性就是非常适合处理$[0-2^n)$范围内数据的四则运算，而且这里的四则运算大都通过位运算处理，效率比较高。实际生产中由于数据的量会比较大，为了加快整个计算的过程，通常会采用离散傅里叶变换(DFT)及其逆变换来进行编码实现。具体的介绍可以参见<a target="_blank" rel="noopener" href="http://blog.mythsman.com/?p=3135">这一篇文章</a>。</p>
-<h2 id="重要特征"><a href="#重要特征" class="headerlink" title="重要特征"></a>重要特征</h2><p>由于RS编码采用的是伽罗华域$GF(2^n)$，那他就有一个很有趣的特点，那就是对于数据$b_1,b_2$以及其分别对应的冗余码$c_1,c_2$，我们可以迅速的知道对于数据$b_1\otimes b_2$，他的冗余码就是$c_1\otimes c_2$($\otimes $表示异或)。</p>
-<p>这一点其实很好理解，根据之前的编码过程，我们很容易知道对于实数域，如果数据$b_1,b_2$分别对应的冗余码是$c_1,c_2$，那么数据$b_1+ b_2$的冗余码就是$c_1+ c_2$。而现在的运算域是伽罗华域，在伽罗华域中加法做的就是异或操作。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://peterylh.blog.163.com/blog/static/12033201371375050233/">Reed Solomon纠删码</span></a><br><a target="_blank" rel="noopener" href="http://www.eetop.cn/blog/html/71/63271-2747.html">里德-所罗门码(RS 码) 简介</a><br><a target="_blank" rel="noopener" href="http://research.swtch.com/field">Finite Field Arithmetic and Reed-Solomon Coding</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/09/%E5%B9%82%E5%AE%9A%E5%BE%8B%E5%92%8C%E9%BD%90%E5%A4%AB%E5%AE%9A%E5%BE%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/09/%E5%B9%82%E5%AE%9A%E5%BE%8B%E5%92%8C%E9%BD%90%E5%A4%AB%E5%AE%9A%E5%BE%8B/" itemprop="url">幂定律和齐夫定律</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-09T14:27:33+00:00">
-                2016-09-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
-                    <span itemprop="name">Data Mining</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="幂定律"><a href="#幂定律" class="headerlink" title="幂定律"></a>幂定律</h2><p>幂定律又叫幂律，大量的事实表明，很多现象都服从类似于幂函数$y&#x3D;cx^a$的形式，其中$a$是幂，而且通常是负数。</p>
-<p>幂定律可以非常直观的用马太效应(Matthew effect)解释，说白了其实就是所谓的“富者越富，穷者越穷”。例如图书的销售，本来销售好的图书可能会发布更多的广告，做更多的营销从而导致销量更多。这样如果将图书销售量按照名次排列下来就会发现图书销量会随着名次的提高而指数性的提高。</p>
-<h2 id="齐夫定律"><a href="#齐夫定律" class="headerlink" title="齐夫定律"></a>齐夫定律</h2><p>齐夫定律(Zipf’s Law)其实可以说是幂定律的一种形式，只是由于在曾经一次语料库的统计分析中由于拟合效果很好而广为人知。简而言之，他的内容就是对于一个语料库而言，我们统计他当中每一个词$i$出现的频率$f_i$与该频率在所有的词语中间的排名$r_i$，发现$f_i\times r_i$竟然近似等于一个常数$C$。当然，这只是一个经验定律，并不是定理、更不是理论。不过在自然界中有很多现象都满足这样一条规律而已。</p>
-<p>不过这个定律的具体形式也不仅仅局限于上面的那个等式，而是有可能会变成$f_i\times r_i^\alpha &#x3D;C$等等一系列形式。毕竟只是一个经验公式，拟合的时候相应的调节下参数也不是不可。</p>
-<h2 id="齐夫定律的简单应用"><a href="#齐夫定律的简单应用" class="headerlink" title="齐夫定律的简单应用"></a>齐夫定律的简单应用</h2><p>除了拟合预测，齐夫定律还有一个很有用的应用，就是在之前的一个实验中，我需要在某个城市的地图上上随机生成一些点来模拟人的位置，那么我该如何模拟更加真实呢？现实生活中人肯定不会是标准均匀分布的，如果使用正态分布的话，所有人都是以一个点为中心分布似乎也不太合理。这是就可以用到这个齐夫定律了。我们可以先假定总共有$N$个人，我们可以把人这些人分为$m$个人群，每个人群都是以二维正态分布的方式(选择好方差)聚集在中心点周围，而中心点可以以随机分布的方式从图中直接获取。至于每个人群的人数，我们可以按照齐夫定律，选择每个人群的个数。选择的方法也很简单，假设第$i$个人群的人数是$a_i$，解下面的方程组即可：<br>$$\left\{\begin{aligned}&amp;\sum a_i&#x3D;N\\&amp;i*a_i&#x3D;j*a_j\end{aligned}\right.$$</p>
-<p>这样最后生成的随机分布就非常具有说服力了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/37/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><span class="page-number current">38</span><a class="page-number" href="/page/39/">39</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/39/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/37/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><span class="page-number current">38</span><a class="page-number" href="/page/39/">39</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/39/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1923,7 +1885,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1934,7 +1896,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1945,7 +1907,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

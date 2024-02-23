@@ -307,6 +307,962 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/04/apache2%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/04/apache2%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE/" itemprop="url">apache2服务器的搭建与配置</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-04T10:31:21+00:00">
+                2015-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Apache/" itemprop="url" rel="index">
+                    <span itemprop="name">Apache</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>搭建apache2其实并不难，只是网上的资料有很多都过时了，之前被误导过好几次，走了很多弯路。趁着这次在本地搭建网站的时机重新捋一下思路，也方便以后有需求的时候查阅。</p>
+<p>首先当然是下载包包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ sudo apt-get install apache2</span><br></pre></td></tr></table></figure>
+<p>装完后就可以用了，在地址栏输入本地回送地址127.0.0.1或者localhost就可以进入到默认的界面了。</p>
+<p>默认的界面当然就是apache2的说明界面了。其实很多情况下并不需要在网上寻找帮助文档，几乎所有的软件都会自带使用说明，只是略长，我们一般都懒得看。但是其实很多重要的东西就在这当中，比如apache2的默认界面里：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu Logo Apache2 Ubuntu Default Page</span><br><span class="line">It works!</span><br><span class="line">This is the default welcome page used to test the correct operation of the Apache2 server after installation on Ubuntu systems. It is based on the equivalent page on Debian, from which the Ubuntu Apache packaging is derived. If you can read this page, it means that the Apache HTTP server installed at this site is working properly. You should replace this file (located at /var/www/html/index.html) before continuing to operate your HTTP server.</span><br><span class="line">If you are a normal user of this web site and don&#x27;t know what this page is about, this probably means that the site is currently unavailable due to maintenance. If the problem persists, please contact the site&#x27;s administrator.</span><br><span class="line">Configuration Overview</span><br><span class="line">Ubuntu&#x27;s Apache2 default configuration is different from the upstream default configuration, and split into several files optimized for interaction with Ubuntu tools. The configuration system is fully documented in /usr/share/doc/apache2/README.Debian.gz. Refer to this for the full documentation. Documentation for the web server itself can be found by accessing the manual if the apache2-doc package was installed on this server.</span><br><span class="line">The configuration layout for an Apache2 web server installation on Ubuntu systems is as follows:</span><br><span class="line">/etc/apache2/</span><br><span class="line">|-- apache2.conf</span><br><span class="line">|       `--  ports.conf</span><br><span class="line">|-- mods-enabled</span><br><span class="line">|       |-- *.load</span><br><span class="line">|       `-- *.conf</span><br><span class="line">|-- conf-enabled</span><br><span class="line">|       `-- *.conf</span><br><span class="line">|-- sites-enabled</span><br><span class="line">|       `-- *.conf</span><br><span class="line"></span><br><span class="line">apache2.conf is the main configuration file. It puts the pieces together by including all remaining configuration files when starting up the web server.</span><br><span class="line">ports.conf is always included from the main configuration file. It is used to determine the listening ports for incoming connections, and this file can be customized anytime.</span><br><span class="line">Configuration files in the mods-enabled/, conf-enabled/ and sites-enabled/ directories contain particular configuration snippets which manage modules, global configuration fragments, or virtual host configurations, respectively.</span><br><span class="line">They are activated by symlinking available configuration files from their respective *-available/ counterparts. These should be managed by using our helpers a2enmod, a2dismod, a2ensite, a2dissite, and a2enconf, a2disconf . See their respective man pages for detailed information.</span><br><span class="line">The binary is called apache2\. Due to the use of environment variables, in the default configuration, apache2 needs to be started/stopped with /etc/init.d/apache2 or apache2ctl. Calling /usr/bin/apache2 directly will not work with the default configuration.</span><br><span class="line">Document Roots</span><br><span class="line">By default, Ubuntu does not allow access through the web browser to any file apart of those located in /var/www, public_html directories (when enabled) and /usr/share (for web applications). If your site is using a web document root located elsewhere (such as in /srv) you may need to whitelist your document root directory in /etc/apache2/apache2.conf.</span><br><span class="line">The default Ubuntu document root is /var/www/html. You can make your own virtual hosts under /var/www. This is different to previous releases which provides better security out of the box.</span><br><span class="line">Reporting Problems</span><br><span class="line">Please use the ubuntu-bug tool to report bugs in the Apache2 package with Ubuntu. However, check existing bug reports before reporting a new bug.</span><br><span class="line">Please report bugs specific to modules (such as PHP and others) to respective packages, not to the web server itself.</span><br><span class="line">Valid XHTML 1.0 Transitional</span><br></pre></td></tr></table></figure>
+<p>仅仅从这个文件中，我们就可以至少得到以下的重要信息：</p>
+<ol>
+<li>当访问本机的时候，默认进入的页面是&#x2F;var&#x2F;www&#x2F;html&#x2F;index.html。</li>
+<li>配置系统的说明在&#x2F;usr&#x2F;share&#x2F;doc&#x2F;apache2&#x2F;README.Debian.gz中。</li>
+<li>完整使用手册可以通过安装apache2-doc 进行下载。</li>
+<li>主配置文件为&#x2F;etc&#x2F;apache2&#x2F;apache2.conf。</li>
+<li>启动和关闭apache2服务可以通过执行命令&#x2F;etc&#x2F;init.d&#x2F;apache2 start（stop &#x2F; restart）当然也可以是 service apache2 start (stop &#x2F; restart)。这里一定要注意记得！记得！加root权限！这里不加root权限并没有明显的提示（好坑），当遇到问题的时候很难让人想到是这里出的错，所以一定要记得！记得！加root权限！</li>
+<li>默认情况下apache2拒绝访问除&#x2F;var&#x2F;www 和&#x2F;usr&#x2F;share文件夹外的其他文件，这种权限是通过apache2.conf文件来控制的.</li>
+</ol>
+<p>默认的apache2.conf为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br></pre></td><td class="code"><pre><span class="line"># This is the main Apache server configuration file.  It contains the</span><br><span class="line"># configuration directives that give the server its instructions.</span><br><span class="line"># See http://httpd.apache.org/docs/2.4/ for detailed information about</span><br><span class="line"># the directives and /usr/share/doc/apache2/README.Debian about Debian specific</span><br><span class="line"># hints.</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"># Summary of how the Apache 2 configuration works in Debian:</span><br><span class="line"># The Apache 2 web server configuration in Debian is quite different to</span><br><span class="line"># upstream&#x27;s suggested way to configure the web server. This is because Debian&#x27;s</span><br><span class="line"># default Apache2 installation attempts to make adding and removing modules,</span><br><span class="line"># virtual hosts, and extra configuration directives as flexible as possible, in</span><br><span class="line"># order to make automating the changes and administering the server as easy as</span><br><span class="line"># possible.</span><br><span class="line"></span><br><span class="line"># It is split into several files forming the configuration hierarchy outlined</span><br><span class="line"># below, all located in the /etc/apache2/ directory:</span><br><span class="line">#</span><br><span class="line">#	/etc/apache2/</span><br><span class="line">#	|-- apache2.conf</span><br><span class="line">#	|	`--  ports.conf</span><br><span class="line">#	|-- mods-enabled</span><br><span class="line">#	|	|-- *.load</span><br><span class="line">#	|	`-- *.conf</span><br><span class="line">#	|-- conf-enabled</span><br><span class="line">#	|	`-- *.conf</span><br><span class="line"># 	`-- sites-enabled</span><br><span class="line">#	 	`-- *.conf</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"># * apache2.conf is the main configuration file (this file). It puts the pieces</span><br><span class="line">#   together by including all remaining configuration files when starting up the</span><br><span class="line">#   web server.</span><br><span class="line">#</span><br><span class="line"># * ports.conf is always included from the main configuration file. It is</span><br><span class="line">#   supposed to determine listening ports for incoming connections which can be</span><br><span class="line">#   customized anytime.</span><br><span class="line">#</span><br><span class="line"># * Configuration files in the mods-enabled/, conf-enabled/ and sites-enabled/</span><br><span class="line">#   directories contain particular configuration snippets which manage modules,</span><br><span class="line">#   global configuration fragments, or virtual host configurations,</span><br><span class="line">#   respectively.</span><br><span class="line">#</span><br><span class="line">#   They are activated by symlinking available configuration files from their</span><br><span class="line">#   respective *-available/ counterparts. These should be managed by using our</span><br><span class="line">#   helpers a2enmod/a2dismod, a2ensite/a2dissite and a2enconf/a2disconf. See</span><br><span class="line">#   their respective man pages for detailed information.</span><br><span class="line">#</span><br><span class="line"># * The binary is called apache2\. Due to the use of environment variables, in</span><br><span class="line">#   the default configuration, apache2 needs to be started/stopped with</span><br><span class="line">#   /etc/init.d/apache2 or apache2ctl. Calling /usr/bin/apache2 directly will not</span><br><span class="line">#   work with the default configuration.</span><br><span class="line"></span><br><span class="line"># Global configuration</span><br><span class="line">#</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># ServerRoot: The top of the directory tree under which the server&#x27;s</span><br><span class="line"># configuration, error, and log files are kept.</span><br><span class="line">#</span><br><span class="line"># NOTE!  If you intend to place this on an NFS (or otherwise network)</span><br><span class="line"># mounted filesystem then please read the Mutex documentation (available</span><br><span class="line"># at &lt;URL:http://httpd.apache.org/docs/2.4/mod/core.html#mutex&gt;);</span><br><span class="line"># you will save yourself a lot of trouble.</span><br><span class="line">#</span><br><span class="line"># Do NOT add a slash at the end of the directory path.</span><br><span class="line">#</span><br><span class="line">#ServerRoot &quot;/etc/apache2&quot;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The accept serialization lock file MUST BE STORED ON A LOCAL DISK.</span><br><span class="line">#</span><br><span class="line">Mutex file:$&#123;APACHE_LOCK_DIR&#125; default</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># PidFile: The file in which the server should record its process</span><br><span class="line"># identification number when it starts.</span><br><span class="line"># This needs to be set in /etc/apache2/envvars</span><br><span class="line">#</span><br><span class="line">PidFile $&#123;APACHE_PID_FILE&#125;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># Timeout: The number of seconds before receives and sends time out.</span><br><span class="line">#</span><br><span class="line">Timeout 300</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># KeepAlive: Whether or not to allow persistent connections (more than</span><br><span class="line"># one request per connection). Set to &quot;Off&quot; to deactivate.</span><br><span class="line">#</span><br><span class="line">KeepAlive On</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># MaxKeepAliveRequests: The maximum number of requests to allow</span><br><span class="line"># during a persistent connection. Set to 0 to allow an unlimited amount.</span><br><span class="line"># We recommend you leave this number high, for maximum performance.</span><br><span class="line">#</span><br><span class="line">MaxKeepAliveRequests 100</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># KeepAliveTimeout: Number of seconds to wait for the next request from the</span><br><span class="line"># same client on the same connection.</span><br><span class="line">#</span><br><span class="line">KeepAliveTimeout 5</span><br><span class="line"></span><br><span class="line"># These need to be set in /etc/apache2/envvars</span><br><span class="line">User $&#123;APACHE_RUN_USER&#125;</span><br><span class="line">Group $&#123;APACHE_RUN_GROUP&#125;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># HostnameLookups: Log the names of clients or just their IP addresses</span><br><span class="line"># e.g., www.apache.org (on) or 204.62.129.132 (off).</span><br><span class="line"># The default is off because it&#x27;d be overall better for the net if people</span><br><span class="line"># had to knowingly turn this feature on, since enabling it means that</span><br><span class="line"># each client request will result in AT LEAST one lookup request to the</span><br><span class="line"># nameserver.</span><br><span class="line">#</span><br><span class="line">HostnameLookups Off</span><br><span class="line"></span><br><span class="line"># ErrorLog: The location of the error log file.</span><br><span class="line"># If you do not specify an ErrorLog directive within a &lt;VirtualHost&gt;</span><br><span class="line"># container, error messages relating to that virtual host will be</span><br><span class="line"># logged here.  If you *do* define an error logfile for a &lt;VirtualHost&gt;</span><br><span class="line"># container, that host&#x27;s errors will be logged there and not here.</span><br><span class="line">#</span><br><span class="line">ErrorLog $&#123;APACHE_LOG_DIR&#125;/error.log</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># LogLevel: Control the severity of messages logged to the error_log.</span><br><span class="line"># Available values: trace8, ..., trace1, debug, info, notice, warn,</span><br><span class="line"># error, crit, alert, emerg.</span><br><span class="line"># It is also possible to configure the log level for particular modules, e.g.</span><br><span class="line"># &quot;LogLevel info ssl:warn&quot;</span><br><span class="line">#</span><br><span class="line">LogLevel warn</span><br><span class="line"></span><br><span class="line"># Include module configuration:</span><br><span class="line">IncludeOptional mods-enabled/*.load</span><br><span class="line">IncludeOptional mods-enabled/*.conf</span><br><span class="line"></span><br><span class="line"># Include list of ports to listen on</span><br><span class="line">Include ports.conf</span><br><span class="line"></span><br><span class="line"># Sets the default security model of the Apache2 HTTPD server. It does</span><br><span class="line"># not allow access to the root filesystem outside of /usr/share and /var/www.</span><br><span class="line"># The former is used by web applications packaged in Debian,</span><br><span class="line"># the latter may be used for local directories served by the web server. If</span><br><span class="line"># your system is serving content from a sub-directory in /srv you must allow</span><br><span class="line"># access here, or in any related virtual host.</span><br><span class="line">&lt;Directory /&gt;</span><br><span class="line">	Options FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all denied</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /usr/share&gt;</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /var/www/&gt;</span><br><span class="line">	Options Indexes FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">#&lt;Directory /srv/&gt;</span><br><span class="line">#	Options Indexes FollowSymLinks</span><br><span class="line">#	AllowOverride None</span><br><span class="line">#	Require all granted</span><br><span class="line">#&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line"># AccessFileName: The name of the file to look for in each directory</span><br><span class="line"># for additional configuration directives.  See also the AllowOverride</span><br><span class="line"># directive.</span><br><span class="line">#</span><br><span class="line">AccessFileName .htaccess</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The following lines prevent .htaccess and .htpasswd files from being</span><br><span class="line"># viewed by Web clients.</span><br><span class="line">#</span><br><span class="line">&lt;FilesMatch &quot;^.ht&quot;&gt;</span><br><span class="line">	Require all denied</span><br><span class="line">&lt;/FilesMatch&gt;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># The following directives define some format nicknames for use with</span><br><span class="line"># a CustomLog directive.</span><br><span class="line">#</span><br><span class="line"># These deviate from the Common Log Format definitions in that they use %O</span><br><span class="line"># (the actual bytes sent including headers) instead of %b (the size of the</span><br><span class="line"># requested file), because the latter makes it impossible to detect partial</span><br><span class="line"># requests.</span><br><span class="line">#</span><br><span class="line"># Note that the use of %&#123;X-Forwarded-For&#125;i instead of %h is not recommended.</span><br><span class="line"># Use mod_remoteip instead.</span><br><span class="line">#</span><br><span class="line">LogFormat &quot;%v:%p %h %l %u %t &quot;%r&quot; %&gt;s %O &quot;%&#123;Referer&#125;i&quot; &quot;%&#123;User-Agent&#125;i&quot;&quot; vhost_combined</span><br><span class="line">LogFormat &quot;%h %l %u %t &quot;%r&quot; %&gt;s %O &quot;%&#123;Referer&#125;i&quot; &quot;%&#123;User-Agent&#125;i&quot;&quot; combined</span><br><span class="line">LogFormat &quot;%h %l %u %t &quot;%r&quot; %&gt;s %O&quot; common</span><br><span class="line">LogFormat &quot;%&#123;Referer&#125;i -&gt; %U&quot; referer</span><br><span class="line">LogFormat &quot;%&#123;User-agent&#125;i&quot; agent</span><br><span class="line"></span><br><span class="line"># Include of directories ignores editors&#x27; and dpkg&#x27;s backup files,</span><br><span class="line"># see README.Debian for details.</span><br><span class="line"></span><br><span class="line"># Include generic snippets of statements</span><br><span class="line">IncludeOptional conf-enabled/*.conf</span><br><span class="line"></span><br><span class="line"># Include the virtual host configurations:</span><br><span class="line">IncludeOptional sites-enabled/*.conf</span><br><span class="line"></span><br><span class="line"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span><br></pre></td></tr></table></figure>
+<p>注意这当中的一段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;Directory /&gt;</span><br><span class="line">	Options FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all denied</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /usr/share&gt;</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line"></span><br><span class="line">&lt;Directory /var/www/&gt;</span><br><span class="line">	Options Indexes FollowSymLinks</span><br><span class="line">	AllowOverride None</span><br><span class="line">	Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br></pre></td></tr></table></figure>
+<p>由这段可以很容易的知道apache2到底为哪些文件夹赋予了打开的权限了。以后就可以通过修改这里达到各种不可告人的目的了。</p>
+<p>最后还有一个重要的配置，就是默认目录的更改。默认的目录其实是记录在:&#x2F;etc&#x2F;apache2&#x2F;sites-available&#x2F;000-default.conf 文件当中（在&#x2F;etc&#x2F;apache2&#x2F;sites-enable&#x2F;中也有一个指向他的链接）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:/etc/apache2/sites-available$ cat 000-default.conf </span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">	# The ServerName directive sets the request scheme, hostname and port that</span><br><span class="line">	# the server uses to identify itself. This is used when creating</span><br><span class="line">	# redirection URLs. In the context of virtual hosts, the ServerName</span><br><span class="line">	# specifies what hostname must appear in the request&#x27;s Host: header to</span><br><span class="line">	# match this virtual host. For the default virtual host (this file) this</span><br><span class="line">	# value is not decisive as it is used as a last resort host regardless.</span><br><span class="line">	# However, you must set it for any further virtual host explicitly.</span><br><span class="line">	#ServerName www.example.com</span><br><span class="line"></span><br><span class="line">	ServerAdmin webmaster@localhost</span><br><span class="line">	DocumentRoot /var/www/html</span><br><span class="line"></span><br><span class="line">	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,</span><br><span class="line">	# error, crit, alert, emerg.</span><br><span class="line">	# It is also possible to configure the loglevel for particular</span><br><span class="line">	# modules, e.g.</span><br><span class="line">	#LogLevel info ssl:warn</span><br><span class="line"></span><br><span class="line">	ErrorLog $&#123;APACHE_LOG_DIR&#125;/error.log</span><br><span class="line">	CustomLog $&#123;APACHE_LOG_DIR&#125;/access.log combined</span><br><span class="line"></span><br><span class="line">	# For most configuration files from conf-available/, which are</span><br><span class="line">	# enabled or disabled at a global level, it is possible to</span><br><span class="line">	# include a line for only one particular virtual host. For example the</span><br><span class="line">	# following line enables the CGI configuration for this host only</span><br><span class="line">	# after it has been globally disabled with &quot;a2disconf&quot;.</span><br><span class="line">	#Include conf-available/serve-cgi-bin.conf</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line"></span><br><span class="line"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span><br></pre></td></tr></table></figure>
+<p>当中的“DocumentRoot ”键对应的值就是默认的目录了，可以任由我们修改了。</p>
+<p>apache2的简单配置基本就是这些，不需要百度，我们也是完全可以自己弄清楚的。</p>
+<p>注：</p>
+<ol>
+<li>修改完配置文件后记得重启服务</li>
+<li>可以顺手吧&#x2F;var&#x2F;www的权限设置为777方便修改网页</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/03/Linux%E4%B8%ADln%E5%91%BD%E4%BB%A4%E7%9A%84%E7%94%A8%E6%B3%95%E4%BB%A5%E5%8F%8A%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/03/Linux%E4%B8%ADln%E5%91%BD%E4%BB%A4%E7%9A%84%E7%94%A8%E6%B3%95%E4%BB%A5%E5%8F%8A%E5%88%86%E6%9E%90/" itemprop="url">Linux中ln命令的用法以及分析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-03T15:44:41+00:00">
+                2015-11-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在ubuntu用也有类似于windows中快捷方式这种类型的东西，即链接。这里一般使用ln命令来执行得到，ln命令用法简单，但是与windows不同，这里有硬链接和软链接两种类型的链接。在介绍两种链接的时候，我们先来了解一下Linux的文件系统。</p>
+<h2 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h2><p>在Linux中每一个文件大体上由三个部分组成：</p>
+<ol>
+<li>文件名：这个是用来标记这个文件的符号，也就是我们所理解的文件名；</li>
+<li>inode：inode存放的是文件的metadata，也就是元信息，包括了文件的权限、创建时间、修改时间、唯一id、文件种类、一个与文件名数目对应的链接数，最后还有一个指向实际数据区域的指针。我们可以用stat命令来查看文件的inode信息。</li>
+<li>数据区：这里是真正保存数据的地方。</li>
+</ol>
+<p>当我们创建一个文件的时候，我们实际上是创建了这个文件的文件名以及inode，只有当我们真正写数据的时候，我们才会想数据区里写入数据。<br>当我们删除一个文件的时候，我们实际上是删除了这个文件的文件名，然后这个文件对应的inode的连接数会减一，当这个连接数减为0的时候，操作系统才会讲这个inode删除，也就是删除了这个文件。</p>
+<h2 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h2><p><img src="/images/2015/11/03/1/1.png"></p>
+<p>硬链接相当于给文件重新起了一个名字，没有创建inode，只是对inode的链接数加了1，更没有数据的拷贝，新创建的名字与原来的名字从本质上没有任何先后次序，是对等存在的。对一个文件的修改就是对另一个文件的修改。当删除一个文件的时候，只是删除了这个文件名，并且将对应inode的链接数减了1。</p>
+<p>硬链接还有一些非常有趣的性质：</p>
+<h3 id="不允许给目录创建硬链接"><a href="#不允许给目录创建硬链接" class="headerlink" title="不允许给目录创建硬链接"></a>不允许给目录创建硬链接</h3><p>为什么不允许给目录创建硬链接呢？原因其实非常好玩。事实上Linux对目录本身是有硬链接的，我们知道每一个文件夹下都至少会有两个链接，一个是’.’、表示当前文件本身；另一个是’..’、表示当前文件的父目录。事实上，这个’.’就是对当前文件的一个硬链接，而’..’是对当前文件夹的父目录的硬链接，这就是为什么如果我们新建一个文件夹后，用stat查看这个文件夹的链接数，会发现这个数至少是2而不是1。<br>既然有硬链接，那么为什么不允许用户创建呢？原因也很有趣。如果任由用户随意添加硬链接，那么很容易出现一种情况，就是比如dir1-&gt;dir3 , dir2-&gt;dir3，这时如果我们在dir3下执行cd .. ，那么我们应该跳到哪里呢？显然这是一个不可描述的问题。因此，为了避免这种情况的发生，Linux的设计者才做了这样一个规定。</p>
+<h3 id="只有在同一文件系统中的文件之间才能创建链接。"><a href="#只有在同一文件系统中的文件之间才能创建链接。" class="headerlink" title="只有在同一文件系统中的文件之间才能创建链接。"></a>只有在同一文件系统中的文件之间才能创建链接。</h3><p>这一点跟软链接不同，由于硬链接中的两个文件名需要映射到同一个inode上，而这个文件系统的inode显然不能被另一个文件系统直接看到，因此也就不能跨文件系统访问了。</p>
+<p>事实上，硬链接用的不多，比较常用的是软链接：</p>
+<h2 id="软链接"><a href="#软链接" class="headerlink" title="软链接"></a>软链接</h2><p><img src="/images/2015/11/03/1/2.png"></p>
+<p>软链接又叫符号链接，就是传统意义上windows中的那种链接，本身可以看做是一种指针，指向实际的文件。</p>
+<p>具体ln命令的用法：</p>
+<p>ln 源文件 目标文件        &#x2F;&#x2F;默认创建硬链接</p>
+<p>ln -s 源文件 目标文件    &#x2F;&#x2F;加-s （symbolic）选项创建软链接</p>
+<p>创建的软链接在用ls -l 查看的时候是会显示细节的，比如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/test$ <span class="built_in">ln</span> -s a.txt b.txt</span><br><span class="line">myths@myths-X450LD:~/test$ <span class="built_in">ls</span></span><br><span class="line">a.txt  b.txt</span><br><span class="line">myths@myths-X450LD:~/test$ <span class="built_in">ls</span> -l</span><br><span class="line">总用量 4</span><br><span class="line">-rw-rw-r-- 1 myths myths 6 11月  6 00:27 a.txt</span><br><span class="line">lrwxrwxrwx 1 myths myths 5 11月  6 00:29 b.txt -&gt; a.txt</span><br><span class="line">myths@myths-X450LD:~/test$</span><br></pre></td></tr></table></figure>
+<p>这里权限的第一个位置写的是  l  表明这是一个软链接，而且最后还会有一个箭头指向实际的文件。</p>
+<p>当然也可以用readlink 命令来显示链接目的地：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~/test$ readlink  b.txt</span><br><span class="line">a.txt</span><br></pre></td></tr></table></figure>
+<p>实际中用到软链接的地方是很多的，比如显示网站的时候，一般将index.html指向实际想执行的文件来默认显示网站打开的网页。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a target="_blank" rel="noopener" href="https://www.cs.nmsu.edu/~pfeiffer/classes/474/notes/inodefs.html">NMSU CS课件</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/02/Qt%E4%B8%AD%E5%9F%BA%E6%9C%AC%E7%9A%84%E7%BB%98%E5%9B%BE%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/02/Qt%E4%B8%AD%E5%9F%BA%E6%9C%AC%E7%9A%84%E7%BB%98%E5%9B%BE%E6%96%B9%E6%B3%95/" itemprop="url">Qt中基本的绘图方法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-02T14:17:58+00:00">
+                2015-11-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Qt/" itemprop="url" rel="index">
+                    <span itemprop="name">Qt</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Qt中实现绘图功能和其他的库差不多，主要靠Painter，Pen，Brush之类的东西进行描绘。这里主要牵涉到QPainter，QPen，QBrush三个类，用法也很简单。下面主要是实现一个全面显示各种图形的程序，定义了两个类，一个负责绘图区，一个负责用户交互，这里先介绍绘图区的类。</p>
+<h2 id="Painter-pro"><a href="#Painter-pro" class="headerlink" title="Painter.pro"></a>Painter.pro</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#-------------------------------------------------</span><br><span class="line">#</span><br><span class="line"># Project created by QtCreator <span class="number">2015</span><span class="number">-11</span><span class="number">-02</span>T18:<span class="number">38</span>:<span class="number">46</span></span><br><span class="line">#</span><br><span class="line">#-------------------------------------------------</span><br><span class="line"></span><br><span class="line">QT       += core gui</span><br><span class="line"></span><br><span class="line"><span class="built_in">greaterThan</span>(QT_MAJOR_VERSION, <span class="number">4</span>): QT += widgets</span><br><span class="line"></span><br><span class="line">TARGET = Painter</span><br><span class="line">TEMPLATE = app</span><br><span class="line"></span><br><span class="line">SOURCES += main.cpp </span><br><span class="line">    painter.cpp </span><br><span class="line">    widget.cpp</span><br><span class="line"></span><br><span class="line">HEADERS  += </span><br><span class="line">    painter.h </span><br><span class="line">    widget.h</span><br></pre></td></tr></table></figure>
+<h2 id="painter-h"><a href="#painter-h" class="headerlink" title="painter.h"></a>painter.h</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> WIDGET_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WIDGET_H</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QWidget&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QBrush&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QPen&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QPainter&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QRect&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QPoint&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QDebug&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Painter</span> : <span class="keyword">public</span> QWidget</span><br><span class="line">&#123;</span><br><span class="line">    Q_OBJECT</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Painter</span>(QWidget *parent = <span class="number">0</span>);</span><br><span class="line">    ~<span class="built_in">Painter</span>();</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">//枚举所有类型的图形</span></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">Shape</span>&#123;Line,Rectangle,RoundRect,Ellipse,Polygon,Polyline,Points,Arc,Path,Text,Pixmap&#125;;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setShape</span><span class="params">(Shape)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setPen</span><span class="params">(QPen)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setBrush</span><span class="params">(QBrush)</span></span>;</span><br><span class="line">    <span class="comment">//重写重绘事件</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">paintEvent</span><span class="params">(QPaintEvent*)</span></span>;</span><br><span class="line"><span class="keyword">private</span> :</span><br><span class="line">    Shape shape;</span><br><span class="line">    QBrush brush;</span><br><span class="line">    QPen pen;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// WIDGET_H</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="painter-cpp"><a href="#painter-cpp" class="headerlink" title="painter.cpp"></a>painter.cpp</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;painter.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">Painter::<span class="built_in">Painter</span>(QWidget *parent)</span><br><span class="line">    : <span class="built_in">QWidget</span>(parent)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">setPalette</span>(<span class="built_in">QPalette</span>(Qt::white));<span class="comment">//设置背景</span></span><br><span class="line">    <span class="built_in">setAutoFillBackground</span>(<span class="literal">true</span>);</span><br><span class="line">    <span class="built_in">setMinimumSize</span>(<span class="number">400</span>,<span class="number">400</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Painter::~<span class="built_in">Painter</span>()</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Painter::setShape</span><span class="params">(Shape s)</span></span>&#123;</span><br><span class="line">    shape=s;</span><br><span class="line">    <span class="built_in">update</span>();<span class="comment">//调用qwidget的update()来更新状态</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Painter::setPen</span><span class="params">(QPen p)</span></span>&#123;</span><br><span class="line">    pen=p;</span><br><span class="line">    <span class="built_in">update</span>();</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Painter::setBrush</span><span class="params">(QBrush b)</span></span>&#123;</span><br><span class="line">    brush=b;</span><br><span class="line">    <span class="built_in">update</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Painter::paintEvent</span><span class="params">(QPaintEvent *)</span></span>&#123;</span><br><span class="line">    <span class="built_in">qDebug</span>()&lt;&lt;<span class="string">&quot;debug 2&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">QPainter <span class="title">p</span><span class="params">(<span class="keyword">this</span>)</span></span>;<span class="comment">//拿到当前的画笔句柄</span></span><br><span class="line"></span><br><span class="line">    p.<span class="built_in">setPen</span>(pen);</span><br><span class="line">    p.<span class="built_in">setBrush</span>(brush);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//留一个Qrect备用</span></span><br><span class="line">    <span class="function">QRect <span class="title">rect</span><span class="params">(<span class="number">50</span>,<span class="number">100</span>,<span class="number">300</span>,<span class="number">200</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//留一个QPoint 数组备用</span></span><br><span class="line">    <span class="type">static</span> <span class="type">const</span> QPoint points[<span class="number">4</span>]=&#123;</span><br><span class="line">        <span class="built_in">QPoint</span>(<span class="number">150</span>,<span class="number">100</span>),</span><br><span class="line">        <span class="built_in">QPoint</span>(<span class="number">300</span>,<span class="number">150</span>),</span><br><span class="line">        <span class="built_in">QPoint</span>(<span class="number">350</span>,<span class="number">250</span>),</span><br><span class="line">        <span class="built_in">QPoint</span>(<span class="number">100</span>,<span class="number">300</span>),</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//留几个角度备用</span></span><br><span class="line">    <span class="type">int</span> startAngle=<span class="number">30</span>*<span class="number">16</span>;</span><br><span class="line">    <span class="type">int</span> spanAngle=<span class="number">120</span>*<span class="number">16</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//留一个QPainterPath备用</span></span><br><span class="line">    QPainterPath path;</span><br><span class="line">    path.<span class="built_in">addRect</span>(<span class="number">150</span>,<span class="number">150</span>,<span class="number">100</span>,<span class="number">100</span>);</span><br><span class="line">    path.<span class="built_in">moveTo</span>(<span class="number">100</span>,<span class="number">100</span>);</span><br><span class="line">    path.<span class="built_in">cubicTo</span>(<span class="number">300</span>,<span class="number">100</span>,<span class="number">200</span>,<span class="number">200</span>,<span class="number">300</span>,<span class="number">300</span>);</span><br><span class="line">    path.<span class="built_in">cubicTo</span>(<span class="number">100</span>,<span class="number">300</span>,<span class="number">200</span>,<span class="number">200</span>,<span class="number">100</span>,<span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//根据选择的shape分别显示</span></span><br><span class="line">    <span class="keyword">switch</span>(shape)&#123;</span><br><span class="line">    <span class="keyword">case</span> Line:<span class="comment">//直线</span></span><br><span class="line">        p.<span class="built_in">drawLine</span>(rect.<span class="built_in">topLeft</span>(),rect.<span class="built_in">bottomRight</span>());</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Rectangle:<span class="comment">//矩形</span></span><br><span class="line">        p.<span class="built_in">drawRect</span>(rect);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> RoundRect:<span class="comment">//圆角矩形</span></span><br><span class="line">        p.<span class="built_in">drawRoundRect</span>(rect);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Ellipse:<span class="comment">//椭圆</span></span><br><span class="line">        p.<span class="built_in">drawEllipse</span>(rect);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Polygon:<span class="comment">//多边形</span></span><br><span class="line">        p.<span class="built_in">drawPolygon</span>(points,<span class="number">4</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Polyline:<span class="comment">//多边线</span></span><br><span class="line">        p.<span class="built_in">drawPolyline</span>(points,<span class="number">4</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Points:<span class="comment">//点</span></span><br><span class="line">        p.<span class="built_in">drawPoints</span>(points,<span class="number">4</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Arc:<span class="comment">//弧线</span></span><br><span class="line">        p.<span class="built_in">drawArc</span>(rect,startAngle,spanAngle);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Path:<span class="comment">//路径</span></span><br><span class="line">        p.<span class="built_in">drawPath</span>(path);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> Text:<span class="comment">//文字</span></span><br><span class="line">        p.<span class="built_in">drawText</span>(rect,Qt::AlignCenter,<span class="string">&quot;Hello Qt!&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"><span class="comment">//  case Pixmap://图片</span></span><br><span class="line"><span class="comment">//      p.drawPixmap(150,150,QPixmap(&quot;homemythstest.png&quot;));</span></span><br><span class="line"><span class="comment">//      break;</span></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="main-cpp"><a href="#main-cpp" class="headerlink" title="main.cpp"></a>main.cpp</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;painter.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QApplication&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">QApplication <span class="title">a</span><span class="params">(argc, argv)</span></span>;</span><br><span class="line">    Widget w;</span><br><span class="line">    w.<span class="built_in">show</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> a.<span class="built_in">exec</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/31/Visual-Studio-%E7%B3%BB%E5%88%97%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/31/Visual-Studio-%E7%B3%BB%E5%88%97%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%95%B4%E7%90%86/" itemprop="url">Visual Studio 系列调试方法整理</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-31T15:27:49+00:00">
+                2015-10-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>学编程不会调试，这简直就跟做买卖不会数钱一样好笑，有时候程序出了bug，思维受限的时候，肉眼是很难判断出错误的地方的，虽然调试不一定非得用Debug模式来进行，但是使用vs系列的Debug模式的确是个比较方便的好办法。</p>
+<p>首先介绍一些快捷键：</p>
+<h2 id="Ctrl-F5-键"><a href="#Ctrl-F5-键" class="headerlink" title="Ctrl + F5 键"></a>Ctrl + F5 键</h2><p>这个就是直接运行程序，不会在任何断点处下来，所以实际上并不属于Debug模式的范畴，而是直接运行程序了。这样运行的程序结束后会自动pause一下，所以比较方便的能查看程序运行的结果，而不会出现所谓的“闪退”。</p>
+<h2 id="开启Debug模式"><a href="#开启Debug模式" class="headerlink" title="开启Debug模式"></a>开启Debug模式</h2><h2 id="F5键"><a href="#F5键" class="headerlink" title="F5键"></a>F5键</h2><p>表示开始调试，如果程序设置了断点，或者需要从控制台读入数据，那么会在断电处或者输入数据的地方停止下来，否则将运行程序直到结束，而当程序结束的时候，他会直接结束调试模式，可以说是一种“闪退”，这是正常现象。这个键我个人一般不会用，通常会用F10来ctrl+F10来代替。</p>
+<h2 id="F10键"><a href="#F10键" class="headerlink" title="F10键"></a>F10键</h2><p>单步执行（逐过程），按下F10键后，会在代码的左边出现一个箭头，表示当前程序运行到的地方（当前行并未执行）。每按一次，程序就会向下运行一行，直到程序结束。注意当运行到调用函数的地方的时候，会跳过函数体的内部的运行细节而直接运行到函数返回后的结果。</p>
+<h2 id="Ctrl-F10-键"><a href="#Ctrl-F10-键" class="headerlink" title="Ctrl + F10 键"></a>Ctrl + F10 键</h2><p>直接运行到光标所在位置（光标所在位置不表示鼠标指针所在位置。。不要犯傻哦），简单暴力。</p>
+<h2 id="F11键"><a href="#F11键" class="headerlink" title="F11键"></a>F11键</h2><p>单步执行（逐语句），基本作用与F10一样，唯一的不同是，当运行到调用函数的时候，按下该键会直接进入函数体内部，比如scanf函数之类的（这显然是我们不需要知道的），一般情况下如果我们确实想进入函数内部看看，我都会直接用Ctrl + F10直接进去，而不是F11 F11的慢慢走。</p>
+<h2 id="F9键"><a href="#F9键" class="headerlink" title="F9键"></a>F9键</h2><p>设置和取消断点，会在当前代码行前出现一个红点点，当然直接在代码行前单击一下也可以设置和取消断点，所以这个键比较鸡肋，也不常用。</p>
+<hr>
+<p>通过以上的方法，我们进入了Debug模式，进入了这个模式，我们就可以做很多事情了，最简单的事情就是查看单个变量运行时的值。想要做到这一点我们只需要把鼠标指针移到想要查看的光标上，光标旁边就会出现他的值了：</p>
+<p><img src="/images/2015/10/31/1/1.png"></p>
+<p>当然，如果想查看一个数组各个元素的值，我们可以把鼠标放在数组名上，就会出现这样的下拉界面：</p>
+<p><img src="/images/2015/10/31/1/2.png"></p>
+<p>就可以方便的看到了各个数值了。</p>
+<p>当然，如果想更加清楚的看各个数字的变化的话，我们可以调出添加监视的界面。右键某一个变量，选择添加监视：</p>
+<p><img src="/images/2015/10/31/1/3.png"></p>
+<p>点开后这样就会出现一下的一个界面：</p>
+<p><img src="/images/2015/10/31/1/4.png"></p>
+<p>这个窗口的“名称”部分，我们可以写入我们需要查看的变量的名字，右边会显示他对应的当前的值。如果名字是一个数组，那么他的值显示的是他数组的首地址（没什么卵用），但是我们可以点开名称前面的小三角，来显示出数组中各个元素的值。</p>
+<h2 id="关闭Debug模式"><a href="#关闭Debug模式" class="headerlink" title="关闭Debug模式"></a>关闭Debug模式</h2><p>在Debug模式下，点击窗口的红叉叉实际上是关闭不了的，我们当然可以在菜单中选择停止调试，但是这样显然很cuo（第二声）（实际上按按钮的行为都很cuo（第二声），所以我把我的按钮那一栏都直接取消了，是不是看上去非常干净0.0），快捷的做法是按shift + F5 这样就可以结束Debug模式而到正常的码代码的模式了。</p>
+<hr>
+<p>以上是最基本的Debug方法了，这是最基本的调试方法，每一个人都必须要掌握。</p>
+<p>以下是一些比较高级的调试手段了，说高级，并不是说有多难掌握，只是说相对于基础的调试方法来说，这种方法更加快捷，方便程序员使用，他们的关系，我觉得就像各种运行库之于操作系统所提供的API一样，前者是对后者的封装和简化，有兴趣的同学可以来研究研究。</p>
+<p>当我们右键设置的断点的时候，我们会发现这样的菜单：</p>
+<p><img src="/images/2015/10/31/1/5.png"></p>
+<p>这里我们常用的就是 “条件”选项，和“命中次数”选项，我说了，由于这是“高级”调试手段，所以操作界面十分的User-friendly，应该打开就会用了，我就不赘述了。</p>
+<p>注：</p>
+<ul>
+<li>个人比较建议大家不要用按钮（这样显得特别的怂），多用快捷键，这样会提高很多的效率。</li>
+<li>建议大家都把行号加起来（具体方法请自行百度）</li>
+<li>有兴趣的同学可以用一个叫VassistX的插件来辅助你的vs2010（好处谁用谁知道），或者升级到vs2013</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/30/Qt%E4%B8%ADLNK2019%E9%94%99%E8%AF%AF%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/30/Qt%E4%B8%ADLNK2019%E9%94%99%E8%AF%AF%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/" itemprop="url">Qt中LNK2019错误的解决办法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-30T14:31:20+00:00">
+                2015-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Qt/" itemprop="url" rel="index">
+                    <span itemprop="name">Qt</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在写Qt 网络编程的程序时，有时候会遇到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dialog.obj:-1: error: LNK2019: 无法解析的外部符号 &quot;__declspec(dllimport) public: virtual __cdecl QNetworkAccessManager::~QNetworkAccessManager(void)&quot; (__imp\_??1QNetworkAccessManager@@UEAA@XZ)，该符号在函数 &quot;protected: void __cdecl Dialog::slotLogin(void)&quot; (?slotLogin@Dialog@@IEAAXXZ) 中被引用</span><br></pre></td></tr></table></figure>
+<p>这类的错误，让人十分头大。</p>
+<p>这个错误大多是因为没有按照要求导入相应的链接库，以至于无法调用相应的类库。在vs或者codeblocks环境下可以通过选项设置之类的东西添加相应的链接库。但是在Qt Creator默认是没有这种东西的，而是提供了另一种途径，即每个项目必然会有的.pro文件，类似于：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#-------------------------------------------------</span><br><span class="line">#</span><br><span class="line"># Project created by QtCreator <span class="number">2015</span><span class="number">-10</span><span class="number">-29</span>T23:<span class="number">52</span>:<span class="number">56</span></span><br><span class="line">#</span><br><span class="line">#-------------------------------------------------</span><br><span class="line"></span><br><span class="line">QT       += core gui</span><br><span class="line"></span><br><span class="line"><span class="built_in">greaterThan</span>(QT_MAJOR_VERSION, <span class="number">4</span>): QT += widgets</span><br><span class="line"></span><br><span class="line">TARGET = Dialog</span><br><span class="line">TEMPLATE = app</span><br><span class="line"></span><br><span class="line">SOURCES += main.cpp</span><br><span class="line">        dialog.cpp</span><br><span class="line"></span><br><span class="line">HEADERS  += dialog.h</span><br></pre></td></tr></table></figure>
+<p>这个文件主要是给qmake用的，具体也没有必要了解。一般是系统生成的默认值就行了，只有当我们需要导入链接库的时候才有用。比如当我们需要用QNetworkAccessManager这个类的时候，我们需要在这当中加入一句话：<code>QT += network</code>即可，这样在构建的时候就会导入network这一系列的库。这个network从哪来的呢？实际上，在Qt Creator自带的帮助文档中已经告诉我们了，在QNetworkAccessManager中有相应的说明：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Header:		#include &lt;QNetworkAccessManager&gt;</span><br><span class="line">qmake:		QT += network</span><br><span class="line">Since:		Qt 4.4</span><br><span class="line">Inherits:	QObject</span><br></pre></td></tr></table></figure>
+<p>有了这个说明，那么解决方案就很明显了。</p>
+<p>但是还有一点需要注意，就是在修改过.pro 文件之后，需要手动将系统之前在上一级目录下生成出来的build文件夹删除之后才能使该文件生效。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/29/Qt%E5%AE%9E%E7%8E%B0FTP%E7%9A%84%E4%B8%8A%E4%BC%A0%E5%92%8C%E4%B8%8B%E8%BD%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/29/Qt%E5%AE%9E%E7%8E%B0FTP%E7%9A%84%E4%B8%8A%E4%BC%A0%E5%92%8C%E4%B8%8B%E8%BD%BD/" itemprop="url">Qt实现FTP的上传和下载</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-29T15:51:32+00:00">
+                2015-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Qt/" itemprop="url" rel="index">
+                    <span itemprop="name">Qt</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本来想简单抄抄书，随便手写个Ftp客户端的，结果发现教材上的是基于Qt4的QFtp类库，而在Qt5中取消了这一个类库（同时也取消了QHttp等的类），取而代之的是QNetworkAccessManager 这个类，把这些杂货全都揽下来了，据说是因为之前的两个类有重复而且效率有问题balabala。于是就百度了一下，发现百度上要么讲的不全，要么就是要去下一个由热心网民重新封装的QFtp类。显然我并不喜欢无脑复制粘贴，想好好看下Qt官方提供的东西的用法，深入的理解下Qt网络编程，于是就果断自行google（话说google真好用），加上查看帮助文档，终于把一个简版的Ftp客户端大概框架弄清楚了。</p>
+<p>不多说，上源码：</p>
+<h2 id="Dialog-pro"><a href="#Dialog-pro" class="headerlink" title="Dialog.pro"></a>Dialog.pro</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#-------------------------------------------------</span><br><span class="line">#</span><br><span class="line"># Project created by QtCreator <span class="number">2015</span><span class="number">-10</span><span class="number">-29</span>T23:<span class="number">52</span>:<span class="number">56</span></span><br><span class="line">#</span><br><span class="line">#-------------------------------------------------</span><br><span class="line"></span><br><span class="line">QT       += core gui</span><br><span class="line">QT       += network  #这里要添加这个库</span><br><span class="line"></span><br><span class="line"><span class="built_in">greaterThan</span>(QT_MAJOR_VERSION, <span class="number">4</span>): QT += widgets</span><br><span class="line"></span><br><span class="line">TARGET = QFtp</span><br><span class="line">TEMPLATE = app</span><br><span class="line"></span><br><span class="line">SOURCES += main.cpp</span><br><span class="line">        dialog.cpp</span><br><span class="line"></span><br><span class="line">HEADERS  += dialog.h</span><br></pre></td></tr></table></figure>
+<h2 id="dialog-h"><a href="#dialog-h" class="headerlink" title="dialog.h"></a>dialog.h</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> DIALOG_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DIALOG_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//注意需要添加的头文件</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QPushButton&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFile&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QNetworkReply&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QLineEdit&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QtNetwork/QNetworkAccessManager&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QtNetwork/QNetworkRequest&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QLabel&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QString&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QGridLayout&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QMessageBox&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dialog</span> : <span class="keyword">public</span> QDialog</span><br><span class="line">&#123;</span><br><span class="line">    Q_OBJECT</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Dialog</span>(QWidget *parent = <span class="number">0</span>);</span><br><span class="line">    ~<span class="built_in">Dialog</span>();</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    QGridLayout *layout;</span><br><span class="line">    QLabel *LbServer,*LbUser,*LbPasswd;</span><br><span class="line">    QLineEdit *LeServer,*LeUser,*LePasswd;</span><br><span class="line">    QPushButton *PbPut,*PbGet;</span><br><span class="line">    QNetworkAccessManager manager;<span class="comment">//这个是重点</span></span><br><span class="line"><span class="keyword">protected</span> slots:</span><br><span class="line">    <span class="comment">//处理按钮的点击信号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotPut</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotGet</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//处理网络连接的信号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">managePut</span><span class="params">(QNetworkReply*)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">manageGet</span><span class="params">(QNetworkReply*)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// DIALOG_H</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="dialog-cpp"><a href="#dialog-cpp" class="headerlink" title="dialog.cpp"></a>dialog.cpp</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;dialog.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">Dialog::<span class="built_in">Dialog</span>(QWidget *parent)</span><br><span class="line">    : <span class="built_in">QDialog</span>(parent)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">setWindowTitle</span>(<span class="string">&quot;My Ftp&quot;</span>);</span><br><span class="line"></span><br><span class="line">    layout=<span class="keyword">new</span> <span class="built_in">QGridLayout</span>(<span class="keyword">this</span>);</span><br><span class="line">    LbServer=<span class="keyword">new</span> <span class="built_in">QLabel</span>(<span class="string">&quot;Server:&quot;</span>);</span><br><span class="line">    LbUser=<span class="keyword">new</span> <span class="built_in">QLabel</span>(<span class="string">&quot;User:&quot;</span>);</span><br><span class="line">    LbPasswd=<span class="keyword">new</span> <span class="built_in">QLabel</span>(<span class="string">&quot;Passwd:&quot;</span>);</span><br><span class="line">    LeServer=<span class="keyword">new</span> <span class="built_in">QLineEdit</span>(<span class="string">&quot;ftp://120.27.41.126/home/myths/1.txt&quot;</span>);</span><br><span class="line">    LeUser=<span class="keyword">new</span> <span class="built_in">QLineEdit</span>(<span class="string">&quot;myths&quot;</span>);</span><br><span class="line">    LePasswd=<span class="keyword">new</span> <span class="built_in">QLineEdit</span>(<span class="string">&quot;123456&quot;</span>);</span><br><span class="line">    LePasswd-&gt;<span class="built_in">setEchoMode</span>(QLineEdit::Password);<span class="comment">//设置加密显示</span></span><br><span class="line">    PbPut=<span class="keyword">new</span> <span class="built_in">QPushButton</span>(<span class="string">&quot;Put&quot;</span>);</span><br><span class="line">    PbGet=<span class="keyword">new</span> <span class="built_in">QPushButton</span>(<span class="string">&quot;Get&quot;</span>);</span><br><span class="line"></span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(LbServer,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(LeServer,<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(LbUser,<span class="number">1</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(LeUser,<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(LbPasswd,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(LePasswd,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(PbPut,<span class="number">3</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(PbGet,<span class="number">3</span>,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">setFixedSize</span>(<span class="number">300</span>,<span class="number">200</span>);<span class="comment">//固定大小</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//按钮点击事件信号槽的连接</span></span><br><span class="line">    <span class="built_in">connect</span>(PbPut,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotPut</span>()));</span><br><span class="line">    <span class="built_in">connect</span>(PbGet,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotGet</span>()));</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::managePut</span><span class="params">(QNetworkReply * reply)</span></span>&#123;</span><br><span class="line">    <span class="built_in">qDebug</span>()&lt;&lt;reply-&gt;<span class="built_in">error</span>();<span class="comment">//输出调试信息</span></span><br><span class="line">    <span class="keyword">switch</span>(reply-&gt;<span class="built_in">error</span>())&#123;<span class="comment">//判断连接后的状态</span></span><br><span class="line">    <span class="keyword">case</span> QNetworkReply::NoError:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Upload Success!&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> QNetworkReply::HostNotFoundError:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Host Not Found!&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> QNetworkReply::AuthenticationRequiredError:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Login Failure!&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Unknown Failure&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::manageGet</span><span class="params">(QNetworkReply *reply)</span></span>&#123;</span><br><span class="line">    <span class="comment">//基本和managerPut类似   </span></span><br><span class="line">    <span class="built_in">qDebug</span>()&lt;&lt;reply-&gt;<span class="built_in">error</span>();</span><br><span class="line">    QByteArray data;</span><br><span class="line">    <span class="keyword">switch</span>(reply-&gt;<span class="built_in">error</span>())&#123;</span><br><span class="line">    <span class="keyword">case</span> QNetworkReply::NoError:</span><br><span class="line">        data=reply-&gt;<span class="built_in">readAll</span>();<span class="comment">//从url中读取文件内容，输出到data中（也可以再将数据写入到文件中，为了方便，这里就权且打印一下吧）</span></span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Upload Success!nThe file you&#x27;ve got is :n&quot;</span>+data);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> QNetworkReply::HostNotFoundError:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Host Not Found!&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> QNetworkReply::AuthenticationRequiredError:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Login Failure!&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        QMessageBox::<span class="built_in">information</span>(<span class="keyword">this</span>,<span class="string">&quot;Put information&quot;</span>,<span class="string">&quot;Unknown Failure&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Dialog::~<span class="built_in">Dialog</span>()</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotPut</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//判断信息输入完整</span></span><br><span class="line">    <span class="keyword">if</span>(LeUser-&gt;<span class="built_in">text</span>().<span class="built_in">isEmpty</span>()||LePasswd-&gt;<span class="built_in">text</span>().<span class="built_in">isEmpty</span>()||LeServer-&gt;<span class="built_in">text</span>().<span class="built_in">isEmpty</span>())&#123;</span><br><span class="line">        QMessageBox::<span class="built_in">warning</span>(<span class="keyword">this</span>,<span class="string">&quot;Error&quot;</span>,<span class="string">&quot;Please fill in the information&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//重点！将之前的槽清空并重新连接至需要的</span></span><br><span class="line">    manager.<span class="built_in">disconnect</span>(<span class="built_in">SIGNAL</span>(<span class="built_in">finished</span>(QNetworkReply*)));</span><br><span class="line">    <span class="comment">//完全清空某对象连接的槽可以用manager.disconnect();</span></span><br><span class="line">    <span class="built_in">connect</span>(&amp;manager,<span class="built_in">SIGNAL</span>(<span class="built_in">finished</span>(QNetworkReply*)),<span class="built_in">SLOT</span>(<span class="built_in">managePut</span>(QNetworkReply*)));</span><br><span class="line"></span><br><span class="line">    <span class="comment">//设置登录信息</span></span><br><span class="line">    <span class="function">QUrl <span class="title">url</span><span class="params">(LeServer-&gt;text())</span></span>;</span><br><span class="line">    url.<span class="built_in">setPort</span>(<span class="number">21</span>);</span><br><span class="line">    url.<span class="built_in">setUserName</span>(LeUser-&gt;<span class="built_in">text</span>());</span><br><span class="line">    url.<span class="built_in">setPassword</span>(LePasswd-&gt;<span class="built_in">text</span>());</span><br><span class="line"></span><br><span class="line">    QByteArray data=<span class="string">&quot;This is the test data.n&quot;</span>;</span><br><span class="line">    <span class="comment">/*QNetworkReply *reply=*/</span></span><br><span class="line">    manager.<span class="built_in">put</span>(<span class="built_in">QNetworkRequest</span>(url),data);<span class="comment">//将data上传到url中，返回的reply将触发网络的连接信号</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotGet</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//基本意义与slotPut类似</span></span><br><span class="line">    <span class="keyword">if</span>(LeUser-&gt;<span class="built_in">text</span>().<span class="built_in">isEmpty</span>()||LePasswd-&gt;<span class="built_in">text</span>().<span class="built_in">isEmpty</span>()||LeServer-&gt;<span class="built_in">text</span>().<span class="built_in">isEmpty</span>())&#123;</span><br><span class="line">        QMessageBox::<span class="built_in">warning</span>(<span class="keyword">this</span>,<span class="string">&quot;Error&quot;</span>,<span class="string">&quot;Please fill in the information&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line">    manager.<span class="built_in">disconnect</span>(<span class="built_in">SIGNAL</span>(<span class="built_in">finished</span>(QNetworkReply*)));</span><br><span class="line">    <span class="built_in">connect</span>(&amp;manager,<span class="built_in">SIGNAL</span>(<span class="built_in">finished</span>(QNetworkReply*)),<span class="built_in">SLOT</span>(<span class="built_in">manageGet</span>(QNetworkReply*)));</span><br><span class="line">    <span class="function">QUrl <span class="title">url</span><span class="params">(LeServer-&gt;text())</span></span>;</span><br><span class="line">    url.<span class="built_in">setPort</span>(<span class="number">21</span>);</span><br><span class="line">    url.<span class="built_in">setUserName</span>(LeUser-&gt;<span class="built_in">text</span>());</span><br><span class="line">    url.<span class="built_in">setPassword</span>(LePasswd-&gt;<span class="built_in">text</span>());</span><br><span class="line">    <span class="comment">/*QNetworkReply *reply=*/</span></span><br><span class="line">    manager.<span class="built_in">get</span>((<span class="built_in">QNetworkRequest</span>(url)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="main-cpp"><a href="#main-cpp" class="headerlink" title="main.cpp"></a>main.cpp</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;dialog.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QApplication&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">QApplication <span class="title">a</span><span class="params">(argc, argv)</span></span>;</span><br><span class="line">    Dialog w;</span><br><span class="line">    w.<span class="built_in">show</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> a.<span class="built_in">exec</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>5、运行截图</p>
+<p>权且只显示主界面：</p>
+<p><img src="/images/2015/10/29/1/1.png"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/28/Qt%E4%B8%AD%E5%AE%9E%E7%8E%B0QQ%E6%8A%BD%E5%B1%89%E6%95%88%E6%9E%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -906,959 +1862,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/24/Qt%E6%A0%87%E5%87%86%E5%AF%B9%E8%AF%9D%E6%A1%86%E7%9A%84%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/24/Qt%E6%A0%87%E5%87%86%E5%AF%B9%E8%AF%9D%E6%A1%86%E7%9A%84%E4%BD%BF%E7%94%A8/" itemprop="url">Qt标准对话框的使用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-24T13:58:05+00:00">
-                2015-10-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Qt/" itemprop="url" rel="index">
-                    <span itemprop="name">Qt</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>学习编程个人觉得还是得从代码谈起，一方面有利于加深理解，另一方面也方便使（摘）用（抄）。</p>
-<p>这一节只要是理解简单的对话框的编写框架和一些基本的标准对话框的使用方法。一些具体的说明将在源码中分析。</p>
-<h2 id="Dialog-pro（Qt的基本文件）"><a href="#Dialog-pro（Qt的基本文件）" class="headerlink" title="Dialog.pro（Qt的基本文件）"></a>Dialog.pro（Qt的基本文件）</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#-------------------------------------------------</span><br><span class="line">#</span><br><span class="line"># Project created by QtCreator <span class="number">2015</span><span class="number">-10</span><span class="number">-24</span>T17:<span class="number">38</span>:<span class="number">36</span></span><br><span class="line">#</span><br><span class="line">#-------------------------------------------------</span><br><span class="line"></span><br><span class="line">QT       += core gui</span><br><span class="line"></span><br><span class="line"><span class="built_in">greaterThan</span>(QT_MAJOR_VERSION, <span class="number">4</span>): QT += widgets</span><br><span class="line"></span><br><span class="line">TARGET = DIalog</span><br><span class="line">TEMPLATE = app</span><br><span class="line"></span><br><span class="line">SOURCES += main.cpp</span><br><span class="line">        dialog.cpp</span><br><span class="line"></span><br><span class="line">HEADERS  += dialog.h</span><br></pre></td></tr></table></figure>
-<h2 id="dialog-h（对话框类的声明）"><a href="#dialog-h（对话框类的声明）" class="headerlink" title="dialog.h（对话框类的声明）"></a>dialog.h（对话框类的声明）</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> DIALOG_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DIALOG_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QApplication&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QGridLayout&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QPushButton&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QLineEdit&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFrame&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QString&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFileDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QColor&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QColorDialog&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFont&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;QFontDialog&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dialog</span> : <span class="keyword">public</span> QDialog</span><br><span class="line">&#123;</span><br><span class="line">    Q_OBJECT</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Dialog</span>(QWidget *parent = <span class="number">0</span>);</span><br><span class="line">    ~<span class="built_in">Dialog</span>();</span><br><span class="line"><span class="keyword">public</span>:<span class="comment">//以下是使用到的控件的声明</span></span><br><span class="line">    QGridLayout *layout;</span><br><span class="line">    QPushButton *filePushButton,*colorPushButton,*fontPushButton;</span><br><span class="line">    QLineEdit *fileLineEdit,*fontLineEdit;</span><br><span class="line">    QFrame *colorFrame;</span><br><span class="line"><span class="keyword">private</span> slots:<span class="comment">//以下是用到的槽，各对应一个信号（事件）</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotOpenFileDlg</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotOpenColorDlg</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">slotOpenFontDlg</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// DIALOG_H</span></span></span><br></pre></td></tr></table></figure>
-
-<h2 id="dialog-cpp（类的实现－－－重要－－－）"><a href="#dialog-cpp（类的实现－－－重要－－－）" class="headerlink" title="dialog.cpp（类的实现－－－重要－－－）"></a>dialog.cpp（类的实现－－－重要－－－）</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;dialog.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">Dialog::<span class="built_in">Dialog</span>(QWidget *parent)</span><br><span class="line">    : <span class="built_in">QDialog</span>(parent)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">setWindowTitle</span>(<span class="built_in">tr</span>(<span class="string">&quot;This is the title.&quot;</span>));<span class="comment">//设置对话框标题,这里有个tr()函数，用途好像是为了实现国际化的一个翻译函数。。。不太懂，不过目测问题挺多的，小规模的程序感觉没什么必要用，以后就不用这个了。</span></span><br><span class="line"></span><br><span class="line">    layout=<span class="keyword">new</span> <span class="built_in">QGridLayout</span>(<span class="keyword">this</span>);<span class="comment">//这句是把当前的布局交给layout来表示</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建按钮控件并设置Text属性</span></span><br><span class="line">    filePushButton =<span class="keyword">new</span> QPushButton;</span><br><span class="line">    filePushButton-&gt;<span class="built_in">setText</span>(<span class="string">&quot;File Dialog&quot;</span>);</span><br><span class="line">    colorPushButton=<span class="keyword">new</span> QPushButton;</span><br><span class="line">    colorPushButton-&gt;<span class="built_in">setText</span>(<span class="string">&quot;Color Dialog&quot;</span>);</span><br><span class="line">    fontPushButton=<span class="keyword">new</span> QPushButton;</span><br><span class="line">    fontPushButton-&gt;<span class="built_in">setText</span>(<span class="string">&quot;Font Dialog&quot;</span>);</span><br><span class="line"></span><br><span class="line">    fileLineEdit =<span class="keyword">new</span> QLineEdit; <span class="comment">//QLineEdit类代表编辑框，它可以让用户输入一个单行文本。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//QFrame 类，这个姑且用来显示当前选择的颜色</span></span><br><span class="line">    colorFrame=<span class="keyword">new</span> QFrame;</span><br><span class="line">    colorFrame-&gt;<span class="built_in">setFrameShape</span>(QFrame::Box);<span class="comment">//设置来自框架风格的框架外形值,一般就这个。</span></span><br><span class="line">    colorFrame-&gt;<span class="built_in">setAutoFillBackground</span>(<span class="literal">true</span>);<span class="comment">//是否自动刷新填充色，这里我们需要设为true</span></span><br><span class="line"></span><br><span class="line">　　 <span class="comment">//文本编辑框，用来显示样例字体</span></span><br><span class="line">    fontLineEdit=<span class="keyword">new</span> QLineEdit;</span><br><span class="line">    fontLineEdit-&gt;<span class="built_in">setText</span>(<span class="string">&quot;Hello world.&quot;</span>);</span><br><span class="line"></span><br><span class="line">　　 <span class="comment">//设置布局，这里是GridLayout,用addWidget方法设置控件的相对位置</span></span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(filePushButton,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(fileLineEdit,<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(colorPushButton,<span class="number">1</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(colorFrame,<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(fontPushButton,<span class="number">2</span>,<span class="number">0</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">addWidget</span>(fontLineEdit,<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line">    layout-&gt;<span class="built_in">setMargin</span>(<span class="number">15</span>);<span class="comment">//设置到上下左右边界的距离</span></span><br><span class="line">    layout-&gt;<span class="built_in">setSpacing</span>(<span class="number">10</span>);<span class="comment">//设置各个控件之间的空隙</span></span><br><span class="line"></span><br><span class="line">　　 <span class="comment">//信号和槽的连接，连接各个按钮的点击事件</span></span><br><span class="line">    <span class="built_in">connect</span>(filePushButton,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotOpenFileDlg</span>()));</span><br><span class="line">    <span class="built_in">connect</span>(colorPushButton,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotOpenColorDlg</span>()));</span><br><span class="line">    <span class="built_in">connect</span>(fontPushButton,<span class="built_in">SIGNAL</span>(<span class="built_in">clicked</span>()),<span class="keyword">this</span>,<span class="built_in">SLOT</span>(<span class="built_in">slotOpenFontDlg</span>()));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Dialog::~<span class="built_in">Dialog</span>()</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开标准文件选择对话框</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotOpenFileDlg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//传入句柄，标题，默认目录，文件类型(多种文件的话用;;分开)，返回选择的文件名，或者一个空串</span></span><br><span class="line">    QString s=QFileDialog::<span class="built_in">getOpenFileName</span>(<span class="keyword">this</span>,<span class="string">&quot;open file dialog&quot;</span>,<span class="string">&quot;/&quot;</span>,<span class="string">&quot;C++ files(*.cpp);;C files(*.c)&quot;</span>);</span><br><span class="line">    fileLineEdit-&gt;<span class="built_in">setText</span>(s);<span class="comment">//将文件名交给编辑框</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开标准颜色选择对话框</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotOpenColorDlg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//getColor方法会打开一个颜色选择对话框，传入默认的颜色，返回选择的颜色。</span></span><br><span class="line">    QColor color=QColorDialog::<span class="built_in">getColor</span>(Qt::blue);</span><br><span class="line">    <span class="keyword">if</span>(color.<span class="built_in">isValid</span>())&#123;<span class="comment">//判断颜色是否合法</span></span><br><span class="line">        colorFrame-&gt;<span class="built_in">setPalette</span>(<span class="built_in">QPalette</span>(color));<span class="comment">//将Frame的背景色设置为选择的颜色</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开标准字体对话框</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Dialog::slotOpenFontDlg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">bool</span> ok;</span><br><span class="line">　　 <span class="comment">//getFont方法打开一个字体选择对话框，返回选择的字体，同时以引用的方式返回字体是否合法。</span></span><br><span class="line">    QFont font=QFontDialog::<span class="built_in">getFont</span>(&amp;ok);</span><br><span class="line">    <span class="keyword">if</span>(ok)&#123;<span class="comment">//判断字体是否合法</span></span><br><span class="line">        fontLineEdit-&gt;<span class="built_in">setFont</span>(font);<span class="comment">//设置编辑框的字体</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/23/vsftp%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E9%85%8D%E7%BD%AE2-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/23/vsftp%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E9%85%8D%E7%BD%AE2-2/" itemprop="url">vsftp服务的搭建和配置(2/2)</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-23T10:56:16+00:00">
-                2015-10-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="配置本地用户"><a href="#配置本地用户" class="headerlink" title="配置本地用户"></a>配置本地用户</h2><ol>
-<li>在配置文件中添加local_enable&#x3D;YES表示允许以本地用户登陆。这是必须的。</li>
-<li>然而默认情况下登陆后只有读取权限没有写入权限，所以如果需要能够上传文件，则需要添加write_enable&#x3D;YES 。并且保证登陆的用户有相应的权限。</li>
-<li>有时候不希望让登陆的用户看见不属于他家目录里的东西，这时候就需要将该用户’chroot’，需要添加chroot_local_user&#x3D;YES ，或者：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">chroot_local_user=YES</span><br><span class="line">chroot_list_enable=YES</span><br><span class="line">chroot_list_file=/etc/vsftpd.chroot_list＃这个可以自定义</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>通过编辑&#x2F;etc&#x2F;vsftpd.chroot_list来精确控制chroot的权限。</p>
-<p>但是这样设置有时候在登陆的时候出现refusing to run with writable root inside chroot 错误，这是因为系统不允许chroot 用户有写入自身的权限，所以如果这样设置就不能给该用户写权限了，需要取消他对自身家目录的写入权限：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:/home# chmod g-w stu</span><br></pre></td></tr></table></figure>
-<p>(在配置了chroot_local_user&#x3D;YES之后一定要注意，所有拥有w权限的用户将无法登录！！！所以。。如果想设置多个用户，其中某些我们想让他拥有w权限，而另一些只拥有r权限的话，还是要配置一下chroot_list_file 为好)</p>
-<h2 id="配置匿名用户"><a href="#配置匿名用户" class="headerlink" title="配置匿名用户"></a>配置匿名用户</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">anonymous_enable=YES　　          #是否启用匿名用户</span><br><span class="line">no_anon_password=YES 　　         #匿名用户login时不询问口令</span><br><span class="line"></span><br><span class="line">#下面这四个主要语句控制这文件和文件夹的上传、下载、创建、删除和重命名。</span><br><span class="line">anon_upload_enable=(YES/NO);        #控制匿名用户对文件（非目录）上传权限。</span><br><span class="line">anon_world_readable_only=(YES/NO); #控制匿名用户对文件的下载权限</span><br><span class="line">anon_mkdir_write_enable=(YES/NO); #控制匿名用户对文件夹的创建权限</span><br><span class="line">anon_other_write_enable=(YES/NO); #控制匿名用户对文件和文件夹的删除和重命名</span><br><span class="line"></span><br><span class="line">#匿名用户下载是使用的是nobody这个用户，所以相应的O这个位置要有R权限才能被下载。若想让匿名用户能上传和删除权限，必需设置write_enable=YES #全局设置，是否容许写入(无论是匿名用户还是本地用户，若要启用上传权限的话，就要开启他)</span><br><span class="line">anon_root=(none) #匿名用户主目录</span><br><span class="line">anon_max_rate＝(0) #匿名用户速度限制</span><br><span class="line">chown_uploads=YES #所有匿名上传的文件的所属用户将会被更改成chown_username</span><br><span class="line">chown_username=whoever #匿名上传文件所属用户名</span><br></pre></td></tr></table></figure>
-
-<p>由于一般情况下懒得弄这个匿名，所以以上设置并没有实践确认，权且留下来备用。</p>
-<h2 id="文件的定义"><a href="#文件的定义" class="headerlink" title="文件的定义"></a>文件的定义</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">chroot_list_file=/etc/vsftpd/vsftpd.chroot_list #定义限制/允许更改用户主目录的文件</span><br><span class="line">userlist_file=/etc/vsftpd/vsftpd.user_list #定义限制/允许用户登录的文件</span><br><span class="line">banner_file=/etc/vsftpd/banner #定义登录信息文件的位置</span><br><span class="line">banned_email_file=/etc/vsftpd/banned_emails #禁止使用的匿名用户登陆时作为密码的电子邮件地址</span><br><span class="line">xferlog_file=/var/log/vsftpd.log #日志文件位置</span><br><span class="line">message_file=.message #目录信息文件</span><br><span class="line">user_config_dir=/etc/vsftpd/userconf　　#定义用户配置文件的目录</span><br><span class="line">local_root=webdisk #此项设置每个用户登陆后其根目录为/home/username/webdisk。定义本地用户登陆的根目录,注意定义根目录可以是相对路径也可以是绝对路径。相对路径是针对用户家目录来说的.</span><br><span class="line">anon_root=/var/ftp　　 #匿名用户登陆后的根目录</span><br></pre></td></tr></table></figure>
-
-<h2 id="显示欢迎信息"><a href="#显示欢迎信息" class="headerlink" title="显示欢迎信息"></a>显示欢迎信息</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ftpd_banner=welcome to FTP .　　#login时显示欢迎信息.如果设置了banner_file则此设置无效</span><br><span class="line">dirmessage_enable=YES　　 #允许为目录配置显示信息,显示每个目录下面的message_file文件的内容</span><br><span class="line">在设置了这个属性之后，只要在每一个文件夹下面创建一个以message_file定义的文件为名的文本文件（默认是.message），那么在打开到这个文件夹时就会显示该文件中的欢迎信息。</span><br><span class="line">setproctitle_enable=YES　　 #显示会话状态信息,关!</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/21/ubuntu%E4%B8%ADapt-get%E7%9A%84%E5%8D%B8%E8%BD%BD%E5%8F%82%E6%95%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/21/ubuntu%E4%B8%ADapt-get%E7%9A%84%E5%8D%B8%E8%BD%BD%E5%8F%82%E6%95%B0/" itemprop="url">ubuntu中apt-get的卸载参数</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-21T15:41:10+00:00">
-                2015-10-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>很多情况下，当我们遇到一些软件出错的时候，我们正常会选择重新安装软件来初始化我们的配置文件，然而事实上，仅仅调用普通的apt-get remove 命令是不能完全重新安装软件的。<br>很多配置文件的信息，和一些错误的配置都会保留下来，导致尽管重新安装软件仍然会出现与之前相同的错误或者配置文件并没有真正初始化。<br>这时候其实只要在之前的命令后面多加一个–purge参数就能够做到清理残余文件的作用。<br>比如之前配置vsftpd的时候，好像由于乱改了什么东西，导致出现服务无法正常启动的错误，使用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ sudo service vsftpd stop```</span><br><span class="line">命令时会报</span><br></pre></td></tr></table></figure>
-<p>stop: Unknown instance:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">当时病急乱投医，搜索了好久关于service stop命令的东西，结果始终解决不了，软件卸了装装了卸还是没有什么用，走了许多的弯路。后来才发现其实只要在卸载的时候加上这个参数再重新安装软件即可：</span><br></pre></td></tr></table></figure>
-<p>myths@myths-X450LD:~$ sudo apt-get remove –purge vsftpd</p>
-<pre><code>这个命令虽然十分简单，但是绝对实用，以后遇到类似的问题时用这个东西应该就可以迎刃而解了。
-</code></pre>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/20/vsftp%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E9%85%8D%E7%BD%AE1-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/20/vsftp%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E9%85%8D%E7%BD%AE1-2/" itemprop="url">vsftp服务的搭建和配置(1/2)</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-20T15:54:10+00:00">
-                2015-10-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>vsftpd，又叫Very Secure FTP daemon,是一种Linux下安全的文件传输软件。安装和配置也很简单，平时传传文件也是非常有用的。</p>
-<h2 id="安装和启动"><a href="#安装和启动" class="headerlink" title="安装和启动"></a>安装和启动</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# apt-get install vsftpd</span><br></pre></td></tr></table></figure>
-<p>即可安装完成。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:/# service vsftpd start</span><br></pre></td></tr></table></figure>
-<p>即可启动服务。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:/# service vsftpd stop</span><br></pre></td></tr></table></figure>
-<p>即可停止服务。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:/# service vsftpd restart</span><br></pre></td></tr></table></figure>
-<p>即可重启服务。<br>有时候stop命令会出现错误，虽然不知道是怎么回事，但是重新安装一下就可以了。当然这里有个<a href="/2015/10/21/1/">坑</a>。。</p>
-<h2 id="用户管理"><a href="#用户管理" class="headerlink" title="用户管理"></a>用户管理</h2><p>Vsftpd的用户有三种形式：</p>
-<ol>
-<li>匿名用户形式：在默认安装的情况下，系统只提供匿名用户访问</li>
-<li>本地用户形式：以&#x2F;etc&#x2F;passwd中的用户名为认证方式</li>
-<li>虚拟用户形式：支持将用户名和口令保存在数据库文件或数据库服务器中。相对于FTP的本地用户形式来说，虚拟用户只是FTP服务器的专有用户，虚拟用 户只能访问FTP服务器所提供的资源，这大大增强系统本身的安全性。相对于匿名用户而言，虚拟用户需要用户名和密码才能获取FTP服务器中的文件，增加了 对用户和下载的可管理性。对于需要提供下载服务，但又不希望所有人都可以匿名下载；既需要对下载用户进行管理，又考虑到主机安全和管理方便的FTP站点来 说，虚拟用户是一种极好的解决方案。</li>
-</ol>
-<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>主配置文件为：&#x2F;etc&#x2F;vsftpd.conf</p>
-<p>我本机的配置文件如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br></pre></td><td class="code"><pre><span class="line"># Example config file /etc/vsftpd.conf</span><br><span class="line">#</span><br><span class="line"># The default compiled in settings are fairly paranoid. This sample file</span><br><span class="line"># loosens things up a bit, to make the ftp daemon more usable.</span><br><span class="line"># Please see vsftpd.conf.5 for all compiled in defaults.</span><br><span class="line">#</span><br><span class="line"># READ THIS: This example file is NOT an exhaustive list of vsftpd options.</span><br><span class="line"># Please read the vsftpd.conf.5 manual page to get a full idea of vsftpd&#x27;s</span><br><span class="line"># capabilities.</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"># Run standalone?  vsftpd can run either from an inetd or as a standalone</span><br><span class="line"># daemon started from an initscript.</span><br><span class="line">listen=YES</span><br><span class="line">#</span><br><span class="line"># Run standalone with IPv6?</span><br><span class="line"># Like the listen parameter, except vsftpd will listen on an IPv6 socket</span><br><span class="line"># instead of an IPv4 one. This parameter and the listen parameter are mutually</span><br><span class="line"># exclusive.</span><br><span class="line">#listen_ipv6=YES</span><br><span class="line">#</span><br><span class="line"># Allow anonymous FTP? (Disabled by default)</span><br><span class="line">anonymous_enable=YES </span><br><span class="line"># Uncomment this to allow local users to log in.</span><br><span class="line">local_enable=YES</span><br><span class="line">#</span><br><span class="line"># Uncomment this to enable any form of FTP write command.</span><br><span class="line">#write_enable=YES</span><br><span class="line">#</span><br><span class="line"># Default umask for local users is 077\. You may wish to change this to 022,</span><br><span class="line"># if your users expect that (022 is used by most other ftpd&#x27;s)</span><br><span class="line">#local_umask=022</span><br><span class="line">#</span><br><span class="line"># Uncomment this to allow the anonymous FTP user to upload files. This only</span><br><span class="line"># has an effect if the above global write enable is activated. Also, you will</span><br><span class="line"># obviously need to create a directory writable by the FTP user.</span><br><span class="line">#anon_upload_enable=YES</span><br><span class="line">#</span><br><span class="line"># Uncomment this if you want the anonymous FTP user to be able to create</span><br><span class="line"># new directories.</span><br><span class="line">#anon_mkdir_write_enable=YES</span><br><span class="line">#</span><br><span class="line"># Activate directory messages - messages given to remote users when they</span><br><span class="line"># go into a certain directory.</span><br><span class="line">dirmessage_enable=YES</span><br><span class="line">#</span><br><span class="line"># If enabled, vsftpd will display directory listings with the time</span><br><span class="line"># in  your  local  time  zone.  The default is to display GMT. The</span><br><span class="line"># times returned by the MDTM FTP command are also affected by this</span><br><span class="line"># option.</span><br><span class="line">use_localtime=YES</span><br><span class="line">#</span><br><span class="line"># Activate logging of uploads/downloads.</span><br><span class="line">xferlog_enable=YES</span><br><span class="line">#</span><br><span class="line"># Make sure PORT transfer connections originate from port 20 (ftp-data).</span><br><span class="line">connect_from_port_20=YES</span><br><span class="line">#</span><br><span class="line"># If you want, you can arrange for uploaded anonymous files to be owned by</span><br><span class="line"># a different user. Note! Using &quot;root&quot; for uploaded files is not</span><br><span class="line"># recommended!</span><br><span class="line">#chown_uploads=YES</span><br><span class="line">#chown_username=whoever</span><br><span class="line">#</span><br><span class="line"># You may override where the log file goes if you like. The default is shown</span><br><span class="line"># below.</span><br><span class="line">#xferlog_file=/var/log/vsftpd.log</span><br><span class="line">#</span><br><span class="line"># If you want, you can have your log file in standard ftpd xferlog format.</span><br><span class="line"># Note that the default log file location is /var/log/xferlog in this case.</span><br><span class="line">#xferlog_std_format=YES</span><br><span class="line">#</span><br><span class="line"># You may change the default value for timing out an idle session.</span><br><span class="line">#idle_session_timeout=600</span><br><span class="line">#</span><br><span class="line"># You may change the default value for timing out a data connection.</span><br><span class="line">#data_connection_timeout=120</span><br><span class="line">#</span><br><span class="line"># It is recommended that you define on your system a unique user which the</span><br><span class="line"># ftp server can use as a totally isolated and unprivileged user.</span><br><span class="line">#nopriv_user=ftpsecure</span><br><span class="line">#</span><br><span class="line"># Enable this and the server will recognise asynchronous ABOR requests. Not</span><br><span class="line"># recommended for security (the code is non-trivial). Not enabling it,</span><br><span class="line"># however, may confuse older FTP clients.</span><br><span class="line">#async_abor_enable=YES</span><br><span class="line">#</span><br><span class="line"># By default the server will pretend to allow ASCII mode but in fact ignore</span><br><span class="line"># the request. Turn on the below options to have the server actually do ASCII</span><br><span class="line"># mangling on files when in ASCII mode.</span><br><span class="line"># Beware that on some FTP servers, ASCII support allows a denial of service</span><br><span class="line"># attack (DoS) via the command &quot;SIZE /big/file&quot; in ASCII mode. vsftpd</span><br><span class="line"># predicted this attack and has always been safe, reporting the size of the</span><br><span class="line"># raw file.</span><br><span class="line"># ASCII mangling is a horrible feature of the protocol.</span><br><span class="line">#ascii_upload_enable=YES</span><br><span class="line">#ascii_download_enable=YES</span><br><span class="line">#</span><br><span class="line"># You may fully customise the login banner string:</span><br><span class="line">#ftpd_banner=Welcome to blah FTP service.</span><br><span class="line">#</span><br><span class="line"># You may specify a file of disallowed anonymous e-mail addresses. Apparently</span><br><span class="line"># useful for combatting certain DoS attacks.</span><br><span class="line">#deny_email_enable=YES</span><br><span class="line"># (default follows)</span><br><span class="line">#banned_email_file=/etc/vsftpd.banned_emails</span><br><span class="line">#</span><br><span class="line"># You may restrict local users to their home directories.  See the FAQ for</span><br><span class="line"># the possible risks in this before using chroot_local_user or</span><br><span class="line"># chroot_list_enable below.</span><br><span class="line">#chroot_local_user=YES</span><br><span class="line">#</span><br><span class="line"># You may specify an explicit list of local users to chroot() to their home</span><br><span class="line"># directory. If chroot_local_user is YES, then this list becomes a list of</span><br><span class="line"># users to NOT chroot().</span><br><span class="line"># (Warning! chroot&#x27;ing can be very dangerous. If using chroot, make sure that</span><br><span class="line"># the user does not have write access to the top level directory within the</span><br><span class="line"># chroot)</span><br><span class="line">#chroot_local_user=YES</span><br><span class="line">#chroot_list_enable=YES</span><br><span class="line"># (default follows)</span><br><span class="line">#chroot_list_file=/etc/vsftpd.chroot_list</span><br><span class="line">#</span><br><span class="line"># You may activate the &quot;-R&quot; option to the builtin ls. This is disabled by</span><br><span class="line"># default to avoid remote users being able to cause excessive I/O on large</span><br><span class="line"># sites. However, some broken FTP clients such as &quot;ncftp&quot; and &quot;mirror&quot; assume</span><br><span class="line"># the presence of the &quot;-R&quot; option, so there is a strong case for enabling it.</span><br><span class="line">#ls_recurse_enable=YES</span><br><span class="line">#</span><br><span class="line"># Customization</span><br><span class="line">#</span><br><span class="line"># Some of vsftpd&#x27;s settings don&#x27;t fit the filesystem layout by</span><br><span class="line"># default.</span><br><span class="line">#</span><br><span class="line"># This option should be the name of a directory which is empty.  Also, the</span><br><span class="line"># directory should not be writable by the ftp user. This directory is used</span><br><span class="line"># as a secure chroot() jail at times vsftpd does not require filesystem</span><br><span class="line"># access.</span><br><span class="line">secure_chroot_dir=/var/run/vsftpd/empty</span><br><span class="line">#</span><br><span class="line"># This string is the name of the PAM service vsftpd will use.</span><br><span class="line">pam_service_name=vsftpd</span><br><span class="line">#</span><br><span class="line"># This option specifies the location of the RSA certificate to use for SSL</span><br><span class="line"># encrypted connections.</span><br><span class="line">rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem</span><br><span class="line"># This option specifies the location of the RSA key to use for SSL</span><br><span class="line"># encrypted connections.</span><br><span class="line">rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key</span><br></pre></td></tr></table></figure>
-<p>以上是我本机的&#x2F;etc&#x2F;vsftpd.conf的初始配置，至于一些配置细节下次在详细说明。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/17/%E6%A6%82%E7%8E%87dp%E4%B8%93%E9%A2%98%E6%95%B4%E7%90%862-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/17/%E6%A6%82%E7%8E%87dp%E4%B8%93%E9%A2%98%E6%95%B4%E7%90%862-2/" itemprop="url">概率dp专题整理(2/2)</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-17T12:59:03+00:00">
-                2015-10-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Algorithm/" itemprop="url" rel="index">
-                    <span itemprop="name">Algorithm</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><a target="_blank" rel="noopener" href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=76505#problem/A">LightOJ 1027 A Dangerous Maze:</a></p>
-<p>预先求出递推式，最后通过公式直接计算。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">gcd</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (b == <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">gcd</span>(b, a%b);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="type">int</span> T;</span><br><span class="line">	<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;T);</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> t = <span class="number">1</span>; t &lt;= T; t++)&#123;</span><br><span class="line">		<span class="type">int</span> n;</span><br><span class="line">		<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;n);</span><br><span class="line">		<span class="type">int</span> p = <span class="number">0</span>, q = n,num;</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++)&#123;</span><br><span class="line">			<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;num);</span><br><span class="line">			<span class="keyword">if</span> (num &lt; <span class="number">0</span>)&#123;</span><br><span class="line">				q--;</span><br><span class="line">				p -= num;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span>&#123;</span><br><span class="line">				p += num;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (q == <span class="number">0</span>)&#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Case %d: infn&quot;</span>,t);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="type">int</span> div = <span class="built_in">gcd</span>(p, q);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Case %d: %d/%dn&quot;</span>,t,p/div,q/div);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<hr>
-<p><a target="_blank" rel="noopener" href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=76505#problem/J">LightOJ 1284 Lights inside 3D Grid:</a></p>
-<p>要判断经过k次变换后的开灯的数目，我们可以先计算对于每一个cell而言，在经历了k次变换后，仍然开灯的期望，最后将每一个cell的期望相加即可。</p>
-<p>有一个M*N*P的立方体，每次随机选两个格子，把它们之间的灯全打开（如果已经是打开的就关闭），经过K次操作之后开着的灯的个数的期望是多少。</p>
-<p>把每个灯经过K次操作亮着的概率P求出来，因为每个灯是独立的，最后的期望也就是:<br>$$\Sigma(Pi*1+(1-Pi)*0)$$</p>
-<p>对于一个灯来说， 设f[i]是经过i次操作亮着的概率，g[i]是经过i次操作不亮的概率，则有$f[i]+p[i]&#x3D;1,f[i]&#x3D;f[i-1]*(1-p)+g[i-1]*p$，这里的p是操作一次能操作到这个灯的概率。</p>
-<p>通过这两个式子，能得到$f[i]&#x3D;f[i-1]*(1-2p)+p$，两边加上b&#x2F;(a-1)，也就是0.5，成为等比数列，最后得到$f[i]&#x3D;0.5-0.5*(1-2p)^i$。</p>
-<p>那么只要对每个灯求出p就能算出答案了。能操作到这个灯等价于选的两个点的坐标在x轴，y轴，z轴都分别在这个灯坐标的两侧，对每个轴分别算符合的情况，然后相乘，最后除以所有情况就是概率。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">Get</span> <span class="params">(<span class="type">int</span> a,<span class="type">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1.0</span>*b*b-(a<span class="number">-1</span>)*(a<span class="number">-1</span>)-(b-a)*(b-a);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> T;</span><br><span class="line">	<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;T);</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> Cas=<span class="number">1</span>;Cas&lt;=T;Cas++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="type">int</span> x,y,z,n;</span><br><span class="line">		<span class="built_in">scanf</span>(<span class="string">&quot;%d%d%d%d&quot;</span>,&amp;x,&amp;y,&amp;z,&amp;n);</span><br><span class="line">		<span class="type">double</span> ans=<span class="number">0</span>,p,t=<span class="number">1.0</span>*x*x*y*y*z*z;</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">1</span>;i&lt;=x;i++) </span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> j=<span class="number">1</span>;j&lt;=y;j++)</span><br><span class="line">				<span class="keyword">for</span> (<span class="type">int</span> k=<span class="number">1</span>;k&lt;=z;k++)</span><br><span class="line">				&#123;</span><br><span class="line">					p=<span class="number">1.0</span>*<span class="built_in">Get</span>(i,x)*<span class="built_in">Get</span>(j,y)*<span class="built_in">Get</span>(k,z)/t;</span><br><span class="line">					ans+=<span class="number">0.5</span><span class="number">-0.5</span>*<span class="built_in">pow</span>(<span class="number">1</span><span class="number">-2</span>*p,<span class="number">1.0</span>*n);</span><br><span class="line">				&#125;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Case %d: %lfn&quot;</span>,Cas,ans);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/10/14/%E6%95%B0%E8%AE%BA%E5%9F%BA%E7%A1%80%E4%B8%93%E9%A2%98%E5%B0%8F%E7%BB%93/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/14/%E6%95%B0%E8%AE%BA%E5%9F%BA%E7%A1%80%E4%B8%93%E9%A2%98%E5%B0%8F%E7%BB%93/" itemprop="url">数论基础专题小结</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-14T14:11:02+00:00">
-                2015-10-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Algorithm/" itemprop="url" rel="index">
-                    <span itemprop="name">Algorithm</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>这个专题很杂，牵涉到很多数学公式和一些优化方法，还是要根据不同的题目来积累经验。</p>
-<hr>
-<p><a target="_blank" rel="noopener" href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=70017#problem/E">LightOJ 1282 Leading and Trailing:</a><br>这道题牵涉到求一个大数的前几位和后几位的方法，前者主要是通过对数进行处理，后者通过快速取模。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span>  <span class="title">powMod</span><span class="params">(<span class="type">int</span> a,<span class="type">int</span> n,<span class="type">int</span> mod)</span></span>&#123;</span><br><span class="line">	<span class="type">int</span>  ans=<span class="number">1</span>;</span><br><span class="line">	<span class="keyword">while</span>(n&gt;<span class="number">0</span>)&#123;</span><br><span class="line">		<span class="keyword">if</span>(n&amp;<span class="number">1</span>)&#123;</span><br><span class="line">			ans=ans*a%mod;</span><br><span class="line">		&#125;</span><br><span class="line">		n&gt;&gt;=<span class="number">1</span>;</span><br><span class="line">		a=a*a%mod;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">getHead</span><span class="params">(<span class="type">int</span> n,<span class="type">int</span> k)</span></span>&#123;</span><br><span class="line">	 <span class="keyword">return</span> <span class="built_in">pow</span>(<span class="number">10</span>,<span class="number">2</span>+<span class="built_in">fmod</span>(k*<span class="built_in">log10</span>(n),<span class="number">1</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="type">int</span>  t;</span><br><span class="line">	<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;t);</span><br><span class="line">	<span class="keyword">for</span>(<span class="type">int</span>  i=<span class="number">1</span>;i&lt;=t;i++)&#123;</span><br><span class="line">		<span class="type">int</span>  n,k;</span><br><span class="line">		<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>,&amp;n,&amp;k);</span><br><span class="line"></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Case %d: %d %03dn&quot;</span>,i,<span class="built_in">getHead</span>(n,k),<span class="built_in">powMod</span>(n%<span class="number">1000</span>,k,<span class="number">1000</span>));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<hr>
-<p>[LightOJ 1259 Goldbach&#96;s Conjecture:](<a target="_blank" rel="noopener" href="http://acm.hust.edu.cn/vjudge/contest/view.action?cid=70017#problem/F">http://acm.hust.edu.cn/vjudge/contest/view.action?cid=70017#problem/F</a>)</p>
-<p>这道题主要是判断素数和素数表相结合，用素数表提高枚举效率，通过 判断素数表 提高判断的效率。</p>
-<pre><code class="cpp">#include&lt;iostream&gt;
-#include&lt;cstring&gt;
-#include&lt;cstdio&gt;
-#include&lt;algorithm&gt;
-#include&lt;cmath&gt;
-#include&lt;vector&gt;
-using namespace std;
-vector&lt;int&gt;prime;
-bool p[10000004];
-int main()&#123;
-    int tt;
-    prime.clear();
-    memset(p,0,sizeof p);
-    for(int i=2;i&lt;=10000000;i++)&#123;
-        if(p[i]==0)&#123;
-            prime.push_back(i);
-            for(int j=2;i*j&lt;=10000000;j++)&#123;
-                p[j*i]=1;
-            &#125;
-        &#125;
-    &#125;
-    scanf(&quot;%d&quot;,&amp;tt);
-    for(int t=1;t&lt;=tt;t++)&#123;
-        int n;
-        scanf(&quot;%d&quot;,&amp;n);
-        int ans=0;
-        for(int i=0;prime[i]*2&lt;=n;i++)&#123;
-            if(p[n-prime[i]]==0)&#123;
-                ans++;
-            &#125;
-        &#125;
-        printf(&quot;Case %d: %dn&quot;,t,ans);
-    &#125;
-&#125;```
-</code></pre>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/53/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/53/">53</a><span class="page-number current">54</span><a class="page-number" href="/page/55/">55</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/55/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/53/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/53/">53</a><span class="page-number current">54</span><a class="page-number" href="/page/55/">55</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/55/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1904,7 +1912,7 @@ int main()&#123;
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1915,7 +1923,7 @@ int main()&#123;
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1926,7 +1934,7 @@ int main()&#123;
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

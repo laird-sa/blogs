@@ -307,6 +307,1068 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/09/01/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%882%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/01/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%882%EF%BC%89/" itemprop="url">TooSimple的工作周记（2）</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T08:05:56+00:00">
+                2018-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Note/" itemprop="url" rel="index">
+                    <span itemprop="name">Note</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这个礼拜似乎是写了一礼拜的业务代码，没遇到什么太恶心的坑，就是理解业务逻辑费了点功夫。下个礼拜似乎又要开始撸组件撸网页了，现在想想感觉还是写写业务比较舒服，没事可以怼怼产品，给前端找找bug，写完还可以慢慢测；撸组件就比较无聊了，容易出大锅，而且还得求着人家用，用出问题还会被怼。。。不过好处大概就是以后跳槽面试的时候不容易被问死吧。。。</p>
+<h1 id="知识-技巧"><a href="#知识-技巧" class="headerlink" title="知识&amp;技巧"></a>知识&amp;技巧</h1><h2 id="常用-see和-link注释"><a href="#常用-see和-link注释" class="headerlink" title="常用@see和@link注释"></a>常用@see和@link注释</h2><p>写代码的时候经常会遇到一些需要枚举的类型，比如“活动类型”、“数据来源”这类的。但是一般来讲我们不会直接用enum类型，因为这些数据一般都是以整数的形式存储在数据表里面，因此用整型去存储、转移会更加方便。所以一般我们都是直接声明成一个整型，然后用另外一个类去存储这个类型的值，比如:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//需要引用的地方</span></span><br><span class="line"><span class="type">int</span> xxxType;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//该类型的值</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">XxxType</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">type1</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">type2</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">type3</span> <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样搞没啥问题，但是比较讨厌的就是，当另外一个人看到xxxType这个字段时，他可不知道这玩意的值是XxxType去记录的，他甚至有可能去用YyyType的类型去给xxxType赋值。这就说不清楚了。</p>
+<p>因此一个比较简单的方法就是把注释写清楚了，而相比普通的注释，java的文档注释就比较好用了。这里面有一个@see的注释，非常适合这种场景：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* <span class="doctag">@see</span> the.package.of.XxxType</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">int</span> xxxType;</span><br></pre></td></tr></table></figure>
+
+<p>也可以使用{@link}注释，达到类似的效果:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* &#123;<span class="doctag">@link</span> the.package.of.XxxType&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">int</span> xxxType;</span><br></pre></td></tr></table></figure>
+<p>这样无论谁在给这个字段赋值时，都非常清楚的知道该赋什么值了。这一点jdk做的就非常好，要向他学习。。。</p>
+<h2 id="SQL的分页查询和滚动查询"><a href="#SQL的分页查询和滚动查询" class="headerlink" title="SQL的分页查询和滚动查询"></a>SQL的分页查询和滚动查询</h2><p>SQL里的limit语句分页的性能不高这个应该是个常识，因为limit语句其实只是对前面查询的结果进行了一个简单的过滤，而没有做任何额外的优化。比如说我们希望从一个表中把所有的数据批量同步出来，但是考虑到量比较大，所以我们会希望通过分页慢慢查而不是一次性查出来。一个比较弱智的做法就是这样:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable limit <span class="number">0</span>,<span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable limit <span class="number">1000</span>,<span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable limit <span class="number">2000</span>,<span class="number">1000</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>比如有1000w的数据，那我们只要查1w次就好了，似乎效果不错。但是实际上我们是每一次都把1000w个数据查出来然后进行的过滤，也就是执行了1w次的全表扫描。可能刚开始的时候比较快，因为不需要查询多少数据就攒满了1000个数据，直接返回了，但是越查到后面就一定会越慢。</p>
+<p>这时候正确的做法应该是尽量去使用索引来限制每一次查找的范围，使得每一次扫描不再是全表查找而是索引查找。具体的做法大概是这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">0</span> limit <span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">1000</span> limit <span class="number">1000</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="operator">&gt;</span> <span class="number">2000</span> limit <span class="number">1000</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>当然，前提还是在id字段上加了索引。至于为什么说第二种方法会优于第一种方法，其实很简单：</p>
+<blockquote>
+<p>Talk is cheap , explain your SQL.</p>
+</blockquote>
+<h2 id="SQL-MyBatis批量处理语句"><a href="#SQL-MyBatis批量处理语句" class="headerlink" title="SQL&amp;MyBatis批量处理语句"></a>SQL&amp;MyBatis批量处理语句</h2><p>我们知道每一条SQL语句都会有一个最少执行时间，无论这条语句有多简单，况且每一次网络传输也需要时间。因此如果有大批量的DML语句需要执行，写一个for循环挨个去执行显然是一个很蠢的方法。所以我们更加倾向于将多条查询语句拼凑成一条，一次性去请求数据库。</p>
+<p>对于批量查询，我们知道有 where in 语句，可以很方便的一次性查询多条记录，比如:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> someTable <span class="keyword">where</span> id <span class="keyword">in</span> ( <span class="number">1</span>, <span class="number">22</span>, <span class="number">333</span> );</span><br></pre></td></tr></table></figure>
+
+<p>对于批量插入，我们知道 insert 语句本身就可以支持同时插入多个values：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> someTable (id ,key) <span class="keyword">values</span> (<span class="number">1</span>,<span class="string">&#x27;aa&#x27;</span>),(<span class="number">22</span>,<span class="string">&#x27;bbb&#x27;</span>),(<span class="number">333</span>,<span class="string">&#x27;cccc&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>对于批量更新，我们可以利用when case 语句结合where in语句，一次性更新：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> someTable <span class="keyword">set</span> key <span class="operator">=</span> <span class="keyword">case</span> <span class="keyword">when</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">then</span> <span class="string">&#x27;aa&#x27;</span> <span class="keyword">when</span> id<span class="operator">=</span><span class="number">22</span> <span class="keyword">then</span> <span class="string">&#x27;bbb&#x27;</span> <span class="keyword">when</span> id<span class="operator">=</span><span class="number">333</span> <span class="keyword">then</span> <span class="string">&#x27;ccc&#x27;</span> <span class="keyword">when</span> id <span class="keyword">in</span> (<span class="number">1</span>, <span class="number">22</span>, <span class="number">333</span>);</span><br></pre></td></tr></table></figure>
+
+<p>对于批量更新，如果使用mybatis，mapper大概是这样:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">&quot;updateKey&quot;</span> <span class="attr">parameterType</span>=<span class="string">&quot;java.util.List&quot;</span>&gt;</span></span><br><span class="line">    update someTable</span><br><span class="line">    <span class="tag">&lt;<span class="name">trim</span> <span class="attr">prefix</span>=<span class="string">&quot;set&quot;</span> <span class="attr">suffixOverrides</span>=<span class="string">&quot;,&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">trim</span> <span class="attr">prefix</span>=<span class="string">&quot;key =case&quot;</span> <span class="attr">suffix</span>=<span class="string">&quot;end&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">collection</span>=<span class="string">&quot;list&quot;</span> <span class="attr">item</span>=<span class="string">&quot;item&quot;</span> <span class="attr">index</span>=<span class="string">&quot;index&quot;</span>&gt;</span></span><br><span class="line">                when id=#&#123;item.id,jdbcType=BIGINT&#125; then #&#123;item.key,jdbcType=VARCHAR&#125;</span><br><span class="line">            <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">trim</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">trim</span>&gt;</span></span><br><span class="line">    where id in</span><br><span class="line">    <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">collection</span>=<span class="string">&quot;list&quot;</span> <span class="attr">index</span>=<span class="string">&quot;index&quot;</span> <span class="attr">item</span>=<span class="string">&quot;item&quot;</span> <span class="attr">separator</span>=<span class="string">&quot;,&quot;</span> <span class="attr">open</span>=<span class="string">&quot;(&quot;</span> <span class="attr">close</span>=<span class="string">&quot;)&quot;</span>&gt;</span></span><br><span class="line">        #&#123;item.id,jdbcType=BIGINT&#125;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Git-stash快速保存状态"><a href="#Git-stash快速保存状态" class="headerlink" title="Git stash快速保存状态"></a>Git stash快速保存状态</h2><p>一个之前一直没有注意到的git命令，主要用于把当前未保存的状态直接推到一个栈里暂存，并且将工作区环境清空，回头有空的时候也可以再把工作区恢复。当开发到一半突然要切分支的时候特别有用。。。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git stash -h</span><br><span class="line">usage: git stash list [&lt;options&gt;]</span><br><span class="line">   or: git stash show [&lt;stash&gt;]</span><br><span class="line">   or: git stash drop [-q|--quiet] [&lt;stash&gt;]</span><br><span class="line">   or: git stash ( pop | apply ) [--index] [-q|--quiet] [&lt;stash&gt;]</span><br><span class="line">   or: git stash branch &lt;branchname&gt; [&lt;stash&gt;]</span><br><span class="line">   or: git stash save [--patch] [-k|--[no-]keep-index] [-q|--quiet]</span><br><span class="line">                      [-u|--include-untracked] [-a|--all] [&lt;message&gt;]</span><br><span class="line">   or: git stash [push [--patch] [-k|--[no-]keep-index] [-q|--quiet]</span><br><span class="line">                       [-u|--include-untracked] [-a|--all] [-m &lt;message&gt;]</span><br><span class="line">                       [-- &lt;pathspec&gt;...]]</span><br><span class="line">   or: git stash clear</span><br></pre></td></tr></table></figure>
+
+<h2 id="Gradle将jar包打包到maven本地库"><a href="#Gradle将jar包打包到maven本地库" class="headerlink" title="Gradle将jar包打包到maven本地库"></a>Gradle将jar包打包到maven本地库</h2><p>主要利用gradle的<a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/maven_plugin.html">maven插件</a>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: &#x27;maven&#x27;</span><br><span class="line">uploadArchives &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenDeployer &#123;</span><br><span class="line">            repository(url: uri(&#x27;C:\\Users\\admin\\.m2\\repository&#x27;))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行<code>gradle uploadArchives</code>命令即可。</p>
+<p>需要注意的是，gradle默认的缓存目录并不是maven的<code>~/.m2/repository/</code>下，而是类似<code>~/.gradle/caches/modules-2/files-2.1</code>的目录下。</p>
+<h1 id="问题-反省"><a href="#问题-反省" class="headerlink" title="问题&amp;反省"></a>问题&amp;反省</h1><h2 id="注意各种json转化工具对map的转化"><a href="#注意各种json转化工具对map的转化" class="headerlink" title="注意各种json转化工具对map的转化"></a>注意各种json转化工具对map的转化</h2><p>在将一些对象转化为json的时候要格外注意，尤其是在数据中有map类型的数据，而且key是普通对象的时候。看下下面的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONObject;</span><br><span class="line"><span class="keyword">import</span> com.google.gson.Gson;</span><br><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> field1;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> field2;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Foo</span><span class="params">(<span class="type">int</span> field1, <span class="type">int</span> field2)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.field1 = field1;</span><br><span class="line">        <span class="built_in">this</span>.field2 = field2;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        Map&lt;Foo, Integer&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="type">Foo</span> <span class="variable">foo1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Foo</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">        <span class="type">Foo</span> <span class="variable">foo2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Foo</span>(<span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">        map.put(foo1, <span class="number">1</span>);</span><br><span class="line">        map.put(foo2, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(JSONObject.toJSONString(map));</span><br><span class="line">        System.out.println(<span class="keyword">new</span> <span class="title class_">Gson</span>().toJson(map));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个例子中，fastjson会将这个map对象转成下面这个:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;field1&quot;:2,&quot;field2&quot;:3&#125;:2,&#123;&quot;field1&quot;:1,&quot;field2&quot;:2&#125;:1&#125;</span><br></pre></td></tr></table></figure>
+<p>fastjson将map的key也展开成了json，导致这个结果不满足标准的json格式，需要格外注意，不要因为无法进行json格式化而怀疑人生。</p>
+<p>gson会将这个map对象转换成下面这个:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;Foo(field1\u003d2, field2\u003d3)&quot;:2,&quot;Foo(field1\u003d1, field2\u003d2)&quot;:1&#125;</span><br></pre></td></tr></table></figure>
+<p>他也将key展开成了json，但是仍然是一个字符串，这样就仍然符合json的格式，可以格式化成这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;Foo(field1=2, field2=3)&quot;:2,</span><br><span class="line">    &quot;Foo(field1=1, field2=2)&quot;:1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>二者其实各有利弊，一个方便我们去理解，另一个则满足了约定俗成的标准。</p>
+<h2 id="小心使用String的replace和replaceAll"><a href="#小心使用String的replace和replaceAll" class="headerlink" title="小心使用String的replace和replaceAll"></a>小心使用String的replace和replaceAll</h2><p>不得不说，愚蠢的我一直以为replace函数是只替换一次，而replaceAll函数是替换全部。其实压根不是这样，replace是用普通字符串进行匹配，而replaceAll是用正则表达式去匹配。事实上他们的本质都是用的正则表达式，看一下函数实现就知道了:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">replace</span><span class="params">(CharSequence target, CharSequence replacement)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Pattern.compile(target.toString(), Pattern.LITERAL).matcher(</span><br><span class="line">            <span class="built_in">this</span>).replaceAll(Matcher.quoteReplacement(replacement.toString()));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">replaceAll</span><span class="params">(String regex, String replacement)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Pattern.compile(regex).matcher(<span class="built_in">this</span>).replaceAll(replacement);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>误用这两个函数会有很多明显的bug，比如下面的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;(1)(11)(111)&quot;</span>;</span><br><span class="line">System.out.println(s.replace(<span class="string">&quot;(1)&quot;</span>, <span class="string">&quot;(2)&quot;</span>));</span><br><span class="line">System.out.println(s.replaceAll(<span class="string">&quot;(1)&quot;</span>, <span class="string">&quot;(2)&quot;</span>));</span><br></pre></td></tr></table></figure>
+<p>输出就会是这样:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">2</span>)(<span class="number">11</span>)(<span class="number">111</span>)</span><br><span class="line">((<span class="number">2</span>))((<span class="number">2</span>)(<span class="number">2</span>))((<span class="number">2</span>)(<span class="number">2</span>)(<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+<p>因为括号会被正则理解为捕获，而不被当成括号，类似的错误还会有很多很多，要格外注意。</p>
+<p>当然，即使是知道差别，有时候想当然的用了也会出问题。比如下面代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> <span class="string">&quot;,1,1,1,11,111,&quot;</span>;</span><br><span class="line">System.out.println(s.replace(<span class="string">&quot;,1,&quot;</span>, <span class="string">&quot;,2,&quot;</span>));</span><br></pre></td></tr></table></figure>
+<p>我的意图是将字符串按逗号分隔，将值为1的全部变为2,（不替换11,111）。但是这段代码实际跑起来缺变成了这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">,2,1,2,11,111,</span><br></pre></td></tr></table></figure>
+<p>这样就少替换了一个。这是由于正则匹配的本质是自动机，匹配过的字符串是不会拿回来重新匹配的。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/09/01/database-sql/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/01/database-sql/" itemprop="url">「数据库」嵌入式SQL语言</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T06:32:28+00:00">
+                2018-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>交互式SQL语言有很多优点：记录集合操作、非过程性操作、一条语句就可实现复杂查询的结果，</li>
+<li>然而，交互式SQL本身也有很多局限：
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/09/01/database-sql/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/27/database-language/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/27/database-language/" itemprop="url">「数据库」数据库语言SQL</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-27T11:36:31+00:00">
+                2018-08-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="SQL语言概述"><a href="#SQL语言概述" class="headerlink" title="SQL语言概述"></a>SQL语言概述</h3><p><strong>结构化查询语言</strong>(Structured Query Language)简称SQL，是一种特殊目的的编程语言，是一种数据库查询和程序设计语言，用于存取数据以及查询、更新和管理关系数据库系统。</p>
+<ul>
+<li>SQL语言是集DDL、DML和DCL于一体的数据库语言
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/27/database-language/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/25/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%881%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/25/TooSimple%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E8%AE%B0%EF%BC%881%EF%BC%89/" itemprop="url">TooSimple的工作周记（1）</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-25T06:43:21+00:00">
+                2018-08-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Note/" itemprop="url" rel="index">
+                    <span itemprop="name">Note</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>好快啊，又是一周的轮回，本来打算把本周遇到的问题展开一个一个总结的，但是奈何踩的坑是在有点多，展开来根本没时间搞，索性就搞了这个类似周报的东西。希望从这一周开始，每一周都能坚持下来喽。</p>
+<p>由于跟给老大看的周报不同，这个是给俺自己看的，所以成果啥的就不表了，主要表一表自己写的bug跟领悟。就记一些大实话吧，”<strong>写者有罪，闻者足戒</strong>“。</p>
+<h1 id="知识-技巧"><a href="#知识-技巧" class="headerlink" title="知识&amp;技巧"></a>知识&amp;技巧</h1><h2 id="while循环的控制逻辑写在循环体内"><a href="#while循环的控制逻辑写在循环体内" class="headerlink" title="while循环的控制逻辑写在循环体内"></a>while循环的控制逻辑写在循环体内</h2><p>这句话是同事跟我讲的，领会了下他的意思，大概是，下面的写法二要比写法一好:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Method1</span></span><br><span class="line"><span class="keyword">while</span> (!shouldBreak1() &amp;&amp; !shouldBreak2()) &#123;</span><br><span class="line">    <span class="comment">//Do sth</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Method1</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (shouldBreak1()) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (shouldBreak2()) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//Do sth</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>方法一看似简单清晰，一行代码就完成了控制逻辑，但是这样其实有弊端:</p>
+<ol>
+<li>调试麻烦，如果条件越来越多，容易混淆出错的到底是哪一行</li>
+<li>打日志不方便，这很显然</li>
+<li>逻辑一致性较差，有的控制逻辑可以写在开头，可有的控制逻辑就无法写在开头了，这时候不如都直接写在代码体里，保证一致性。</li>
+</ol>
+<p>当然，复杂逻辑适合方法二这么搞，但是辩证的看，如果逻辑比较简单，用方法一也无可厚非嘛。</p>
+<h2 id="不要对数据表的记录进行物理删除"><a href="#不要对数据表的记录进行物理删除" class="headerlink" title="不要对数据表的记录进行物理删除"></a>不要对数据表的记录进行物理删除</h2><p>我总结我们内部的业务数据表都是通过增加is_deleted字段来代表改项是否被删除（逻辑删除），而不会直接删除这条记录。分析了下这样做有下面几个好处：</p>
+<ol>
+<li>防止数据丢失。这很显然。</li>
+<li>方便追查数据变更。可以看出这行记录是何时删除的等等。</li>
+<li>方便进行数据同步。比如有的场景下，数据库A希望定时全量同步数据库B的数据。在不使用DTS的情况下，A只有扫描B的全表来更新自己。当B表把某条记录删除时，A表却无法获知B表的变更，就会造成数据不一致，这样需要进行一些额外的补偿操作，比较麻烦。</li>
+<li>简化并发环境下的操作。当多个服务同时对一条记录进行操作时，如果某一个服务进行了物理删除操作，则很容易造成一些奇怪的问题。</li>
+</ol>
+<p>当然，如果一张表采用的是逻辑删除，那么业务代码在查询的时候就要小心一点了，别查到了脏数据。</p>
+<h2 id="数据表默认加上gmt-modified-gmt-create-updated-at字段"><a href="#数据表默认加上gmt-modified-gmt-create-updated-at字段" class="headerlink" title="数据表默认加上gmt_modified,gmt_create,updated_at字段"></a>数据表默认加上gmt_modified,gmt_create,updated_at字段</h2><p>一般来说，一张数据表我们会加上这样三个字段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">`gmt_create` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT &#x27;创建时间（毫秒）&#x27;,</span><br><span class="line">`gmt_modified` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT &#x27;修改时间（毫秒）&#x27;,</span><br><span class="line">`updated_at` int(20) NOT NULL DEFAULT &#x27;0&#x27; COMMENT &#x27;记录更新时间&#x27;,</span><br></pre></td></tr></table></figure>
+<p><code>gmt_create</code> 很显然保存了记录创建的时间，方便数据追查和校验，这个可以理解。但是<code>gmt_modified</code>跟<code>updated_at</code>字段似乎有些重复，都保存了记录的更新时间，区别只在于一个是手动更新，一个是自动更新。可是这到底有没有必要呢？</p>
+<p>在某些场景下，是有必要的，因为这两个字段的逻辑含义是不同的。<code>gmt_modified</code>表示的是字段的最后的<strong>修改</strong>时间，而<code>updated_at</code>表示的是程序最后一次<strong>试图</strong>修改的时间（逻辑上类似Unix系统的<code>touch</code>）。比如某个场景下，数据库A希望从数据库B中同步一些数据，但是同步过来的数据只是数据库A的一部分，这时候我们可能希望知道数据库A中到底有哪些字段是从数据库B中同步过的（即使值没有变化），哪些字段是没有同步过的。此时，仅凭<code>gmt_modified</code>，我们无法获知哪些字段是从数据库B中获得的，这时我们就在执行同步操作的代码里手动去更新<code>updated_at</code>即可。</p>
+<p>当然，如果业务比较简单，能保证不牵涉到类似的场景，也是可以把<code>updated_at</code>拿掉的。。。</p>
+<h2 id="Guava大法好"><a href="#Guava大法好" class="headerlink" title="Guava大法好"></a>Guava大法好</h2><p>guava包里有很多便利的工具，mark下，以后慢慢用。比如在做数据分片时用<code>Lists.partition</code>方法，或者初始化集合类的<code>Lists.newArrayListWithExpectedSize</code>方法等。不过需要小心的是这种工具为了效率，容易返回一些Immutable的集合，在下游使用的时候要格外小心。比如这样的操作就不被允许:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>);</span><br><span class="line">List&lt;List&lt;Integer&gt;&gt; partitions = Lists.partition(list, <span class="number">3</span>);</span><br><span class="line">Collections.shuffle(partitions);</span><br></pre></td></tr></table></figure>
+<p>因为partition返回的是不可变集合，而shuffle方法需要进行set操作，因此就会报<code>UnsupportedOperationException</code>。</p>
+<h1 id="问题-反省"><a href="#问题-反省" class="headerlink" title="问题&amp;反省"></a>问题&amp;反省</h1><h2 id="保证线上线下数据库一致"><a href="#保证线上线下数据库一致" class="headerlink" title="保证线上线下数据库一致"></a>保证线上线下数据库一致</h2><blockquote>
+<p>测试用的数据库一定要和线上数据库的定义保持一致，否则很多线上bug在线下根本测不出来。当线下数据库变更之后，不要忘记在线上加字段，即使当时不影响业务，也容易留坑给后人。</p>
+</blockquote>
+<p>踩了一个前人的坑，线上的数据表跟测试环境的不一样，导致我新加的一个功能始终跑不动，非常诡异。当时查表的操作是放在一个线程里的，异常信息也没打出来，导致排查了很久。。。</p>
+<h2 id="定时任务在发布时注意机器数量"><a href="#定时任务在发布时注意机器数量" class="headerlink" title="定时任务在发布时注意机器数量"></a>定时任务在发布时注意机器数量</h2><blockquote>
+<p>一般情况下，一个比较复杂的web服务会将task模块与api模块分别进行部署。这是因为通常情况下，task模块的任务量比较固定，因此我们会用固定数量的机器去跑，很少去变动；而api服务的任务量不固定，经常需要根据负载去弹性伸缩，经常回去扩容和缩容。因此对于一个定时任务来说，如果这个任务执行多次的结果不是幂等的，那么就要注意不能把它部署到api服务的机器上，否则就容易造成同样的任务被不同的机器执行多次的结果。<br>当然，在分布式环境下，定时任务还是最好接入分布式任务调度系统比较好，由调度系统统一配置和管理，这样就没这么多幺蛾子了。</p>
+</blockquote>
+<p>在看着leader扩容机器的时候突然想到的，于是我赶紧把放在api模块里的定时任务偷偷移到了task模块里。。。</p>
+<h2 id="一个服务中互相无关的组件在启动时不能互相影响"><a href="#一个服务中互相无关的组件在启动时不能互相影响" class="headerlink" title="一个服务中互相无关的组件在启动时不能互相影响"></a>一个服务中互相无关的组件在启动时不能互相影响</h2><blockquote>
+<p>这一点需要留意，很多情况下我们是在一个服务里不断添加子功能，那么在写代码时就要注意不能因为一个子功能出错而导致整个服务起不起来甚至报错，尤其是在服务初始化的时候。因此我们一定要做好<code>try catch finally</code>，保证子功能的异常不会抛到外面。</p>
+</blockquote>
+<p>之前写了一个接入Rmq的服务，这个服务在接入时出了一点问题导致这个服务没起来，但是由于异常抛出去了，导致整个应用都没起来。后来把异常全都捕获之后才定位了问题并解决掉的。一般来说在一些很可能抛异常的地方一定要把异常捕获全了，可以这么写：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="comment">//TODO something that may raise an exception</span></span><br><span class="line">&#125;<span class="keyword">catch</span> (Exception1 e)&#123;</span><br><span class="line">    <span class="comment">//TODO do sth to handle or print this exception</span></span><br><span class="line">&#125;<span class="keyword">catch</span> (Exception2 e)&#123;</span><br><span class="line">    <span class="comment">//TODO do sth to handle or print this exception</span></span><br><span class="line">&#125;<span class="keyword">catch</span> (Throwable e)&#123;</span><br><span class="line">    <span class="comment">//TODO do sth to handle or print all exceptions that might be raised.</span></span><br><span class="line">&#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">    <span class="comment">//TODO do sth that must be done.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意一定要通过捕获<code>Throwable</code>将所有的异常、错误捕获全了，不能仅仅捕获IDE提醒的那些<code>checked exception</code>。</p>
+<h2 id="数据库字段默认值设置要小心"><a href="#数据库字段默认值设置要小心" class="headerlink" title="数据库字段默认值设置要小心"></a>数据库字段默认值设置要小心</h2><blockquote>
+<p>在设计表结构的时候，字段的默认值最好不要有业务含义，如果非得有，那一定要和业务逻辑相适配，不能就这么随便设个0或者是空啥的（况且一般来说字段类型都得是Not Null的才好）。</p>
+</blockquote>
+<p>我的一个锅，在变更表结构的时候，有一个需要新加的字段含义是某个排名的前百分比。我当时没有细想，默认就设成了0，后来在表结构变更完之后忽然想起来，默认是0的话岂不是表示默认的这些条目排名最靠前么(前0%)，这显然太不科学了，于是又重新变更了表结构，然后还要再刷一波数据。还好我的数据都是从别人那同步来的，再同步一次就好了，否则就得被迫跑路了。。</p>
+<p>当然，设置正确的默认值的前提是要<strong>了解字段的逻辑含义</strong>，如果字段是从别人那边同步过来的一定要问清楚，有效数据的范围是什么，数据的逻辑含义是什么。</p>
+<h2 id="将bean用来进行rpc传输要记得序列化"><a href="#将bean用来进行rpc传输要记得序列化" class="headerlink" title="将bean用来进行rpc传输要记得序列化"></a>将bean用来进行rpc传输要记得序列化</h2><blockquote>
+<p>当然，这是常识，一开始写的时候也会记得，但是当这个bean组合了其他的bean的时候，那些bean也是要做序列化的。。。这个很容易被忘掉。</p>
+</blockquote>
+<p>曾经写的一个的bug，在测试的时候就觉得奇怪，服务调用方传进来的参数始终不对，于是重头检查了这一块的代码，果然是序列化的问题，于是赶紧在发布前打了一个新包给服务调用方（其实也是我自己了）。</p>
+<h2 id="遇到预定义的常量要确认他的值到底是什么"><a href="#遇到预定义的常量要确认他的值到底是什么" class="headerlink" title="遇到预定义的常量要确认他的值到底是什么"></a>遇到预定义的常量要确认他的值到底是什么</h2><blockquote>
+<p>比如Double.MIN_VALUE，遇到这种常量一定要点进去看下到底是啥，不能再把这个当成最小负数来用了。</p>
+</blockquote>
+<p>同样的坑不能踩第二遍。</p>
+<h2 id="ES中自定义Analyzer时要小心默认的配置"><a href="#ES中自定义Analyzer时要小心默认的配置" class="headerlink" title="ES中自定义Analyzer时要小心默认的配置"></a>ES中自定义Analyzer时要小心默认的配置</h2><blockquote>
+<p>其实不仅是es，很多与配置有关的问题都会牵涉到一点，叫<code>默认配置</code>。有默认值固然方便，但是默认不代表可以无视，一定要做到心中有数，否则就可能会因为默认配置与当前业务逻辑不符而造成意外的、难以排查的bug</p>
+</blockquote>
+<p>曾经在前人维护的es配置中有这样的一个analyzer:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;analysis&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;analyzer&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;comma_analyzer&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;pattern&quot;</span><span class="punctuation">:</span> <span class="string">&quot;,&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;pattern&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>他定义了一个comma_analyzer，试图以逗号分隔进行分词，一切似乎都很简单干净，人畜无害。但是真正用的时候却发现很多本应当搜索到的词却搜索不到，代码改了半天也没啥进展，直到我翻到<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/6.3/analysis-pattern-analyzer.html#analysis-pattern-analyzer">es的文档</a>，才发现有一个坑爹的默认配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Pattern Analyzer</span><br><span class="line"></span><br><span class="line">Definition</span><br><span class="line">It consists of:</span><br><span class="line"></span><br><span class="line">Tokenizer</span><br><span class="line">  Pattern Tokenizer</span><br><span class="line">  </span><br><span class="line">Token Filters</span><br><span class="line">  Lower Case Token Filter</span><br><span class="line">  Stop Token Filter (disabled by default)</span><br></pre></td></tr></table></figure>
+<p>好嘛，默认还加了一个大写转小写的过滤器，难怪用大写字母去搜大写字母根本搜不到，必须用小写字母才能搜到对应的大写字母。<br>而且这个filter是在建索引的时候添加的，因此搜索结果本身是看不出被转为小写了，这个问题排查起来难度还是很大的。</p>
+<p>这就是一开始建索引考虑不周导致的遗留问题，现在发现bug之后修改起来也很不方便，必须要删除索引重建。在目前业务数据非常庞大的情况下，这样的代价是非常大的，因此也只能将这个缺陷告知所有的业务接入方了，在业务代码中适配了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/22/database-base/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/22/database-base/" itemprop="url">「数据库」数据库系统基础</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T12:20:19+00:00">
+                2018-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ol>
+<li>数据库 是 电子化信息的集合</li>
+</ol>
+<ul>
+<li>将信息规范化并使之电子化，形成电子信息’库’，以便利用计算机对这些信息进行快速有效的存储、检索、统计与管理。</li>
+</ul>
+<ol start="2">
+<li>表(Table)：以按行按列形式组织及展现的数据
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/22/database-base/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/08/11/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98%E7%9C%8BJVM%E5%8A%A8%E6%80%81%E5%8F%8D%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/11/%E4%BB%8E%E4%B8%80%E4%B8%AA%E8%AF%A1%E5%BC%82%E7%9A%84%E9%97%AE%E9%A2%98%E7%9C%8BJVM%E5%8A%A8%E6%80%81%E5%8F%8D%E4%BC%98%E5%8C%96/" itemprop="url">从一个诡异的问题看JVM动态反优化</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T07:36:27+00:00">
+                2018-08-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前一段时间在做代码性能比较的时候用到了jmh这个工具，原本以为拥有了这个方便的工具就能hold住java微基准测试这个命题。但是事实上，用着用着就发现自己的理解还非常不深入，有很多在测试的时候难以解释的现象。于是查阅了相关资料，才发现这里面的水比我想象要深，趁着记忆还热乎，赶紧记录一下。</p>
+<h2 id="动态编译VS静态编译"><a href="#动态编译VS静态编译" class="headerlink" title="动态编译VS静态编译"></a>动态编译VS静态编译</h2><p>java作为一种动态编译语言与c&#x2F;c++这种静态编译语言有本质的不同。静态编译语言是在编译时就已经对代码做好了编译优化(比如C&#x2F;C++在编译时指定-O1 -O2 -O3参数)，得到的程序能够直接被计算机忠实地执行。而java这种动态编译语言在编译时几乎不会做什么优化，而是等到运行在虚拟机中时，动态的进行优化。</p>
+<p>动态优化有好处有坏处，好处就在于他可以根据程序实时的运行状况，忽略掉那些事实上没有被执行的代码的影响，最大化的优化那些被多次执行的代码（这也是jvm有“预热”这一说法的原因）；但是，缺点也在于，随着程序的运行，程序运行的环境会发生变化，如果继续保留之前动态优化的代码则会无法起作用甚至可能会出现错误，此时就需要卸载之前做的优化，这就是<strong>“动态反优化（Dynamic Deoptimization）”</strong>。</p>
+<p>显然，我们并不希望jvm经常进行动态反优化，但是其实正常情况下，相比于程序逻辑的执行时间，这点反优化造成影响还是微不足道的。相比于他带来的问题，我们往往更加享受他带来的便利，因此大部分情况我们也无需太在意这些细节。但是当我们分析问题的粒度逐渐变小时、尤其是在做微基准测试时，就需要做到对这类问题心中有数了，否则就可能贻笑大方。</p>
+<h2 id="诡异的问题"><a href="#诡异的问题" class="headerlink" title="诡异的问题"></a>诡异的问题</h2><p>说的可能有点玄乎，举一个简单的例子，比如下面这样一段微基准测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.pinduoduo.tusenpo.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.annotations.*;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.Runner;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.RunnerException;</span><br><span class="line"><span class="keyword">import</span> org.openjdk.jmh.runner.options.OptionsBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="meta">@BenchmarkMode(Mode.Throughput)</span></span><br><span class="line"><span class="meta">@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@State(Scope.Benchmark)</span></span><br><span class="line"><span class="meta">@Threads(4)</span></span><br><span class="line"><span class="meta">@Fork(0)</span></span><br><span class="line"><span class="meta">@OutputTimeUnit(TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">interface</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Method1</span> <span class="keyword">implements</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> d + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Method2</span> <span class="keyword">implements</span> <span class="title class_">Operator</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">operate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> d + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">callMillionTimes</span><span class="params">(Operator op)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; <span class="number">1000000</span>; i++)</span><br><span class="line">            d = op.operate(d);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_1_Method1</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method1</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_2_Method2</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method2</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_3_Empty</span><span class="params">()</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_4_Method1Again</span><span class="params">()</span> &#123;</span><br><span class="line">        callMillionTimes(<span class="keyword">new</span> <span class="title class_">Method1</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test_5_NaiveLoop</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; <span class="number">1000000</span>; i++)</span><br><span class="line">            d = d + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RunnerException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Runner</span>(<span class="keyword">new</span> <span class="title class_">OptionsBuilder</span>().include(Test.class.getSimpleName()).build()).run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码中我们定义了一个父类Operator和他的两个子类Method1、Method2，这两个类的实现<strong>完全相同</strong>，相当于一个自增操作。同时测试了五个方法：</p>
+<ol>
+<li>test_1_Method1，将Method1的方法执行一百万次。</li>
+<li>test_2_Method2，将Method2的方法执行一百万次。</li>
+<li>test_3_Empty，这其实是一个空方法。</li>
+<li>test_4_Method1Again，与test_1_Method1完全一样。</li>
+<li>test_5_NaiveLoop，这个方法体现的是Method1和Method2的“本质”。</li>
+</ol>
+<p>考虑到在jmh中，以@Benchmark注解的方法是按照方法名的字典序顺序依次执行的，而且我采用的是@Fork(0)注解，因此上述函数的排序就是该函数的执行顺序，且执行的环境是同一个。</p>
+<p>理论上讲，上面四个函数的执行速度应该是<code>1≈2≈4≈5&lt;&lt;3</code>，但是这段代码跑起来的结果乍一看却让人大吃一惊：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score        Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  15098760.275 ±  71855.243  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5       178.431 ±   1500.989  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15031249.707 ± 428833.911  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5        14.213 ±      0.046  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  15109072.590 ±  47893.576  ops/ms</span><br></pre></td></tr></table></figure>
+
+<p>最终的执行结果竟然是<code>1≈3≈5&gt;&gt;2≈4</code>，乍一看是相当令人不可思议。幸亏这里比较的方法比较简单，从而可以很容易让人归谬。如果这几个不一样的方法，那么人们就很容易做出一些自以为是的愚蠢的判断了。</p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>事实上，由于待测试的函数运行时间相对比较短，因此动态编译对函数的影响就非常的大。而随着JVM的日趋强大，动态编译本身就是一个十分复杂的系统，各种策略与运行状态会互相影响，因此想要真正完全掌握代码的执行状态其实是很困难的事。想要真正了解代码的运行状态，原则上是要在运行时加入<code>-XX:+PrintCompilation -XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining&quot;</code>这些编译参数。这些参数表示打印出编译信息、解锁隐藏参数以及打印内联信息。事实上，很多编译优化基本都是通过内联来实现的，因此打印内联信息能让我们很好的研究编译优化的情况。</p>
+<p>当然，学会读这些结果还是比较有难度的，我也只是大概理解他的含义。不过其实如果了解java编译优化的基本原理，这个问题还是不难解释的。</p>
+<p>回归上面的问题，仔细分析一下，上面的这段诡异的代码其实有如下几个疑点：</p>
+<ol>
+<li>为什么test_1_Method1和test_2_Method2的逻辑完全相同，但是执行时间却有天壤之别。</li>
+<li>为什么test_1_Method1的执行时间竟然和空的test_3_Empty一样。</li>
+<li>为什么test_1_Method1和test_4_Method1Again的代码完全一样，但是执行时间却仍然不一样。</li>
+</ol>
+<p>不过仔细分析一下，其实可以根据上面的情况分析出三点：</p>
+<ol>
+<li>从test_1,test_3,test_5的执行时间几乎相等可以推断出，这里的test_1和test_5其实并没有得到真正的执行，毕竟”10^7 ops&#x2F;ms”的执行速度都超过了计算机的主频，况且函数体还是一个一百万的循环。</li>
+<li>根据常理推断，test_2,test_4的执行速度应该是百万级的运算量理论上的运行速度。</li>
+<li>test_1与test_2、test_4的区别在于，test_1是第一次实例化Operator，而test_2,test_4则不是。</li>
+</ol>
+<p>那么显然，test_1,test_5在运行的时候一定是受到了JVM的动态优化，而test_2,test_4在执行的时候则受到了动态反优化，回归了正常而无用的计算。这里主要用到了两种优化逻辑。</p>
+<h3 id="单形调用变换"><a href="#单形调用变换" class="headerlink" title="单形调用变换"></a>单形调用变换</h3><p>我们知道，jvm支持多态，这个性质可以很方便的帮我们对复杂并具有关联的事物进行抽象建模。但是代价就是，当用父类的引用去调用子类的方法时，会多一次查虚拟表的操作，同时也不利于进行代码的内联(Inline)优化。而内联优化基本可以说是jvm优化的最重要的形式。因此在这种情况下，很多优化措施都无法生效。但是，jvm非常聪明，当他发现最近的代码块中某一个父类只有一个子类的实例时，他就很机智的将这个父类的方法与这个子类的方法进行绑定，使得调用子类的方法变得更快；同时当子类的方法比较简单时，甚至会将子类的方法进行内联。这就是JVM动态优化的一种，叫单形调用变换（monomorphic）。</p>
+<h3 id="无用代码移除"><a href="#无用代码移除" class="headerlink" title="无用代码移除"></a>无用代码移除</h3><p>无用代码移除的优化相比上面的优化更好理解，也就是JVM会判断，某些值在进行运算时如果没有对环境造成除其本身外的任何影响，那么JVM在执行时就有可能将这个值的运算直接移除。</p>
+<p>有了这两个知识，基本就可以解释上面这个问题了。</p>
+<p>首先，在test_5中，这样的简单循环计算出来的d其实没有任何用处，因此JVM就直接优化掉了，这个test_5也就直接被优化成了test_3。</p>
+<p>然后，在test_1中，由于存在单形调用变换，operate方法被直接内联成了<code>d+1</code>，因此test_1也就直接被优化成了test_5，从而最终被优化成了test_3。</p>
+<p>最后，在test_2和test_4中，由于环境中存在着Operator类的不同实例，因此单形调用变换失效，内联代码被重新动态反优化成了函数调用。而在函数调用中，当读到<code>d=op.operate(d)</code>这个方法无法时，jvm无法直接判断出d是否对op这个对象造成影响，因此也就无法将d直接优化掉，从而导致了程序完完整整的跑完了一百万次循环。</p>
+<h2 id="启示"><a href="#启示" class="headerlink" title="启示"></a>启示</h2><p>这个例子告诉我们，对java进行微基准测试与对c&#x2F;c++进行微基准测试是不一样的。JVM会有很多复杂的逻辑，我们要对代码<strong>心存敬畏</strong>。</p>
+<p>那么，有什么方法能够让我们尽量避免编译优化与编译反优化对我们的基准测试的影响呢？其实我们能做的也很有限，我们不能指定JVM去优化某段代码或者让他不去优化某段代码，我们只能尽量保证让JVM以<strong>同样</strong>的优化逻辑去优化我们希望比较的那些函数，从而尽量避免动态优化对我们结论的影响。</p>
+<h3 id="充分的预热"><a href="#充分的预热" class="headerlink" title="充分的预热"></a>充分的预热</h3><p>同样是上面的那段代码，如果我们将预热和执行的运行时间充分扩大（比如扩大十倍），那么我们就会得到完全不一样的运行结果：</p>
+<p><strong>调整参数</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Warmup(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Fork(0)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score          Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  14686856.275 ±  2661991.738  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5  12162409.605 ± 24908442.187  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15019642.291 ±   288132.800  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5  15002946.149 ±   221140.844  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  14978329.847 ±   464391.640  ops/ms</span><br></pre></td></tr></table></figure>
+<p>你会发现，经过充分的预热，所有的代码都得到了优化。</p>
+<h3 id="隔离环境"><a href="#隔离环境" class="headerlink" title="隔离环境"></a>隔离环境</h3><p>同样是上面的那段代码，如果我们将不同测试时的环境(profiler)进行隔离，我们也会得到完全优化后的结果：</p>
+<p><strong>调整参数</strong><br>这里使用给@Fork注解赋一个非零值来给新的函数创造新的执行环境。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Measurement(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)</span></span><br><span class="line"><span class="meta">@Fork(1)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Benchmark                  Mode  Cnt         Score        Error   Units</span><br><span class="line">Test.test_1_Method1       thrpt    5  15063249.605 ±  86686.469  ops/ms</span><br><span class="line">Test.test_2_Method2       thrpt    5  15059995.145 ± 170559.955  ops/ms</span><br><span class="line">Test.test_3_Empty         thrpt    5  15083788.370 ± 109821.284  ops/ms</span><br><span class="line">Test.test_4_Method1Again  thrpt    5  15108390.906 ±  77092.684  ops/ms</span><br><span class="line">Test.test_5_NaiveLoop     thrpt    5  15048447.746 ± 458691.436  ops/ms</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实根据<strong>观察者效应</strong>或者是广义的<strong>测不准原理</strong>，对代码进行微基准测试本身就会对代码造成影响，正如下面这句话所说：</p>
+<blockquote>
+<p>Once you measure a system’s performance ,you change the system.</p>
+</blockquote>
+<p>总而言之，学会对代码保持敬畏，技术和技术带来的现象永远只是表象，要学会脱离技术思考本质，提高自己的思维。毕竟，在IT界还有这样一句话：</p>
+<blockquote>
+<p>A fool with a tool is still a fool.</p>
+</blockquote>
+<p>共勉。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-jtp12214/index.html">Java 理论与实践-动态编译与性能测量</a><br><a target="_blank" rel="noopener" href="https://www.slideshare.net/RafaelWinterhalter/an-introduction-to-jvm-performance">An introduction to JVM performance</a><br><a target="_blank" rel="noopener" href="https://www.slideshare.net/dougqh/jvm-mechanics-when-does-the">JVM Mechanics: When Does the JVM JIT &amp; Deoptimize?</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/35046745/what-is-the-purpose-of-jmh-fork">What is the purpose of JMH @Fork?</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/504103/how-do-i-write-a-correct-micro-benchmark-in-java/">How do I write a correct micro-benchmark in Java?</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/07/23/openwrt-lan-switch/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -952,888 +2014,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/06/14/spring-boot-database/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/14/spring-boot-database/" itemprop="url">「Spring」SpringBoot数据库访问</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-14T09:29:31+00:00">
-                2018-06-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring/" itemprop="url" rel="index">
-                    <span itemprop="name">Spring</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Springboot对于数据访问层，无论是SQL还是NOSQL，都默认采用整合Spring Data的方式进行统一处理，Springboot添加大量自动配置，屏蔽了很多设置。并引入各种<em>Template，</em>Repository来简化我们对数据访问层的操作。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/06/14/spring-boot-database/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/06/06/spring-boot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/06/spring-boot/" itemprop="url">「Spring」SpringBoot入门</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-06T15:06:01+00:00">
-                2018-06-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring/" itemprop="url" rel="index">
-                    <span itemprop="name">Spring</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Spring Boot 是由 Pivotal 团队提供的全新框架。Spring Boot 是所有基于 Spring Framework 5.0 开发的项目的起点。Spring Boot 的设计是为了简化新 Spring 应用的初始搭建以及开发过程，并且尽可能减少你的配置文件。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/06/06/spring-boot/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/05/27/hexo-code-block/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/27/hexo-code-block/" itemprop="url">Hexo 博客美化代码块</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-27T06:24:29+00:00">
-                2018-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Hexo/" itemprop="url" rel="index">
-                    <span itemprop="name">Hexo</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>最近有人问我博客的代码块是怎么做的，如下面的代码块，然后好久没有写文章了，趁着周末有时间就水一篇吧~</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = <span class="string">&#x27;abcdaabc&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> info = arr</span><br><span class="line">    .<span class="title function_">split</span>(<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    .<span class="title function_">reduce</span>(<span class="function">(<span class="params">p, k</span>) =&gt;</span> (p[k]++ || (p[k] = <span class="number">1</span>), p), &#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(info); <span class="comment">//&#123; a: 3, b: 2, c: 2, d: 1 &#125;</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/27/hexo-code-block/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/05/13/pm2-study/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/13/pm2-study/" itemprop="url">记一下 pm2 常用配置及命令</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-13T08:45:46+00:00">
-                2018-05-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Node/" itemprop="url" rel="index">
-                    <span itemprop="name">Node</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><code>PM2</code> 是 <code>node</code> 进程管理工具，可以利用它来简化很多 <code>node</code> 应用管理的繁琐任务，如性能监控、自动重启、负载均衡等，而且使用非常简单。本文就 <code>PM2</code> 进行入门性的介绍，基本涵盖了 <code>PM2</code> 的常用的功能和配置。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/13/pm2-study/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/05/11/spring-ssm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/11/spring-ssm/" itemprop="url">「Spring」SSM框架整合(Spring+SpringMVC+MyBatis)</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-11T14:52:55+00:00">
-                2018-05-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring/" itemprop="url" rel="index">
-                    <span itemprop="name">Spring</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>SSM框架是spring MVC ，spring和mybatis框架的整合，是标准的MVC模式，将整个系统划分为表现层，controller层，service层，DAO层。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/11/spring-ssm/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2018/05/06/spring-mybatis/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/06/spring-mybatis/" itemprop="url">「Spring」持久层框架Mybatis</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-06T14:51:34+00:00">
-                2018-05-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring/" itemprop="url" rel="index">
-                    <span itemprop="name">Spring</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Mybatis支持普通sql操作，存储过程的调用，它是一个高级的ORM框架(Object Relation Mapping对象关系映射–以面向对象思想访问数据库)，是一个基于Java的持久层框架。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/06/spring-mybatis/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/19/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><span class="page-number current">20</span><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/21/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/19/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><span class="page-number current">20</span><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/21/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1879,7 +2064,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1890,7 +2075,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1901,7 +2086,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

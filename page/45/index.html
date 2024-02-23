@@ -307,6 +307,939 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/29/OpenCV%E8%AE%A1%E7%AE%97%E5%9B%BE%E5%83%8F%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%89%B9%E5%BE%81/" itemprop="url">OpenCV计算图像的梯度特征</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-29T15:52:28+00:00">
+                2016-03-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>计算图像的梯度是在进行图像处理时经常用到的方法，但是这玩意自己手写未免效率低而且容易出错。OpenCV里集成了相应的函数，只不过用的人好像并不多导致我找了半天才找到。姑且记一下以备日后使用。</p>
+<h2 id="计算像素梯度的绝对值"><a href="#计算像素梯度的绝对值" class="headerlink" title="计算像素梯度的绝对值"></a>计算像素梯度的绝对值</h2><p>这个用到了cv2.magnitude方法，具体用法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sobelx=cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3)#1,0表示只在x方向求一阶导数</span><br><span class="line">sobely=cv2.Sobel(im,cv2.CV_64F,0,1,ksize=3)#0,1表示只在y方向求一阶导数</span><br><span class="line">mag=cv2.magnitude(x,y)</span><br></pre></td></tr></table></figure>
+<p>这里传入两个参数，分别是x和y方向的梯度，这里我用的是Sobel算子分别求x和y方向的梯度，卷积核的大小我设置的是３。得到的mag就是对应每个像素的梯度矩阵。实际上这也可以算成边缘检测吧。</p>
+<p>对于Sobel函数有个注意点，他的第二个参数是扩展了像素的数值范围，因为梯度是有方向的，所以sobel函数得到的是有正有负的值，所以相当于扩大了取值。通常情况下我们会加上下面的函数来得到梯度的绝对值：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sobelx=cv2.convertScaleAbs(cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3))</span><br></pre></td></tr></table></figure>
+<p>在外面套一个取绝对值的函数，或者也可以直接套一个np.abs()。。。不过效果不太一样。</p>
+<h2 id="计算像素梯度的方向"><a href="#计算像素梯度的方向" class="headerlink" title="计算像素梯度的方向"></a>计算像素梯度的方向</h2><p>这个用到了cv2.parse方法，具体用法如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">phase= cv2.phase(cv2.Sobel(im,cv2.CV_64F,1,0,ksize=3),cv2.Sobel(im,cv2.CV_64F,0,1,ksize=3),angleInDegrees=True)</span><br></pre></td></tr></table></figure>
+<p>Sobel的用法跟上面一样，最后一个参数为True表示结果用角度制表示，否则用弧度制。</p>
+<p>得到的结果通常会用直方图来表示，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hist(phase.ravel(),256,[0,256])</span><br></pre></td></tr></table></figure>
+<p>输出的图像就是梯度按照角度的分布。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/27/Tomcat+Servlet%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" itemprop="url">Tomcat Servlet编程基础</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-27T15:51:24+00:00">
+                2016-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前一直使用的是Apache服务器，对于Tomcat的工作方式反而不那么习惯。给我一个Java web程序源码我都不晓得他应该怎么连接到Tomcat上。于是趁着无聊的时候看了个J2EE的Servlet教程，终于对怎么把java部署到Tomcat上、以及Tomcat的基本工作流程有了简要的认识。当然，这里仅仅指的是简单的Servlet程序的部署方法，不过这点方法从理论上讲已经具备了写一个简单web 应用的能力了。</p>
+<h2 id="Tomcat基本配置"><a href="#Tomcat基本配置" class="headerlink" title="Tomcat基本配置"></a>Tomcat基本配置</h2><p>Tomcat的配置文件是%TOMCAT_HOME%&#x2F;conf&#x2F;server.xml，这里配置了Tomcat的基本信息，最重要的是下面这两个：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;</span><br><span class="line">               connectionTimeout=&quot;20000&quot;</span><br><span class="line">               redirectPort=&quot;8443&quot; /&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;Host name=&quot;localhost&quot;  appBase=&quot;webapps&quot;</span><br><span class="line">            unpackWARs=&quot;true&quot; autoDeploy=&quot;true&quot;&gt;</span><br></pre></td></tr></table></figure>
+<p>第一个指定了Tomcat监听的端口，默认是8080，如果和其他应用冲突了可以在这里修改。</p>
+<p>第二个指定了Tomcat映射的根目录，就像apache中的&#x2F;var&#x2F;www&#x2F;html&#x2F;的作用一样，但又不完全一样。因为这下面放的都应该是一套完整的应用而不是单一的html文件。</p>
+<h2 id="HttpServlet类基本用法"><a href="#HttpServlet类基本用法" class="headerlink" title="HttpServlet类基本用法"></a>HttpServlet类基本用法</h2><p>Servlet程序就是服务器小程序，现在我们的目的是编写web服务器，那么自然就用到了HttpServlet类来实现一个Http服务器应用。它的基本框架是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebServlet(&quot;/MyServlet&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> <span class="number">1L</span>;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		response.getWriter().append(<span class="string">&quot;&lt;a href=&#x27;http://www.baidu.com&#x27;&gt;baidu&lt;/a&gt;&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">		doGet(request, response);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里最常用的就是重载它的doGet和doPost方法，每个方法都传入Request和Response方法，可以从Request中读入用户传过来的数据，并且将需要显示的内容写在Response中，这样就可以达到简单的动态显示网页的效果了。（注意加@WebServlet标注）</p>
+<h2 id="Webapps下项目基本配置"><a href="#Webapps下项目基本配置" class="headerlink" title="Webapps下项目基本配置"></a>Webapps下项目基本配置</h2><p>这个是Tomcat和Apache非常不同的东西，也是我花了半天才理清楚的。</p>
+<p>把Servlet应用放在Webapps文件夹下必须要有web.xml配置文件，这个文件应该放在 项目根目录&#x2F;WEB-INF&#x2F; 下，这是用来配置整个项目的配置文件。他一定要有如下格式：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;ISO-8859-1&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee</span></span></span><br><span class="line"><span class="string"><span class="tag">                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">metadata-complete</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>实际上就是把<code>%TOMCAT_HOME%/conf/web.xml</code>文件的中间部分去掉，留下了外壳，以后需要在这里面慢慢添加配置文件。</p>
+<p>当然， 为了让他能访问到一个特定的Servlet程序，我们还要的对他进行注册:</p>
+<p>首先，我们要把编译过的MyServlet.class文件放在WEB-INF&#x2F;下的classes&#x2F;文件夹下；</p>
+<p>然后，在上面的web.xml中间写入这样的内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">      &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">      &lt;servlet-class&gt;MyServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;/servlet&gt;</span><br><span class="line"></span><br><span class="line">    &lt;servlet-mapping&gt;</span><br><span class="line">        &lt;servlet-name&gt;MyServlet&lt;/servlet-name&gt;</span><br><span class="line">        &lt;url-pattern&gt;/MyServlet&lt;/url-pattern&gt;</span><br><span class="line">    &lt;/servlet-mapping&gt;</span><br></pre></td></tr></table></figure>
+<p>意思很清楚，就是对这个Servlet起个名字，然后把他映射到项目根目录下的MyServlet上，这样就能够通过浏览器访问到了。（事实上，上面的操作的目的就是之前那个类文件中的<code>@WebServlet(&quot;/MyServlet&quot;)</code> 。</p>
+<p>上面是比较基础的操作方法，如果是用Eclipse的话就简单的很了，什么配置web.xml啊，新建文件夹啊都不用操心，只要新建动态网页应用，写个Servlet类，然后直接就能跑起来。不过有一个要注意的就是在用Eclipse查看浏览页面的时候是不用手动开启Tomcat服务器的，如果手动开了的话还会报错。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/25/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" itemprop="url">Python面向对象编程基础</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-25T14:34:08+00:00">
+                2016-03-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近一直在用Python写代码，发现了很多代码重复的问题，总是复制粘贴显得特别凌乱，于是就想用类来封装一下。下面就记录下Python中最基础的面向对象编程方法。python的面向对象跟java，c++的面向对象意思都差不多，从他们类比过来还是非常好理解的。</p>
+<h2 id="类定义"><a href="#类定义" class="headerlink" title="类定义"></a>类定义</h2><p>python的类定义比较简单格式基本是这样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>():</span><br><span class="line"></span><br><span class="line">    publicAttr= <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">instanceMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">staticMethod</span>():</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">classMethod</span>(<span class="params">cls</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__del__</span>():</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>直接定义一个Test类，括号里面表示他的父类，默认是Object。</li>
+<li>构造函数名字叫__init__，括号内表示构造的参数，但是第一个参数必须是self，表示传入自己的引用，而且之后调用的所有类属性类方法都需要用self来引导。</li>
+<li>类的方法分为实例方法、静态方法和类方法。除了实例方法外，其他方法是在方法上方用‘@staticmethod’或‘@classmethod’来表示的。而且只有实例方法必须先生成一个实例才可以调用。</li>
+<li>注意类方法默认传入的参数不是self，而是cls，表示他是类方法。类方法跟静态方法基本差不多，不同的就是这个参数，以及在继承中的差异。</li>
+<li>析构函数名字叫__del__，传入self参数。由于python本身具有垃圾回收机制，我们既可以用<code>del myinstance</code>来显式调用，也可以让系统自己调用。</li>
+</ul>
+<h2 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h2><p>python中并没有权限控制的关键字，所以默认的权限都是public，他相信程序员知道自己正在做什么。不过他也提供了权限控制的机制，就是通过方法名。如果方法名或属性名前面由‘__’修饰，那么python就认为他是私有的。</p>
+<p>比如:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>():</span><br><span class="line">    __privateAttr=<span class="number">1</span></span><br><span class="line">    publicAttr= <span class="number">2</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__privateMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span> self.__private</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">publicMethod</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span> self.publicAttr</span><br><span class="line"></span><br><span class="line">test=Test()             <span class="comment">#constructor</span></span><br><span class="line"><span class="built_in">print</span> test.publicAttr</span><br><span class="line"><span class="comment">#print test.__privateAttr</span></span><br><span class="line">test.publicMethod()</span><br><span class="line"><span class="comment">#test.__privateMethod()</span></span><br></pre></td></tr></table></figure>
+<p>类外部调用私有属性是会报错的。</p>
+<p>不过事实上，私有属性也是可以在类外被访问到的，只要在他的名字前面加上“_类名”就可以了。</p>
+<h2 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h2><p>python支持多重继承（具体内容暂时不研究），父类名写在类声明的括号里面。具体用法跟其他的支持OOP语言的使用方法类似。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/23/Eclipse+Tomcat%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E5%BF%83%E5%BE%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/23/Eclipse+Tomcat%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E5%BF%83%E5%BE%97/" itemprop="url">Eclipse+Tomcat平台搭建心得</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-23T15:56:49+00:00">
+                2016-03-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>突然被要求搭建个Java 动态网页开发环境，好久不用eclipse的我着实懵逼好久。这当中遇到了好多好多的坑，姑且记录下一些注意事项，加深下对Eclipse和Tomcat的理解。</p>
+<ul>
+<li><p>java环境和Tomcat的环境一定要搭建正确，windows下注意配置下环境变量即可，ubuntu下还要注意尽量要自己下载源码编译，不要用apt-get里面的包。。。apt-get里的东西满满的都是坑，懒人化操作固然方便，但是这就导致了我们对他的路径、环境变量的存储位置都不清楚，这对接下来的配置会带来极大的困难。</p>
+</li>
+<li><p>eclipse的版本一定要看准了，不一定要是最新的，但是尽量用eclipse for j2ee 版本的。虽说理论上任何的eclipse版本之间都可以通过安装插件来达到同样的效果，但是这还是有很多不一样的地方。当你对着教程学习的时候，发现自己的菜单选项和人家的选项不一样的时候还是非常的蛋疼的。</p>
+</li>
+<li><p>eclipse在配置Server的时候一定要选择到我们下载的Tomcat路径。因为无论我们是否安装了Tomcat，在preference-&gt;server-&gt;runtime environment 选项中eclipse总会提供所有的Tomcat版本供我们选择，然而这些并没有卵用，如果想让eclipse连接本机的Tomcat，必须在search选项中选择Tomcat安装路径。这样选择的server才能用。</p>
+</li>
+<li><p>一定要添加全所有需要的jar包，在build path里添加需要的包（这里通常有很多很多，比如struts，spring，javax，json之类的），尤其是Tomcat的包（即javax之类的包，如果不是eclipse for j2ee的话是很难找到的）。而且还要注意选择jre包，选择不对的话是会报错的，而且很难看出来。</p>
+</li>
+<li><p>一定要记得，要在WEB-INF&#x2F;lib&#x2F;文件夹下把之前build path中添加的包通通添加进来， 否则会迷之报错，最典型的就是在Tomcat启动时报类似“Error configuring application listener of class org.springframework.web.context.ContextLoaderListener”的错误。。。话说报这个错的时候谁会想到是因为jar包没有加对地方造成的。。。另外提一句，如果是绕过eclipse直接在Tomcat中启动项目的话，还得会看日志，日志文件是在<code>%TOMCAT_HOME%/logs/catalina.out</code>文件中。如果不会看日志文件，你看到的只能是404 not found，并不能研究错误是什么。。。</p>
+</li>
+<li><p>通常情况下，第一次在Tomcat里跑自己的项目肯定会报类似这样的错误<code>“The Apache Tomcat Native library which allows optimal performance in production environments was not found...”</code>这是因为我们缺少APR（Apache Portable Runtime）这个东西，在windows下可以直接下tcnative-1.dll文件，并放在c:&#x2F;windows&#x2F;system32&#x2F;下（注意选择架构）。如果是在ubuntu下就有点麻烦了，还得去下apr和apr-util文件来配置编译。。。甚是麻烦以至于我到现在都没弄好。。。</p>
+</li>
+</ul>
+<p>差不多上面就是我搭建Eclipse+Tomcat服务器遇到的问题和解决的方法。以后遇到问题还是要善于去找日志文件，并勤于利用搜索引擎，这样才能将问题进行有针对性的解决。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/14/Markdown%E6%96%87%E6%9C%AC%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80%E5%88%9D%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/14/Markdown%E6%96%87%E6%9C%AC%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80%E5%88%9D%E8%AF%86/" itemprop="url">Markdown文本标记语言初识</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-14T13:22:53+00:00">
+                2016-03-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>一直听说用Markdown写博文挺方便的，也一直没有在意，然而最近在用jupyter的时候突然发现jupyter是自带Markdown的，这让没用过的我很是尴尬。而且后来在网上翻博客的时候，发现<a target="_blank" rel="noopener" href="http://www.jianshu.com/">“简书”</a> 上的博客格式都非常漂亮，特别是层次非常清楚，排版也和工整，后来才知道这个就是用markdown写的。于是我也萌生了一个用markdown写文章的想法。 当然在这之前，肯定要了解下markdown的语法什么的。</p>
+<h2 id="平台"><a href="#平台" class="headerlink" title="平台"></a>平台</h2><p>首先我需要一个Linux下写Markdown的小工具，有一个开源的小软件叫‘retext’（用pyqt写的）能够挺好的支持markdown的语法的。</p>
+<p>如果是在web上直接写markdown，也有很多平台，百度一下就晓得了。当然，类似jupyter、简书甚至wordpress也都能够很好的支持markdown</p>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>用法十分简单，一张表就可以基本解决：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#Header 1</span><br><span class="line">##Heaer 2</span><br><span class="line">###Header 3</span><br><span class="line">####header 4</span><br><span class="line">#####header 5</span><br><span class="line">######header 6</span><br><span class="line"></span><br><span class="line">Header</span><br><span class="line">====</span><br><span class="line"></span><br><span class="line">SubHeader</span><br><span class="line">----</span><br><span class="line"></span><br><span class="line">**bold**</span><br><span class="line"></span><br><span class="line">*italics*</span><br><span class="line"></span><br><span class="line">*emphasize*</span><br><span class="line"></span><br><span class="line">label [^1]</span><br><span class="line"></span><br><span class="line">&gt; This is the quote</span><br><span class="line"></span><br><span class="line">    #include&lt;iostream&gt;</span><br><span class="line">    using namespace std;</span><br><span class="line">    int main()&#123;</span><br><span class="line">        printf(&quot;hello world\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">[This is the label](http://www.baidu.com)</span><br><span class="line"></span><br><span class="line">![alt](/images/2016/03/14/1/1.png)</span><br><span class="line"></span><br><span class="line">*  1</span><br><span class="line">* * 1</span><br><span class="line">* * * 1</span><br><span class="line"></span><br><span class="line">[^1]: This is my first footnote</span><br></pre></td></tr></table></figure>
+<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="/images/2016/03/14/1/2.png"></p>
+<p>需要说明的几点：</p>
+<ul>
+<li>换行是用位于行末的两个空格来确定的，而不是直接回车。</li>
+<li>代码是用同一的一个缩进位来表示的。</li>
+<li>引用链接是用<code>[text](url)</code>来确定的，如果是引用图片，则在前面加！号即可。</li>
+<li>标注是用<code>[^n]</code>来确定的，在需要使用的时候用<code>[^n]</code>，在文章末尾用<code>[^n]:description</code>来加以说明。</li>
+<li>多级分点是用<code>*</code>来表示的，当然，多个<code>*</code>之间要有空格。</li>
+<li>其他用法可以查看文档</li>
+</ul>
+<p>Markdown之所以这么红，我想就是因为他的宗旨非常切合大众的需要，那就是“成为一种适用于网络的书写语言”，他的宗旨就是易读易写。这也就难怪他成为写博客，构建cms站点，甚至是写论文的一个非常好的工具了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/12/%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/12/%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96%E5%A4%84%E7%90%86/" itemprop="url">直方图均衡化处理</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-12T15:49:25+00:00">
+                2016-03-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Vision</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>直方图均衡化方法属于图像增强的范畴，是一种对图像进行灰度级修正的方法。简而言之，就是对一个灰度图像进行处理，使他的特征更加明显。通常情况下，在对图像进行进一步的处理之前，直方图均衡化是一种对灰度进行归一化处理的好方法，而且也可以增强图像的对比度。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这个方法的思路非常简单，就是我们把一个灰度图像以0-255个灰度值为横坐标，灰度对应的像素点的个数为纵坐标，构成一个灰度直方图。对于那些灰度分布非常不均衡的图像来说，我们要做的就是通过对灰度值进行一个映射，将他灰度直方图尽可能的拉伸。通常情况下我们可以对他的累计分布函数（CDF）进行线性插值即可，实现起来也很简单。</p>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>当然我们并不需要每次都自己写，调用matplotlib的函数可以很轻松的画出直方图，调用OpenCV的函数可以很轻松的进行均衡化：</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> Image,cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">raw=Image.<span class="built_in">open</span>(<span class="string">&#x27;test.png&#x27;</span>)</span><br><span class="line">im=np.array(raw.convert(<span class="string">&#x27;L&#x27;</span>))</span><br><span class="line"></span><br><span class="line">gray()</span><br><span class="line">figure()</span><br><span class="line">hist(im.ravel(),<span class="number">256</span>,[<span class="number">0</span>,<span class="number">256</span>])<span class="comment">#matplotlib的函数，hist用来绘直方图，ravel是将二维图像数组转换成一维数组</span></span><br><span class="line">xlim([<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line"></span><br><span class="line">equ=cv2.equalizeHist(im)    <span class="comment">#OpenCV直方图均衡化的接口</span></span><br><span class="line">figure()</span><br><span class="line">hist(equ.ravel(),<span class="number">256</span>,[<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line">xlim([<span class="number">0</span>,<span class="number">256</span>])</span><br><span class="line"></span><br><span class="line">figure()</span><br><span class="line">imshow(raw)</span><br><span class="line"></span><br><span class="line">res=np.hstack((im,equ))    <span class="comment">#将两个图像水平合并方便查看</span></span><br><span class="line">figure()</span><br><span class="line">imshow(res)</span><br><span class="line"></span><br><span class="line">show()</span><br></pre></td></tr></table></figure>
+
+<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="/images/2016/03/12/1/1.png"><br><img src="/images/2016/03/12/1/2.png"><br><img src="/images/2016/03/12/1/3.png"><br><img src="/images/2016/03/12/1/4.png"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/10/%E5%88%A9%E7%94%A8python%E8%84%9A%E6%9C%AC%E7%88%AC%E5%8F%96%E5%AD%97%E4%BD%93%E6%96%87%E4%BB%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -909,991 +1842,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/03/%E5%88%A9%E7%94%A8caffe%E4%B8%8Elmdb%E8%AF%BB%E5%86%99%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/03/%E5%88%A9%E7%94%A8caffe%E4%B8%8Elmdb%E8%AF%BB%E5%86%99%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE/" itemprop="url">利用caffe与lmdb读写图像数据</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-03T15:34:15+00:00">
-                2016-03-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>由于有关caffe的开发资料实在太少，单单是这个问题就困扰了我半天。最后终于找到了一个大腿—-<a target="_blank" rel="noopener" href="http://research.beenfrog.com/">beenfrog</a>，也是一个正在学习caffe框架的研究人员。博客mark下，以后有问题可以去这里找。</p>
-<p>本文代码部分主要参考于<a target="_blank" rel="noopener" href="http://research.beenfrog.com/code/2015/12/30/write-read-lmdb-example.html">此文</a>。</p>
-<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>lmdb是一种轻量级的数据库，caffe中主要就是使用lmdb模块来进行图像数据集的保存。据说是因为lmdb有读取速度快，支持多线程、多进程并发，等这样那样的优点（具体见<a target="_blank" rel="noopener" href="http://lmdb.readthedocs.org/en/release/">官网</a>，虽然我暂时没有看出来，据我所知网上查找lmdb文档的人大都仅仅是为了使用caffe的），注意到这个数据库其实并没有任何压缩处理的作用，他的目的只是为了快速的索引和存取。他的数据都会带着一定的数据结构从而使的体积略微增大。</p>
-<p>事实上如果仅仅看lmdb的用法是无法直接应用于图像文件的处理的。由于caffe是将图像以他自带的数据类型的形式传入lmdb中的，因此我们必须结合caffe的数据类型才能完成读取和使用。</p>
-<h2 id="lmdb的安装"><a href="#lmdb的安装" class="headerlink" title="lmdb的安装"></a>lmdb的安装</h2><p>参考官方文档，安装如下依赖即可：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">udo apt-get install cython</span><br><span class="line">sudo apt-get install libffi-dev python-dev build-essential</span><br><span class="line">sudo apt-get install python-cffi</span><br><span class="line">sudo easy_install lmdb</span><br></pre></td></tr></table></figure>
-<p>实践再次映证了用easy_install 安装要比pip好的多(在版本跟的上的情况下)。</p>
-<h2 id="生成数据文件"><a href="#生成数据文件" class="headerlink" title="生成数据文件"></a>生成数据文件</h2><p>这里以zhengfang&#x2F;文件夹下的1.png至1000.png为例</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> lmdb</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> caffe</span><br><span class="line"><span class="keyword">from</span> caffe.proto <span class="keyword">import</span> caffe_pb2</span><br><span class="line"></span><br><span class="line"><span class="comment">#basic setting</span></span><br><span class="line">lmdb_file = <span class="string">&#x27;lmdb_data&#x27;</span><span class="comment">#期望生成的数据文件</span></span><br><span class="line">batch_size = <span class="number">200</span>       <span class="comment">#lmdb对于数据进行的是先缓存后一次性写入从而提高效率，因此定义一个batch_size控制每次写入的量。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># create the leveldb file</span></span><br><span class="line">lmdb_env = lmdb.<span class="built_in">open</span>(lmdb_file, map_size=<span class="built_in">int</span>(<span class="number">1e12</span>))<span class="comment">#生成一个数据文件，定义最大空间</span></span><br><span class="line">lmdb_txn = lmdb_env.begin(write=<span class="literal">True</span>)              <span class="comment">#打开数据库的句柄</span></span><br><span class="line">datum = caffe_pb2.Datum()                          <span class="comment">#这是caffe中定义数据的重要类型</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">    x+=<span class="number">1</span></span><br><span class="line">    img=cv2.imread(<span class="string">&#x27;zhengfang/&#x27;</span>+<span class="built_in">str</span>(x)+<span class="string">&#x27;.png&#x27;</span>).convert(<span class="string">&#x27;RGB&#x27;</span>)     <span class="comment">#从zhengfang/文件夹中依次读取图像</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># save in datum</span></span><br><span class="line">    data = img.astype(<span class="string">&#x27;int&#x27;</span>).transpose(<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>)      <span class="comment">#图像矩阵，注意需要调节维度</span></span><br><span class="line">    <span class="comment">#data = np.array([img.convert(&#x27;L&#x27;).astype(&#x27;int&#x27;)]) #或者这样增加维度</span></span><br><span class="line">    label = x                                      <span class="comment">#图像的标签，为了方便存储，这个必须是整数。</span></span><br><span class="line">    datum = caffe.io.array_to_datum(data, label)   <span class="comment">#将数据以及标签整合为一个数据项</span></span><br><span class="line"></span><br><span class="line">    keystr = <span class="string">&#x27;&#123;:0&gt;8d&#125;&#x27;</span>.<span class="built_in">format</span>(x-<span class="number">1</span>)                 <span class="comment">#lmdb的每一个数据都是由键值对构成的，因此生成一个用递增顺序排列的定长唯一的key</span></span><br><span class="line">    lmdb_txn.put( keystr, datum.SerializeToString())<span class="comment">#调用句柄，写入内存。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># write batch</span></span><br><span class="line">    <span class="keyword">if</span> x % batch_size == <span class="number">0</span>:                        <span class="comment">#每当累计到一定的数据量，便用commit方法写入硬盘。</span></span><br><span class="line">        lmdb_txn.commit()</span><br><span class="line">        lmdb_txn = lmdb_env.begin(write=<span class="literal">True</span>)      <span class="comment">#commit之后，之前的txn就不能用了，必须重新开一个。</span></span><br><span class="line">        <span class="built_in">print</span> <span class="string">&#x27;batch &#123;&#125; writen&#x27;</span>.<span class="built_in">format</span>(x)</span><br><span class="line"></span><br><span class="line">lmdb_env.close()                                   <span class="comment">#结束后记住释放资源，否则下次用的时候打不开。。。</span></span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">batch 200 writen</span><br><span class="line">batch 400 writen</span><br><span class="line">batch 600 writen</span><br><span class="line">batch 800 writen</span><br><span class="line">batch 1000 writen</span><br></pre></td></tr></table></figure>
-
-
-<p>照着注释，很好理解了。值得一提的是，生成的文件是以文件夹的形式保存的，内部由data.mdb lock.mdb组成，不用管他。</p>
-<p>这里需要强烈注意的一点是，datum里的图像是需要有长宽高三个维度的，而且第一个维度默认是通道数，而我们平常的图像格式是第三位是通道。因此我们需要在读入普通图像的时候将他转置一下存入datum中，或者在外面增加一层。</p>
-<h2 id="读取数据文件"><a href="#读取数据文件" class="headerlink" title="读取数据文件"></a>读取数据文件</h2><p>读取上面生成的数据文件。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> caffe</span><br><span class="line"><span class="keyword">import</span> lmdb</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">from</span> caffe.proto <span class="keyword">import</span> caffe_pb2</span><br><span class="line"></span><br><span class="line">lmdb_env = lmdb.<span class="built_in">open</span>(<span class="string">&#x27;lmdb_data&#x27;</span>)<span class="comment">#打开数据文件</span></span><br><span class="line">lmdb_txn = lmdb_env.begin()      <span class="comment">#生成句柄</span></span><br><span class="line">lmdb_cursor = lmdb_txn.cursor()  <span class="comment">#生成迭代器指针</span></span><br><span class="line">datum = caffe_pb2.Datum()        <span class="comment">#caffe定义的数据类型</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> key, value <span class="keyword">in</span> lmdb_cursor:   <span class="comment">#循环获取数据</span></span><br><span class="line">    datum.ParseFromString(value) <span class="comment">#从value中读取datum数据</span></span><br><span class="line"></span><br><span class="line">    label = datum.label          <span class="comment">#获取标签以及图像数据</span></span><br><span class="line">    data = caffe.io.datum_to_array(datum)</span><br><span class="line">    <span class="built_in">print</span> data.shape</span><br><span class="line">    <span class="built_in">print</span> datum.channels</span><br><span class="line">    image =data.transpose(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>)</span><br><span class="line">    cv2.imshow(<span class="string">&#x27;cv2.png&#x27;</span>, image) <span class="comment">#显示</span></span><br><span class="line">    cv2.waitKey(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">cv2.destroyAllWindows()</span><br><span class="line">lmdb_env.close()</span><br></pre></td></tr></table></figure>
-<p>输出：（图像略）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(3, 27, 72)</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
-<p>基本是和写入程序一一相对，很好理解。同样需要注意的是如需要显示图像，则需要将数据转置回来。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/03/Python%E4%B8%AD%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84format%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/03/Python%E4%B8%AD%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84format%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8/" itemprop="url">Python中字符串的format函数使用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-03T15:26:25+00:00">
-                2016-03-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>从python2.6之后，python中的字符串就有了str.format()函数这一格式控制的强大工具。相比于之前使用%的格式控制手段，str.format()函数显然更加符合我们的思维习惯，而且更加简洁。</p>
-<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><p>作为字符串的一个方法，它以{}和:来代替%，进行格式控制。</p>
-<h2 id="定位"><a href="#定位" class="headerlink" title="定位"></a>定位</h2><h3 id="通过位置"><a href="#通过位置" class="headerlink" title="通过位置"></a>通过位置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">In [1]: &#x27;&#123;0&#125;,&#123;1&#125;&#x27;.format(&#x27;kzc&#x27;,18)</span><br><span class="line">Out[1]: &#x27;kzc,18&#x27;</span><br><span class="line">In [2]: &#x27;&#123;&#125;,&#123;&#125;&#x27;.format(&#x27;kzc&#x27;,18)</span><br><span class="line">Out[2]: &#x27;kzc,18&#x27;</span><br><span class="line">In [3]: &#x27;&#123;1&#125;,&#123;0&#125;,&#123;1&#125;&#x27;.format(&#x27;kzc&#x27;,18)</span><br><span class="line">Out[3]: &#x27;18,kzc,18&#x27;</span><br></pre></td></tr></table></figure>
-<p>十分好理解，就是在字符串中用{}中的值来指定format中用以代替他的值。可以接受不限个参数，位置可以不按顺序，可以不用或者用多次。</p>
-<h3 id="通过关键字参数"><a href="#通过关键字参数" class="headerlink" title="通过关键字参数"></a>通过关键字参数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">In [5]: &#x27;&#123;name&#125;,&#123;age&#125;&#x27;.format(age=18,name=&#x27;kzc&#x27;)</span><br><span class="line">Out[5]: &#x27;kzc,18&#x27;</span><br></pre></td></tr></table></figure>
-<p>就是可以用键值对的形式给参数列表中的元素赋值。</p>
-<h3 id="通过对象属性"><a href="#通过对象属性" class="headerlink" title="通过对象属性"></a>通过对象属性</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class Person:</span><br><span class="line">  def __init__(self,name,age):</span><br><span class="line">    self.name,self.age = name,age</span><br><span class="line">    def __str__(self):</span><br><span class="line">      return &#x27;This guy is &#123;self.name&#125;,is &#123;self.age&#125; old&#x27;.format(self=self)</span><br><span class="line"></span><br><span class="line">In [2]: str(Person(&#x27;kzc&#x27;,18))</span><br><span class="line">Out[2]: &#x27;This guy is kzc,is 18 old&#x27;</span><br></pre></td></tr></table></figure>
-<p>在参数列表中指定要显示的对象的属性，并在format中传入这个对象。</p>
-<h3 id="通过下标"><a href="#通过下标" class="headerlink" title="通过下标"></a>通过下标</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">In [7]: p=[&#x27;kzc&#x27;,18]</span><br><span class="line">In [8]: &#x27;&#123;0[0]&#125;,&#123;0[1]&#125;&#x27;.format(p)</span><br><span class="line">Out[8]: &#x27;kzc,18&#x27;</span><br></pre></td></tr></table></figure>
-<p>结合位置与下表进行传参。</p>
-<h2 id="格式限定符"><a href="#格式限定符" class="headerlink" title="格式限定符"></a>格式限定符</h2><h3 id="填充与对齐"><a href="#填充与对齐" class="headerlink" title="填充与对齐"></a>填充与对齐</h3><p>填充常跟对齐一起使用<br>^、&lt;、&gt;分别是居中、左对齐、右对齐，后面带宽度<br>:号后面带填充的字符，只能是一个字符，不指定的话默认是用空格填充<br>比如</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [15]: &#x27;&#123;:&gt;8&#125;&#x27;.format(&#x27;189&#x27;)</span><br><span class="line">Out[15]: &#x27;   189&#x27;</span><br><span class="line">In [16]: &#x27;&#123;:0&gt;8&#125;&#x27;.format(&#x27;189&#x27;)</span><br><span class="line">Out[16]: &#x27;00000189&#x27;</span><br><span class="line">In [17]: &#x27;&#123;:a&gt;8&#125;&#x27;.format(&#x27;189&#x27;)</span><br><span class="line">Out[17]: &#x27;aaaaa189&#x27;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="精度与类型"><a href="#精度与类型" class="headerlink" title="精度与类型"></a>精度与类型</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">In [44]: &#x27;&#123;:.2f&#125;&#x27;.format(321.33345)</span><br><span class="line">Out[44]: &#x27;321.33&#x27;</span><br></pre></td></tr></table></figure>
-<p>精度常跟类型f一起使用，本例中.2表示长度为2的精度，f表示float类型。</p>
-<h3 id="进制转换"><a href="#进制转换" class="headerlink" title="进制转换"></a>进制转换</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">In [54]: &#x27;&#123;:b&#125;&#x27;.format(17)</span><br><span class="line">Out[54]: &#x27;10001&#x27;</span><br><span class="line">In [55]: &#x27;&#123;:d&#125;&#x27;.format(17)</span><br><span class="line">Out[55]: &#x27;17&#x27;</span><br><span class="line">In [56]: &#x27;&#123;:o&#125;&#x27;.format(17)</span><br><span class="line">Out[56]: &#x27;21&#x27;</span><br><span class="line">In [57]: &#x27;&#123;:x&#125;&#x27;.format(17)</span><br><span class="line">Out[57]: &#x27;11&#x27;</span><br></pre></td></tr></table></figure>
-<p>b、d、o、x分别是二进制、十进制、八进制、十六进制，跟在冒号后面</p>
-<h3 id="分割字符"><a href="#分割字符" class="headerlink" title="分割字符"></a>分割字符</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">In [47]: &#x27;&#123;:,&#125;&#x27;.format(1234567890)</span><br><span class="line">Out[47]: &#x27;1,234,567,890&#x27;</span><br></pre></td></tr></table></figure>
-<p>用逗号还能用来做金额的千位分隔符。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/27/Caffe%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/27/Caffe%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/" itemprop="url">Caffe深度学习框架搭建</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-27T11:53:26+00:00">
-                2016-02-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在整理最近学习的知识时，突然意识到机器学习与深度学习的差别。之前学的gd算法，logistic回归算法，svm算法等都属于机器学习的范畴，而深度学习与他们其实是并列的关系，同属机器学习这个大的范畴。个人认为深度学习其实是曾经没落的BP神经网络的发展，可以说神经网络就是趁着深度学习的浪潮借尸还魂的。不过，深度学习想要理解起来也不是那么容易的。既然如此，我们何不搭建一个黑盒环境，先直观感受一下深度学习的魅力再慢慢研究呢？这里我们用到的工具就是Caffe深度学习框架。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>说道Caffe，我们不得不提他的作者<a target="_blank" rel="noopener" href="http://daggerfs.com/">贾扬清</a>（点击进入个人主页）。没错是一个中国人，而且是一个非常厉害的中国人（我词穷）。话不多说，我们来看看他的CV：</p>
-<p><img src="/images/2016/02/27/1/1.png" alt="Yangqing"><img src="/images/2016/02/27/1/2.png" alt="cv"></p>
-<p>只是很少的一部分，不说话，我们用心来感受就可以了。</p>
-<p>Caffe其实是他与他的朋友利用课余时间写的一个框架，而且写的时候正逢他写博士毕业论文的时候。这么推来大概是2014年左右完成的。</p>
-<p>因此说白了Caffe只是一个普通的小团体的开源项目而已，就连他的官网也是挂靠在berkeleyvision.org上。官网：<a target="_blank" rel="noopener" href="http://caffe.berkeleyvision.org/">http://caffe.berkeleyvision.org/</a></p>
-<h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><p>根据惯例，本人还是一切以<a target="_blank" rel="noopener" href="http://caffe.berkeleyvision.org/installation.html">官方文档</a>做参考，搭建在ubuntu14.04系统上。</p>
-<h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>项目托管在github上，见他的<a target="_blank" rel="noopener" href="https://github.com/BVLC/caffe">github</a>即可。</p>
-<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><p>依赖有很多，除了常见的包之外，还要下这些：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler</span><br><span class="line">sudo apt-get install --no-install-recommends libboost-all-dev</span><br><span class="line">sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev</span><br><span class="line">sudo apt-get install libatlas-base-dev</span><br></pre></td></tr></table></figure>
-<p>当然，原则上还要有GPU的依赖，但是不用GPU照样可以工作，只是要注意之后的参数设定。</p>
-<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>和OpenCV一样，这里用cmake编译。</p>
-<p>打开项目根目录，依次输入以下指令即可：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make all</span><br><span class="line">make install</span><br><span class="line">make runtest</span><br></pre></td></tr></table></figure>
-<p>这样就会在build文件加里面生成很多的文件。注意，这些文件不能删的，因为事实上他编译得到的头文件啊、二进制文件啊都在这里，将来使用caffe的时候都要用到。</p>
-<p>如果需要安装python接口的话还要输入<code>make pycaffe</code>，而且还需要下载python的依赖。在项目根目录下，输入：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd ./build/install/python/</span><br><span class="line">for req in $(cat requirements.txt); do sudo pip install $req; done</span><br></pre></td></tr></table></figure>
-<p>就是要满足这个文件里的所有依赖(除此之外还有一个skimage.so需要下载i)。但是，由于国内的pip镜像普遍不全，如果不翻墙，总有一些包下不下来。因此，我手动打开requirements.txt，查看具体需要的包，然后通过<code>$sudo apt-get install python-*****</code>的办法下载某些无法下载的包。</p>
-<p>如果完全下载好了，那么在项目中进入.&#x2F;python目录中打开ipython，就能import caffe 了。当然，为了方便，我们可以把caffe文件夹（caffe模块的位置）复制到<code>/usr/lib/python2.7/dist-packages</code> 目录下，这样就可以在任意的地方调用了。</p>
-<h3 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h3><p>事实上在编译阶段就进行了测试，只是这样并没有具体的感悟，下面就结合mnist来简单测试下。</p>
-<p>在项目根目录下输入：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./data/mnist/get_mnist.sh</span><br><span class="line">./examples/mnist/create_mnist.sh</span><br></pre></td></tr></table></figure>
-<p>表示下载mnist训练集，并转换为指定格式。</p>
-<p>然后需要打开<code>./examples/mnist/lenet_solver.prototxt</code> 文件，并将最后一行的GPU改成CPU。(毕竟之前没有装GPU，果断是不支持的)。</p>
-<p>最后就可以跑训练程序了。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./examples/mnist/train_lenet.sh</span><br></pre></td></tr></table></figure>
-<p>得到结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">I0227 16:58:31.228276  5528 solver.cpp:228] Iteration 9800, loss = 0.0148246</span><br><span class="line">I0227 16:58:31.228313  5528 solver.cpp:244]     Train net output #0: loss = 0.0148246 (* 1 = 0.0148246 loss)</span><br><span class="line">I0227 16:58:31.228335  5528 sgd_solver.cpp:106] Iteration 9800, lr = 0.00599102</span><br><span class="line">I0227 16:58:37.839028  5528 solver.cpp:228] Iteration 9900, loss = 0.00598603</span><br><span class="line">I0227 16:58:37.839066  5528 solver.cpp:244]     Train net output #0: loss = 0.00598603 (* 1 = 0.00598603 loss)</span><br><span class="line">I0227 16:58:37.839088  5528 sgd_solver.cpp:106] Iteration 9900, lr = 0.00596843</span><br><span class="line">I0227 16:58:44.390777  5528 solver.cpp:454] Snapshotting to binary proto file examples/mnist/lenet_iter_10000.caffemodel</span><br><span class="line">I0227 16:58:44.395431  5528 sgd_solver.cpp:273] Snapshotting solver state to binary proto file examples/mnist/lenet_iter_10000.solverstate</span><br><span class="line">I0227 16:58:44.425786  5528 solver.cpp:317] Iteration 10000, loss = 0.00296525</span><br><span class="line">I0227 16:58:44.425813  5528 solver.cpp:337] Iteration 10000, Testing net (#0)</span><br><span class="line">I0227 16:58:48.531802  5528 solver.cpp:404]     Test net output #0: accuracy = 0.9909</span><br><span class="line">I0227 16:58:48.531833  5528 solver.cpp:404]     Test net output #1: loss = 0.0281938 (* 1 = 0.0281938 loss)</span><br><span class="line">I0227 16:58:48.531841  5528 solver.cpp:322] Optimization Done.</span><br><span class="line">I0227 16:58:48.531859  5528 caffe.cpp:222] Optimization Done.</span><br></pre></td></tr></table></figure>
-<p>最后可以发现拟合的准确率为99.09%。</p>
-<p>至于每一个命令文件到底是做了什么可以直接打开看看。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/26/%E5%9B%BE%E5%83%8F%E5%8C%B9%E9%85%8D%E4%B8%ADHarris%E8%A7%92%E7%82%B9%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/26/%E5%9B%BE%E5%83%8F%E5%8C%B9%E9%85%8D%E4%B8%ADHarris%E8%A7%92%E7%82%B9%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/" itemprop="url">图像匹配中Harris角点特征提取</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-26T15:39:42+00:00">
-                2016-02-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在进行图像检测或者是识别的时候，我们需要提取出一些有特征的点加以识别，最常用的就是基于点的识别。这里所谓的点，其实就是一些重要的点，比如轮廓的拐角，线段的末端等。这些特征比较容易识别，而且不容易受到光照等环境的影响，因此在许多的特征匹配算法中十分常见。</p>
-<p>常见的特征点提取算法有Harris算 子（改进后的Shi-Tomasi算法）、Moravec算子、Forstner算子、小波变换算子等。现在就先介绍一下最常用的Harris角点检测算法。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Harris算法的思想很简单，也很容易理解。</p>
-<p>我们知道角点附近的区域相比于其他地方有这样一个显著的特点，就是无论沿着哪一个方向看，他灰度的变化率始终是很大的。也就是说假设我们有一个矩形窗口罩在角点附近，将这个窗口顺着任意方向移动一小段距离得到一个新的区域，将这个新的区域与旧的区域对应点的灰度做差得到的值始终很大。相比之下，平滑区域的变化就很小，而边缘区域沿着某些方向变化率大、某些方向变化率小。</p>
-<p>Harris算法利用的就是这个特点，他首先定义了一个窗口函数$w(x,y)$来表示他选择的窗口区域，$(x,y)$表示点的坐标，$w(x,y)$表示这个坐标所占的权值。有时候我们用0-1赋值，表示选定一块区域，也有时候我们用高斯滤波减少噪点的影响；然后定义了一个方向向量$(u,v)$，以及$E(u,v)$表示窗口沿着$(u,v)$方向移动后的梯度变化情况。并将$E(u,v)$做如下定义：</p>
-<p>$E(u,v)&#x3D;\underset{x,y}{\Sigma} w(x,y)[I(x+u,y+v)-I(x,y)]^2$</p>
-<p>其中$I(x,y)$表示点$(x,y)$的灰度值。</p>
-<p>根据上面的介绍我们知道角点的特征就是$E(u,v)$的值取较大值。那么为了更方便的计算，我们对他需要进行一下化简：</p>
-<p>泰勒展开：$I(x+u,y+v)-I(x,y)&#x3D;I(x,y)+uI_x+vI_y$</p>
-<p>其中$I_x,I_y$分别为灰度沿x,y方向的导数。</p>
-<p>转化为矩阵形式：$E(u,v)&#x3D;[u\ v]M\begin{bmatrix}u\\v\end{bmatrix},M&#x3D;\underset{x,y}\Sigma w(x,y)\begin{bmatrix}I_x^2&amp;I_xI_y\\I_xI_y&amp;I_y^2\end{bmatrix}$</p>
-<p>最后定义一个估价函数R：</p>
-<p>$R&#x3D;det(M)&#x3D;k(trace(M))^2$</p>
-<p>其中$det(M)&#x3D;\lambda_1\lambda_2,trace(M)&#x3D;\lambda_1+\lambda_2$,k是一个控制参数。</p>
-<p>$\lambda_1,\lambda_2$为M的特征值。</p>
-<p>这个估价函数个特性，就是当R较小时，图像是平坦的；当R小于０时，图像是一个边缘；当R很大时，这个图像是一个角点。因此通常我们会对R设置一个阈值，大于这个阈值的点我们可以看做是角点。</p>
-<h2 id="OpenCV调用"><a href="#OpenCV调用" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h2><p>OpenCV里封装了Harris算法，调用下看看效果，就不自己实现了。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img=cv2.imread(<span class="string">&#x27;test.png&#x27;</span>,cv2.IMREAD_GRAYSCALE)</span><br><span class="line">cv2.imshow(<span class="string">&#x27;gray.png&#x27;</span>,img)<span class="comment">#控制背景为黑色</span></span><br><span class="line">cv2.imwrite(<span class="string">&#x27;gray.png&#x27;</span>,img)</span><br><span class="line">im=np.float32(img)</span><br><span class="line">dst=cv2.cornerHarris(im,<span class="number">3</span>,<span class="number">3</span>,<span class="number">0.04</span>)<span class="comment">#生成估价矩阵</span></span><br><span class="line"></span><br><span class="line">height,width=dst.shape</span><br><span class="line">mark=dst&gt;<span class="number">0.01</span>*dst.<span class="built_in">max</span>()<span class="comment">#寻找具有较大权值的像素点</span></span><br><span class="line">height,width=mark.shape</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> xrange(height):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width):</span><br><span class="line">        <span class="keyword">if</span> mark[i][j]:</span><br><span class="line">            cv2.circle(img,(j,i),<span class="number">5</span>,<span class="number">255</span>)<span class="comment">#标记得到的点</span></span><br><span class="line">cv2.imshow(<span class="string">&#x27;Harris.png&#x27;</span>,img)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;Harris.png&#x27;</span>,img)</span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
-<p>重要的步骤就是在估价矩阵里找到较大的那些点。</p>
-<p><strong>效果图</strong></p>
-<p><img src="/images/2016/02/26/1/1.png" alt="gray"><br><img src="/images/2016/02/26/1/2.png" alt="Harris"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/25/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E5%87%BB%E4%B8%AD%E5%87%BB%E4%B8%8D%E4%B8%AD%E5%8F%98%E6%8D%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/25/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E5%87%BB%E4%B8%AD%E5%87%BB%E4%B8%8D%E4%B8%AD%E5%8F%98%E6%8D%A2/" itemprop="url">二值形态学之击中击不中变换</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-25T15:21:58+00:00">
-                2016-02-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>击中击不中变换（Hit Miss Transform ，HMT），是通过同时探测图像的内部和外部，进而获取更多的内外标记，体现更多信息的一个方法。他的应用有很多，特别是在图像识别以及图像细化方面。</p>
-<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>既然既要有击中也要有击不中，那么显然我们需要两个结构基元E和F，我们把这两个结构基元记为一个结构元素对$B&#x3D;(E,F$。其中一个用来探测图像内部，一个用来探测图像外部。</p>
-<p>对于给定的图像A，我们定义用B对他进行的击中击不中变换为</p>
-<p>$A*B&#x3D;(A\Theta E)\bigcap (A^c\Theta F)$</p>
-<p>即用E对A进行腐蚀，用F对A的补集进行腐蚀，并将得到的结果求交集。</p>
-<p>这样说可能冠冕堂皇了一点，简单的讲其实就在判断图像中的某一个像素，将这个像素与结构基元的‘原点’对应，看看结构基元中的‘击中’基元是否能完全被图像覆盖、结构基元中的‘击不中部分’是否能与图像没有任何交集。如果答案均为是，那么这个点就可以得到保留，否则就舍弃。当然，这里用了腐蚀的方法使得图像更加容易被识别进去。</p>
-<p>说白了一点其实就是相当于在用一个模子来测试这个图片，并将所有符合这个模子的中心点标记下而已。</p>
-<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><h3 id="物体识别"><a href="#物体识别" class="headerlink" title="物体识别"></a>物体识别</h3><p>这个很显而易见了，只要将击中基元设计成为需要识别的图像的样子，击不中基元设计为击中基元取反后的样子即可。然后用这两个基元对图像进行检测即可。</p>
-<p>不过有时候图像会发生略微变形，为了提高识别率，我们通常会将两个结构基元都稍微腐蚀一下，给图像变形留下些余地。</p>
-<p>思路比较清楚，具体代码依据实际情况编写即可，这里不做举例。</p>
-<h3 id="细化"><a href="#细化" class="headerlink" title="细化"></a>细化</h3><h4 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h4><p>图像细化是一种最常见的使用击中击不中变换的形态学算法。他的目的就如他的字面意思，将图像变细，就像取到了图像的骨架。</p>
-<p>其定义是，对于图像S，利用结构对$B&#x3D;(E,f)$进行细化记为：</p>
-<p>$S\bigotimes B&#x3D;S\setminus (S*B)$</p>
-<p>其中$S*B$表示用B对S进行细化得到的标记点，$\setminus$表示求差集。</p>
-<p>下面介绍一种细化的方法。</p>
-<h4 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h4><p>设置八个分别代表不同边界的击中击不中模板：</p>
-<p>$\begin{bmatrix}\bullet&amp;\bullet&amp;\bullet\\&amp;\circ&amp;\\\circ&amp;\circ&amp;\circ\end{bmatrix}$$\begin{bmatrix}&amp;\bullet&amp;\bullet\\\circ&amp;\circ&amp;\bullet\\\circ&amp;\circ&amp;\end{bmatrix}$$\begin{bmatrix}\circ&amp;&amp;\bullet\\\circ&amp;\circ&amp;\bullet\\\circ&amp;&amp;\bullet\end{bmatrix}$$\begin{bmatrix}\circ&amp;\circ&amp;\\\circ&amp;\circ&amp;\bullet\\&amp;\bullet&amp;\bullet\end{bmatrix}$</p>
-<p>$\begin{bmatrix}\circ&amp;\circ&amp;\circ\\&amp;\circ&amp;\\\bullet&amp;\bullet&amp;\bullet\end{bmatrix}$$\begin{bmatrix}&amp;\circ&amp;\circ\\\bullet&amp;\circ&amp;\circ\\\bullet&amp;\bullet&amp;\end{bmatrix}$$\begin{bmatrix}\bullet&amp;&amp;\circ\\\bullet&amp;\circ&amp;\circ\\\bullet&amp;&amp;\circ\end{bmatrix}$$\begin{bmatrix}\bullet&amp;\bullet&amp;\\\bullet&amp;\circ&amp;\circ\\&amp;\circ&amp;\circ\end{bmatrix}$</p>
-<p>其中$\circ$表示击中模板，$\bullet$表示击不中模板，０表示不设置限制。每个矩阵的中心位置设为原点。</p>
-<p>接下来我们要做的就是用着八个模板依次对待处理的图像做击中击不中变换，每轮操作都会使图像变细。经过多次的迭代之后图像保持不变，这个结果就是经过细化后的图像了。</p>
-<p>由于OpenCV中没有直接进行HMT的模板，因此手敲了一个（大概意思差不多是这样，就是效率不敢恭维。。）</p>
-<h4 id="OpenCV实现"><a href="#OpenCV实现" class="headerlink" title="OpenCV实现"></a>OpenCV实现</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">im=cv2.imread(<span class="string">&#x27;test.png&#x27;</span>,cv2.IMREAD_GRAYSCALE)</span><br><span class="line">thresh,im=cv2.threshold(im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line">cv2.imshow(<span class="string">&#x27;binary.png&#x27;</span>,im)<span class="comment">#控制背景为黑色</span></span><br><span class="line">cv2.imwrite(<span class="string">&#x27;binary.png&#x27;</span>,im)</span><br><span class="line"></span><br><span class="line">arr=np.array(im)</span><br><span class="line">mat=[]<span class="comment">#HMT模板矩阵</span></span><br><span class="line">mat.append(np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]]))</span><br><span class="line">mat.append(np.array([[<span class="number">0</span>,-<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>]]))</span><br><span class="line">mat.append(np.array([[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]]))</span><br><span class="line">mat.append(np.array([[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>]]))</span><br><span class="line">mat.append(np.array([[<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>,-<span class="number">1</span>],[<span class="number">0</span>,-<span class="number">1</span>,-<span class="number">1</span>]]))</span><br><span class="line">mat.append(np.array([[<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>],[-<span class="number">1</span>,-<span class="number">1</span>,-<span class="number">1</span>]]))</span><br><span class="line">mat.append(np.array([[-<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],[-<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[-<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]]))</span><br><span class="line">mat.append(np.array([[-<span class="number">1</span>,-<span class="number">1</span>,<span class="number">0</span>],[-<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>]]))</span><br><span class="line"></span><br><span class="line">height,width=arr.shape</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:<span class="comment">#迭代直至无变化</span></span><br><span class="line">    before=arr.copy()</span><br><span class="line">    <span class="keyword">for</span> m <span class="keyword">in</span> mat:<span class="comment">#使用八个模板进行变换</span></span><br><span class="line">        mark=[]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> xrange(height-<span class="number">2</span>):<span class="comment">#对每个非边界点进行测试</span></span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> xrange(width-<span class="number">2</span>):</span><br><span class="line">                reg=<span class="literal">True</span></span><br><span class="line">                <span class="keyword">for</span> im <span class="keyword">in</span> xrange(<span class="number">3</span>):</span><br><span class="line">                    <span class="keyword">for</span> jm <span class="keyword">in</span> xrange(<span class="number">3</span>):</span><br><span class="line">                        <span class="keyword">if</span> <span class="keyword">not</span> arr[i+<span class="number">1</span>][j+<span class="number">1</span>]==<span class="number">255</span>:</span><br><span class="line">                            <span class="keyword">continue</span></span><br><span class="line">                        <span class="keyword">if</span> m[im][jm]==<span class="number">1</span> <span class="keyword">and</span> arr[i+im][j+jm]==<span class="number">0</span>:</span><br><span class="line">                            reg=<span class="literal">False</span></span><br><span class="line">                        <span class="keyword">if</span> m[im][jm]==-<span class="number">1</span> <span class="keyword">and</span> arr[i+im][j+jm]==<span class="number">255</span>:</span><br><span class="line">                            reg=<span class="literal">False</span></span><br><span class="line">                <span class="keyword">if</span> reg:<span class="comment">#找到标记，删除</span></span><br><span class="line">                    mark.append((i+<span class="number">1</span>,j+<span class="number">1</span>))</span><br><span class="line">        <span class="keyword">for</span> it <span class="keyword">in</span> mark:</span><br><span class="line">            x,y=it</span><br><span class="line">            arr[x][y]=<span class="number">0</span></span><br><span class="line">    <span class="keyword">if</span> (before==arr).<span class="built_in">all</span>():</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;thin.png&#x27;</span>,arr)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;thin.png&#x27;</span>,arr)</span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
-<p>就是用八个模板不停的求卷积，并将标记到的点删除，直至无法删除为止。</p>
-<h4 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h4><p><img src="/images/2016/02/25/2/1.png" alt="binary"></p>
-<p><img src="/images/2016/02/25/2/2.png" alt="thin"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/02/25/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E5%BC%80%E8%BF%90%E7%AE%97%E5%92%8C%E9%97%AD%E8%BF%90%E7%AE%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/02/25/%E4%BA%8C%E5%80%BC%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B9%8B%E5%BC%80%E8%BF%90%E7%AE%97%E5%92%8C%E9%97%AD%E8%BF%90%E7%AE%97/" itemprop="url">二值形态学之开运算和闭运算</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-02-25T06:49:48+00:00">
-                2016-02-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>开闭运算是二值形态学的重要部分，是对腐蚀和膨胀算法的扩展应用，在图像的去噪方面也是十分的常用。</p>
-<h2 id="二值开运算"><a href="#二值开运算" class="headerlink" title="二值开运算"></a>二值开运算</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>用结构元素B（即模板核）对图像A进行开运算，可以用符号$A\circ B$来表示，其定义式为：</p>
-<p>$A\circ B&#x3D;(A\Theta B)\bigoplus B$</p>
-<p>所以开运算实际上就是A先被B腐蚀，再被B膨胀。</p>
-<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><p>很明显，开运算可以消除一些很小的背景噪点（椒盐噪声），平滑较大物体的边界而不明显改变其体积。也会磨光矩形的内边缘，以及分离一些粘连目标。</p>
-<p>（这里所说的背景噪点是指以黑色为背景色，白色为前景色）</p>
-<h3 id="OpenCV调用"><a href="#OpenCV调用" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">im=cv2.imread(<span class="string">&quot;test.png&quot;</span>,cv2.IMREAD_GRAYSCALE)<span class="comment">#以二值图读入</span></span><br><span class="line"></span><br><span class="line">im=cv2.bitwise_not(im)<span class="comment">#由于背景为白色，将其置反从而统一标准</span></span><br><span class="line"></span><br><span class="line">thresh,im=cv2.threshold(im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)<span class="comment">#OTSU转化为二值图</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;binary&#x27;</span>,im)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;binary.png&#x27;</span>,im)</span><br><span class="line"></span><br><span class="line">kernel=np.ones((<span class="number">2</span>,<span class="number">2</span>),np.uint8)<span class="comment">#模板核</span></span><br><span class="line"></span><br><span class="line">opening=cv2.morphologyEx(im,cv2.MORPH_OPEN,kernel)<span class="comment">#进行开运算消除背景噪声</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;opening&#x27;</span>,opening)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;opening.png&#x27;</span>,opening)</span><br><span class="line"></span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
-<p>这里调用的是cv2.morphologyEx函数，这是专门用于处理形态学问题的，传入适当参数即可。</p>
-<p>由于图像本身是以白色为背景，因此将他的像素取个反，使他符合约定俗称的黑色背景。</p>
-<p>（写的时候发现一个问题，就是imread好像并不直接支持gif图像格式的读取，因此本来是test.gif的图片还得事先进行convert，转化为test.png然后才好使用）</p>
-<h3 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h3><p><img src="/images/2016/02/25/1/1.png" alt="binary"></p>
-<p><img src="/images/2016/02/25/1/2.png" alt="opening"></p>
-<h2 id="二值闭运算"><a href="#二值闭运算" class="headerlink" title="二值闭运算"></a>二值闭运算</h2><h3 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h3><p>用结构元素B（即模板核）对图像A进行闭运算，可以用符号$A\cdot B$来表示，其定义式为：</p>
-<p>$A\cdot B&#x3D;[A\bigoplus (-B)]\Theta (-B)$</p>
-<p>所以闭运算实际上就是A先被B膨胀，再被B腐蚀。</p>
-<h3 id="作用-1"><a href="#作用-1" class="headerlink" title="作用"></a>作用</h3><p>闭运算在去除图像的前景噪声方面具有很好的应用，通过闭运算之后，图像原有目标的间断可以得到连接、目标内部的孔洞可以得到填充而基本不改变原图的大小以及形态。同时也会磨光凸向图像内部的边角。</p>
-<h3 id="OpenCV调用-1"><a href="#OpenCV调用-1" class="headerlink" title="OpenCV调用"></a>OpenCV调用</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">im=cv2.imread(<span class="string">&quot;test.png&quot;</span>,cv2.IMREAD_GRAYSCALE)<span class="comment">#以二值图读入</span></span><br><span class="line"></span><br><span class="line">thresh,im=cv2.threshold(im,<span class="number">0</span>,<span class="number">255</span>,cv2.THRESH_BINARY+cv2.THRESH_OTSU)<span class="comment">#OTSU转化为二值图</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;binary&#x27;</span>,im)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;binary.png&#x27;</span>,im)</span><br><span class="line"></span><br><span class="line">kernel=np.ones((<span class="number">2</span>,<span class="number">2</span>),np.uint8)<span class="comment">#模板核</span></span><br><span class="line"></span><br><span class="line">closing=cv2.morphologyEx(im,cv2.MORPH_CLOSE,kernel)<span class="comment">#进行闭运算消除前景噪声</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&#x27;closing&#x27;</span>,closing)</span><br><span class="line">cv2.imwrite(<span class="string">&#x27;closing.png&#x27;</span>,closing)</span><br><span class="line"></span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
-<p>没啥好说的了，对着开操作改下参数就好了。</p>
-<h3 id="效果图-1"><a href="#效果图-1" class="headerlink" title="效果图"></a>效果图</h3><p><img src="/images/2016/02/25/1/3.png" alt="binary"><br><img src="/images/2016/02/25/1/4.png" alt="closing"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/44/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/44/">44</a><span class="page-number current">45</span><a class="page-number" href="/page/46/">46</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/46/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/44/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/44/">44</a><span class="page-number current">45</span><a class="page-number" href="/page/46/">46</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/46/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1939,7 +1892,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1950,7 +1903,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -1961,7 +1914,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

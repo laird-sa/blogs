@@ -307,6 +307,947 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/13/SpringBoot%E4%B9%8BController%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/13/SpringBoot%E4%B9%8BController%E7%94%A8%E6%B3%95/" itemprop="url">SpringBoot之Controller用法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-13T14:53:21+00:00">
+                2017-05-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><p>Controller是SpringBoot里最基本的组件，他的作用是把用户提交来的请求通过对URL的匹配，分配给不同的接收器，再进行处理，然后向用户返回结果。他的重点就在于如何从HTTP请求中获得信息，提取参数，并分发给不同的处理服务。</p>
+<h2 id="基本组成"><a href="#基本组成" class="headerlink" title="基本组成"></a>基本组成</h2><p>一个最经典的Controller应该大概长这样:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.demo.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Controller;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by myths on 5/16/17.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IndexController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(value = &#123;&quot;index&quot;, &quot;/&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>首先应该在类的开头，加上<code>@Controller</code>注解，告知Spring这是一个控制器。<br>然后在对应的处理函数前面加上<code>@RequestMapping</code>，告知这个函数需要相应的URL。<br>接着这个函数传入了一个Model类型的参数，这个参数主要是用于向模板传递数据。<br>该函数最后返回了一个叫”index”的字符串，表示将调用名为”index”的模板，具体名称取决于模板引擎，比如对于jsp他将访问”index.jsp”这个文件,对于thymeleaf，他将访问”index.html”这个文件。</p>
+<p>上面的是最简单的用法，实际上有很多细节需要注意，下面就来一一解释。</p>
+<h2 id="ResponseBody"><a href="#ResponseBody" class="headerlink" title="ResponseBody"></a>ResponseBody</h2><p>如果我们想返回纯字符串而不是渲染后的模板，那我们可以在需要返回字符串的函数前面加上<code>@ResponseBody</code>这个注解；<br>如果我们像对于整个类都返回字符串，我们也可以在这个类前面加上<code>@ResponseBody</code>注解，或者将<code>@Controller</code>注解换成<code>@RestController</code>，均可。</p>
+<h2 id="RequestMapping"><a href="#RequestMapping" class="headerlink" title="RequestMapping"></a>RequestMapping</h2><h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p>这个注解是用来告诉Spring，下面的这个函数或者类是用来映射到那个URL的，通常情况下有下面这些选项：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(</span></span><br><span class="line"><span class="meta">        path = &#123;&quot;/test&quot;&#125;,</span></span><br><span class="line"><span class="meta">        params = &#123;&quot;name&quot;,&quot;userId&quot;&#125;,</span></span><br><span class="line"><span class="meta">        method = &#123;RequestMethod.GET&#125;,</span></span><br><span class="line"><span class="meta">        consumes = &#123;&quot;text/plain&quot;, &quot;application/*&quot;&#125;,</span></span><br><span class="line"><span class="meta">        produces = &quot;text/plain&quot;,</span></span><br><span class="line"><span class="meta">        headers = &quot;content-type=text/*&quot;</span></span><br><span class="line"><span class="meta">)</span></span><br></pre></td></tr></table></figure>
+<p>我们可以指定这个路径，参数，方法，头信息，来作为一个Controller的入口。当然，通常我们只需要指定path就行了。</p>
+<h3 id="对象转json或xml"><a href="#对象转json或xml" class="headerlink" title="对象转json或xml"></a>对象转json或xml</h3><p>这里有一个使用的小窍门，比如有时候我们希望返回json字符串，我们当然可以调用jackson,gson,fastjson等等工具来组合数据，但是这样显然比较麻烦。其实springboot自带了将对象持久化的工具，只要我们在<code>produces</code>参数中指定头信息，就可以将返回的对象直接转换为json或xml。比如:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mythsman.controller;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.mythsman.bean.TestBean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;test&quot;, produces = &#123;&quot;application/json;charset=UTF-8&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">public</span> TestBean <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">TestBean</span> <span class="variable">testBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TestBean</span>();</span><br><span class="line">        testBean.setName(<span class="string">&quot;myths&quot;</span>);</span><br><span class="line">        testBean.setAge(<span class="number">12</span>);</span><br><span class="line">        <span class="keyword">return</span> testBean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>访问后的返回结果就是<code>&#123;&quot;name&quot;:&quot;myths&quot;,&quot;age&quot;:12&#125;</code>。同理，也可以自动转换成xml格式，不过xml格式对与map等的数据结构无法支持，因此我们还是建议采用json。</p>
+<h3 id="作用对象"><a href="#作用对象" class="headerlink" title="作用对象"></a>作用对象</h3><p>这个注解可以注解一个函数，也可以注解一个类。当注解一个类时，类中所有的方法都会在这个基础上再进行过滤：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/path1&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/path2&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;ok&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数就能匹配”&#x2F;path1&#x2F;path1”这个地址。</p>
+<h3 id="缺省参数"><a href="#缺省参数" class="headerlink" title="缺省参数"></a>缺省参数</h3><p>当RequestMapping的参数是空的时候，他就表示匹配剩余所有的页面,实际上也就是匹配所有的404页面。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IndexController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当RequestMapping不指定参数名时，默认就是path参数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IndexController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="PathVariable"><a href="#PathVariable" class="headerlink" title="PathVariable"></a>PathVariable</h2><p>RequestMapping中的path也可以是一个未定的变量，比如下面的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/&#123;variable&#125;&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(<span class="meta">@PathVariable(&quot;variable&quot;)</span>String variable)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> variable;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过花括号我们就可以指定这个变量，并且通过<code>@PathVariable</code>注解得到这个参数，非常方便。</p>
+<h2 id="RequestParam"><a href="#RequestParam" class="headerlink" title="RequestParam"></a>RequestParam</h2><p>RequestMapping也可以获取类似表单传回的信息形式，比如<code>/index?name=XXX</code>，这个<code>name</code>变量就可以通过RequestParam注解来获得:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(<span class="meta">@RequestParam(value = &quot;name&quot;,required = false,defaultValue = &quot;233&quot;)</span>String name)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以控制这个参数的名字，是否必须，以及设置默认值，来更好的进行匹配。</p>
+<h2 id="RequestBody"><a href="#RequestBody" class="headerlink" title="RequestBody"></a>RequestBody</h2><p>RequestBody用来获取Post信息的消息体,只要在参数中通过<code>@RequestBody</code>注解就能得到这个参数:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestController</span> &#123;</span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(<span class="meta">@RequestBody</span> String body)</span> &#123;</span><br><span class="line">		<span class="comment">//对body进行解析即可</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;success&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上面这些大概就是Controller中最基本的用法了，十分的方便清楚。具体的细节可以参考源码中的注释，解释的也是十分详尽了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/12/SpringBoot%E7%8E%AF%E5%A2%83%E7%86%9F%E6%82%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/12/SpringBoot%E7%8E%AF%E5%A2%83%E7%86%9F%E6%82%89/" itemprop="url">SpringBoot环境熟悉</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-12T14:34:12+00:00">
+                2017-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>就个人而言，我曾经比较畏惧JAVA，我们都知道JAVA这个东西是相当成熟了，各种框架特别复杂，名词也特别的多。我还记得我第一次想学struts的时候折腾了半天硬是没有找到头绪，面对各种眼花缭乱的包、眼花缭乱的配置文件、眼花缭乱的框架版本、眼花缭乱的报错信息，还有眼花缭乱的各种名词，硬是停留在了servlet的层面上，完全失去了在短时间内学下去的动力。因此很久都没有碰过JAVA。不过一个机缘巧合，我突然发现其实这些东西都是很有套路的，每一个东西其实都是为了解决某一个小问题，只是刚入门的时候面对庞大的体系一下子懵了。而且，在JAVA发展到当今的程度，之前冗杂的事情也被简化了很多，框架的封装度更加的高，我们学起来也轻松很多了。</p>
+<h2 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h2><p>Springboot就是当前火热起来的用于JAVA Web开发的微框架，配置十分方便，结合Intellij IDEA用起来十分的顺手，非常适合快速上手。同时他的文档也清楚,<a target="_blank" rel="noopener" href="http://spring.io/">官方文档</a>里写的也很细致。</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>曾经最烦人的配置问题在这里都不是问题，当我们需要创建项目的时候，可以去<a target="_blank" rel="noopener" href="http://start.spring.io/">start.spring.io</a>上选择相应的配置，下载一个空的项目包，然后用IDE打开即可。</p>
+<p>通常情况下，除了指定包信息以及各种版本信息之外，我们在开发Springboot的时候一般会加上下面的依赖：</p>
+<ul>
+<li>Thymeleaf</li>
+<li>AOP</li>
+<li>MySQL</li>
+<li>MyBatis</li>
+<li>Redis</li>
+<li>DevTools</li>
+</ul>
+<p>Thymeleaf是SpringBoot1.5版本后推荐的模板引擎，取代了曾经的velocity以及更加古老的jsp，左右后台渲染前台页面的控制器；<br>AOP则是对面向切面编程思想的支持，他给我们提供了面向切面编程的接口；<br>MySQL则是非常主流的数据库驱动；<br>Mybatis则为我们在数据库与函数之间建立了一个DAO(Data Access Object)层，方便我们不用写jdbc的代码就能访问数据；<br>Redis则是非常流行的NOSQL数据库，适合对一些数据做缓存处理以及快速的读取写入；<br>DevTools则提供了很多方便我们编程的特性，让IDE反应更快。。。</p>
+<p>事实上这个网站做的事情也很简单，就是构建了下面的文件结构:</p>
+<pre><code>├── mvnw
+├── mvnw.cmd
+├── pom.xml
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── example
+    │   │           └── demo
+    │   │               └── DemoApplication.java
+    │   └── resources
+    │       ├── application.properties
+    │       ├── static
+    │       └── templates
+    └── test
+        └── java
+            └── com
+                └── example
+                    └── demo
+                        └── DemoApplicationTests.java
+</code></pre>
+<p>说白了其实就是配置了maven的包管理系统，以及推荐的文件结构，仅此而已。</p>
+<h2 id="什么是maven"><a href="#什么是maven" class="headerlink" title="什么是maven"></a>什么是maven</h2><p>maven其实就是一个包管理工具，就像是python的pip，ubuntu的apt,js的npm，在<a target="_blank" rel="noopener" href="https://www.maven.org/">www.maven.org</a>里集成了绝大多数大家常用的包信息，类似于webservice的注册中心。maven将本项目所有的包依赖全都写进了pom.xml文件中，免得我们一个一个下载再一个一个放进build path里，免去了很多的麻烦。<br>上面的配置形成的pom.xml如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line">	&lt;groupId&gt;com.example&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;demo&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">	&lt;packaging&gt;jar&lt;/packaging&gt;</span><br><span class="line">	&lt;name&gt;demo&lt;/name&gt;</span><br><span class="line">	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;</span><br><span class="line">	&lt;parent&gt;</span><br><span class="line">		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;</span><br><span class="line">		&lt;version&gt;1.5.3.RELEASE&lt;/version&gt;</span><br><span class="line">		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;</span><br><span class="line">	&lt;/parent&gt;</span><br><span class="line">	&lt;properties&gt;</span><br><span class="line">		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;</span><br><span class="line">		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;</span><br><span class="line">		&lt;java.version&gt;1.8&lt;/java.version&gt;</span><br><span class="line">	&lt;/properties&gt;</span><br><span class="line">	&lt;dependencies&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;1.3.0&lt;/version&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;runtime&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;runtime&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;test&lt;/scope&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">	&lt;/dependencies&gt;</span><br><span class="line">	&lt;build&gt;</span><br><span class="line">		&lt;plugins&gt;</span><br><span class="line">			&lt;plugin&gt;</span><br><span class="line">				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</span><br><span class="line">			&lt;/plugin&gt;</span><br><span class="line">		&lt;/plugins&gt;</span><br><span class="line">        &lt;/build&gt;</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
+<p>如果我们想重新加入一个包，只要在maven的管理中心找到这个包的groupId以及artifactId然后写在这里的dependency里就行了。最后利用IDE提供的自动导入maven包即可。</p>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>相比于曾经写项目每个组件都有一个xml配置文件，SpringBoot都帮我们封装成了一个统一的配置文件application.properties，比如在某一个项目中我的配置是这样的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#tomcat start</span><br><span class="line">server.compression.enabled=true</span><br><span class="line"></span><br><span class="line">#tomcat end</span><br><span class="line"></span><br><span class="line">#redis start</span><br><span class="line">spring.redis.database=0</span><br><span class="line">spring.redis.host=localhost</span><br><span class="line">spring.redis.port=6379</span><br><span class="line">#redis end</span><br><span class="line"></span><br><span class="line">#multipart start</span><br><span class="line">spring.http.multipart.enabled=true</span><br><span class="line">spring.http.multipart.max-file-size=10MB</span><br><span class="line">spring.http.multipart.max-request-size=10MB</span><br><span class="line">#multipart end</span><br><span class="line"></span><br><span class="line">#thymeleaf start</span><br><span class="line">spring.thymeleaf.mode=HTML5</span><br><span class="line">spring.thymeleaf.encoding=UTF-8</span><br><span class="line">spring.thymeleaf.content-type=text/html</span><br><span class="line">spring.thymeleaf.cache=true</span><br><span class="line">#thymeleaf end</span><br><span class="line"></span><br><span class="line">#mysql start</span><br><span class="line">spring.datasource.url=jdbc:mysql://localhost:3306/test</span><br><span class="line">spring.datasource.username=root</span><br><span class="line">spring.datasource.password=123456</span><br><span class="line">#mysql start</span><br><span class="line"></span><br><span class="line">#mybatis start</span><br><span class="line">mybatis.configuration.cache-enabled=true</span><br><span class="line">mybatis.configuration.lazy-loading-enabled=true</span><br><span class="line">mybatis.configuration.multipleResultSetsEnabled=true</span><br><span class="line">#mybatis end</span><br></pre></td></tr></table></figure>
+<p>这其实就是对传统的配置方法做了一层封装，使得项目更加简洁清楚，所有的配置项也都能由IDE自动补全，不要太爽。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>由于这个框架比较新，因此很多组建都需要java8的支持，并且如果以后发布到服务器上，也需要Tomcat8的支持，这一点需要尤其的注意。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/12/java-thread/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/12/java-thread/" itemprop="url">「Java教程」多线程</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-12T10:07:41+00:00">
+                2017-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">Java教程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>多线程的存在，不是提高程序的执行速度。其实是为了提高应用程序的使用率。<br>程序的执行其实都是在抢 CPU 的资源，CPU 的执行权。<br>多个进程是在抢这个资源，而其中的某一个进程如果执行路径(线程)比较多，就会有更高的几率抢到 CPU 的执行权。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/12/java-thread/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/10/wpo-localstorage-css-js/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/10/wpo-localstorage-css-js/" itemprop="url">Web 性能优化（4）——localstorage 存储静态文件的意义</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-10T09:27:00+00:00">
+                2017-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>localstorage 并不仅仅只是”狂拽酷炫吊炸天“的黑科技。在一些特殊场景下，甚至可能会有意想不到的收获。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/10/wpo-localstorage-css-js/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/09/npm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/09/npm/" itemprop="url">NPM 学习笔记整理</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-09T19:25:24+00:00">
+                2017-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Node/" itemprop="url" rel="index">
+                    <span itemprop="name">Node</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="什么是-NPM"><a href="#什么是-NPM" class="headerlink" title="什么是 NPM"></a>什么是 NPM</h1><p><code>npm</code> 之于 <code>Node</code> ，就像 <code>pip</code> 之于 <code>Python</code> , <code>gem</code> 之于 <code>Ruby</code> , <code>composer</code> 之于 <code>PHP</code> 。</p>
+<p><code>npm</code> 是 <code>Node</code> 官方提供的包管理工具，他已经成了 <code>Node</code> 包的标准发布平台，用于 <code>Node</code> 包的发布、传播、依赖控制。<br><code>npm</code> 提供了命令行工具，使你可以方便地下载、安装、升级、删除包，也可以让你作为开发者发布并维护包。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/09/npm/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/05/java-io/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/05/java-io/" itemprop="url">「Java教程」IO机制</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-05T09:31:22+00:00">
+                2017-05-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">Java教程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>输入输出（I&#x2F;O）是指程序与外部设备或其他计算机进行交互的操作。几乎所有的程序都具有输入与输出操作，Java把这些输入与输出操作用流来实现，通过统一的接口来表示，从而使程序设计更为简单。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/05/java-io/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/05/01/C++11%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1027,961 +1968,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/28/wpo-data-uri-performance/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/28/wpo-data-uri-performance/" itemprop="url">Web 性能优化（3）——探讨 data URI 的性能</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-28T13:16:18+00:00">
-                2017-04-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
-                    <span itemprop="name">实验室</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>业内常会有 Data URI 的利与弊、用与不用的讨论，即使在最有经验的前端开发者眼中，也会形成对 data URI 截然不同的看法。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/04/28/wpo-data-uri-performance/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/28/pseudo-elements-and-pseudo-classes/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/28/pseudo-elements-and-pseudo-classes/" itemprop="url">重新认识伪类和伪元素</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-28T08:35:10+00:00">
-                2017-04-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CSS3/" itemprop="url" rel="index">
-                    <span itemprop="name">CSS3</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>熟悉前端的人都会听过<code>css</code>的伪类与伪元素，然而大多数的人都会将这两者混淆(包括我)。那今天就让我们来看看伪类和伪元素的区别吧!</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/04/28/pseudo-elements-and-pseudo-classes/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/26/Angular2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/26/Angular2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" itemprop="url">Angular2学习笔记</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-26T15:23:27+00:00">
-                2017-04-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>阴差阳错，当初在选择写网站的时候选择了使用Angular2+RESTfuｌ，现在想起来，这个选择可能有点轻率了。虽然这套框架我个人觉得可能的确比较适合做移动端Web的开发，但是由于网站开发的经验明显不足，加上这套技术还不是相当的成熟，在学习的过程中走了很多的弯路。而且，功利一点的讲，对于找工作的帮助可能并不是很大，很多Web相关的职务招的都是Java方向的，而我直接跳过这种传统框架直接接触新知识难免会发现基础不牢的情况。不过还好，经过这一段时间的倒腾，好歹把Angular2的东西稍微消化了一点，相比啥都不会，也算是有点收获吧。</p>
-<h2 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h2><p>刚学习Angular2的时候，是照着他的<a target="_blank" rel="noopener" href="https://angular.cn/docs/ts/latest/">中文文档</a>上来的。虽然这上面对框架解释的非常细致，讲的也很清晰，例子也很典型，但是这个文档还是有点偏旧了。文档中介绍的example中用的结构还是用的基于github源码的较早前的版本，现在用起来十分的不方便。现在基本上都是用angular-cli来组织文件，这个项目对Angular2提供了强大的支持，我们用起来也比以前方便了很多。<br>具体的过程就不细说了，可以参考angular-cli的<a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">wiki</a>，主要是以下步骤：</p>
-<ol>
-<li>安装新版本的node。(注意node的版本一定要是6以上的，否则会报奇奇怪怪的错);</li>
-<li>安装angular-cli (<code>npm install -g @angular/cli</code>);</li>
-<li>新建项目 (ng new PROJECTNAME);</li>
-<li>选择一个合适的IDE，我选择的是WebStorm;</li>
-</ol>
-<p>这样基本上就算是搭好了Angular2简单的开发环境。</p>
-<h2 id="开发细节"><a href="#开发细节" class="headerlink" title="开发细节"></a>开发细节</h2><p>Angular2这类MVVM架构的框架跟传统的MVC框架有很大的不同，不过主要需要考虑的就是下面这几个部分：</p>
-<ol>
-<li>模板。主要是模板语言部分以及在模板中使用组件的变量等等。</li>
-<li>数据绑定。包括属性绑定、事件绑定、插值绑定以及双向绑定，主要用于组件内的变量在页面中的显示以及页面等。</li>
-<li>服务。这包括两方面，一个是访问RESTFUL的服务，另一个是用来保存本地变量的。访问RESTFUL的服务通常是使用Promise来进行异步回调使用的，访问本地变量的服务则要注意不要写成全局的变量，否则就会出现类似所有同时访问网站的用户都共享同一个变量的尴尬场面。。。</li>
-<li>依赖注入。依赖注入做的就是控制变量的传递关系，防止数据混乱的调用关系等等。</li>
-</ol>
-<p>具体的使用方法等到需要的时候查看文档即可。</p>
-<h2 id="项目发布"><a href="#项目发布" class="headerlink" title="项目发布"></a>项目发布</h2><p>如果是测试环境，直接<code>ng serve</code>就可以用node服务器在本地的默认4200端口显示页面了。<br>但是，用测试环境你会发现项目非常的巨大，一个啥依赖都没有的’Hello world’就足足有3MB的大小，这显然是用户无法接受的。</p>
-<p>那么为什么他会有这么大呢？这是由于Angular2默认使用的是JIT(Just-in-Time - JIT)编译。这个JIT编译有他的好处，他意味这我们的代码是在客户端解释的，那么他编译的效率会比较高，编译的结果会更好。但是他也有很多的缺点，Angular2文档中列举了下面几点：</p>
-<ol>
-<li>渲染得更快;</li>
-<li>需要的异步请求更少;</li>
-<li>需要下载的Angular框架体积更小;</li>
-<li>提早检测模板错误;</li>
-<li>更安全;</li>
-</ol>
-<p>于是，Angular2又提出了一个新的编译方法叫AOT(Ahead of Time - AOT)。这个编译方法就是相当于静态编译，这样就可以提前筛掉没有使用过的组建，并且减轻了客户端的压力。显然这很棒棒喽，但是文档中介绍的转换方法实在是麻烦，弄了半天报了一堆错也没弄成，最后还是用了angular-cli才算搞定。</p>
-<p>对于开发环境，可以使用<code>ng serve --prod --aot</code>来进行简单的优化。不过对于真正的生产环境我们显然不能用node服务器，我这里用的是nginx来部署，具体步骤如下：</p>
-<ol>
-<li>使用命令<code>ng build --prod --aot</code>来生成<code>dist/</code>文件夹。</li>
-<li>将上面的文件夹配置成nginx站点的根目录</li>
-<li>配置gzip压缩，进一步减少文件传输量</li>
-<li>使用try_files选项配置跳转的启动路径，否则直接输入二级路由是会报错的。</li>
-</ol>
-<p>具体的配置应当是下面这样：</p>
-<pre><code>server &#123;
-    listen 80 default_server;
-    listen [::]:80 default_server ipv6only=on;
-
-    root /var/www/html/dist;
-    index index.html index.htm;
-
-    # Make site accessible from http://localhost/
-    server_name localhost;
-
-    location / &#123;
-        # First attempt to serve request as file, then
-        # as directory, then fall back to displaying a 404.
-        try_files $uri $uri /index.html;
-        # Uncomment to enable naxsi on this location
-        # include /etc/nginx/naxsi.rules
-    &#125;
-    gzip on;
-    gzip_min_length 1k;
-    gzip_buffers 4 8k;
-    gzip_http_version 1.1;
-    gzip_types text/plain application/javascript application/x-javascript text/javascript text/css application/xml;
-&#125;
-</code></pre>
-<p>这基本就是Angular2项目开发的基本过程了。</p>
-<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">angular-cli</a><br><a target="_blank" rel="noopener" href="https://angular.cn/docs/ts/latest/">angular中文文档</a><br><a target="_blank" rel="noopener" href="https://my.oschina.net/syscde/blog/790763">nginx发布Angular2</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/25/java-exception/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/25/java-exception/" itemprop="url">「Java教程」异常处理机制</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-25T00:34:31+00:00">
-                2017-04-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java%E6%95%99%E7%A8%8B/" itemprop="url" rel="index">
-                    <span itemprop="name">Java教程</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Java语言提供了完善的异常处理机制。正确运用这套机制，有助于提高程序的健壮性。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/04/25/java-exception/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/24/%E4%BA%91%E8%AE%A1%E7%AE%97%E6%AF%94%E8%B5%9B%E6%80%BB%E7%BB%93/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/24/%E4%BA%91%E8%AE%A1%E7%AE%97%E6%AF%94%E8%B5%9B%E6%80%BB%E7%BB%93/" itemprop="url">云计算比赛总结</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-24T14:20:35+00:00">
-                2017-04-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>2017年4月23日，今天为期近半年的云计算比赛终于落下了帷幕。尘埃落定，分完奖金，分完奖品，好像一切没有发生过一样，生活也慢慢步入了正轨。但是我总觉得，一切事情总得留下写什么值得记忆和回味的东西。在一切渐渐过去之后，比赛本身变得其实不那么重要，反而是那些看起来与比赛无关的细节更值得铭记。从前我一直觉得，有些事情体验了就好，但是我渐渐发现，体验过的东西几乎都特别的容易忘记，没有思考与总结的体验只能算的上是走马观花，我特别羡慕像杨振宁那样的学者，虽然身体渐渐衰老，但是他总能非常清楚的记得在某年某月某日，与某人发生过哪些对话。虽然我的记性不太好，但是我也希望我的经历能够不仅仅成为过去，而是成为自己一直受用的财富。</p>
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>其实参加这个比赛的原因非常搞笑，在上学期的一次大创项目的例会上，指导老师跟我们聊了聊项目的问题，发现没啥好聊的，然后话锋一转说，“哎？我听说最近有个云计算比赛，你们要不要参加看看，前几年某某老师带的队伍好像都拿了不错的名次，blabla。。。”，我们当然不敢表达什么反对意见了，然后就在我们的项目没啥进展的情况下，撂下手头的事开始搞这个云计算方面的事情。。。<br>然而尴尬的是，我们并没有人会scala，hadoop，spark这类搞分布式云计算常用的疙瘩，一切都得从头学起，但是我们其实也并没有太多的时间。因此拖着拖着，就过了春节。春节过来后，发现不能再拖了，就迎着头皮加班加点的搞了一个多礼拜，才稍微理清楚眉目。虽说是四人的小team，但是实际做起来就我跟某大佬两个人在做。比赛总共两道题，那就一人一道题，我负责基于kmeans聚类的大数据分类算法，大佬负责通用后缀树的构建算法。</p>
-<h2 id="研究"><a href="#研究" class="headerlink" title="研究"></a>研究</h2><p>关于这个kmeans算法，其实spark的mllib里有一个kmeans的库。不过显然，这个在我们的数据集上跑的效率并不好，于是我们就参照大赛提供的一个名叫<a target="_blank" rel="noopener" href="http://glaros.dtc.umn.edu/gkhome/views/cluto">cluto</a>的单机kmeans工具作为参照。里面有一些相关文档，因此我主要是参照这个进行处理。</p>
-<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>问题其实很简单，就是给定两个数据集，你给我用spark跑出这两个数据集的聚类结果。这两个数据集，一个是数目较多特征较少的稠密矩阵，另一个是数目较少特征较多的文本矩阵。初赛跑第一类数据，决赛跑第二类数据。然后评测的时候总和比较准确率(NMI)跟时间。</p>
-<h3 id="我的思路"><a href="#我的思路" class="headerlink" title="我的思路"></a>我的思路</h3><p>照着cluto的意思，我就简单的利用spark mllib中的相关函数进行拼接处理。事实上mllib提供的kmeans库本身没有太大的毛病（感觉毛病其实有两点，后面会说），之所以在大多数情况下效果不是太好，我看主要是因为，人家在设计这个玩意的时候，压根就没打算让你直接套。你得根据你实际的数据集，进行相应的预处理，而这些预处理的手段他其实也在其他的模块里有提供，而且大部分都实现的没啥问题。问题的重点就在于我们如何去根据数据集去选择正确的预处理方式。<br>通常情况下，预处理的方式无非下面这几步：</p>
-<ol>
-<li>特征提取（降维）</li>
-<li>行列加权</li>
-<li>归一化</li>
-</ol>
-<p>所谓特征提取，通常也就是用PCA，SVD这类算法，从高维数据中提取更有代表性的维度来讨论，从而加快运算速度。<br>所谓行列加权，通常是采用一些经验算法，比如IDF加权，将数据进“强化”，使其能更加突出主要维度的作用。<br>所谓归一化，很简单，就是消除各条数据尺度不同带来的影响。虽然很简单，但是也很重要，对结果的影响也不小。</p>
-<p>不过上面的这些步骤也不能一概而论，比如有些数据集上，降维有可能导致数据丢失，行列加权会导致数据异常，归一化会导致主要维度丢失等等。因此mllib在设计的时候就没有将这些方法融入kmeans里面，而是分开来供大家选择，有针对性的使用。</p>
-<p>没错，虽然答辩的时候吹的天花乱坠（其实也没啥干货。。。），但是实际操作的时候用的就是上面的三个步骤，自己几乎没有实现任何功能模块，完全调用mllib中的库。。。</p>
-<p>除此预处理之外，就是些细节参数的选择了，主要包括下面几点：</p>
-<ol>
-<li>距离函数的选择</li>
-<li>初始化中心点的选择</li>
-<li>平均准确率与时间的抉择</li>
-</ol>
-<p>mllib自带的kmeans模块有一个缺点就是他只支持了平方欧氏距离，虽然现在看起来，似乎所有的距离公式都可以某种程度上互相转换。但是简单的看，在很多情况下，不同的距离测度在不同数据集上的表现也不完全相同，因此更换一个合适的距离测度似乎是一个轻松讨巧的提高准确率的办法。我在实际操作中采用的是余弦距离，稍微修改下源码就可以办到。<br>初始化中心点的方法大多数情况采用其自带的kmeans++算法，准确率一般会提高一点。不过也不排除random更好的情况。<br>至于平均准确率与时间的抉择就十分有讲究了，我们比赛成绩说的过去的很大一部分原因就是这个抉择做的还算不错。我们知道在spark1.6以下的版本里，有一个参数叫runs，不过由于一些代码可维护性、执行效率等的原因，在高版本的spark里这个参数被取消了。这个参数曾经存在的意义在于，我们知道kmeans本身的初始点选择具有一定的随机性，那么每次聚类结果的准确率就不一定相同，有时好，有时不好。我们在比赛的时候显然希望尽可能的避免表现不好的情况，那么我们就可以通过运行多次数据，取代价函数最低的那组模型作为最终的模型，这个运行次数就是runs参数的意义。显然，这个参数并不能提高kmeans本身的准确率，而是通过时间，去换取准确率高的概率，减少准确率低的概率。这就是一个简单的“时间换准确率的想法”。与之对应的，也有用“准确率换时间的想法”，比如有许多队伍，在聚类时并不采用整个数据集，而是去进行采样，获取一些有代表性的数据，来做聚类，这样有的确会提高算法执行速度，但是也有降低准确率的可能。</p>
-<h3 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h3><p>当然，我的算法是存在问题的。最突出的问题在于，在实际的运行中，我发现spark提供的kmeans算法并不能很好的并行计算，绝大多数的stage都集中在一个worker上。。，这是一个很尴尬的问题，他意味着这实际上就不是一个分布式程序。不过这个问题也不完全出于我，因为我采用的就是spark mllib中的kmeans实现。这个实现似乎在操作中有一些问题，导致几乎所有的数据都在一个worker上跑，我尝试采用了RangePartition来代替HashPartition，但是结果也并没有任何好转。情急之下我也就没有过多的考虑这个问题，就直接提交了代码。事实上如果这个问题解决了，那么运行时间应该能缩短成1&#x2F;7左右，成绩排进前两名应该是没啥问题的。不过这或许就是差距所在吧。</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>虽然总体上讲，在进入决赛的11支队伍里，我们在两道题上做的都不是很突出，但是由于我们两道题都比较稳定，没有出现短板，因此最后拿了第三名，低于南大PASA实验室的研究僧以及东北大学的队伍。相比之下，南师大的队伍虽然第二题全场最高，但是第一题却是倒数第二，混了个三等奖；东南大学的队伍，虽然第二题跟南大一样跑除了隐藏数据集，但是第一题同样扑街，也混了三等奖。。。<br>说起第一题的结果，其实也颇有争议，评委方认为这个聚类问题得综合考虑时间以及准确率来判分，但是实际操作中，为了防止高速低准确度混分情况的出现，在评价速度分的时候乘上了与准确率有关的系数，导致准确率的影响过大。我这种“时间换准确率”的做法就比较占便宜了，而那种“准确率换时间”的做法就吃了亏。。。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/04/23/optimization-of-my-blog/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/23/optimization-of-my-blog/" itemprop="url">本博客的优化汇总</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-23T08:25:00+00:00">
-                2017-04-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%A0%88/" itemprop="url" rel="index">
-                    <span itemprop="name">博客栈</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><img src="https://bbs-static.nfz.yecdn.com/i/0000087.png" alt="0000087.png"></p>
-<p>我一直在关注我的博客的浏览体验，其中，网站的加载速度对于浏览体验来说是非常重要的。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/04/23/optimization-of-my-blog/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/28/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><span class="page-number current">29</span><a class="page-number" href="/page/30/">30</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/30/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/28/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><span class="page-number current">29</span><a class="page-number" href="/page/30/">30</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/30/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2027,7 +2018,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2038,7 +2029,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -2049,7 +2040,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

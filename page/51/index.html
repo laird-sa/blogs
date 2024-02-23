@@ -307,6 +307,1100 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/22/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C1-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/22/%E8%8B%8F%E5%A4%A7Mooc%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%B7%E8%AF%BE%E8%84%9A%E6%9C%AC%E7%9A%84%E5%88%B6%E4%BD%9C1-3/" itemprop="url">苏大Mooc系统的刷课脚本的制作（1/3）</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-22T15:56:38+00:00">
+                2015-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>闲话不说，其实写这个目的大家都懂，懒得看那些无聊的网路课。但是由于课程的要求，这些课程必须要看，而且由于技术原因，又不能跳着看，视频的播放条不能拖动，只能硬着头皮的刷时间。很多同学都是开着视频开着静音做其他的事，想想也是悲哀。</p>
+<p>当然，我写这个程序的初衷并不是为了偷懒，而是纯粹的学习。用技术手段做出一些别人难以实现的事情可是很有成就感的。为了实现这样一个简单的目的其实也不是那么简单的（至少对我这个前几天刚接触web的人而言）。。。</p>
+<h2 id="课程首页"><a href="#课程首页" class="headerlink" title="课程首页"></a>课程首页</h2><p><img src="/images/2015/12/22/1/1.png"></p>
+<p>从右边点击课程名字就会打开视频，学习完的视频前面会有绿色的钩钩；每个视频下面有播放条，播放条只能在已经看过的部分任意拖动，不能向前拖动。</p>
+<p>这就是课程首页的情况，接下来就是想查看源码。结果发现网页是动态生成的，而不是之前学习的静态网页。这两者最直观的感受就是源代码和审查元素得到的代码不一样，也就是用javascript之类的语言根据即时的情况生成的网页。这时候就需要细致的分析js代码了。</p>
+<p>&nbsp;</p>
+<h2 id="封包分析"><a href="#封包分析" class="headerlink" title="封包分析"></a>封包分析</h2><p>很自然的想法就是查看下封包，弄清楚在观看视频的时候到底是发送了什么东西给后台让后台标记当前视频为已看。经过一番查找（需要细心的找），在用chrome找到了这样的一个包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">General：</span><br><span class="line"></span><br><span class="line">Request URL:http://kczx.suda.edu.cn/G2S/Learning/StudentLearning.ashx?action=GetG2SSetStageLearnPartStudent&amp;fPlanID=34&amp;fPartID=359&amp;fSecond=550&amp;_=1451308953409</span><br><span class="line">Request Method:GET</span><br><span class="line">Status Code:200 OK</span><br><span class="line">Remote Address:42.244.42.191:80</span><br><span class="line"></span><br><span class="line">Request Headers：</span><br><span class="line"></span><br><span class="line">Accept:*/*</span><br><span class="line">Accept-Encoding:gzip, deflate, sdch</span><br><span class="line">Accept-Language:zh-CN,zh;q=0.8</span><br><span class="line">Connection:keep-alive</span><br><span class="line">Cookie:ASP.NET_SessionId=zh4ifl55q521xx45bmbjwa45; amlbcookie=01; iPlanetDirectoryPro=AQIC5wM2LY4SfcxX1vREajjp5zIi4s9GtkPT1Ivxjw%2BJfo4%3D%40AAJTSQACMDE%3D%23</span><br><span class="line">Host:kczx.suda.edu.cn</span><br><span class="line">Referer:http://kczx.suda.edu.cn/G2S/Learning/Learning.htm?Part=&amp;Plan=34&amp;type=2</span><br><span class="line">User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36</span><br><span class="line">X-Requested-With:XMLHttpRequest</span><br><span class="line"></span><br><span class="line">Query String Parameters：</span><br><span class="line"></span><br><span class="line">action:GetG2SSetStageLearnPartStudent</span><br><span class="line">fPlanID:34</span><br><span class="line">fPartID:359</span><br><span class="line">fSecond:550</span><br><span class="line">_:1451308953409</span><br></pre></td></tr></table></figure>
+<p>看到了顿时就豁然开朗了，原来每隔一段时间，网页会通过一个get请求，将当前看的视频的名称、看到的时间发送给后台，让后台加以记录，确认已经看到的地方。fPlanID很明显是课程的编号，fPartID应该是视频的编号，而fSecond应该是当前看到的时间了（最后哪个_:的值，可能是token值，然而翻遍代码，并没有找到对应的值，我想应该是一个随机数，暂时不去管他，应该也无妨）。所以，“作弊”的方法也就很简单了，就是根据这个信息，将描述视频的信息和当前看到（伪造）的时间发送给后台就可以了。</p>
+<p>经过一番尝试，这样做果断是合理的。那么，通过这个手段，我们就可以手动的通过输入地址发送get请求来“刷课”了。虽然这显然不够帅，然而对那些没有编程基础的人来说，这种方法倒也是简单快捷的（总比挂着视频方便）。</p>
+<p>&nbsp;</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/21/python%E4%B8%8B%E8%A7%A3%E6%9E%90json%E6%A0%BC%E5%BC%8F%E6%96%87%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/21/python%E4%B8%8B%E8%A7%A3%E6%9E%90json%E6%A0%BC%E5%BC%8F%E6%96%87%E4%BB%B6/" itemprop="url">python下解析json格式文件</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-21T15:44:46+00:00">
+                2015-12-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>解析json文件无非编码和解码，这里我们用了python下自带的json模块。当然还要结合python本身特有的dict类型的操作。</p>
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>编码用到的是json.dumps()函数，将字典转化为json对象。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line">data = [&#123;<span class="string">&#x27;a&#x27;</span>:<span class="string">&quot;A&quot;</span>,<span class="string">&#x27;b&#x27;</span>:(<span class="number">2</span>,<span class="number">4</span>),<span class="string">&#x27;c&#x27;</span>:<span class="number">3.0</span>&#125;]  <span class="comment">#list对象</span></span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;DATA:&quot;</span>,<span class="built_in">repr</span>(data)</span><br><span class="line">data_string = json.dumps(data)<span class="comment">#dumps函数</span></span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;JSON:&quot;</span>,data_string</span><br></pre></td></tr></table></figure>
+<p>输出的结果是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DATA: [&#123;&#x27;a&#x27;:&#x27;A&#x27;,&#x27;c&#x27;:3.0,&#x27;b&#x27;:(2,4)&#125;] #python的dict类型的数据是没有顺序存储的</span><br><span class="line">JSON: [&#123;&quot;a&quot;:&quot;A&quot;,&quot;c&quot;:3.0,&quot;b&quot;:[2,4]&#125;]</span><br></pre></td></tr></table></figure>
+
+<h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><p>解码用json.loads()函数，将json格式转化为dict。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line">data = <span class="string">&#x27;&#123;&quot;a&quot;:&quot;A&quot;,&quot;b&quot;:[2,4],&quot;c&quot;:3.0&#125;&#x27;</span>  <span class="comment">#json格式</span></span><br><span class="line"></span><br><span class="line">decoded = json.loads(data)</span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;DECODED:&quot;</span>,decoded</span><br></pre></td></tr></table></figure>
+<p>输出的结果是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DECODED: [&#123;u&#x27;a&#x27;: u&#x27;A&#x27;, u&#x27;c&#x27;: 3.0, u&#x27;b&#x27;: [2, 4]&#125;]</span><br></pre></td></tr></table></figure>
+
+<p>编码和解码的过程中，元组会被变成无次序的列表，而字典的次序也并不能保证不变。</p>
+<p>现在，处理json格式的重点便成了正确处理dict类型数据了。</p>
+<h2 id="常见错误"><a href="#常见错误" class="headerlink" title="常见错误"></a>常见错误</h2><p>python的json模块不支持单引号，所以类似<code>&quot;&#123;&#39;a&#39;:&#39;A&#39;,&#39;b&#39;:[2,4],&#39;c&#39;:3.0&#125;&quot;</code>的字符串是会报以下错误的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ValueError: Expecting property name: line 1 column 2 (char 1)</span><br></pre></td></tr></table></figure>
+<p>这时候我们只需要把他单双引号互换即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;&#123;&quot;a&quot;:&quot;A&quot;,&quot;b&quot;:[2,4],&quot;c&quot;:3.0&#125;&#x27;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/20/Vim%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/20/Vim%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/" itemprop="url">Vim基本命令</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-20T15:41:22+00:00">
+                2015-12-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>很久不用vim了，发现什么命令都忘光了，敲起代码来连复制粘贴都不会了，还得用gedit去搞，真的相当蛋疼。这里把常用的命令汇总一下，趁机好好系统的记一下。不看不知道，看了才晓得原来vim还有很多非常炫的特性。</p>
+<h2 id="帮助文档"><a href="#帮助文档" class="headerlink" title="帮助文档"></a>帮助文档</h2><p>首先，我们得晓得vim的帮助文档。当然man vim 是一个不错的选择，不过他主要是基于在bash中使用，而不是在vim界面中的使用。非常感人的是，vim有一个自带的中文教程（中文！），讲的非常清楚（不过我没耐心看完）。<br><code>myths@myths-X450LD:~$ vimtutor </code></p>
+<h2 id="vim的模式"><a href="#vim的模式" class="headerlink" title="vim的模式"></a>vim的模式</h2><p>指令模式（任意模式下按Esc或Ctrl+[进入） 用来正常情况下的快捷指令，是各个模式之间切换的桥梁</p>
+<p>插入模式（指令模式下按i进入） 左下角显示–INSERT– 实际上就是普通的文本编辑器</p>
+<p>可视模式（指令模式下按v进入） 左下角显示–VISUAL–</p>
+<p>末行模式（指令模式下按： 或 &#x2F; 进入，在屏幕最下面可以输入命令）</p>
+<h2 id="命令历史"><a href="#命令历史" class="headerlink" title="命令历史"></a>命令历史</h2><p>所有以 行末模式输入的命令都有历史，键入 ：  &#x2F; 或？后然后按上下方向键即可翻阅之前的命令。</p>
+<h2 id="文件命令"><a href="#文件命令" class="headerlink" title="文件命令"></a>文件命令</h2><p>其实vim可以在bash中一次打开多个文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myths@myths-X450LD:~$ vim file1 file2 file3</span><br></pre></td></tr></table></figure>
+<p>也可以在vim中打开新的文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open foo.txt</span><br></pre></td></tr></table></figure>
+<p>也可以用拆分的试图打开新的文件：(不太会用)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">split foo.txt</span><br></pre></td></tr></table></figure>
+<p>如果一次性打开了多个文件，那么可以用以下命令来切换文件：（上下切换）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:bn</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:bp</span><br></pre></td></tr></table></figure>
+<p>如果忘记了当前的文件叫啥，可以用如下命令查看当前的文件名：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:arg</span><br></pre></td></tr></table></figure>
+<p>（其实在用：w 保存的时候也会在左下角显示文件名）</p>
+<h2 id="插入命令"><a href="#插入命令" class="headerlink" title="插入命令"></a>插入命令</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>用法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>i</td>
+<td>在当前位置生前插入</td>
+</tr>
+<tr>
+<td>a</td>
+<td>在当前位置后插入</td>
+</tr>
+<tr>
+<td>I</td>
+<td>在当前行首插入</td>
+</tr>
+<tr>
+<td>A</td>
+<td>在当前行尾插入</td>
+</tr>
+<tr>
+<td>o</td>
+<td>在当前行之后插入一行</td>
+</tr>
+<tr>
+<td>O</td>
+<td>在当前行之前插入一行</td>
+</tr>
+</tbody></table>
+<p>一般是灵活使用 i o 即可。</p>
+<h2 id="查找命令"><a href="#查找命令" class="headerlink" title="查找命令"></a>查找命令</h2><p>这个非常简单实用！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/text</span><br></pre></td></tr></table></figure>
+<p>text是你要查找的内容。。。然后查找下一个只需要按n，查找上一个按N。</p>
+<p>或者是？text反向查找（可以不去管他了）</p>
+<h2 id="替换命令"><a href="#替换命令" class="headerlink" title="替换命令"></a>替换命令</h2><p>替换光标所在字符可以在指令模式下按r 再按替换的字符即可。</p>
+<p>替换字符串：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:s/old/new/</span><br></pre></td></tr></table></figure>
+<p>这里表示在当前行用new来替换old字符第一个匹配到的字符</p>
+<p>如果需要全局替换，需要输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:s/old/new/g</span><br></pre></td></tr></table></figure>
+<p>g表示全局替换</p>
+<p>匹配的串可以用正则来表示，而且s可以替换为一个区间，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:10,20 s/^/haha/g</span><br></pre></td></tr></table></figure>
+<p>表示在10到20行的行首添加haha，非常好理解。</p>
+<p>！注意，Vim默认的替换方式是单行替换，也就是说上面的所有替换方法都是对于单行，是指定行的替换，&#x2F;g也是指在选定行下进行的全局替换，如果是要在全文中进行替换，则需要用％s参数，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%s/old/new/g</span><br></pre></td></tr></table></figure>
+<p>表示在全文中将old 替换成new 。</p>
+<h2 id="移动命令"><a href="#移动命令" class="headerlink" title="移动命令"></a>移动命令</h2><pre><code>h 左移 ；l 右移 ；k 上移 ；j 下移；
+
+w 前移一个单词 ；b 后移一个单词；
+
+当然，所有的移动都可以在前面加数字表示移动的距离。
+
+&lt;home&gt; 行首；&lt;end&gt;行尾；
+
+gg 文件头；G 文件尾；
+
+Ctrl + e 向下滚动一行
+
+Ctrl + y 向上滚动一行
+
+Ctrl + d 向下滚动半屏
+
+Ctrl + u 向上滚动半屏
+
+Ctrl + f 向下滚动一屏
+
+Ctrl + b 向上滚动一屏
+</code></pre>
+<h3 id="撤销和重做："><a href="#撤销和重做：" class="headerlink" title="撤销和重做："></a><strong>撤销和重做：</strong></h3><pre><code>实用！
+
+u 撤销
+
+Ctrl + r 重做
+</code></pre>
+<h3 id="删除操作："><a href="#删除操作：" class="headerlink" title="删除操作："></a><strong>删除操作：</strong></h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x</td>
+<td>删除当前字符用</td>
+</tr>
+<tr>
+<td>dd</td>
+<td>删除当前行用</td>
+</tr>
+<tr>
+<td>dj</td>
+<td>删除上一行</td>
+</tr>
+<tr>
+<td>dk</td>
+<td>删除下一行</td>
+</tr>
+<tr>
+<td>10d</td>
+<td>删除当前行开始的10行.</td>
+</tr>
+<tr>
+<td>D</td>
+<td>删除当前字符至行尾</td>
+</tr>
+<tr>
+<td>:1,10d</td>
+<td>删除1-10行</td>
+</tr>
+</tbody></table>
+<h2 id="拷贝粘贴"><a href="#拷贝粘贴" class="headerlink" title="拷贝粘贴"></a>拷贝粘贴</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>yy</td>
+<td>拷贝当前行</td>
+</tr>
+<tr>
+<td>10yy</td>
+<td>拷贝当前后开始的10行</td>
+</tr>
+<tr>
+<td>p</td>
+<td>在当前光标后粘贴,如果之前使用了yy命令来复制一行，那么就在当前行的下一行粘贴。</td>
+</tr>
+<tr>
+<td>:1,10 co 20</td>
+<td>将1-10行插入到第20行之后。</td>
+</tr>
+<tr>
+<td>ddp</td>
+<td>交换当前行和其下一行，实际上就是删除当前行然后放在下一行的后面</td>
+</tr>
+</tbody></table>
+<p>在可视模式下，用jklh命令移动即可选择某些行或字符，再按y即可复制。</p>
+<h2 id="剪切命令"><a href="#剪切命令" class="headerlink" title="剪切命令"></a>剪切命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:1, 10 m 20</span><br></pre></td></tr></table></figure>
+
+<p>将第1-10行移动到第20行之后</p>
+<h2 id="退出命令"><a href="#退出命令" class="headerlink" title="退出命令"></a>退出命令</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>:x或  :wq</td>
+<td>保存并退出</td>
+</tr>
+<tr>
+<td>:q!</td>
+<td>强制退出并忽略所有更改</td>
+</tr>
+<tr>
+<td>:e!</td>
+<td>放弃所有修改，并打开原来文件。</td>
+</tr>
+</tbody></table>
+<h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><p>vim竟然可以实现宏功能，微醺。</p>
+<p>在指令模式下按p再按一个字母比如a，然后输入想要的指令最后再按q即可录制出宏，保存在的@a里。下次想用的时候只需要在指令模式下按@a即可使用宏。</p>
+<p>&nbsp;</p>
+<h2 id="执行shell"><a href="#执行shell" class="headerlink" title="执行shell"></a>执行shell</h2><p>在行末模式下输入！再输入命令即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:!g++ test.cpp</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/19/Json%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/19/Json%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E6%A6%82%E8%BF%B0/" itemprop="url">Json文件格式概述</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-19T15:58:21+00:00">
+                2015-12-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index">
+                    <span itemprop="name">Others</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们知道现如今，json格式很多网页在前端和后端交互的过程中都会用到的一种文件格式，尤其是在使用ajax进行交互的场合。他的语法简单，而且条理十分清晰，适合处理大量的有着逻辑关系的数据。</p>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>什么是 JSON ？</p>
+<ol>
+<li>JSON 指的是 JavaScript 对象表示法（JavaScript Object Notation）</li>
+<li>JSON 是轻量级的文本数据交换格式</li>
+<li>JSON 独立于语言</li>
+<li>JSON 具有自我描述性，更易理解</li>
+<li>JSON 使用 JavaScript 语法来描述数据对象，但是 JSON 仍然独立于语言和平台。JSON 解析器和 JSON 库支持许多不同的编程语言。</li>
+</ol>
+<p>w3c的标准说明如下：<br>JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。 易于人阅读和编写。同时也易于机器解析和生成。 它基于JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯（包括C, C++, C#, Java, JavaScript, Perl, Python等）。 这些特性使json成为理想的数据交换语言。</p>
+<p>所以几乎所有的语言都会有支持json格式转化的库。</p>
+<h2 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h2><p>json的格式只有两种！所以非常简单方便：</p>
+<p>1.键值对</p>
+<p>对象是一个无序的“‘名称&#x2F;值’对”集合。一个对象以“{”开始，“}”结束。每个“名称”后跟一个“:”；“键值对”之间使用“,”分隔。</p>
+<p>2.数组</p>
+<p>数组是值（value）的有序集合。一个数组以“[”开始，“]”结束。值之间使用“,”分隔。</p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;employees&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;firstName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Bill&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;lastName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Gates&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;firstName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;George&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;lastName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Bush&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;firstName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Thomas&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;lastName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Carter&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>要注意的是，每一个非数值的字符串都应当带引号，否则标准的解析库是无法解析的。</p>
+<p>网上也有很多json的在线格式化的网站，在遇到json无法解析的时候可以去那里找找错。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/16/Ubuntu%E4%B8%8B%E5%8D%B8%E8%BD%BD%E5%A4%9A%E4%BD%99%E7%9A%84Ubuntu%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/16/Ubuntu%E4%B8%8B%E5%8D%B8%E8%BD%BD%E5%A4%9A%E4%BD%99%E7%9A%84Ubuntu%E7%B3%BB%E7%BB%9F/" itemprop="url">Ubuntu下卸载多余的Ubuntu系统</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-16T15:44:53+00:00">
+                2015-12-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前由于种种原因，折腾了很多个Ubuntu系统，也换了好多个，重新安装了很多次系统，终于找到了当前这个能用的了。本以为万事大吉了，然而最近突然发现之前安装的没用的Ubuntu系统竟然还在我的磁盘中！不说了，接下来我们的任务肯定得把这个删干净了。</p>
+<p>然而百度了一下发现并没有这样的教程，有的很多都是在win+ubuntu双系统下删除ubuntu以及grub。显然我们不需要删除grub，而且万一我们没有windows系统呢？学Linux肯定得在Linux下解决问题了。</p>
+<p>本打算用fdisk命令之类的进行操作，然而命令还是太烦了点，对于我这种第一次接触磁盘分区的人来说有点吃力，还好我在网上找到了一个图形化控制磁盘分区的小软件—-gparted。</p>
+<p>安装命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@myths-X450LD:~# apt-get install gparted</span><br></pre></td></tr></table></figure>
+<p>这个软件就像windows下自带的那个磁盘操作界面一样，把磁盘的层次显示的非常清楚。运行起来界面是这样的（当然，这种操作磁盘的动作是需要root权限的）：</p>
+<p><img src="/images/2015/12/16/1/1.png"></p>
+<p>这样我们就非常清楚的掌握了分区的情况了。ntfs是windows的文件系统，ext是Linux的文件系统。分区从sda1到sda11，其中少了sda3和sda4，这是因为约定sda1到sda4为主分区，而我这里只有两个主分区所以剩下的就不显示了。sda1就是我们windows的c盘了，可见其特殊性。sda5到sda11都是扩展分区，可供我们调节使用的。</p>
+<p>现在，如果要删除多余的ubuntu系统，我们只要搞清楚他的分区，然后格式化即可。最后在格式化之后，用update-grub命令更新下grub列表就好了。</p>
+<p>（这个工具要小心使用。。。不解释，分区中加锁的几项表示是已经加载的分区，这是无法修改的，或者必须卸载后才能修改的）</p>
+<p>格式化结束后，我们可以选择删除区号，前提是不能有比他数字更大的分区，比如我删除了sda9，然而我的sda11是我当前的系统，显然不能删。那我就不能删除这个已格式化的分区了。</p>
+<p>那么这些分区留着有什么用呢？其实我们完全可以当做一个磁盘来用。在系统重启后，这两个分区会被自动装载到&#x2F;media文件夹下，并且在桌面的文件夹下显示，我们可以方便的使用。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/15/DIY%E7%99%BE%E5%BA%A6%E9%A6%96%E9%A1%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/15/DIY%E7%99%BE%E5%BA%A6%E9%A6%96%E9%A1%B5/" itemprop="url">DIY百度首页</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-12-15T15:55:44+00:00">
+                2015-12-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>花了一天时间DIY了一个百度首页，学习了好多东西，特别是关于页面的dom布局，和css的属性设置，还有关于图片的使用和jquery等等的知识，算是web前端入了个门。贴下代码纪念下，效果页面我觉得差不多能以假乱真了。。。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;content-type&quot;</span>  <span class="attr">content</span>=<span class="string">&quot;text/html&quot;</span> <span class="attr">charset</span>=<span class="string">&quot;utf-8&quot;</span> &gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">style</span>  <span class="attr">type</span>=<span class="string">&quot;text/css&quot;</span> &gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#header</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:absolute;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">right</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">top</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">19px</span> <span class="number">0</span> <span class="number">5px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">20px</span> <span class="number">0</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css"></span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#header</span> <span class="selector-tag">div</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:relative;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:right</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.b</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:<span class="number">#333</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-weight</span>:bold;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">line-height</span>:<span class="number">24px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:<span class="number">21px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">13px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:underline;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.b</span><span class="selector-pseudo">:hover</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:blue;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#setting</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-weight</span>:normal;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">6px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">display</span>:none;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:relative;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">left</span>:<span class="number">24px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:-<span class="number">100px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#d1d1d1</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">70px</span>;</span></span><br><span class="line"><span class="language-css">				-webkit-<span class="attribute">box-shadow</span>: <span class="number">1px</span> <span class="number">1px</span> <span class="number">5px</span> <span class="number">#d1d1d1</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.clear</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">clear</span>:both;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#setting</span> <span class="selector-tag">a</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:black;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">1px</span> <span class="number">2px</span> <span class="number">1px</span> <span class="number">2px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">22px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">1px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">display</span>:block;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">12px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:none;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#setting</span> <span class="selector-tag">a</span><span class="selector-pseudo">:hover</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#6495ED</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			*&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;			</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#logo</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">270px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">129px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#mid</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">70px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css"></span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#input</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">20px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">539px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">34px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">16px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>: <span class="number">1px</span> solid <span class="number">#3385ff</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#submit</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">95px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">34px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border</span>:<span class="number">0px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">15px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#3385ff</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.more</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:right</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">line-height</span>:<span class="number">24px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:<span class="number">21px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#38f</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:white;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">4px</span> <span class="number">0</span> <span class="number">4px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-left</span>:<span class="number">25px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-right</span>:-<span class="number">8px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">13px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:none;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#right</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border-left</span>:solid <span class="number">1px</span> <span class="number">#f0f0f0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:absolute;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">display</span>:none;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">top</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">right</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">bottom</span>:<span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-color</span>:<span class="number">#f9f9f9</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">85px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.cover</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding-top</span>:<span class="number">10px</span>;	</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-decoration</span>:none;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.r</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-top</span>:<span class="number">10px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">border-bottom</span>:solid <span class="number">1px</span> <span class="number">#f0f0f0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">75px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">font-size</span>:<span class="number">11px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">color</span>:<span class="number">#666</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">cursor</span>:pointer;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;icon.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">36px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">36px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin-bottom</span>:<span class="number">10px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic1</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">72px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">40px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic2</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">112px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css"></span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic3</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">36px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic4</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">148px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic5</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">184px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.pic6</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">220px</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.clear</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">clear</span>:both;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.footer</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">280px</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> ;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span>:center;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.wrapper</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">padding</span>:<span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">position</span>:center;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">660px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.mobile</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;mobile.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.nuomi</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;nuomi.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">margin</span>:<span class="number">0</span> auto;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-class">.bt</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:left</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">text-align</span><span class="selector-pseudo">:left</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">			<span class="selector-id">#btn</span>&#123;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">&quot;btn.png&quot;</span>) no-repeat;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">float</span><span class="selector-pseudo">:left</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">background-position</span>:-<span class="number">600px</span> -<span class="number">96px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">width</span>:<span class="number">14px</span>;</span></span><br><span class="line"><span class="language-css">				<span class="attribute">height</span>:<span class="number">17px</span>;</span></span><br><span class="line"><span class="language-css">			&#125;</span></span><br><span class="line"><span class="language-css">		</span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;jquery.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">			$(<span class="variable language_">document</span>).<span class="title function_">ready</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#m&quot;</span>).<span class="title function_">mouseover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#setting&quot;</span>).<span class="title function_">show</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#m&quot;</span>).<span class="title function_">mouseout</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#setting&quot;</span>).<span class="title function_">hide</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;.more&quot;</span>).<span class="title function_">mouseover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">show</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">mouseover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">show</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;)</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">mouseout</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="string">&quot;#right&quot;</span>).<span class="title function_">hide</span>();</span></span><br><span class="line"><span class="language-javascript">				&#125;);</span></span><br><span class="line"><span class="language-javascript">				$(<span class="string">&quot;.r&quot;</span>).<span class="title function_">hover</span>(<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="variable language_">this</span>).<span class="title function_">css</span>(<span class="string">&quot;text-decoration&quot;</span>,<span class="string">&quot;underline&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">				&#125;,<span class="keyword">function</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">					$(<span class="variable language_">this</span>).<span class="title function_">css</span>(<span class="string">&quot;text-decoration&quot;</span>,<span class="string">&quot;none&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">				&#125;)</span></span><br><span class="line"><span class="language-javascript">			&#125;);</span></span><br><span class="line"><span class="language-javascript">		</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;header&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;more&quot;</span> &gt;</span>更多产品<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;m&quot;</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">id</span>=<span class="string">&#x27;set&#x27;</span> <span class="attr">href</span>=<span class="string">&quot;javascript:;&quot;</span>&gt;</span>设置<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;clear&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;setting&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>搜索设置<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>高级搜索<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>关闭预测<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;#&quot;</span>&gt;</span>搜索历史<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span>	</span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;https://passport.baidu.com/&quot;</span>&gt;</span>登录<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://tieba.baidu.com&quot;</span>&gt;</span>贴吧<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://v.baidu.com&quot;</span>&gt;</span>视频<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://map.baidu.com&quot;</span>&gt;</span>地图<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://www.hao123.com&quot;</span>&gt;</span>hao123<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://news.baidu.com&quot;</span>&gt;</span>新闻<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;b&quot;</span> <span class="attr">href</span>=<span class="string">&quot;http://www.nuomi.com/?cid=002540&quot;</span>&gt;</span>糯米<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;clear&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;right&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r cover&quot;</span> <span class="attr">style</span>=<span class="string">&quot;height:50px;&quot;</span>&gt;</span>更多产品&lt;/div &gt;</span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">music.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic1&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>音乐<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">image.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic2&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>图片<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">zhidao.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic3&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>知道<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">wenku.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic4&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>文库<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">top.baidu.com</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic5&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>风云榜<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">e.baidu.com</span>/?<span class="attr">refer</span>=<span class="string">888</span>&quot;)&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;pic pic6&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span>百度推广<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;r&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">www.baidu.com</span>/<span class="attr">more</span>/&quot;)&gt;</span>全部产品&gt;&gt;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;mid&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;logo.png&quot;</span> <span class="attr">id</span>=<span class="string">&quot;logo&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">form</span> <span class="attr">method</span>=<span class="string">&#x27;get&#x27;</span> <span class="attr">action</span>=<span class="string">&quot;https://www.baidu.com/s&quot;</span> <span class="attr">id</span>=<span class="string">&quot;form&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">&#x27;input&#x27;</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">name</span>=<span class="string">&#x27;wd&#x27;</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">&#x27;submit&#x27;</span> <span class="attr">type</span>=<span class="string">&#x27;submit&#x27;</span> <span class="attr">value</span>=<span class="string">&quot;百度一下&quot;</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;footer&quot;</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;wrapper&quot;</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;mobile bt&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;bt&quot;</span> <span class="attr">style</span>=<span class="string">&quot;width:90px&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;padding-top:10px;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>手机百度<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span><span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>快人一步<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;nuomi bt&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;bt&quot;</span> <span class="attr">style</span>=<span class="string">&quot;width:90px&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>百度糯米<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span><span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span>一毛大餐<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;bt&quot;</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&quot;float:left;&quot;</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">https:</span>//<span class="attr">www.baidu.com</span>/<span class="attr">cache</span>/<span class="attr">sethelp</span>/<span class="attr">help.html</span>&quot;)&gt;</span>把百度设为首页<span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">home.baidu.com</span>/&quot;)&gt;</span>关于百度<span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span><span class="symbol">&amp;nbsp;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">ir.baidu.com</span>/&quot;)&gt;</span>About Baidu<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&quot;float:left&quot;</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span>@2015<span class="symbol">&amp;nbsp;</span>baidu<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">www.baidu.com</span>/<span class="attr">duty</span>/&quot;)&gt;</span>使用百度前必读<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;text-decoration:underline;cursor:pointer;&quot;</span> <span class="attr">onclick</span>=<span class="string">window.open(</span>&quot;<span class="attr">http:</span>//<span class="attr">jianyi.baidu.com</span>/&quot;)&gt;</span>意见反馈<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">						<span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">&quot;font-size:12px;color:gray;&quot;</span>&gt;</span>京ICP证030173号<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">					<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;btn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;clear&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/12/14/%E8%BF%9C%E7%A8%8B%E6%8C%82%E8%BD%BD%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%91%BD%E4%BB%A4sshfs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3218,1166 +4312,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/30/MD5%E7%AE%97%E6%B3%95%E5%BA%94%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/30/MD5%E7%AE%97%E6%B3%95%E5%BA%94%E7%94%A8/" itemprop="url">MD5算法应用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-30T15:54:26+00:00">
-                2015-11-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Cryptography/" itemprop="url" rel="index">
-                    <span itemprop="name">Cryptography</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>MD5（Message-Digest Algorithm 5）算法是一种非常常见的信息摘要hash算法，一般可以用来进行数字签名，或者理解成为一种压缩算法。他的本质是一种分组加密算法。百度上对MD5算法简要的叙述为：MD5以512位分组来处理输入的信息，且每一分组又被划分为16个32位子分组，经过了一系列的处理后，算法的输出由四个32位分组组成，将这四个32位分组级联后将生成一个128位散列值。用十六进制表示的话，每四位变成一个十六进制数，这样也就是生成了总共为32位的十六进制数，即MD5码。</p>
-<p>这里不介绍MD5的加密和解密算法的细节。从应用的角度讲，我们完全暂且不需要理解算法的过程。我们可以直接利用现有的工具进行加密——-还有解密！事实上，MD5算法从他1991年由MIT发明以来，一直都在经受着解密高手们的攻击，这样，终于在2004年，由我们中国山东大学的王小云教授成功研究出了高效的寻找碰撞的算法（本质上就是一种高效的暴力破解，而且目前这种破解算法已经随处可见了）。</p>
-<p>作为应用而言，比如解决<a target="_blank" rel="noopener" href="http://ctf.idf.cn/index.php?g=game&m=article&a=index&id=29">IDF实验室的第一题</a>，我们只需要一个能够为我们调用的加密解密的接口来方便我们编程。找了半天我终于找到了一个比较不错的免费的API:<a target="_blank" rel="noopener" href="http://tool.zzblo.com/">http://tool.zzblo.com/</a>，只需要简单的http请求就可以调用。</p>
-<h2 id="加密请求"><a href="#加密请求" class="headerlink" title="加密请求"></a>加密请求</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib,urllib2,cookielib</span><br><span class="line">path=<span class="string">&#x27;http://tool.zzblo.com/Api/Md5/encrypt&#x27;</span></span><br><span class="line">plaintext=<span class="string">&#x27;12345678&#x27;</span></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">post_data=urllib.urlencode(&#123;<span class="string">&#x27;text&#x27;</span>:plaintext&#125;)</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Opera/9.23&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line">req=urllib2.Request(path,post_data)</span><br><span class="line">response=urllib2.urlopen(req)</span><br><span class="line"><span class="built_in">print</span> response.read()</span><br></pre></td></tr></table></figure>
-<p>respose:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;status&quot;:200,&quot;text&quot;:&quot;12345678&quot;,&quot;secret32&quot;:&quot;25d55ad283aa400af464c76d713c07ad&quot;,&quot;secret16&quot;:&quot;83aa400af464c76d&quot;&#125;</span><br></pre></td></tr></table></figure>
-<p>这里就看到了明文密文的对应关系。</p>
-<h2 id="解密请求"><a href="#解密请求" class="headerlink" title="解密请求"></a>解密请求</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib,urllib2,cookielib</span><br><span class="line">path=<span class="string">&#x27;http://tool.zzblo.com/Api/Md5/decrypt&#x27;</span></span><br><span class="line">cyphertext=<span class="string">&#x27;25f9e794323b453885f5181f1b624d0b&#x27;</span></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">post_data=urllib.urlencode(&#123;<span class="string">&#x27;secret&#x27;</span>:cypthertext&#125;)</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Opera/9.23&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line">req=urllib2.Request(path,post_data)</span><br><span class="line">response=urllib2.urlopen(req)</span><br><span class="line"><span class="built_in">print</span> response.read()</span><br></pre></td></tr></table></figure>
-<p>response：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;status&quot;:200,&quot;text&quot;:&quot;123456789&quot;,&quot;secret32&quot;:&quot;25f9e794323b453885f5181f1b624d0b&quot;,&quot;secret16&quot;:&quot;323b453885f5181f&quot;&#125;</span><br></pre></td></tr></table></figure>
-<p>与上述结果一致。</p>
-<p>当然这个API只能解决简单的MD5，对于一些复杂的还是要通过别的办法解决。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/27/%E7%9F%AD%E4%BF%A1%E8%BD%B0%E7%82%B8%E6%9C%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E7%AE%80%E8%A6%81%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/27/%E7%9F%AD%E4%BF%A1%E8%BD%B0%E7%82%B8%E6%9C%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E7%AE%80%E8%A6%81%E5%AE%9E%E7%8E%B0/" itemprop="url">短信轰炸机原理分析及简要实现</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-27T15:53:12+00:00">
-                2015-11-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>很多情况下，我们会遇到一些讨厌的人，特别是那种电信诈骗的骗子，行骗方法歹毒低劣，十分令人恶心。然而我们又不能拿他们怎么办。这时候我们就会想起用电话轰炸机这个东西来打击报复。网络上也有过类似的比如“短信轰炸机”这种东西，我也用他来黑过一些人。据他们后来说他们收到的都是些注册会员啊，登陆啊之类的短信提示，十分的烦人。当时听上去就觉得这个东西真的很厉害。最近一个偶然的机会，我发现其实短信轰炸机这种东西原理也是十分的简单的，只要拥有一些基础的网页登陆的知识，理论上就可以实现写出自己的“短信轰炸机”。</p>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>在我们注册一家网站的会员的时候，很多情况下我们需要输入我们的手机号来进行识别和绑定。通常的步骤是：(1)我们输入手机号;(2)系统会向我们的手机发送一条验证码;(3)我们将手机上收到的验证码输入到注册页面上来完成识别。明眼人一看大概就能看出其中的端倪。没错，我们就可以利用网站发送的验证短信，来作为我们的”轰炸引擎“。</p>
-<h2 id="基本步骤"><a href="#基本步骤" class="headerlink" title="基本步骤"></a>基本步骤</h2><p>步骤就是模拟登陆的步骤了，首先我们手动实现一次验证，并且用抓包工具截获他的http封包，获得post的数据，然后利用现有的编程工具，模拟请求即可。</p>
-<h2 id="python简单实现"><a href="#python简单实现" class="headerlink" title="python简单实现"></a>python简单实现</h2><p>我模拟的是搜狐的注册申请，仅实现一次发送。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib,urllib2,cookielib</span><br><span class="line">path=<span class="string">&#x27;https://passport.sohu.com/signup/send_mobile_captcha&#x27;</span></span><br><span class="line">number=<span class="string">&quot;18282828282&quot;</span></span><br><span class="line">cj=cookielib.CookieJar()</span><br><span class="line">post_data=urllib.urlencode(&#123;<span class="string">&#x27;mobile&#x27;</span>:number,<span class="string">&#x27;captchaType&#x27;</span>:<span class="string">&#x27;1&#x27;</span>&#125;)</span><br><span class="line">opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))</span><br><span class="line">opener.addheaders=[(<span class="string">&#x27;User-agent&#x27;</span>,<span class="string">&#x27;Opera/9.23&#x27;</span>)]</span><br><span class="line">urllib2.install_opener(opener)</span><br><span class="line">req=urllib2.Request(path,post_data)</span><br><span class="line">response=urllib2.urlopen(req)</span><br><span class="line"><span class="built_in">print</span> response.read()</span><br></pre></td></tr></table></figure>
-<p>其中的post的数据是根据抓包抓来的数据来填写的，其他的就是简单的模拟登陆的东西。</p>
-<h2 id="note"><a href="#note" class="headerlink" title="note"></a>note</h2><ol>
-<li>实际应用中，需要使用多线程的技术申请多个网站来保证轰炸的密度。</li>
-<li>申请的频率不能太快，因为服务器端会有记录，申请太快会被拒绝服务的。</li>
-<li>通常会使用proxy代理http服务来隐藏自身信息。</li>
-<li>为了防止被利用，绝大多数的网站都会在申请时设置验证码环节来抵御我们这种恶意的申请。所以通常还需要结合OCR技术来识别验证码。</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/25/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%802-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/25/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%802-2/" itemprop="url">正则表达式基础（2）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-25T15:43:29+00:00">
-                2015-11-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>上一节记录了主要的一些元字符集，算是刚刚入了门。这一节主要介绍一些稍微需要动脑筋的东西。</p>
-<h2 id="分组捕获与后向引用"><a href="#分组捕获与后向引用" class="headerlink" title="分组捕获与后向引用"></a>分组捕获与后向引用</h2><p>分组实际上就是个对括号，用处就是将一个匹配串当成一个整体来看，用于改变匹配的优先级。比如我们要匹配“abcabcabcabc”，就可以这样匹配：<code>(abc)&#123;4&#125;</code> 。</p>
-<p>在分组的基础上，我们就可以进行后向引用。所谓后向引用，就是将之前匹配到的字符串记录下来，供后来继续用，提高表达式的效率。</p>
-<p>具体用法是，系统会给表达式中所有的分组标上序号，从1开始。接下来每当希望用到之前分组的内容时，只需要调用”i” 其中i就是分组对应的序号。</p>
-<p>比如<code>(abc)1$12$13$14</code> 就可以匹配“abc1abc2abc3abc4”了。</p>
-<p>注：目测这样写的话，组数不能超过9，毕竟“”这个东西只能作用于一个字符。</p>
-<h2 id="零宽断言"><a href="#零宽断言" class="headerlink" title="零宽断言"></a>零宽断言</h2><p>这个是用来匹配一个位置而不是一个字符串的比如 ( $ 和 ^ ) ，所以叫零宽。他规定了当前的位置需要满足某些条件，或者不能够满足某些条件。也是非常有用处的一个东西。</p>
-<p>1、<code>(?=exp)</code>        零宽度正预测先行断言</p>
-<p>它断言自身出现的位置的后面能匹配表达式exp。比如<code>bw+(?=ingb)</code>，匹配以ing结尾的单词的前面部分(除了ing以外的部分)，如查找I’m singing while you’re dancing.时，它会匹配sing和danc。</p>
-<p>2、<code>(?&lt;=exp)</code>     零宽度正回顾后发断言</p>
-<p>它断言自身出现的位置的前面能匹配表达式exp。比如<code>(?&lt;=bre)w+b</code> 会匹配以re开头的单词的后半部分(除了re以外的部分)，例如在查找reading a book时，它匹配ading。</p>
-<p>3、<code>(?!exp) </code>    零宽度负预测先行断言</p>
-<p>它断言此位置的后面不能匹配表达式exp。例如：<code>d&#123;3&#125;(?!d)</code> 匹配三位数字，而且这三位数字的后面不能是数字；<code>b((?!abc)w)+b</code> 匹配不包含连续字符串abc的单词。<br>4、<code>(?&lt;!exp)</code>    零宽度负回顾后发断言</p>
-<p>它断言此位置的前面不能匹配表达式exp：<code>(?&lt;![a-z])d&#123;7&#125;</code> 匹配前面不是小写字母的七位数字。</p>
-<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><p>由于正则一向比较精炼，所以注释还是很有必要的。</p>
-<p>我们可以用语法(?#comment)来包含注释。例如：<code>2[0-4]d(?#200-249)|25[0-5](?#250-255)|[01]?dd?(?#0-199)</code> 。</p>
-<h2 id="贪婪与懒惰"><a href="#贪婪与懒惰" class="headerlink" title="贪婪与懒惰"></a>贪婪与懒惰</h2><p>当正则表达式中包含能接受重复的限定符时，通常的行为是在满足匹配关系的情况下匹配<strong>尽可能多</strong>的字符。这被称为贪婪匹配，也是默认的匹配方式。</p>
-<p>然而有时，我们更需要懒惰匹配，也就是匹配<strong>尽可能少</strong>的字符。前面给出的限定符都可以被转化为懒惰匹配模式，只要在它后面加上一个问号’?’。这样<code>.*?</code>就意味着匹配任意数量的重复，但是在能使整个匹配成功的前提下使用最少的重复。现在看看懒惰版的例子吧：</p>
-<p><code>a.*?b</code>匹配最短的，以a开始，以b结束的字符串。如果把它应用于<code>aabab</code>的话，它会匹配<code>aab（第一到第三个字符）</code>和<code>ab（第四到第五个字符）</code>。</p>
-<table>
-<thead>
-<tr>
-<th>懒惰限定符</th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>代码&#x2F;语法</td>
-<td>说明</td>
-</tr>
-<tr>
-<td>*?</td>
-<td>重复任意次，但尽可能少重复</td>
-</tr>
-<tr>
-<td>+?</td>
-<td>重复1次或更多次，但尽可能少重复</td>
-</tr>
-<tr>
-<td>??</td>
-<td>重复0次或1次，但尽可能少重复</td>
-</tr>
-<tr>
-<td>{n,m}?</td>
-<td>重复n到m次，但尽可能少重复</td>
-</tr>
-<tr>
-<td>{n,}?</td>
-<td>重复n次以上，但尽可能少重复</td>
-</tr>
-</tbody></table>
-<p>当然正则表达式在不同的平台上还有其他不同的功能，比如会有一些选项来优化匹配方式，或者是平衡组、递归匹配这些复杂的东西。这些遇到了再行了解。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/24/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%801-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/24/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%801-2/" itemprop="url">正则表达式基础（1）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-24T15:32:54+00:00">
-                2015-11-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>正则表达式这东西真的特别常用，在搜索文本啊，写爬虫什么的都得用到。而且现如今各种语言，都会支持正则表达式。之前也零零碎碎的看过，但是很多细节都记不清，这里姑且把一些知识要点记录下来，供日后查找使用。</p>
-<h2 id="通用的正则表达式"><a href="#通用的正则表达式" class="headerlink" title="通用的正则表达式"></a>通用的正则表达式</h2><p>由于正则表达式有很多种实现方式，所以各种方式之间有一些区别。但是以下的一些条件，则是在任何语言的正则中都适用的规律：</p>
-<table>
-<thead>
-<tr>
-<th>符号</th>
-<th>匹配</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>^</td>
-<td>匹配输入字符串开始的位置。</td>
-</tr>
-<tr>
-<td>$</td>
-<td>匹配输入字符串结尾的位置。</td>
-</tr>
-<tr>
-<td>*</td>
-<td>零次或多次匹配前面的字符或子表达式。例如，zo* 匹配“z”和“zoo”。* 等效于 {0,}。</td>
-</tr>
-<tr>
-<td>+</td>
-<td>一次或多次匹配前面的字符或子表达式。例如，“zo+”与“zo”和“zoo”匹配，但与“z”不匹配。+ 等效于 {1,}。</td>
-</tr>
-<tr>
-<td>?</td>
-<td>零次或一次匹配前面的字符或子表达式。例如，“do(es)?”匹配“do”或“does”中的“do”。? 等效于 {0,1}。</td>
-</tr>
-<tr>
-<td>{<em>n</em>}</td>
-<td>_n _是非负整数。正好匹配 <em>n</em> 次。例如，“o{2}”与“Bob”中的“o”不匹配，但与“food”中的两个“o”匹配。</td>
-</tr>
-<tr>
-<td>{<em>n</em>,}</td>
-<td>_n _是非负整数。至少匹配 _n _次。例如，“o{2,}”不匹配“Bob”中的“o”，而匹配“foooood”中的所有 o。“o{1,}”等效于“o+”。“o{0,}”等效于“o*”。</td>
-</tr>
-<tr>
-<td>{<em>n</em>,<em>m</em>}</td>
-<td><em>M</em> 和 <em>n</em> 是非负整数，其中 <em>n</em> &lt;&#x3D; _m_。匹配至少 <em>n</em> 次，至多 <em>m</em> 次。例如，“o{1,3}”匹配“fooooood”中的头三个 o。’o{0,1}’ 等效于 ‘o?’。注意：您不能将空格插入逗号和数字之间。</td>
-</tr>
-<tr>
-<td>?</td>
-<td>当此字符紧随任何其他限定符（*、+、?、{<em>n</em>}、{<em>n</em>,}、{<em>n</em>,<em>m</em>}）之后时，匹配模式是“非贪心的”。“非贪心的”模式匹配搜索到的、尽可能短的字符串，而默认的“贪心的”模式匹配搜索到的、尽可能长的字符串。例如，在字符串“oooo”中，“o+?”只匹配单个“o”，而“o+”匹配所有“o”。</td>
-</tr>
-<tr>
-<td>.</td>
-<td>匹配除“n”之外的任何单个字符。若要匹配包括“n”在内的任意字符，请使用诸如“[sS]”之类的模式。</td>
-</tr>
-<tr>
-<td><em>x</em>&vert; <em>y</em></td>
-<td>匹配 <em>x</em> 或 _y_。例如，’z&vert;food’ 匹配“z”或“food”。’(z&vert; f)ood’ 匹配“zood”或“food”。</td>
-</tr>
-<tr>
-<td>[<em>xyz</em>]</td>
-<td>字符集。匹配包含的任一字符。例如，“[abc]”匹配“plain”中的“a”。</td>
-</tr>
-<tr>
-<td>[^<em>xyz</em>]</td>
-<td>反向字符集。匹配未包含的任何字符。例如，“[^abc]”匹配“plain”中的“p”。</td>
-</tr>
-<tr>
-<td>[<em>a-z</em>]</td>
-<td>字符范围。匹配指定范围内的任何字符。例如，“[a-z]”匹配“a”到“z”范围内的任何小写字母。</td>
-</tr>
-<tr>
-<td>[^<em>a-z</em>]</td>
-<td>反向范围字符。匹配不在指定的范围内的任何字符。例如，“[^a-z]”匹配任何不在“a”到“z”范围内的任何字符。</td>
-</tr>
-</tbody></table>
-<p>这里是正则最基础的用法了，熟记这张表，平时就够用了。</p>
-<p>当然，我们平时也会看到其他一些符号，比如下面这些类似的符号。</p>
-<h2 id="其他元字符"><a href="#其他元字符" class="headerlink" title="其他元字符"></a>其他元字符</h2><table>
-<thead>
-<tr>
-<th>符号</th>
-<th>匹配</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>b</td>
-<td>匹配一个字边界，即字与空格间的位置。例如，“erb”匹配“never”中的“er”，但不匹配“verb”中的“er”。</td>
-</tr>
-<tr>
-<td>B</td>
-<td>非字边界匹配。“erB”匹配“verb”中的“er”，但不匹配“never”中的“er”。</td>
-</tr>
-<tr>
-<td>c_x_</td>
-<td>匹配 <em>x</em> 指示的控制字符。例如，cM 匹配 Control-M 或回车符。<em>x</em> 的值必须在 A-Z 或 a-z 之间。如果不是这样，则假定 c 就是“c”字符本身。</td>
-</tr>
-<tr>
-<td>d</td>
-<td>数字字符匹配。等效于 [0-9]。</td>
-</tr>
-<tr>
-<td>D</td>
-<td>非数字字符匹配。等效于 [^0-9]。</td>
-</tr>
-<tr>
-<td>f</td>
-<td>换页符匹配。等效于 x0c 和 cL。</td>
-</tr>
-<tr>
-<td>n</td>
-<td>换行符匹配。等效于 x0a 和 cJ。</td>
-</tr>
-<tr>
-<td>r</td>
-<td>匹配一个回车符。等效于 x0d 和 cM。</td>
-</tr>
-<tr>
-<td>s</td>
-<td>匹配任何空白字符，包括空格、制表符、换页符等。与 [ fnrtv] 等效。</td>
-</tr>
-<tr>
-<td>S</td>
-<td>匹配任何非空白字符。与 [^ fnrtv] 等效。</td>
-</tr>
-<tr>
-<td>t</td>
-<td>制表符匹配。与 x09 和 cI 等效。</td>
-</tr>
-<tr>
-<td>v</td>
-<td>垂直制表符匹配。与 x0b 和 cK 等效。</td>
-</tr>
-<tr>
-<td>w</td>
-<td>匹配任何字类字符，包括下划线。与“[A-Za-z0-9_]”等效。</td>
-</tr>
-<tr>
-<td>W</td>
-<td>与任何非单词字符匹配。与“[^A-Za-z0-9_]”等效。</td>
-</tr>
-</tbody></table>
-<p>这些元字符也非常普遍，我之所以将他跟上面的通用字符分开，是因为这种类似Perl风格的正则表达式并不能被所有的工具识别。比如Linux下的egrep就无法识别这种表示方法。这就引入了下面的POSIX字符类。</p>
-<h2 id="POSIX字符类"><a href="#POSIX字符类" class="headerlink" title="POSIX字符类"></a>POSIX字符类</h2><table>
-<thead>
-<tr>
-<th>符号</th>
-<th>匹配</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>[:alnum:]</td>
-<td>字母字符和数字字符；在ASCII码中，与[A-Za-z0-9]等效</td>
-</tr>
-<tr>
-<td>[:word:]</td>
-<td>基本与[:alnum:]一样，只是多了一个下划线字符(_)</td>
-</tr>
-<tr>
-<td>[:alpha:]</td>
-<td>字母字符；在ASCII中，等效于[A-Za-z]</td>
-</tr>
-<tr>
-<td>[:blank:]</td>
-<td>包括空格和制表符</td>
-</tr>
-<tr>
-<td>[:cntrl:]</td>
-<td>ASCII控制码；包括ASCII字符0~31以及127</td>
-</tr>
-<tr>
-<td>[:digit:]</td>
-<td>数字0~9</td>
-</tr>
-<tr>
-<td>[:graph:]</td>
-<td>可见字符；在ASCII中，包括字符33~126</td>
-</tr>
-<tr>
-<td>[:lower:]</td>
-<td>小写字母</td>
-</tr>
-<tr>
-<td>[:punct:]</td>
-<td>标点符号字符；在ASCII中，与[-!”#$%&amp;’()*+,.&#x2F;:;&lt;&#x3D;&gt;?@[]_&#96;{&vert;}~]等效</td>
-</tr>
-<tr>
-<td>[:print:]</td>
-<td>可打印字符；包括[:graph:]中的所有字符再加上空格字符</td>
-</tr>
-<tr>
-<td>[:space:]</td>
-<td>空白字符如空格符、制表符、回车符、换行符、垂直制表符以及换页符。在ASCII中，等效为[ trnvf]</td>
-</tr>
-<tr>
-<td>[:upper:]</td>
-<td>大写字母</td>
-</tr>
-<tr>
-<td>[:xdigit:]</td>
-<td>用于表示十六进制的字符；在ASCII中，与[0-9A-Fa-f]等效</td>
-</tr>
-</tbody></table>
-<p>在使用的时候记得还要在外面包一层[  ]。比如匹配四个字母，可以写成 [[:alpha:]]{4}</p>
-<p>这里之所以提到POSIX字符类，是因为在shell中无法使用d w 这类的元字符，只能使用POSIX字符类。</p>
-<p>以上就是正则最基础的用法了。掌握这些就可以解决绝大多数的问题了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/22/Beautiful-Soup%E5%BA%93%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/22/Beautiful-Soup%E5%BA%93%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D/" itemprop="url">Beautiful Soup库的基本介绍</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-22T17:08:29+00:00">
-                2015-11-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>beautiful soup库是python中用来解析html文件的一个工具，他能做到将html文件依据他的标签的特征来取出相应的标签块，比如取出网页的title啊，body啊，或者是某个id对应的东西啊，等等。从而为进一步的加工处理创造条件。从某种程度上讲是替代了正则的作用，但是比正则表达式使用的更加方便。</p>
-<p>现在的beautiful soup库已经是第4.2版本了，所以我们通常叫他bs4。bs4作为一个库，其实是有很多的用法的。至于其具体用法，我是参考以下的文档的：</p>
-<p><a target="_blank" rel="noopener" href="http://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/">http://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/</a></p>
-<p>这里讲的比较详细，查阅起来也很方便。至于安装，我一般是用来<a href="/2015/11/23/1/5">pip</a>进行的，这个比较方便快捷，也便于管理。</p>
-<p>这里权且记录下一些基本的用法：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line">html_doc = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">&lt;html&gt;&lt;head&gt;&lt;title&gt;The Dormouse&#x27;s story&lt;/title&gt;&lt;/head&gt;</span></span><br><span class="line"><span class="string">&lt;body&gt;</span></span><br><span class="line"><span class="string">&lt;p class=&quot;title&quot;&gt;&lt;b&gt;The Dormouse&#x27;s story&lt;/b&gt;&lt;/p&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;p class=&quot;story&quot;&gt;Once upon a time there were three little sisters; and their names were</span></span><br><span class="line"><span class="string">&lt;a href=&quot;http://example.com/elsie&quot; class=&quot;sister&quot; id=&quot;link1&quot;&gt;Elsie&lt;/a&gt;,</span></span><br><span class="line"><span class="string">&lt;a href=&quot;http://example.com/lacie&quot; class=&quot;sister&quot; id=&quot;link2&quot;&gt;Lacie&lt;/a&gt; and</span></span><br><span class="line"><span class="string">&lt;a href=&quot;http://example.com/tillie&quot; class=&quot;sister&quot; id=&quot;link3&quot;&gt;Tillie&lt;/a&gt;;</span></span><br><span class="line"><span class="string">and they lived at the bottom of a well.&lt;/p&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;p class=&quot;story&quot;&gt;...&lt;/p&gt;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup  <span class="comment">#导入模块</span></span><br><span class="line"></span><br><span class="line">soup = BeautifulSoup(html_doc，“lxml”)  <span class="comment">#生成对象soup(这里不加第二个参数有时候会报warning)</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.prettify()    <span class="comment">#prettify()方法将源码格式化并返回</span></span><br><span class="line"><span class="comment"># &lt;html&gt;</span></span><br><span class="line"><span class="comment">#  &lt;head&gt;</span></span><br><span class="line"><span class="comment">#   &lt;title&gt;</span></span><br><span class="line"><span class="comment">#    The Dormouse&#x27;s story</span></span><br><span class="line"><span class="comment">#   &lt;/title&gt;</span></span><br><span class="line"><span class="comment">#  &lt;/head&gt;</span></span><br><span class="line"><span class="comment">#  &lt;body&gt;</span></span><br><span class="line"><span class="comment">#   &lt;p class=&quot;title&quot;&gt;</span></span><br><span class="line"><span class="comment">#    &lt;b&gt;</span></span><br><span class="line"><span class="comment">#     The Dormouse&#x27;s story</span></span><br><span class="line"><span class="comment">#    &lt;/b&gt;</span></span><br><span class="line"><span class="comment">#   &lt;/p&gt;</span></span><br><span class="line"><span class="comment">#   &lt;p class=&quot;story&quot;&gt;</span></span><br><span class="line"><span class="comment">#    Once upon a time there were three little sisters; and their names were</span></span><br><span class="line"><span class="comment">#    &lt;a class=&quot;sister&quot; href=&quot;http://example.com/elsie&quot; id=&quot;link1&quot;&gt;</span></span><br><span class="line"><span class="comment">#     Elsie</span></span><br><span class="line"><span class="comment">#    &lt;/a&gt;</span></span><br><span class="line"><span class="comment">#    ,</span></span><br><span class="line"><span class="comment">#    &lt;a class=&quot;sister&quot; href=&quot;http://example.com/lacie&quot; id=&quot;link2&quot;&gt;</span></span><br><span class="line"><span class="comment">#     Lacie</span></span><br><span class="line"><span class="comment">#    &lt;/a&gt;</span></span><br><span class="line"><span class="comment">#    and</span></span><br><span class="line"><span class="comment">#    &lt;a class=&quot;sister&quot; href=&quot;http://example.com/tillie&quot; id=&quot;link2&quot;&gt;</span></span><br><span class="line"><span class="comment">#     Tillie</span></span><br><span class="line"><span class="comment">#    &lt;/a&gt;</span></span><br><span class="line"><span class="comment">#    ; and they lived at the bottom of a well.</span></span><br><span class="line"><span class="comment">#   &lt;/p&gt;</span></span><br><span class="line"><span class="comment">#   &lt;p class=&quot;story&quot;&gt;</span></span><br><span class="line"><span class="comment">#    ...</span></span><br><span class="line"><span class="comment">#   &lt;/p&gt;</span></span><br><span class="line"><span class="comment">#  &lt;/body&gt;</span></span><br><span class="line"><span class="comment"># &lt;/html&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#以下的方法都很浅显易懂</span></span><br><span class="line"><span class="built_in">print</span> soup.title    </span><br><span class="line"><span class="comment"># &lt;title&gt;The Dormouse&#x27;s story&lt;/title&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.title.name</span><br><span class="line"><span class="comment"># u&#x27;title&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.title.string</span><br><span class="line"><span class="comment"># u&#x27;The Dormouse&#x27;s story&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.title.parent.name</span><br><span class="line"><span class="comment"># u&#x27;head&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.p</span><br><span class="line"><span class="comment"># &lt;p class=&quot;title&quot;&gt;&lt;b&gt;The Dormouse&#x27;s story&lt;/b&gt;&lt;/p&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.p[<span class="string">&#x27;class&#x27;</span>]</span><br><span class="line"><span class="comment"># u&#x27;title&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.a</span><br><span class="line"><span class="comment"># &lt;a class=&quot;sister&quot; href=&quot;http://example.com/elsie&quot; id=&quot;link1&quot;&gt;Elsie&lt;/a&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.find_all(<span class="string">&#x27;a&#x27;</span>)</span><br><span class="line"><span class="comment"># [&lt;a class=&quot;sister&quot; href=&quot;http://example.com/elsie&quot; id=&quot;link1&quot;&gt;Elsie&lt;/a&gt;,</span></span><br><span class="line"><span class="comment">#  &lt;a class=&quot;sister&quot; href=&quot;http://example.com/lacie&quot; id=&quot;link2&quot;&gt;Lacie&lt;/a&gt;,</span></span><br><span class="line"><span class="comment">#  &lt;a class=&quot;sister&quot; href=&quot;http://example.com/tillie&quot; id=&quot;link3&quot;&gt;Tillie&lt;/a&gt;]</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.find(<span class="built_in">id</span>=<span class="string">&quot;link3&quot;</span>)</span><br><span class="line"><span class="comment"># &lt;a class=&quot;sister&quot; href=&quot;http://example.com/tillie&quot; id=&quot;link3&quot;&gt;Tillie&lt;/a&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> link <span class="keyword">in</span> soup.find_all(<span class="string">&#x27;a&#x27;</span>):</span><br><span class="line">    <span class="built_in">print</span>(link.get(<span class="string">&#x27;href&#x27;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># http://example.com/elsie</span></span><br><span class="line"><span class="comment"># http://example.com/lacie</span></span><br><span class="line"><span class="comment"># http://example.com/tillie</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> soup.get_text()</span><br><span class="line"><span class="comment"># The Dormouse&#x27;s story</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The Dormouse&#x27;s story</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Once upon a time there were three little sisters; and their names were</span></span><br><span class="line"><span class="comment"># Elsie,</span></span><br><span class="line"><span class="comment"># Lacie and</span></span><br><span class="line"><span class="comment"># Tillie;</span></span><br><span class="line"><span class="comment"># and they lived at the bottom of a well.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ...</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2015/11/22/python%E6%A8%A1%E5%9D%97%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7pip%E5%92%8Ceasy_install/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/22/python%E6%A8%A1%E5%9D%97%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7pip%E5%92%8Ceasy_install/" itemprop="url">python模块下载工具pip和easy_install</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-22T16:39:25+00:00">
-                2015-11-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在写python的时候，经常会用到一些扩展包，作为python新手，经常又不知道去哪里找这些包。而且就算是找到了，下载下来之后还需要进行繁琐的安装、配置等操作。有时候为了进行这些安装还要去安装能够安装这些程序的程序，比如setuptools等。而安装这些东西有可能还会有很多奇奇怪怪的问题，这样严重影响了编程的体验。还好，python有几个类似ubuntu中apt-get一样的东西，相当于一个包管理器，能够十分便捷的帮我们安装到自己需要的模块，这就是pip和easy_install。</p>
-<h2 id="pip"><a href="#pip" class="headerlink" title="pip"></a>pip</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# apt-get install python-pip</span><br></pre></td></tr></table></figure>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>比如想安装beautifulsoup包可以这样。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# pip install beautifulsoup</span><br></pre></td></tr></table></figure>
-<p>这样基本就能将包安装好了。当然这里很多情况下是会报一些错的（比如包的名称不对），这些错通常都会输出到他的log文件中去，所有的问题都会在log中找到答案。</p>
-<p>其实所有模块的安装方法都能在该模块的帮助文档中找到。比如beautifulsoup包也可以用apt-get来安装，但是作为一个更加专业的python软件，pip显然在python包的安装上更加有优势。而且，pip不仅可以下载，而且可以列举，更新和卸载包，使用的范围更加的广泛。</p>
-<p>以下是一些常用参数：</p>
-<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>-U 或者 –upgrade</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install -U SomePackage</span><br></pre></td></tr></table></figure>
-<p>可以用来更新其他模块，也可以更新pip自己。</p>
-<h3 id="查看更新"><a href="#查看更新" class="headerlink" title="查看更新"></a>查看更新</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip list --outdated</span><br></pre></td></tr></table></figure>
-<h3 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip uninstall SomePackage</span><br></pre></td></tr></table></figure>
-<h3 id="更新源"><a href="#更新源" class="headerlink" title="更新源"></a>更新源</h3><p>有时候经常会遇到他默认的下载点无法链接的情况，这就时候需要指定下载源了。</p>
-<p>手动指定：</p>
-<p>在pip后面跟-i 来指定源，比如用豆瓣的源来安装web.py框架：</p>
-<p>pip install web.py -i <a target="_blank" rel="noopener" href="http://pypi.douban.com/simple">http://pypi.douban.com/simple</a></p>
-<p>自动指定：</p>
-<p>修改~&#x2F;.pip&#x2F;pip.conf 文件的内容，类似与如下格式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line"> index-url = http://pypi.douban.com/simple/</span><br></pre></td></tr></table></figure>
-<p>最后再更新下pip就行了。</p>
-<p>！！！最新发现，更可靠的源：<a target="_blank" rel="noopener" href="http://pypi.zenlogic.net/simple/">http://pypi.zenlogic.net/simple/</a></p>
-<h2 id="easy-install"><a href="#easy-install" class="headerlink" title="easy_install"></a>easy_install</h2><p>在实际中经常发现pip并不好用，因为牵涉到什么ssl的错误，经常会报一些奇奇怪怪的错。相比之下easy_install的表现就稳定许多了。</p>
-<h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@iZ28ntr2ej5Z:~# apt-get install python-setuptools</span><br></pre></td></tr></table></figure>
-<p>没错，在setuptools里就有easy_install了。</p>
-<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>与pip的用法基本相同，只要把pip换成easy_install即可。包括指定源的方法，都一样。</p>
-<hr>
-<p>2017年1月27日：</p>
-<p>最近发现pip在使用自定义的源的时候需要添加–trusted-host参数才能从指定源下载，否则就会提示你需要安装的包找不到。其实这时候只要把在配置文件里写入的pypi源的url改成https即可。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/50/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><span class="page-number current">51</span><a class="page-number" href="/page/52/">52</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/52/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/50/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><span class="page-number current">51</span><a class="page-number" href="/page/52/">52</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/52/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -4423,7 +4362,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -4434,7 +4373,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -4445,7 +4384,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

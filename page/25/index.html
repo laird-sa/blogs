@@ -307,6 +307,958 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/10/15/Shell%E8%A7%A3%E6%9E%90%E5%A4%84%E7%90%86XML%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/10/15/Shell%E8%A7%A3%E6%9E%90%E5%A4%84%E7%90%86XML%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB/" itemprop="url">Shell解析处理XML方法汇总</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-15T05:24:41+00:00">
+                2017-10-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Shell/" itemprop="url" rel="index">
+                    <span itemprop="name">Shell</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前几天干活的时候遇到一个需要解析处理xml文件的一个需求，当时考虑到逻辑比较复杂，因此用java慢慢搞了搞。不过这个需求经常会变，每次变化之后都要重新找到jar包的代码，改了之后还要替换原来的jar包，一来不方便修改，二来不方便统一保存代码，三来也不方便查看jar包的功能。<br>其实对于这种比较灵活的功能，最方便高效的做法是采用一些脚本语言，比如python，ruby等等，开发效率高，而且也能处理一些复杂逻辑。但是由于种种原因，工作中有的机器没有安装这些语言的解释器。因此不得已，研究了一波用shell脚本解析xml的方法。<br>说到底，shell还是不太适合处理复杂的逻辑，但是对于一些简单的查找替换等需求，用shell来搞还是挺方便的。<br>我这里主要采用了下面三个工具：</p>
+<ul>
+<li>xmllint</li>
+<li>xpath</li>
+<li>xml2</li>
+</ul>
+<p>下面就分别总结下这三个工具的用法，方便以后查阅。</p>
+<h2 id="xmllint"><a href="#xmllint" class="headerlink" title="xmllint"></a>xmllint</h2><h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><p>xmllint其实是由一个叫libxml2的c语言库函数实现的一个小工具，因此效率比较高，对不同系统的支持度也很好，功能也比较全。他一般属于<code>libxml2-utils</code>这个软件包，因此类似与<code>sudo apt install libxml2-utils</code>的命令就可以安装。</p>
+<h3 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h3><p>xmllint至少支持下面几个常用功能：</p>
+<ol>
+<li>支持xpath查询语句</li>
+<li>支持类shell的交互式查询</li>
+<li>支持xml格式验证</li>
+<li>支持dtd,xsd对xml的校验</li>
+<li>支持编码转换</li>
+<li>支持xml格式化</li>
+<li>支持去空格压缩</li>
+<li>支持时间效率统计</li>
+</ol>
+<p>其实我们比较常用的功能主要也就是三个–xpath查询、去空格和格式化、校验。<br>比如当前有sample.xml:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="执行xpath查询"><a href="#执行xpath查询" class="headerlink" title="执行xpath查询"></a>执行xpath查询</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --xpath <span class="string">&quot;//book[@id=2]/name/text()&quot;</span> sample.xml</span><br><span class="line">book2</span><br></pre></td></tr></table></figure>
+
+<h4 id="去空格"><a href="#去空格" class="headerlink" title="去空格"></a>去空格</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --noblanks sample.xml</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span><span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span><span class="tag">&lt;<span class="name">license</span>/&gt;</span><span class="tag">&lt;/<span class="name">book</span>&gt;</span><span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span><span class="tag">&lt;/<span class="name">book</span>&gt;</span><span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span><span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span><span class="tag">&lt;/<span class="name">book</span>&gt;</span><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="格式化"><a href="#格式化" class="headerlink" title="格式化"></a>格式化</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --format sample.xml</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">license</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="xsd校验"><a href="#xsd校验" class="headerlink" title="xsd校验"></a>xsd校验</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ cat sample.xsd</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xs:schema</span> <span class="attr">id</span>=<span class="string">&quot;books&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;&quot;</span> <span class="attr">xmlns:xs</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema&quot;</span> <span class="attr">xmlns:msdata</span>=<span class="string">&quot;urn:schemas-microsoft-com:xml-msdata&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;books&quot;</span> <span class="attr">msdata:IsDataSet</span>=<span class="string">&quot;true&quot;</span> <span class="attr">msdata:Locale</span>=<span class="string">&quot;en-US&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">xs:choice</span> <span class="attr">minOccurs</span>=<span class="string">&quot;0&quot;</span> <span class="attr">maxOccurs</span>=<span class="string">&quot;unbounded&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;book&quot;</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">xs:sequence</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xs:string&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;0&quot;</span> <span class="attr">msdata:Ordinal</span>=<span class="string">&quot;0&quot;</span> /&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">xs:element</span> <span class="attr">name</span>=<span class="string">&quot;price&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xs:string&quot;</span> <span class="attr">minOccurs</span>=<span class="string">&quot;0&quot;</span> <span class="attr">msdata:Ordinal</span>=<span class="string">&quot;1&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">xs:sequence</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">xs:attribute</span> <span class="attr">name</span>=<span class="string">&quot;id&quot;</span> <span class="attr">type</span>=<span class="string">&quot;xs:string&quot;</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">xs:element</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">xs:choice</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">xs:complexType</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">xs:element</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">xs:schema</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">myths@business:~$ xmllint --noout --schema sample.xsd sample.xml</span><br><span class="line">sample.xml validates</span><br></pre></td></tr></table></figure>
+<p>注意校验结果信息是输出到stderr中的，工具默认会把原文件回显到stdout里，可以加–noout参数关闭stdout回显。</p>
+<h4 id="流传递"><a href="#流传递" class="headerlink" title="流传递"></a>流传递</h4><p>xmllint默认是传递文件名，如果我们希望用通过管道传递文件流的方式传递数据，我们可以这样弄：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ cat sample.xml |xmllint --format -</span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">books</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book1<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>100<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">license</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;2&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book2<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>200<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">book</span> <span class="attr">id</span>=<span class="string">&quot;3&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>book3<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">price</span>&gt;</span>300<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">books</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="奇怪报错”XPath-set-is-empty”"><a href="#奇怪报错”XPath-set-is-empty”" class="headerlink" title="奇怪报错”XPath set is empty”"></a>奇怪报错”XPath set is empty”</h4><p>这个问题在使用xmllint的xpath功能时候会经常遇到，其实原因主要是xml文件自带了名空间，比如maven的pom文件的开头：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>或者maven的setting文件的开头：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">settings</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>他们都会有个xmlns的属性，表示该xml文件的名空间。如果对这种文件直接执行查找则会报错：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~/cucumber/code/device<span class="comment"># xmllint --xpath &quot;/project&quot; pom.xml </span></span><br><span class="line">XPath <span class="built_in">set</span> is empty</span><br></pre></td></tr></table></figure>
+<p>解决方案要么把文件的xmlns属性去掉，要么就只能采用下面这种变通的办法指定节点名：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~/cucumber/code/device<span class="comment"># xmllint --xpath &quot;/*[local-name()=&#x27;project&#x27;]&quot; pom.xml </span></span><br><span class="line">&lt;project xmlns=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> xsi:schemaLocation=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;  </span><br><span class="line">	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;  </span><br><span class="line">...</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="xpath"><a href="#xpath" class="headerlink" title="xpath"></a>xpath</h2><h3 id="简述-1"><a href="#简述-1" class="headerlink" title="简述"></a>简述</h3><p>xpath工具其实是封装了的perl脚本，本身也只有两百来行，功能比较专一，就是提供xpath的查询功能。他一般属于<code>libxml-xpath-perl</code>这个软件包，因此类似于<code>sudo apt install libxml-xpath-perl</code>的命令就可以安装。像suse之类的系统还会直接自带。</p>
+<h3 id="功能-1"><a href="#功能-1" class="headerlink" title="功能"></a>功能</h3><p>不同系统中安装的版本可能不同，不过基本功能是类似的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xpath -e <span class="string">&#x27;//book/name/text()&#x27;</span>  sample.xml</span><br><span class="line">Found 3 nodes <span class="keyword">in</span> sample.xml:</span><br><span class="line">-- NODE --</span><br><span class="line">book1</span><br><span class="line">-- NODE --</span><br><span class="line">book2</span><br><span class="line">-- NODE --</span><br><span class="line">book3</span><br></pre></td></tr></table></figure>
+<p>默认会将查询呢结果输出到stdout中，将说明信息输出到stderr中。如果为了方便收集结果，可以将stderr重定向到&#x2F;dev&#x2F;null，或者加上-q参数：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xpath -e <span class="string">&#x27;//book/name/text()&#x27;</span> sample.xml 2&gt;/dev/null</span><br><span class="line">book1</span><br><span class="line">book2</span><br><span class="line">book3</span><br><span class="line"></span><br><span class="line">myths@business:~$ xpath -q -e <span class="string">&#x27;//book/name/text()&#x27;</span> sample.xml</span><br><span class="line">book1</span><br><span class="line">book2</span><br><span class="line">book3</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="对比xmllint"><a href="#对比xmllint" class="headerlink" title="对比xmllint"></a>对比xmllint</h3><p>xpath相比xmllint的xpath功能有一点点区别很重要，如果xpath匹配了多个结果，那么xpath就会分行输出，而xmllint则会揉到一行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ xmllint --xpath <span class="string">&quot;//book/name/text()&quot;</span> sample.xml</span><br><span class="line">book1book2book3</span><br></pre></td></tr></table></figure>
+<p>除此之外，xmllint工具相对比较稳定，在不同的系统内的使用参数基本固定。而xpath工具不是很标准，在不同系统内的默认版本之间甚至不互相兼容。比如在ubuntu14.04内默认用法是<code>/usr/bin/xpath [options] -e query [-e query...] [filename...]</code>,而在suse12内的默认用法却是<code>/usr/bin/xpath [filename] query</code>。这会很容易导致相同脚本对不同系统的不兼容性。</p>
+<h2 id="xml2"><a href="#xml2" class="headerlink" title="xml2"></a>xml2</h2><h3 id="简述-2"><a href="#简述-2" class="headerlink" title="简述"></a>简述</h3><p>xml2这个工具感觉知道的人并不多，不过其实他在某些场景里跟其他命令配合能起到奇效。这个工具的开发人员的博客似乎已经挂掉了，不过目测应该用C以及libxml2库写的一个小工具。一般是在<code>xml2</code>软件包中，因此类似<code>sudo apt install xml2</code>的命令就可以安装。</p>
+<h3 id="功能-2"><a href="#功能-2" class="headerlink" title="功能"></a>功能</h3><p>这个工具包含六个命令：xml2,2xml,html2,2html,csv2,2csv，功能也非常unix，就是分别将xml,html,csv格式与一种他称之为“flat format”的格式进行转换。举个例子：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">myths@business:~$ <span class="built_in">cat</span> sample.xml |xml2</span><br><span class="line">/books/book/@<span class="built_in">id</span>=1</span><br><span class="line">/books/book/name=book1</span><br><span class="line">/books/book/price=100</span><br><span class="line">/books/book</span><br><span class="line">/books/book/@<span class="built_in">id</span>=2</span><br><span class="line">/books/book/name=book2</span><br><span class="line">/books/book/price=200</span><br><span class="line">/books/book</span><br><span class="line">/books/book/@<span class="built_in">id</span>=3</span><br><span class="line">/books/book/name=book3</span><br><span class="line">/books/book/price=300</span><br><span class="line"></span><br><span class="line">myths@business:~$ <span class="built_in">cat</span> sample.xml |xml2|2xml</span><br><span class="line">&lt;books&gt;&lt;book <span class="built_in">id</span>=<span class="string">&quot;1&quot;</span>&gt;&lt;name&gt;book1&lt;/name&gt;&lt;price&gt;100&lt;/price&gt;&lt;/book&gt;&lt;book <span class="built_in">id</span>=<span class="string">&quot;2&quot;</span>&gt;&lt;name&gt;book2&lt;/name&gt;&lt;price&gt;200&lt;/price&gt;&lt;/book&gt;&lt;book <span class="built_in">id</span>=<span class="string">&quot;3&quot;</span>&gt;&lt;name&gt;book3&lt;/name&gt;&lt;price&gt;300&lt;/price&gt;&lt;/book&gt;&lt;/books&gt;</span><br></pre></td></tr></table></figure>
+<p>这种自定义的格式非常简单而巧妙，有的表示新建节点(<code>/books/book</code>)，有的表示给节点赋值(<code>/books/book/name=book1</code>)，有的表示给节点的属性赋值(<code>/books/book/@id=1</code>)。写法跟xpath很像但又不完全一样。而且相互对应的两个命令放在一起能做到幂等。</p>
+<p>那么这种转化命令有什么用呢？其实我们经常会遇到一些创建xml文件的需求，但是直接按照xml格式动态生成就非常麻烦，这时候用flat format做个中转就非常方便了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env bash</span></span><br><span class="line"></span><br><span class="line">tempFile=$(<span class="built_in">mktemp</span> tmp.XXXX)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">addBook</span></span>()&#123;</span><br><span class="line">    <span class="built_in">id</span>=<span class="variable">$1</span></span><br><span class="line">    name=<span class="variable">$2</span></span><br><span class="line">    price=<span class="variable">$3</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book/@id=<span class="variable">$id</span>&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book/name=<span class="variable">$name</span>&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;/books/book/price=<span class="variable">$price</span>&quot;</span>&gt;&gt;<span class="variable">$tempFile</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">main</span></span>()&#123;</span><br><span class="line">    addBook 1 book1 100</span><br><span class="line">    addBook 2 book2 200</span><br><span class="line">    addBook 3 book3 300</span><br><span class="line">    <span class="built_in">cat</span> <span class="variable">$tempFile</span>|2xml|xmllint --format --output new_sample.xml -</span><br><span class="line">    <span class="built_in">rm</span> <span class="variable">$tempFile</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">main <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<p>上面这段代码就生成了与sample.xml一模一样的new_sample.xml.</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/10/08/compare-vps-ecs-vh/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/10/08/compare-vps-ecs-vh/" itemprop="url">云主机和 VPS 的区别</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-08T07:35:00+00:00">
+                2017-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>很多站长对于云主机、VPS、虚拟主机之间的区别都不知所以，很多解释这些概念的文章也经常出现各种错误，使得这些概念经常被混淆。所以我也写一篇阐述它们区别的文章。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/08/compare-vps-ecs-vh/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/10/02/how-to-write-beautiful-github-readme/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/10/02/how-to-write-beautiful-github-readme/" itemprop="url">如何写好一个开源项目的 README</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-02T06:07:00+00:00">
+                2017-10-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E4%BA%AB%E9%95%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">分享镜</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>README 是一个项目的门面。如果你想让更多人使用你的项目或者给你的贡献 PR、丢 star，你就应该写一个吸引人的 README。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/02/how-to-write-beautiful-github-readme/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/09/17/wpo-web-font-performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/09/17/wpo-web-font-performance/" itemprop="url">Web 性能优化（6）——WebFont 字体优化</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-17T09:48:00+00:00">
+                2017-09-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">实验室</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>WebFont 的加载是一个令人头疼的事情。除了跨域问题、还有 FOIT、FOUT 等等。为了提供更好的用户体验，我寻找了一些高效加载 WebFont 的简单解决方法，并对它们分别进行测试。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/17/wpo-web-font-performance/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/09/10/xiaomi-anc-earphone/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/09/10/xiaomi-anc-earphone/" itemprop="url">小米降噪耳机评测</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-10T06:46:00+00:00">
+                2017-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E4%BA%AB%E9%95%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">分享镜</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <script src="https://cdn.jsdelivr.net/npm/aplayer@1.6.0/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@1.0.1/dist/Meting.min.js"></script>
+
+<p>在同学的安利之下，我剁手了一副小米降噪耳机 Type-C 版。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/10/xiaomi-anc-earphone/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/09/07/Linux%E4%B8%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/09/07/Linux%E4%B8%8B%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%85%8D%E7%BD%AE%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3/" itemprop="url">Linux下定时任务配置深入理解</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-07T13:39:33+00:00">
+                2017-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>关于定时任务的配置其实是一个老掉牙的问题了，为什么我又要总结一遍呢？我想大概有以下几点原因。首先，大多数文章都聚焦于cron语法，而比较忽视具体的操作步骤。其次，很多文章都介绍的比较凌乱，层次不是很清楚。而且，当我理清楚linux下定时任务配置的一套流程之后，深刻的觉得他的设计真的是很周到的。不过最重要的一点大概就是我非常不喜欢那种堆砌命令用法的文章，好像Linux就是他写的一样，东一块说明，西一块说明，谁都不知道这些说明是谁说的，从哪里来的，是不是以讹传讹，可信度有多少，是不是已经不被支持，等等。尤其是在当前这种版本飞速迭代的年代，对于一些重要配置只知其然不知其所以然是非常可怕的一件事。<br>其实关于定时任务配置这一块没有任何技术含量，重要的就是细心一点，理清配置文件之间的关系即可。</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>在linux里配置定时任务主要是靠cron和crontab两个程序来控制。这两个命令各司其职而又互相联系，cron是执行定时任务的守护进程，负责配置的解析跟处理；而crontab则是方便用户进行直接配置的命令，相当于是方便用户直接进行管理的工具。</p>
+<h2 id="Cron"><a href="#Cron" class="headerlink" title="Cron"></a>Cron</h2><p>查阅Ubuntu14.04系统的cron的man文档，我们可以发现，cron其实是一个存放在<code>/etc/init.d/</code>下的一个脚本，随着系统开机自动启动，可以由service命令调度控制开启和关闭。</p>
+<h3 id="Step1"><a href="#Step1" class="headerlink" title="Step1"></a>Step1</h3><p>首先，cron会搜索<code>/var/spool/cron/crontabs</code>文件夹，这个文件夹下有多个以用户名命名的文件，每个文件就是属于各个用户的独立的cron配置文件。我们可以将定时任务项按照类似下面的规则配置在这些文件里：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># For example, you can run a backup of all your user accounts</span><br><span class="line"># at 5 a.m every week with:</span><br><span class="line"># 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/</span><br><span class="line"># </span><br><span class="line"># For more information see the manual pages of crontab(5) and cron(8)</span><br><span class="line"># </span><br><span class="line"># m h  dom mon dow   command</span><br></pre></td></tr></table></figure>
+<p>其实就是基础的cron配置项加上需要执行的命令。需要注意的是与下面两个不同，这里的配置<strong>不需要</strong>指定用户名，而下面的配置是需要指定用户名的。</p>
+<h3 id="Step2"><a href="#Step2" class="headerlink" title="Step2"></a>Step2</h3><p>然后，cron会去搜索<code>/etc/crontab</code>文件，并且解析里面的cron配置。比如在Debian里，默认的配置是这样的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SHELL=/bin/sh</span><br><span class="line">PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin</span><br><span class="line"></span><br><span class="line"># m h dom mon dow user  command</span><br><span class="line">17 *    * * *   root    cd / &amp;&amp; run-parts --report /etc/cron.hourly</span><br><span class="line">25 6    * * *   root    test -x /usr/sbin/anacron || ( cd / &amp;&amp; run-parts --report /etc/cron.daily )</span><br><span class="line">47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / &amp;&amp; run-parts --report /etc/cron.weekly )</span><br><span class="line">52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / &amp;&amp; run-parts --report /etc/cron.monthly )</span><br></pre></td></tr></table></figure>
+<p>他首先定义了一些基本的环境变量，然后配置了四条任务。显然，这四条任务就是配置了定时调度<code> /etc/cron.hourly</code>，<code>/etc/cron.daily</code>,<code>/etc/cron.weekly</code>,<code>/etc/cron.monthly</code>这四个文件夹，通过run-parts命令来递归调度文件夹下的所有可执行文件。<br>这个配置可能在不同的linux版本下写法不一样，但是最终的结果基本差不多，都是默认配置了定时调度文件夹的任务。比如在SUSE12中，这个配置就变成了这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SHELL=/bin/sh</span><br><span class="line">PATH=/usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin</span><br><span class="line">MAILTO=root</span><br><span class="line">#</span><br><span class="line"># check scripts in cron.hourly, cron.daily, cron.weekly, and cron.monthly</span><br><span class="line">#</span><br><span class="line">-*/15 * * * *   root  test -x /usr/lib/cron/run-crons &amp;&amp; /usr/lib/cron/run-crons &gt;/dev/null 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+<p>看上去好像不一样，但其实这个<code>run-crons</code>脚本做的事情也是定时调度那四个文件夹。<br>事实上，很多系统内置的定时脚本都是存放在这四个文件夹下进行自动调度的。</p>
+<h3 id="Step3"><a href="#Step3" class="headerlink" title="Step3"></a>Step3</h3><p>最后，cron会去执行<code>/etc/cron.d/</code>这个文件夹下的东西，不过我们通常不建议在这里进行修改，虽然这个文件夹下的变化也会被监视，但是我们更习惯将这种不通用的定时任务配置在<code>/etc/crontab/</code>里。</p>
+<h2 id="Crontab"><a href="#Crontab" class="headerlink" title="Crontab"></a>Crontab</h2><p>查阅Ubuntu14.04系统的crontab的man文档，我们可以发现，crontab其实是方便用户来维护crontab配置文件的工具。<br>通过<code>crontab -l</code>可以显示属于当前用户的<code>/var/spool/cron/craontabs/</code>文件夹下的配置。通过<code>crontab -e</code>可以安全的进行编辑，如果语法不对他会进行提示，保证安全。就像<code>visudo</code>命令一样，本质就是”修改配置文件+语法检测”。<br>同时，crontab还提供了两个配置文件来控制用户的权限–<code>/etc/cron.allow</code>跟<code>/etc/cron.deny</code>。只有用户名在白名单里的用户才能使用crontab命令，用户名在黑名单里的用户是无法使用crontab命令的。显然，原则上这两个配置文件不能同时存在，如果同时存在，那么出于保守原则考虑，只有白名单有效，黑名单无效。如果这两个配置不存在，那么根据linux版本的不同，有的系统默认所有用户都有权限，有的系统默认只有root才有权限。</p>
+<h1 id="配置选择"><a href="#配置选择" class="headerlink" title="配置选择"></a>配置选择</h1><p>以上大概就是最基本的配置文件了。看上去好像很繁琐，到处都有配置，其实我觉得设计者考虑的还是十分周到的。事实上这一系列的命令跟配置文件充分考虑了各种实际场景，并且给我们提供了很好的选择。</p>
+<h2 id="固定用户的定时任务"><a href="#固定用户的定时任务" class="headerlink" title="固定用户的定时任务"></a>固定用户的定时任务</h2><p>有时候，我们的服务器可能是多个用户在用，这时候如果所有人都把自己的定时任务配置在一个文件里显然不方便处理。这时候我们就可以使用crontab命令去修改位于<code>/var/spool/cron/crontabs/</code>下的属于当前用户的配置文件。这样就能够非常方便的区分不同用户的配置，保护了数据的安全。</p>
+<h2 id="固定时间的定时任务"><a href="#固定时间的定时任务" class="headerlink" title="固定时间的定时任务"></a>固定时间的定时任务</h2><p>很多情况下，作为系统管理员，我们需求的任务模式大都是每小时触发，每日触发，每周触发，每月触发之类的。那么这时我们就可以不用配置cron项，只需要把脚本放在对应的<code>/etc/cron.daily</code>,<code>/etc/cron.hourly</code>之类的文件夹下即可，方便省事。而且事实上，很多系统自身需要的定时任务就是这么办的。这种方式也是我们最<strong>推荐</strong>的方式，因为我们只要把需要定时执行的脚本放在规定的路径下即可，无需配置cron，毕竟cron配置文件用起来还是比shell脚本麻烦很多。</p>
+<h2 id="固定程序的定时任务"><a href="#固定程序的定时任务" class="headerlink" title="固定程序的定时任务"></a>固定程序的定时任务</h2><p>有时候，某些处理特定任务的进程也希望能够创建定时任务，比如我们编写或者安装的第三方任务。这些任务不希望依附于某一个用户，而希望拥有独立的配置文件，方便修改和卸载等等。这时候我们就可以新建一个cron配置文件，放置于<code>/etc/cron.d/</code>文件夹下，进行统一管理。像csf,lfd这类的进程就是这么做的，通过这样的配置保证服务定时重启。</p>
+<h1 id="配置脚本注意点"><a href="#配置脚本注意点" class="headerlink" title="配置脚本注意点"></a>配置脚本注意点</h1><p>所谓的配置脚本其实也有两种，一种是<strong>cron配置文件</strong>，我们可以在这些文件的后面写一些简单的命令；还有一种是放在<code>/etc/cron.daily</code>中的<strong>shell脚本</strong>，或者由cron配置文件调用的shell脚本，这些脚本写起来就更加灵活了。</p>
+<h2 id="cron配置文件"><a href="#cron配置文件" class="headerlink" title="cron配置文件"></a>cron配置文件</h2><p>cron配置文件主要由两部分组成，一部分是环境变量的定义，另一部分就是符合cron语法的配置项。</p>
+<h3 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h3><p>默认情况下，cron配置文件里是没有绝大多数的环境变量的，就连<code>$PATH</code>跟<code>$SHELL</code>这两个变量也都是用的最基础的版本。因此我们在写命令的时候要注意要么全部使用命令的绝对路径，要么就定义下重要的环境变量。。。不过一般来说还是写绝对路径方便。</p>
+<h3 id="输出日志"><a href="#输出日志" class="headerlink" title="输出日志"></a>输出日志</h3><p>默认情况下cron命令的输出是会输出到邮件池里，然后发送给定时任务所属的用户。显然如果定时任务比较频繁就会给用户发送很多的”垃圾邮件”。因此我们一般都会将输出进行重定向，包括标准输出和错误输出，将其全部重定向到指定的文件夹内。<br>有时候我们可能希望查看定时任务到底有没有执行，这时候我们其实只需要查看下syslog的位置，通常是在<code>/var/log/</code>下。他会输出类似下面的定时日志:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Sep  6 23:41:52 pc crontab[8420]: (myths) BEGIN EDIT (myths)</span><br><span class="line">Sep  6 23:42:01 pc CRON[8452]: (myths) CMD (echo 233)</span><br><span class="line">Sep  6 23:42:02 pc postfix/pickup[3547]: 04AD93A0124: uid=1000 from=&lt;myths&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Shell脚本"><a href="#Shell脚本" class="headerlink" title="Shell脚本"></a>Shell脚本</h2><p>写Shell脚本相比些cron配置文件就自由很多了，毕竟只需要关注业务逻辑即可。不过我们仍然需要关注环境变量和当前路径，因为这里的shell脚本中很多环境变量仍然是最基础的配置。通常我们会在脚本开头手动导入默认的配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<p>为了安全起见我们仍然尽量采用绝对路径，或者cd进入想要的路径进行操作，避免不必要的问题。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/08/14/%E5%AD%97%E7%AC%A6%E9%9B%86%E4%B8%8E%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E7%9A%84%E5%BC%BA%E5%8C%96%E7%90%86%E8%A7%A3%E4%B8%8E%E6%93%8D%E4%BD%9C%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1052,1084 +2004,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/11/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9A%84JavaSE8%E4%B9%A6%E5%90%8E%E4%B9%A0%E9%A2%98%E7%AE%80%E6%9E%90-%E7%AC%AC%E4%BA%8C%E7%AB%A0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/11/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9A%84JavaSE8%E4%B9%A6%E5%90%8E%E4%B9%A0%E9%A2%98%E7%AE%80%E6%9E%90-%E7%AC%AC%E4%BA%8C%E7%AB%A0/" itemprop="url">写给大忙人的JavaSE8书后习题简析-第二章</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-11T14:51:42+00:00">
-                2017-07-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Stream-API"><a href="#Stream-API" class="headerlink" title="Stream API"></a>Stream API</h1><h2 id="第一题"><a href="#第一题" class="headerlink" title="第一题"></a>第一题</h2><blockquote>
-<p>编写一个第2.1节中的for循环的并行版本。获取处理器的数量，创造出多个独立的线程，每个都只处理列表的一个片段，然后将他们各自的结果汇总起来。（我们不希望这些线程都更新一个计数器，为什么？）</p>
-</blockquote>
-<p>还是有点麻烦的，线程得传值，得获取运行结果，相比流式计算麻烦太多了。这里为了平均给每个线程分配任务，我们得手动将资源进行拆分，有的是将数据List平均分，我这里是通过取模的结果来进行分配。<br>我们当然不希望这些线程都更新一个计数器，因为累加的操作不是原子操作，我们得加锁，这样不仅麻烦容易出错，而且效率也低。<br>附我的代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">CORES</span> <span class="operator">=</span> Runtime.getRuntime().availableProcessors();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">MyThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">        <span class="type">int</span> id;</span><br><span class="line">        <span class="type">int</span>[] result;</span><br><span class="line">        List&lt;String&gt; words;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">MyThread</span><span class="params">(<span class="type">int</span> id, List&lt;String&gt; words, <span class="type">int</span>[] result)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.words = words;</span><br><span class="line">            <span class="built_in">this</span>.result = result;</span><br><span class="line">            <span class="built_in">this</span>.id = id;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; words.size() / CORES; i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> ((i * CORES + id) &lt; words.size() &amp;&amp; words.get(i * CORES + id).length() &gt; <span class="number">12</span>)</span><br><span class="line">                    count++;</span><br><span class="line">            &#125;</span><br><span class="line">            result[id] = count;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task1</span><span class="params">()</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">contents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(<span class="string">&quot;article.txt&quot;</span>)), StandardCharsets.UTF_8);</span><br><span class="line">        List&lt;String&gt; words = Arrays.asList(contents.split(<span class="string">&quot;[\\P&#123;L&#125;]+&quot;</span>));</span><br><span class="line">        <span class="type">int</span>[] result = <span class="keyword">new</span> <span class="title class_">int</span>[CORES];</span><br><span class="line">        Thread[] threads = <span class="keyword">new</span> <span class="title class_">Thread</span>[CORES];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; CORES; i++) &#123;</span><br><span class="line">            threads[i] = <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">MyThread</span>(i, words, result));</span><br><span class="line">            threads[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; CORES; i++) &#123;</span><br><span class="line">            threads[i].join();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">total</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; CORES; i++)</span><br><span class="line">            total += result[i];</span><br><span class="line">        System.out.println(total);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task1</span>().task1();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="第二题"><a href="#第二题" class="headerlink" title="第二题"></a>第二题</h2><blockquote>
-<p>请想办法验证一下，对于获得前五个最长单词的代码，一旦找到第五个最长的单词后，就不会再调用filter方法了。（一个简单的方法是记录每次的方法调用）</p>
-</blockquote>
-<p>这题主要验证流式计算跟循环的一个很明显的区别，流式计算对于每一个流元素是直接运算到结束，而循环则是一层一层的计算。(姑且这么理解)</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task2</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">contents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(<span class="string">&quot;article.txt&quot;</span>)), StandardCharsets.UTF_8);</span><br><span class="line">        Stream&lt;String&gt; words = Stream.of(contents.split(<span class="string">&quot;[\\P&#123;L&#125;]+&quot;</span>));</span><br><span class="line"></span><br><span class="line">        Stream&lt;String&gt; result = words.filter((word) -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (word.length() &gt; <span class="number">12</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;bingo&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span></span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;).limit(<span class="number">5</span>);</span><br><span class="line">        System.out.println(result.count());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task2</span>().task2();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bingo</span><br><span class="line">bingo</span><br><span class="line">bingo</span><br><span class="line">bingo</span><br><span class="line">bingo</span><br><span class="line">5</span><br></pre></td></tr></table></figure>
-<h2 id="第三题"><a href="#第三题" class="headerlink" title="第三题"></a>第三题</h2><blockquote>
-<p>要统计长单词的数量，使用parallelStream与使用stream有什么区别？请具体测试一下。你可以在调用方法之前和之后调用System.nanoTime，并打印出他们之间的区别。如果你有速度较快的计算机，可以试着处理一个较大的文档（例如战争与和平的英文原著）。</p>
-</blockquote>
-<p>验证串行流跟并行流的效率，实验证明并行流还是比串行流快好多的。我本机cpu是E5-2690v2，数据集也不算大，但是跑起来效率差别还是不小的。代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task3</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task3</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">contents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(<span class="string">&quot;article.txt&quot;</span>)), StandardCharsets.UTF_8);</span><br><span class="line">        Stream&lt;String&gt; words1 = Stream.of(contents.split(<span class="string">&quot;[\\P&#123;L&#125;]+&quot;</span>));</span><br><span class="line">        <span class="type">long</span> <span class="variable">singleStart</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">        <span class="type">long</span> <span class="variable">count1</span> <span class="operator">=</span> words1.filter((word) -&gt; word.length() &gt; <span class="number">12</span>).count();</span><br><span class="line">        <span class="type">long</span> <span class="variable">singleEnd</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line"></span><br><span class="line">        Stream&lt;String&gt; words2 = Stream.of(contents.split(<span class="string">&quot;[\\P&#123;L&#125;]+&quot;</span>));</span><br><span class="line">        <span class="type">long</span> <span class="variable">parrStart</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">        <span class="type">long</span> <span class="variable">count2</span> <span class="operator">=</span> words2.parallel().filter((word) -&gt; word.length() &gt; <span class="number">12</span>).count();</span><br><span class="line">        <span class="type">long</span> <span class="variable">parrEnd</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line"></span><br><span class="line">        System.out.println(String.format(<span class="string">&quot;count1 = %d in %d ms.&quot;</span>, count1, (singleEnd - singleStart) / <span class="number">1000000</span>));</span><br><span class="line">        System.out.println(String.format(<span class="string">&quot;count2 = %d in %d ms.&quot;</span>, count2, (parrEnd - parrStart) / <span class="number">1000000</span>));</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task3</span>().task3();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我的运行结果是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">count1 = 48 in 93 ms.</span><br><span class="line">count2 = 48 in 7 ms.</span><br></pre></td></tr></table></figure>
-<p>我这里并行流的速度接近串行流的十倍。。。</p>
-<h2 id="第四题"><a href="#第四题" class="headerlink" title="第四题"></a>第四题</h2><blockquote>
-<p>假设你有一个数组int[] values&#x3D;{1,4,9,16}。那么Stream.of(values)的结果是什么？你如何获得一个int类型的流。</p>
-</blockquote>
-<p>他返回的是一个引用对象的流，这个引用对象既不是int(int不是引用)，也不是Integer。。。我们只能用<code>Stream&lt;Object&gt;</code>来接收他。。。事实上Java8提供了的IntStream来专门处理int类型的流。。。我们知道，java中泛型是只能用于对像的而不能用于基本类型的，因此我们通常会将int,double等基本类型进行”装箱”成Integer,Double这样的对象。但是这样的话计算时的时间空间消耗就很大，因此java的设计者们对这些基本类型的stream进行了特殊处理，创造了IntStream,DoubleStream这类东西。同时，这些东西还附带了一些额外的统计功能，用起来更加方便，减少了写一些无谓的统计方法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.IntStream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task4</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task4</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">int</span>[] values = &#123;<span class="number">1</span>, <span class="number">4</span>, <span class="number">9</span>, <span class="number">16</span>&#125;;</span><br><span class="line">        <span class="type">IntStream</span> <span class="variable">intStream</span> <span class="operator">=</span> IntStream.of(values);</span><br><span class="line">        intStream.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task4</span>().task4();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="第五题"><a href="#第五题" class="headerlink" title="第五题"></a>第五题</h2><blockquote>
-<p>使用Stream.iterate来得到一个包含随机数字的无限流－不许调用Math.Random，只能直接实现一个线性同余生成器(LCG)。在这个生成器中，你可以从$x_0&#x3D;seed$开始，然后根据合适的a,c和m值产生$x_{n+1}&#x3D;(ax_n+c)%m$。你应该实现一个含有参数a,c,m和seed的方法，并返回一个<code>Stream&lt;Long&gt;</code>对象。可以试一下a&#x3D;25214903917,c&#x3D;11,m&#x3D;$2^{48}$</p>
-</blockquote>
-<p>巩固Stream.iterate的用法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task5</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Stream&lt;Long&gt; <span class="title function_">lcgStream</span><span class="params">(<span class="type">long</span> a, <span class="type">long</span> c, <span class="type">long</span> m, <span class="type">long</span> seed)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Stream.iterate(seed, v -&gt; (a * v + c) % m);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task5</span><span class="params">()</span> &#123;</span><br><span class="line">        lcgStream(<span class="number">25214903917L</span>, <span class="number">11</span>, <span class="number">1L</span> &lt;&lt; <span class="number">48</span>, System.currentTimeMillis()).limit(<span class="number">5</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task5</span>().task5();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="第六题"><a href="#第六题" class="headerlink" title="第六题"></a>第六题</h2><blockquote>
-<p>第2.3节中的characterStream方法不是很好用，他需要先填充一个数组列表，然后再转变为一个流。试着编写一行基于流的代码。一个办法是构造一个从0开始到s.length()-1的整数流，然后使用s::charAt方法引用来映射它。</p>
-</blockquote>
-<p>考察IntSteam的用法，以及IntStream可以利用mapToObj来转换成其他类型的流。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.stream.IntStream;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task6</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Stream&lt;Character&gt; <span class="title function_">characterStream</span><span class="params">(String s)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> IntStream.range(<span class="number">0</span>, s.length()).mapToObj(s::charAt);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task6</span><span class="params">()</span> &#123;</span><br><span class="line">        characterStream(<span class="string">&quot;1234567&quot;</span>).forEach(System.out::print);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task6</span>().task6();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1234567</span><br></pre></td></tr></table></figure>
-
-<h2 id="第七题"><a href="#第七题" class="headerlink" title="第七题"></a>第七题</h2><blockquote>
-<p>假设你的老板让你编写一个方法<code>public static&lt;T&gt; boolean isFinite(Stream&lt;T&gt; stream)</code>。为什么这不是一个好主意？不管怎样，先试着写一写。</p>
-</blockquote>
-<p>额，这个问题有点好玩，判断一个流是不是无限流，应该跟判断一个循环是不是死循环差不多等价啊。。。这个问题就有点复杂了，我也没时间研究。不过我也尝试了一些方法。<br>首先，我试了试最普通的collect,count,reduce这些聚合方法。不过显然我只能得到一个死循环。。。接着我去网上找了半天，总算找到一个看似靠谱的答案，(来自<a target="_blank" rel="noopener" href="https://coderanch.com/t/657377/java/Detecting-infinite-Stream">coderanch.co</a>)：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="type">boolean</span> <span class="title function_">isFinite</span><span class="params">(Stream&lt;T&gt; stream)</span> &#123;</span><br><span class="line">    System.out.println(Stream.of(<span class="number">1</span>).spliterator().estimateSize());</span><br><span class="line">    System.out.println(stream.spliterator().estimateSize());</span><br><span class="line">    System.out.println(Long.MAX_VALUE);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task7</span><span class="params">()</span> &#123;</span><br><span class="line">    isFinite(Stream.iterate(<span class="number">1</span>, x -&gt; x));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这段代码输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">9223372036854775807</span><br><span class="line">9223372036854775807</span><br></pre></td></tr></table></figure>
-<p>也就是说，对于有限流，他能返回流的长度，对于无限流，他能返回Long类型的MAX_VALUE。他通过spliterator的estimateSize方法，做到了能够估计一段流长度。<br>看似也能算是一个变通。<br>但是，且不说当一个有限流的长度大于MAX_VALUE会怎么样，事实上这段代码也是有硬伤的，比如下面的代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>).limit(<span class="number">1</span>).spliterator().estimateSize());</span><br><span class="line">System.out.println(Stream.iterate(<span class="number">1</span>, x -&gt; x).limit(<span class="number">1</span>).spliterator().estimateSize());</span><br></pre></td></tr></table></figure>
-<p>他们的返回结果并不是我们想象的<code>1 1</code>而是<code>3 9223372036854775807</code>。。。显然这个方法也不能准确的保证流的长度。。。看上去好像是因为spliterator处理的对象是没有考虑limit的。。。<br>从本质上讲，无限流其实就是一个迭代器，除非我们能判断迭代器是有终点的，否则我们是无法判断这个流是不是有限流。具体原因可以参照下面一题的解法。</p>
-<p>难怪作者大佬说这不是一个Good idea。。。</p>
-<h2 id="第八题"><a href="#第八题" class="headerlink" title="第八题"></a>第八题</h2><blockquote>
-<p>编写一个方法<code>public static &lt;T&gt; Stream&lt;T&gt; zip(Stream&lt;T&gt; first,Stream&lt;T&gt; second)</code>,依次调换流first和second中元素的位置，直到其中一个流结束为止。</p>
-</blockquote>
-<p>这道题又是翻译的锅，所谓的“调换”意思其实是交替获取。。。看来再看翻译书的时候还是要注意身边放一个原文的。。。<br>虽然意思清楚了，但是这道题要真正写的好还是很有难度的，主要的坑点在于如何处理无限流的情况。因此我们不能将流读取到list等容器，只能以迭代器的方式进行操作。而且我们在使用普通的转换函数的时候也是不太方便终止当前流的。所以这就需要用到一些平常比较少用的工具类了。<br>这种zip操作可以帮我们更好的理解流的本质。我们可以看到，将两个无限流进行zip的函数竟然是可以直接返回的，这就说明这个运算一定是lazy的，即只有当取道这个流的时候才会去进行获取下一个值，而这就是迭代器的特征。<br>参考了<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/17640754/zipping-streams-using-jdk8-with-lambda-java-util-stream-streams-zip">stackOverflow</a>的代码，我的zip代码该代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.StreamSupport;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task8</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; Stream&lt;T&gt; <span class="title function_">zip</span><span class="params">(Stream&lt;T&gt; first, Stream&lt;T&gt; second)</span> &#123;</span><br><span class="line">        Iterator&lt;T&gt; firstIterator = first.iterator();</span><br><span class="line">        Iterator&lt;T&gt; secondIterator = second.iterator();</span><br><span class="line">        Iterator&lt;T&gt; iterator = <span class="keyword">new</span> <span class="title class_">Iterator</span>&lt;T&gt;() &#123;</span><br><span class="line">            <span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">first</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">hasNext</span><span class="params">()</span> &#123;</span><br><span class="line">                first = !first;</span><br><span class="line">                <span class="keyword">return</span> first ? firstIterator.hasNext() : secondIterator.hasNext();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> T <span class="title function_">next</span><span class="params">()</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> first ? firstIterator.next() : secondIterator.next();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Iterable&lt;T&gt; iterable = () -&gt; iterator;</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">parallel</span> <span class="operator">=</span> first.isParallel() || second.isParallel();</span><br><span class="line">        <span class="keyword">return</span> StreamSupport.stream(iterable.spliterator(), parallel);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task8</span><span class="params">()</span> &#123;</span><br><span class="line">        Stream&lt;Integer&gt; stream1 = zip(Stream.of(<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>), Stream.of(<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>));</span><br><span class="line">        stream1.forEach(x -&gt; System.out.print(String.format(<span class="string">&quot;%d &quot;</span>, x)));</span><br><span class="line">        System.out.println();</span><br><span class="line"></span><br><span class="line">        Stream&lt;Integer&gt; stream2 = zip(Stream.iterate(<span class="number">1</span>, x -&gt; x * <span class="number">2</span>), Stream.of(<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>));</span><br><span class="line">        stream2.forEach(x -&gt; System.out.print(String.format(<span class="string">&quot;%d &quot;</span>, x)));</span><br><span class="line">        System.out.println();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        Stream&lt;Integer&gt; stream3 = zip(Stream.iterate(<span class="number">1</span>, x -&gt; x * <span class="number">2</span>), Stream.iterate(<span class="number">1</span>, x -&gt; x * <span class="number">3</span>)).limit(<span class="number">10</span>);</span><br><span class="line">        stream3.forEach(x -&gt; System.out.print(String.format(<span class="string">&quot;%d &quot;</span>, x)));</span><br><span class="line">        System.out.println();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task8</span>().task8();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出结果如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span></span><br><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">2</span> <span class="number">4</span> <span class="number">4</span> <span class="number">6</span> <span class="number">8</span> <span class="number">8</span> <span class="number">16</span> <span class="number">10</span> <span class="number">32</span></span><br><span class="line"><span class="number">1</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">9</span> <span class="number">8</span> <span class="number">27</span> <span class="number">16</span> <span class="number">81</span></span><br></pre></td></tr></table></figure>
-<p>可以看到这个函数是可以支持有限流和无限流的。</p>
-<h2 id="第九题"><a href="#第九题" class="headerlink" title="第九题"></a>第九题</h2><blockquote>
-<p>将一个<code>Stream&lt;ArrayList&lt;T&gt;&gt;</code>中的全部元素连接为一个ArrayList<T>。试着用三种不同的聚合方式来实现。</p>
-</blockquote>
-<p>这道题就是总结reduce的三种用法，注意每种用法的用途和特点。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task9</span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; ArrayList&lt;T&gt; <span class="title function_">join1</span><span class="params">(Stream&lt;ArrayList&lt;T&gt;&gt; stream)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stream.reduce((a1, a2) -&gt; &#123;</span><br><span class="line">            a1.addAll(a2);</span><br><span class="line">            <span class="keyword">return</span> a1;</span><br><span class="line">        &#125;).orElse(<span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;T&gt;());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; ArrayList&lt;T&gt; <span class="title function_">join2</span><span class="params">(Stream&lt;ArrayList&lt;T&gt;&gt; stream)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stream.reduce(<span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(), (x, y) -&gt; &#123;</span><br><span class="line">            x.addAll(y);</span><br><span class="line">            <span class="keyword">return</span> x;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; ArrayList&lt;T&gt; <span class="title function_">join3</span><span class="params">(Stream&lt;ArrayList&lt;T&gt;&gt; stream)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stream.reduce(<span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(),</span><br><span class="line">                (result, added) -&gt; &#123;</span><br><span class="line">                    result.addAll(added);</span><br><span class="line">                    <span class="keyword">return</span> result;</span><br><span class="line">                &#125;,</span><br><span class="line">                (result1, result2) -&gt; &#123;</span><br><span class="line">                    result1.addAll(result2);</span><br><span class="line">                    <span class="keyword">return</span> result1;</span><br><span class="line">                &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Stream&lt;ArrayList&lt;Integer&gt;&gt; <span class="title function_">initStream</span><span class="params">()</span> &#123;</span><br><span class="line">        ArrayList&lt;Integer&gt; list1 = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        list1.add(<span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line">        list1.add(<span class="number">1</span>, <span class="number">3</span>);</span><br><span class="line">        ArrayList&lt;Integer&gt; list2 = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        list2.add(<span class="number">0</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Stream.of(list1, list2);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task9</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        join1(initStream()).forEach(x -&gt; System.out.print(String.format(<span class="string">&quot;%d &quot;</span>, x)));</span><br><span class="line">        System.out.println();</span><br><span class="line"></span><br><span class="line">        join2(initStream()).forEach(x -&gt; System.out.print(String.format(<span class="string">&quot;%d &quot;</span>, x)));</span><br><span class="line">        System.out.println();</span><br><span class="line"></span><br><span class="line">        join3(initStream()).forEach(x -&gt; System.out.print(String.format(<span class="string">&quot;%d &quot;</span>, x)));</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task9</span>().task9();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="第十题"><a href="#第十题" class="headerlink" title="第十题"></a>第十题</h2><blockquote>
-<p>编写一个可以用于计算<code>Stream&lt;Double&gt;</code>平均值的聚合方法。为什么不能直接计算出总和再除以count()？</p>
-</blockquote>
-<p>暂且没有找到更加方便的利用聚合函数进行计算的方法，因为不太方便处理这个count。当然，直接转化成数组来处理就不再考虑中吧。<br>显然不能直接计算count，因为这就会导致流的终止，无法继续下面的计算了。除非完全拷贝这个流，但是这样效率就特别低了。。。<br>比较中庸的办法是创建一个对象，让他记录这个count信息：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task10</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Item</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">int</span> count;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">double</span> sum;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Item</span><span class="params">()</span> &#123;</span><br><span class="line">            count = <span class="number">0</span>;</span><br><span class="line">            sum = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> Item <span class="title function_">add</span><span class="params">(<span class="type">double</span> num)</span> &#123;</span><br><span class="line">            count++;</span><br><span class="line">            sum += num;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> Item <span class="title function_">add</span><span class="params">(Item num)</span> &#123;</span><br><span class="line">            count += num.count;</span><br><span class="line">            sum += num.sum;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">double</span> <span class="title function_">getAverage</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> sum / count;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Double <span class="title function_">mean</span><span class="params">(Stream&lt;Double&gt; stream)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stream.reduce(<span class="keyword">new</span> <span class="title class_">Item</span>(), Item::add, Item::add).getAverage();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task10</span><span class="params">()</span> &#123;</span><br><span class="line">        Stream&lt;Double&gt; doubleStream = Stream.of(<span class="number">1.2</span>, <span class="number">2.3</span>, <span class="number">3.4</span>, <span class="number">4.5</span>, <span class="number">5.6</span>);</span><br><span class="line">        System.out.println(mean(doubleStream));<span class="comment">//3.4</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task10</span>().task10();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>但是这样的代码有点冗长，我们其实可以引入一个原子类来记录这个count：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task10</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Double <span class="title function_">mean1</span><span class="params">(Stream&lt;Double&gt; stream)</span> &#123;</span><br><span class="line">        <span class="type">AtomicInteger</span> <span class="variable">count</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> stream.reduce(<span class="number">0.</span>, (total, num) -&gt; &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">now</span> <span class="operator">=</span> count.incrementAndGet();</span><br><span class="line">            <span class="keyword">return</span> (total * (now - <span class="number">1</span>) + num) / now;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Double <span class="title function_">mean2</span><span class="params">(Stream&lt;Double&gt; stream)</span> &#123;</span><br><span class="line">        <span class="type">AtomicInteger</span> <span class="variable">count</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> stream.reduce(<span class="number">0.</span>, (total, num) -&gt; &#123;</span><br><span class="line">            count.incrementAndGet();</span><br><span class="line">            <span class="keyword">return</span> total + num;</span><br><span class="line">        &#125;) / count.doubleValue();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task10</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(mean2(Stream.of(<span class="number">1.2</span>, <span class="number">2.3</span>, <span class="number">3.4</span>, <span class="number">4.5</span>, <span class="number">5.6</span>)));</span><br><span class="line">        System.out.println(mean2(Stream.of(<span class="number">1.2</span>, <span class="number">2.3</span>, <span class="number">3.4</span>, <span class="number">4.5</span>, <span class="number">5.6</span>)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task10</span>().task10();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们这里用了两种方法，原则上都可以，只是方法一更加适合比较长的流，数字不容易溢出，方法二速度更快一点。</p>
-<h2 id="第十一题"><a href="#第十一题" class="headerlink" title="第十一题"></a>第十一题</h2><blockquote>
-<p>我们应该可以将流的结果并发收集到一个<code>ArrayList</code>中，而不是将多个<code>ArrayList</code>合并起来。由于对集合不相交部分的并发操作是线程安全的，所以我们假设这个<code>ArrayList</code>的初始大小即为流的大小。如何能做到这一点？</p>
-</blockquote>
-<p>这题没怎么看懂，好像就是考察原子类。。。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task11</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task11</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        Stream&lt;String&gt; stream = Stream.of(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;3&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="string">&quot;5&quot;</span>);</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            list.add(<span class="string">&quot;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">AtomicInteger</span> <span class="variable">atomic</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>();</span><br><span class="line">        stream.parallel().forEach(x -&gt; &#123;</span><br><span class="line">            list.set(atomic.getAndIncrement(), x);</span><br><span class="line">        &#125;);</span><br><span class="line">        list.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task11</span>().task11();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="第十二题"><a href="#第十二题" class="headerlink" title="第十二题"></a>第十二题</h2><blockquote>
-<p>如第2.13节所示，通过更新一个<code>AtomicInteger</code>数组来计算一个并行<code>Stream&lt;String&gt;</code>宏的所有短单词。使用原子操作方法getAndIncreament来安全的增加每个计数器的值。</p>
-</blockquote>
-<p>简单考察原子类操作。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task12</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task12</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">contents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(<span class="string">&quot;article.txt&quot;</span>)), StandardCharsets.UTF_8);</span><br><span class="line">        Stream&lt;String&gt; words = Stream.of(contents.split(<span class="string">&quot;[\\P&#123;L&#125;]+&quot;</span>));</span><br><span class="line">        <span class="type">AtomicInteger</span> <span class="variable">count</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>();</span><br><span class="line">        words.parallel().forEach(x -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (x.length() &lt; <span class="number">12</span>) &#123;</span><br><span class="line">                count.getAndIncrement();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        System.out.println(count.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task12</span>().task12();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="第十三题"><a href="#第十三题" class="headerlink" title="第十三题"></a>第十三题</h2><blockquote>
-<p>重复上一个练习，这次使用collect方法、Collectors.groupingBy方法和Collectors.counting方法来过滤出短单词。</p>
-</blockquote>
-<p>巩固Collectors的分组方法等。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Collectors;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task13</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">task13</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">contents</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(<span class="string">&quot;article.txt&quot;</span>)), StandardCharsets.UTF_8);</span><br><span class="line">        Stream&lt;String&gt; words = Stream.of(contents.split(<span class="string">&quot;[\\P&#123;L&#125;]+&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="type">long</span> <span class="variable">count</span> <span class="operator">=</span> words.parallel()</span><br><span class="line">                .unordered()</span><br><span class="line">                .collect(Collectors.groupingBy(x -&gt; x.length() &lt; <span class="number">12</span>, Collectors.counting()))</span><br><span class="line">                .get(<span class="literal">true</span>);</span><br><span class="line">        System.out.println(count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Task13</span>().task13();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://doc.lagout.org/programmation/Java/Java%20SE%208%20for%20the%20Really%20Impatient%20%5BHorstmann%202014-01-24%5D.pdf">Java SE 8 for the Really Impatient</a><br><a target="_blank" rel="noopener" href="https://github.com/DanielChesters/java-SE-8-Really-Impatient">Answers found in github</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/10/public-static-cdn-service/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/10/public-static-cdn-service/" itemprop="url">常用免费前端公共库 CDN 服务收集</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-10T07:17:00+00:00">
-                2017-07-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%88%86%E4%BA%AB%E9%95%9C/" itemprop="url" rel="index">
-                    <span itemprop="name">分享镜</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          前端公共库 CDN 服务是指一些服务商将我们常用的前端开发用到的库存放到网上，方便开发者直接调用，并且提供 CDN 加速。与将前端库存放在自己的服务器上相比，公共库的 CDN 更加稳定、高速，一来可以方便开发者的开发，二来可以让用户加速访问这些资源。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/07/10/public-static-cdn-service/">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/08/Nexus%E7%A7%81%E6%9C%8D%E9%85%8D%E7%BD%AE%E4%BB%A5%E5%8F%8A%E5%88%86%E7%BB%84%E7%9A%84%E5%BA%94%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/08/Nexus%E7%A7%81%E6%9C%8D%E9%85%8D%E7%BD%AE%E4%BB%A5%E5%8F%8A%E5%88%86%E7%BB%84%E7%9A%84%E5%BA%94%E7%94%A8/" itemprop="url">Nexus私服配置以及分组的应用</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-08T08:45:46+00:00">
-                2017-07-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>阴差阳错的实习部门分到了Agile Controller Campus的运维(或许吧)部门，部门主要任务大概是控制构建自动化测试的流水线，控制项目各个模块的项目进展以及维护版本一致等。本来指望能进来敲敲代码的，结果发现在这里基本不用写代码，主要是使用内部软件做好项目的配置工作，这倒是我之前一直没有接触过的工作，接触了两天，感觉还是挺有意思的，能从项目的上层了解到整个项目的架构，从整体上理解一个大型团队的工作方式，这里面的学问不比码代码少。<br>我接到的第一个任务就是一个实际中出现的问题。</p>
-<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>我们知道在大型的Java项目中，经常是一个小组负责一个模块，一个项目由好几个模块组成。如果各个模块之间有着某种依赖关系，那么在互相调用的时候，一定是要调用其他模块的稳定版本(即上一次测试通过的版本)，在自己调试的时候，测试和发布的是自己的不稳定版本。显然，这就要求各个模块在开发的时候需要相互隔离，最简单的做法就是对每一个小组开一个nexus私服用来托管其他模块的包以及自己开发的包，每此集成测试时都从各个私服中取出最新的模块，测试通过后再同步更新给各个私服。<br>显然，这样的话每一个小组都得维护一个自己的私服，每次集成时也要从各个私服去取，既浪费资源，而且脚本写起来比较非常麻烦。</p>
-<h1 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h1><p>事实上，Nexus作为”世界第一也是唯一的免费通用仓库管理解决方案”，对这类问题有着非常好的解决方式。当然首先，我们得理清楚maven的版本控制层次。<br>在maven的世界里，原则上所有的包都由他的三维唯一确定:groupId,artifactId,version。但是，其实还有另外一个维度，那就是repository。这也很好理解，毕竟并不是所有的包都发布在全球统一的仓库，还有各个组织或个人私自搭建的仓库，用来托管自己的包。只要我们指定从不同的仓库里获取包，我们就可以做到即使是相同的三维，也有可能获取到不同的代码。</p>
-<p>在Nexus里，至少提供了四种不同类型的仓库:</p>
-<p><strong>宿主类型(hosted)</strong><br>hosted类型表示这是我们自己搭建的仓库，我们可以向这个仓库里添加自己需要的包，就像是搭建一个属于自己的中心仓库一样。</p>
-<p><strong>代理类型(proxy)</strong><br>proxy类型存在的意义在于，在使用自己的私服时，如果仍需要从maven中心仓库去获取公开的包的时候，我们可以不需要额外指定中心仓库，而是使用这个代理类型的仓库，并且让这个仓库去指向那个中心仓库。默认配置的中心仓库名是central，指向远程的中心仓库”<a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/%22%E3%80%82%E8%BF%99%E4%B8%AA%E7%B1%BB%E5%9E%8B%E7%9A%84%E4%BB%93%E5%BA%93%E5%8E%9F%E5%88%99%E4%B8%8A%E4%B8%8D%E8%83%BD%E9%85%8D%E7%BD%AE%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8C%85%EF%BC%8C%E4%BB%96%E5%8F%AA%E8%83%BD%E4%BD%9C%E4%B8%BA%E8%AE%BF%E9%97%AE%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E7%9A%84%E4%BB%A3%E7%90%86%E6%9D%A5%E4%BD%BF%E7%94%A8%E3%80%82">https://repo1.maven.org/maven2/&quot;。这个类型的仓库原则上不能配置自己的包，他只能作为访问远程仓库的代理来使用。</a></p>
-<p><strong>虚拟类型(virtual)</strong><br>这个类型的仓库一般不怎么用到，他主要是为了保证不同类型仓库之间的兼容。比如我们可以用它将一个maven2类型的仓库转成maven1类型的仓库。</p>
-<p><strong>组类型(group)</strong><br>这是最能体现Nexus灵活性的一个配置。上面的这些类型的仓库，无论哪一种，其实都是实实在在的仓库，他们分别都能很好的独立使用，但是如果我们需要配置一个仓库，这个仓库里包含不同类型的仓库，那么我们就需要配置一个组，用这个组来包含不同类型的仓库。而这个组类型本身保存的并不是实实在在的仓库，而是对这些仓库的引用。<br>需要注意的是，组类型可以嵌套，但是他们不存在层级关系。也就是说如果group1包含了repo1,repo2,group2，那么实际上group1就直接包含了repo1,repo2和group2里的所有包，而且并没有这些中间的层级。</p>
-<p>那么我们要做的事情就很简单了，我们只要在同一个私服上，对每一个模块开发小组新建不同的组类型的仓库，每一个小组的仓库里包含的都是自己模块的不稳定版以及其他模块的稳定版本。这样当每一次集成测试时，从每个小组的仓库组里获得最新的版本作为一个新组，对他进行测试并且通过后再用这个新组里的每个模块(稳定版本)去更新旧的模块即可。</p>
-<h1 id="maven配置"><a href="#maven配置" class="headerlink" title="maven配置"></a>maven配置</h1><p>这里顺便记分析下maven的配置。<br>maven的配置文件就是settings.xml了，这个文件的基础配置大概是这样的:</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">settings</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0</span></span></span><br><span class="line"><span class="string"><span class="tag">                      https://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">localRepository</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">interactiveMode</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">usePluginRegistry</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">offline</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">pluginGroups</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servers</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mirrors</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">proxies</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">profiles</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">activeProfiles</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">settings</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>各个标签的具体用法可以参考官方文档，下面大体解释下一些重要配置。</p>
-<h2 id="localRepository"><a href="#localRepository" class="headerlink" title="localRepository"></a>localRepository</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">localRepository</span>&gt;</span>/path/to/local/repo<span class="tag">&lt;/<span class="name">localRepository</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>这个配置指明了本地maven库的包的地址。由于我们在使用maven时，可能会经常使用一些相同的包，为了提高提取效率以及减少中心库的压力，maven在第一次从远程下载某个包的时候就会将它放在本地的库中，方便以后直接取用。需要注意的是，在某些情况下，我们需要手动删除这里的包来保证我们使用的是最新版本的包。这个配置的默认值是在用户家目录下的.m2文件夹中，非常好找。</p>
-<h2 id="servers"><a href="#servers" class="headerlink" title="servers"></a>servers</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servers</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">server</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span>admin<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span>admin123<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">server</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servers</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>这个配置的目的在于，当我们要向私服中去deploy自己的包的时候，显然我们至少得有写入的权限，这里就定义了已知server的用户名和密码，以及这个server的唯一ID。当我们在项目的pom.xml里添加发布的配置时,只要指定正确仓库的id就可以定位到相同id的server，并从中获取用户名和密码。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">distributionManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Nexus Release Repository<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://localhost:8081/nexus/content/repositories/test/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">distributionManagement</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="profiles"><a href="#profiles" class="headerlink" title="profiles"></a>profiles</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">profiles</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">profile</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">activation</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">jdk</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">jdk</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">activation</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Repository for JDK 1.8 builds<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://localhost:8081/nexus/content/groups/test-group<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layout</span>&gt;</span>default<span class="tag">&lt;/<span class="name">layout</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">snapshotPolicy</span>&gt;</span>always<span class="tag">&lt;/<span class="name">snapshotPolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">profile</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">profiles</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>profiles里指定了我们的maven获取包的远程仓库的地址，每一个仓库都有一个唯一的ID以及相应的url。我们可以保存不同的profile配置，每一个配置方案也有一个唯一的ID，我们只要在后面添加下面的配置就能够选择激活的profile配置。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activeProfiles</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">activeProfile</span>&gt;</span>nexus<span class="tag">&lt;/<span class="name">activeProfile</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">activeProfiles</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>同时，我们也要注意着里面的repository标签，这个标签指定的是我们需要额外查找的仓库。比如我在搭建opendaylight环境时，maven需要查找他对应的包，但是maven中心库里默认没有opendaylight的库，那么我们就需要把这个库的地址加入这个repository标签里。这样每次搜索包的时候就可以顺便搜索opendaylight自己的repository。<br>还需要注意一点，就是我们只能从repositories标签里下载普通的包，不能下载插件。如果我们需要从一个仓库里下载插件，我们就需要用<code>pluginRepositories</code>的标签。具体用法可以参见官方文档。</p>
-<h2 id="mirrors"><a href="#mirrors" class="headerlink" title="mirrors"></a>mirrors</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">mirrors</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mirror</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>mirrorId<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mirrorOf</span>&gt;</span>repositoryId<span class="tag">&lt;/<span class="name">mirrorOf</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>Human Readable Name for this Mirror.<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://mirrorURL/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">mirror</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mirrors</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>mirrors配置的意义在于，我们有时候在获取中心库的包的时候，由于网络的原因会导致下载太慢，这时候我们就想使用一些网络较好的镜像来代替那个中心库。这里的mirrorOf参数配置的就是我们希望替代的repositoryId(支持多选，反选等等)。将镜像地址保存在url里。<br>特别配置mirror的时候尤其需要小心，那就是我们使用了mirror之后很有可能覆盖了我们不想覆盖的repository，因此我们尤其要注意这个mirrorOf标签的值。</p>
-<h2 id="proxies"><a href="#proxies" class="headerlink" title="proxies"></a>proxies</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">proxies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">proxy</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>optional<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">active</span>&gt;</span>true<span class="tag">&lt;/<span class="name">active</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">protocol</span>&gt;</span>http<span class="tag">&lt;/<span class="name">protocol</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span>proxyuser<span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span>proxypass<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span>&gt;</span>proxy.host.net<span class="tag">&lt;/<span class="name">host</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span>&gt;</span>80<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">nonProxyHosts</span>&gt;</span>local.net|some.host.com<span class="tag">&lt;/<span class="name">nonProxyHosts</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">proxy</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">proxies</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>proxies配置主要是用来在某些情况下通过配置用户密码，做到使用代理访问远程仓库。主要用到的场景大概就是远程仓库库被GFW墙了或者本机没有外网权限，等需要使用代理的地方。</p>
-<h1 id="Nexus脚本思路"><a href="#Nexus脚本思路" class="headerlink" title="Nexus脚本思路"></a>Nexus脚本思路</h1><p>有时候，我们可能需要一次行建大量的仓，或者需要重复这样的操作。每次都手动点击确认的话，不仅效率地下，而且容易出错，很不Unix。其实说白了这个Nexus的界面只是一个壳，我们点击操作的背后其实是修改Nexus的配置文件。这个配置文件通常是在<code>$NEXUS_HOME/sonatype-work/nexus/conf/nexus.xml</code>这里。<br>大概看一看:</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">nexusConfiguration</span>&gt;</span></span><br><span class="line"> ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">...</span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">id</span>&gt;</span>public<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">name</span>&gt;</span>Public Repositories<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerRole</span>&gt;</span>org.sonatype.nexus.proxy.repository.GroupRepository<span class="tag">&lt;/<span class="name">providerRole</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerHint</span>&gt;</span>maven2<span class="tag">&lt;/<span class="name">providerHint</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStatus</span>&gt;</span>IN_SERVICE<span class="tag">&lt;/<span class="name">localStatus</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">notFoundCacheTTL</span>&gt;</span>15<span class="tag">&lt;/<span class="name">notFoundCacheTTL</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">userManaged</span>&gt;</span>true<span class="tag">&lt;/<span class="name">userManaged</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">exposed</span>&gt;</span>true<span class="tag">&lt;/<span class="name">exposed</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">browseable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">browseable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">writePolicy</span>&gt;</span>READ_ONLY<span class="tag">&lt;/<span class="name">writePolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">indexable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">indexable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStorage</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">provider</span>&gt;</span>file<span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">localStorage</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mergeMetadata</span>&gt;</span>true<span class="tag">&lt;/<span class="name">mergeMetadata</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">memberRepositories</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>snapshots<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>thirdparty<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>central<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">memberRepository</span>&gt;</span>releases<span class="tag">&lt;/<span class="name">memberRepository</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">memberRepositories</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">id</span>&gt;</span>test<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">name</span>&gt;</span>Test<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerRole</span>&gt;</span>org.sonatype.nexus.proxy.repository.Repository<span class="tag">&lt;/<span class="name">providerRole</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">providerHint</span>&gt;</span>maven2<span class="tag">&lt;/<span class="name">providerHint</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStatus</span>&gt;</span>IN_SERVICE<span class="tag">&lt;/<span class="name">localStatus</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">notFoundCacheTTL</span>&gt;</span>1440<span class="tag">&lt;/<span class="name">notFoundCacheTTL</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">userManaged</span>&gt;</span>true<span class="tag">&lt;/<span class="name">userManaged</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">exposed</span>&gt;</span>true<span class="tag">&lt;/<span class="name">exposed</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">browseable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">browseable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">writePolicy</span>&gt;</span>ALLOW_WRITE<span class="tag">&lt;/<span class="name">writePolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">indexable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">indexable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">searchable</span>&gt;</span>true<span class="tag">&lt;/<span class="name">searchable</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">localStorage</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">provider</span>&gt;</span>file<span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">localStorage</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">repositoryPolicy</span>&gt;</span>SNAPSHOT<span class="tag">&lt;/<span class="name">repositoryPolicy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">externalConfiguration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line">    ...</span><br><span class="line">  <span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="tag">&lt;/<span class="name">nexusConfiguration</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>这样一看就很清楚了，我们所有的手动操作其实都是映射到这个文件中。只是需要注意当我们手动修改了这个配置文件之后，我们得重启Nexus服务。。。<br>于此同时，我们也要注意到，<code>$NEXUS_HOME/sonatype-work/nexus/storage</code>文件夹里存放了各个仓库的包，我们也可以将我们需要的包手动添加进来。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://books.sonatype.com/nexus-book/reference/confignx-sect-manage-repo.html">Nexus Document</a></p>
-<p><a target="_blank" rel="noopener" href="http://maven.apache.org/guides/">Maven Document</a></p>
-<p><a target="_blank" rel="noopener" href="http://blog.csdn.net/woshixuye/article/details/8132780">Maven学习五之Nexus中各repository介绍</a></p>
-<p><a target="_blank" rel="noopener" href="http://blog.csdn.net/liujiahan629629/article/details/39272321">Nexus私服使Maven更加强大</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/06/comment_ru_he_xuan_ze/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/06/comment_ru_he_xuan_ze/" itemprop="url">继多说、网易关停之后该何去何从(网易云跟帖宣布2017年8月1日停止服务)</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-06T10:51:21+00:00">
-                2017-07-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><img src="https://cdn.ihoey.com/IHOEY_20170706_184907.png?imageView2/0/format/png/q/75%7Cimageslim" alt="comment_ihoey"><br>继多说（多说关闭想必大家都已经知道了）关闭之后，很多人包括我，都转移到了网易云跟帖，现在网易云跟帖也正式发出公告宣布于 2017 年 8 月 1 日停止服务。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/07/06/comment_ru_he_xuan_ze/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/04/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9A%84JavaSE8%E4%B9%A6%E5%90%8E%E4%B9%A0%E9%A2%98%E7%AE%80%E6%9E%90-%E7%AC%AC%E4%B8%80%E7%AB%A0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/04/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9A%84JavaSE8%E4%B9%A6%E5%90%8E%E4%B9%A0%E9%A2%98%E7%AE%80%E6%9E%90-%E7%AC%AC%E4%B8%80%E7%AB%A0/" itemprop="url">写给大忙人的JavaSE8书后习题简析-第一章</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-04T14:13:56+00:00">
-                2017-07-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="lambda表达式"><a href="#lambda表达式" class="headerlink" title="lambda表达式"></a>lambda表达式</h1><h2 id="第一题"><a href="#第一题" class="headerlink" title="第一题"></a>第一题</h2><blockquote>
-<p>Arrays.sort方法中的比较器代码的线程与调用sort的线程是同一个吗？</p>
-</blockquote>
-<p>是的，看下源码就知道了。<br>Arrays.sort默认采用的是TimSort的方法(即传统Mergesort的优化版本)。当用户指定了一个Comparator时，他会同步的回调这个Comparator的compare方法来作为比较的参照，因此显然这里并不存在多线程的问题。<br>事实上在JDK1.8以后就提供了并行的排序方法Arrays.parallelSort。<br>不过需要注意的是，经过测验，在小数量集上并行排序的速度反倒不如非并行的快，这主要受数量级大小以及并行的核心数的影响。在通常的4核PC机中，这个转折点大约在1e6这个数量级左右。</p>
-<h2 id="第二题"><a href="#第二题" class="headerlink" title="第二题"></a>第二题</h2><blockquote>
-<p>使用java.io.File类的listFiles(FileFilter)和isDirectory方法，编写一个返回指定目录下所有子目录的方法。使用lambda表达式来代替FileFilter对象，再将它改写为一个方法的引用。</p>
-</blockquote>
-<p>这道题主要就是考察lambda的基本用法，以及于其他方法的对比。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.io.FileFilter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task2</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		File file=<span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/home/myths&quot;</span>);</span><br><span class="line">		<span class="comment">//File[] files=file.listFiles((f)-&gt;f.isDirectory());</span></span><br><span class="line">		<span class="comment">//File[] files=file.listFiles(File::isDirectory);</span></span><br><span class="line">		File[] files=file.listFiles(<span class="keyword">new</span> <span class="title class_">FileFilter</span>() &#123;</span><br><span class="line"></span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">accept</span><span class="params">(File pathname)</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> pathname.isDirectory();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line">		<span class="keyword">for</span>(File f : files)&#123;</span><br><span class="line">			System.out.println(f.getAbsolutePath());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="第三题"><a href="#第三题" class="headerlink" title="第三题"></a>第三题</h2><blockquote>
-<p>使用java.io.File类的list(FilenameFilter)方法，编写一个返回指定目录下、具有指定扩展名的所有文件。使用lambda表达式(而不是FilenameFilter)来实现。他会捕获闭合作用域中的哪些变量？</p>
-</blockquote>
-<p>这道题主要考察捕获外部变量。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task3</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		File file=<span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/home/myths&quot;</span>);</span><br><span class="line">		String suffix=<span class="string">&quot;.txt&quot;</span>;</span><br><span class="line">		String[] files=file.list((File dir,String name)-&gt; name.endsWith(suffix));</span><br><span class="line">		<span class="keyword">for</span>(String f:files)&#123;</span><br><span class="line">			System.out.println(f);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>捕获了suffix变量。</p>
-<h2 id="第四题"><a href="#第四题" class="headerlink" title="第四题"></a>第四题</h2><blockquote>
-<p>对于一个指定的File对象数组，首先按照路径的目录排序，然后对每组目录中的元素再按照路径名排序。请使用lambda表达式(而不是Comparator)来实现。</p>
-</blockquote>
-<p>这道题翻译的很差劲，我特地找了下英文原版的题目，发现完全是两个问题。。。原版题目如下：</p>
-<blockquote>
-<p>Given an array of File objects, sort it so that the directories come before the files, and within each group, elements are sorted by path name. Use a lambda expression, not a Comparator.</p>
-</blockquote>
-<p>这样就很清楚了。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task4</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        File[] files = <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/home/myths/&quot;</span>).listFiles();</span><br><span class="line">        Arrays.sort(files, (first, second) -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (first.isDirectory() &amp;&amp; second.isDirectory() || first.isFile() &amp;&amp; second.isFile()) &#123;</span><br><span class="line">                <span class="keyword">return</span> first.getPath().compareTo(second.getPath());</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (first.isDirectory())</span><br><span class="line">                    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">for</span> (File file : files) &#123;</span><br><span class="line">            System.out.println(file.getAbsolutePath());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="第五题"><a href="#第五题" class="headerlink" title="第五题"></a>第五题</h2><blockquote>
-<p>从你的项目中选取一个包含一些ActionListener、Runnable或者其他类似代码的文件。将他们替换为lambda表达式。这样能节省多少行代码？替换后的代码是否有更好的可读性？在这个过程中你使用了方法引用吗？</p>
-</blockquote>
-<p>没有类似的项目，不过显然能节省不少的代码，可读性也会有所提高。如果使用了方法引用，那么可读性和简洁性会进一步提高。</p>
-<h2 id="第六题"><a href="#第六题" class="headerlink" title="第六题"></a>第六题</h2><blockquote>
-<p>你是否讨厌在Runnable实现中处理检查器异常？编写一个捕获所有异常的uncheck方法，再将它改造为不需要检查异常的方法。例如:</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">new Thread(uncheck(</span><br><span class="line">    () -&gt; &#123;</span><br><span class="line">        System.out.println(&quot;Zzz&quot;);</span><br><span class="line">        Thread.sleep(1000);</span><br><span class="line">    &#125;)).start();</span><br><span class="line">//看，不需要catch(InterruptedException);</span><br></pre></td></tr></table></figure>
-
-<p>主要考察＠FunctionalInterface接口的用法，利用这个接口可以很方便的对函数类型的变量进行封装。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task7</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@FunctionalInterface</span></span><br><span class="line">    <span class="keyword">interface</span> <span class="title class_">RunnableEx</span> &#123;</span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> <span class="keyword">throws</span> Exception;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Runnable <span class="title function_">uncheck</span><span class="params">(RunnableEx runner)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> () -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                runner.run();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">                System.err.println(ex);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(uncheck(</span><br><span class="line">                () -&gt; &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;Zzz&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125;)</span><br><span class="line">        ).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="第七题"><a href="#第七题" class="headerlink" title="第七题"></a>第七题</h2><blockquote>
-<p>编写一个静态方法andThen,它接受两个Runnable实例作为参数，并返回一个分别运行这两个实例的Runnable对象。在main方法中，向andThen方法传递两个lambda表达式，并运行返回的实例。</p>
-</blockquote>
-<p>巩固函数接口的使用。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task7</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Runnable <span class="title function_">andThen</span><span class="params">(Runnable runner1, Runnable runner2)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> () -&gt; &#123;</span><br><span class="line">            runner1.run();</span><br><span class="line">            runner2.run();</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(andThen(</span><br><span class="line">                () -&gt; System.out.println(<span class="string">&quot;Runner 1&quot;</span>),</span><br><span class="line">                () -&gt; System.out.println(<span class="string">&quot;Runner 2&quot;</span>)</span><br><span class="line">        )).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="第八题"><a href="#第八题" class="headerlink" title="第八题"></a>第八题</h2><blockquote>
-<p>当一个lambda表达式捕获了如下增强for循环中的值时，会发生什么？这样做是否合法？每个lambda表达式都捕获了一个不同的值，还是他们都获得了最终的值？如果使用传统的for循环，例如<code>for (int i=0;i&lt;names.length;i++)</code>,又会发生什么？</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String[] names = &#123; &quot;Peter&quot;, &quot;Paul&quot;, &quot;Mary&quot; &#125;;</span><br><span class="line">List&lt;Runnable&gt; runners = new ArrayList&lt;&gt;();</span><br><span class="line">for (String name : names)</span><br><span class="line">    runners.add(() -&gt; System.out.println(name));</span><br></pre></td></tr></table></figure>
-
-<p>考察lambda的变量捕获，这里如果采用上面的增强for循环是不会有问题的:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task8</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        String[] names = &#123;<span class="string">&quot;Peter&quot;</span>, <span class="string">&quot;Paul&quot;</span>, <span class="string">&quot;Mary&quot;</span>&#125;;</span><br><span class="line">        List&lt;Runnable&gt; runners = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line"><span class="comment">//      增强for循环</span></span><br><span class="line">        <span class="keyword">for</span> (String name : names)</span><br><span class="line">            runners.add(() -&gt; System.out.println(name));</span><br><span class="line">        <span class="keyword">for</span> (Runnable runnable : runners) &#123;</span><br><span class="line">            runnable.run();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        传统for循环</span></span><br><span class="line"><span class="comment">//        for (int i = 0; i &lt; names.length; i++)</span></span><br><span class="line"><span class="comment">//            runners.add(() -&gt; System.out.println(names[i]));</span></span><br><span class="line"><span class="comment">//        for (Runnable runnable : runners) &#123;</span></span><br><span class="line"><span class="comment">//            runnable.run();</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>但是，这里是不允许使用传统for循环的，否则他会报如下错误：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error:(16, 56) java: local variables referenced from a lambda expression must be final or effectively final</span><br></pre></td></tr></table></figure>
-<p>显然，lambda表达式里取到的这个i由于发生了变化，不再是一个“有效的final值”，不满足lambda“被引用变量是不能修改的”这一规范。</p>
-<h2 id="第九题"><a href="#第九题" class="headerlink" title="第九题"></a>第九题</h2><blockquote>
-<p>编写一个继承Collection接口的子接口Collection2，并添加一个默认方法<code>void forEachIf(Consumer&lt;T&gt; action, Predicate&lt;T&gt; filter)</code>,用来将action应用到所有filter返回true的元素上。你能够如何使用它？</p>
-</blockquote>
-<p>这里主要考察一些常见的函数式接口以及default函数声明。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Collection;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Consumer;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Predicate;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task9</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Collection2</span>&lt;T&gt; <span class="keyword">extends</span> <span class="title class_">Collection</span>&lt;T&gt; &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">default</span> <span class="keyword">void</span> <span class="title function_">forEachIf</span><span class="params">(Consumer&lt;T&gt; action, Predicate&lt;T&gt; filter)</span> &#123;</span><br><span class="line">            forEach(item -&gt; &#123;</span><br><span class="line">                filter.test(item) ? action.accept(item);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="第十题"><a href="#第十题" class="headerlink" title="第十题"></a>第十题</h2><blockquote>
-<p>浏览Collections类中的方法。如果哪一天你可以做主，你会将每个方法放到哪个接口中？这个方法会是一个默认方法还是静态方法？</p>
-</blockquote>
-<p>不是很清楚其中的道理，不敢瞎说。。。</p>
-<h2 id="第十一题"><a href="#第十一题" class="headerlink" title="第十一题"></a>第十一题</h2><blockquote>
-<p>假如你有一个实现了两个接口I和J的类，这两个接口都有一个void f()方法。如果I接口中的f方法是一个抽象的、默认或者静态方法，并且J接口中的f方法是也一个抽象的、默认或者静态方法，分别会发生什么？如果这个类继承自S类并实现了接口I，并且S和I中都有一个void f()方法，又会分别发生什么？</p>
-</blockquote>
-<p>这两个接口之间的搭配有点复杂，不过经过测试，我总结了下面的几个规则：</p>
-<ol>
-<li>只要有一个接口中是抽象函数，那么这个类必须要重载这个函数重新实现。</li>
-<li>如果一个是静态函数一个是默认函数，那么，最终显示出来的是默认函数的特性。</li>
-</ol>
-<p>至于既有extends又有implements的情况。。。有点麻烦，也就不一个一个测了，到时候用到再测吧。。。</p>
-<h2 id="第十二题"><a href="#第十二题" class="headerlink" title="第十二题"></a>第十二题</h2><blockquote>
-<p>在过去，你知道向接口中添加方法是一种不好的形式，因为他会破坏已有的代码。现在你知道了可以像接口中添加新方法，同时能够提供一个默认的实现。这样做安全程度如何？描述一个Collection接口的新stream方法会导致遗留代码编译失败的场景。二进制的兼容性如何？JAR文件中的遗留代码是否还能运行？</p>
-</blockquote>
-<p>所谓安全问题大概就是指对于旧的版本，忽然多出一个可以执行却没有啥作用的函数，略微违背了”封装隐藏”的思想。但是在旧的版本中，他们并不知道这个函数的存在，所以我觉得一般情况下也不存在什么安全问题吧。<br>第二问不是很清楚。。。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://doc.lagout.org/programmation/Java/Java%20SE%208%20for%20the%20Really%20Impatient%20%5BHorstmann%202014-01-24%5D.pdf">Java SE 8 for the Really Impatient</a><br><a target="_blank" rel="noopener" href="https://github.com/DanielChesters/java-SE-8-Really-Impatient">Answers found in github</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2017/07/03/A_re-introduction_to_JavaScript/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/07/03/A_re-introduction_to_JavaScript/" itemprop="url">重新介绍 JavaScript（JS全面系列教程）</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-07-03T10:51:21+00:00">
-                2017-07-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index">
-                    <span itemprop="name">javascript</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>为什么会有这一篇“重新介绍”呢？因为 <code>JavaScript</code> 堪称世界上被人误解最深的编程语言。虽然常被嘲为“玩具语言”，但在它看似简洁的外衣下，还隐藏着强大的语言特性。 <code>JavaScript</code> 目前广泛应用于众多知名应用中，对于网页和移动开发者来说，深入理解 <code>JavaScript</code> 就尤有必要。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/07/03/A_re-introduction_to_JavaScript/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/24/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><span class="space">&hellip;</span><a class="page-number" href="/page/57/">57</a><a class="extend next" rel="next" href="/page/26/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/24/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><span class="space">&hellip;</span><a class="page-number" href="/page/58/">58</a><a class="extend next" rel="next" href="/page/26/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2175,7 +2054,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">566</span>
+                  <span class="site-state-item-count">572</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2186,7 +2065,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-count">69</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -2197,7 +2076,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">278</span>
+                  <span class="site-state-item-count">284</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
