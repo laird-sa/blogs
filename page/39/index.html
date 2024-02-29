@@ -307,6 +307,308 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/17/%E6%9C%80%E5%B0%8F%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/17/%E6%9C%80%E5%B0%8F%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D/" itemprop="url">最小哈希签名</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-17T04:02:22+00:00">
+                2016-09-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最小哈希签名(minhashing signature)解决的问题是，如何用一个哈希方法来对一个集合（集合大小为n）中的子集进行保留相似度的映射（使他在内存中占用的字节数尽可能的少）。</p>
+<p>其实哈希本身并不算难，难的是怎么保留两个子集的相似度的信息。所谓保留相似度，就是说我们能十分直观的从两个子集的哈希结果中看出他们的相似度。当然，朴素的办法就用是一个长度为n的二进制数的每个位来分别对应集合中的每个元素。不过当n比较大而待hash的集合的数目比较小的时候，这种方法的效率就太低了。这时候最常用的方法就是对集合进行最小哈希。</p>
+<h2 id="最小哈希"><a href="#最小哈希" class="headerlink" title="最小哈希"></a>最小哈希</h2><p>什么叫最小哈希，我的理解是，一个很大的集合进行哈希处理的过程其实是由很多小的哈希过程组成。而这些最小的哈希过程就被称为是最小哈希。最小哈希的具体内容就是把一个集合映射到一个编号上。具体的过程也很简单了。</p>
+<p>比如对于集合$U&#x3D;\{a,b,c,d,e\},S_1:\{a,d\},S_2:\{c\},S_3:\{b,d,e\},S_4:\{a,c,d\}$，我们用一个矩阵形式来表示他们：</p>
+<p>$$\begin{matrix}No.&amp;Item&amp;S_1&amp;S_2&amp;S_3&amp;S_4\\0&amp;a&amp;1&amp;0&amp;0&amp;1\\1&amp;b&amp;0&amp;0&amp;1&amp;0\\2&amp;c&amp;0&amp;1&amp;0&amp;1\\3&amp;d&amp;1&amp;0&amp;1&amp;1\\4&amp;e&amp;0&amp;0&amp;1&amp;0\\\end{matrix}$$</p>
+<p>那么，对他进行一次最小哈希就是在经过随机的行排列之后，对于每个集合，从上到下取第一个数值为1的那一行的行号。</p>
+<p>比如对上面的矩阵进行随机行排列后变成：</p>
+<p>$$\begin{matrix}No.&amp;Item&amp;S_1&amp;S_2&amp;S_3&amp;S_4\\1&amp;b&amp;0&amp;0&amp;1&amp;0\\4&amp;e&amp;0&amp;0&amp;1&amp;0\\0&amp;a&amp;1&amp;0&amp;0&amp;1\\3&amp;d&amp;1&amp;0&amp;1&amp;1\\2&amp;c&amp;0&amp;1&amp;0&amp;1\\\end{matrix}$$</p>
+<p>那么每个集合的minhash结果就应该是$h(S_1)&#x3D;0,h(S_2)&#x3D;2,h(S_3)&#x3D;1,h(S_4)&#x3D;0$。</p>
+<p>这就是minhash的基本方法。</p>
+<h2 id="最小哈希签名"><a href="#最小哈希签名" class="headerlink" title="最小哈希签名"></a>最小哈希签名</h2><p>在最小哈希的基础上，最小哈希签名也就很简单了。在最小哈希中，需要对每行进行随机行排列，如果是真随机排列的话显然计算消耗会特别大。因此实际上我们采用了一个替代方法，就是再用一个哈希函数，将行号进行哈希变换。比如当n&#x3D;5时，对$0,1,2,3,4$这5个数，可以用$h(x)&#x3D;(3x+1)%5$的方法进行映射，得到$1,4,2,0,3$。当然，随便找的$h(x)&#x3D;ax+b$这种哈希函数显然可能会冲突，不过只要n和a互素，那么生成的一定是一个排列，这一点用同余类的知识很好证明。</p>
+<p>不过显然，一次最小哈希的结果不能全面的表现出集合的特征。因此最小哈希签名采用了k个不同的哈希函数$h_1,h_2,h_3,…,h_k$，对于集合S，分别调用这些函数作为最小哈希的排列函数，构建出集合S的最小哈希签名$[h_1(S),h_2(S),h_3(S),…,h_k(S)]$。显然，这个签名所占的空间要远远小于用朴素的方法保存集合所需的空间。</p>
+<h2 id="保留相似度的哈希"><a href="#保留相似度的哈希" class="headerlink" title="保留相似度的哈希"></a>保留相似度的哈希</h2><p>为什么说这个最小哈希签名是一种保留相似度的哈希呢？其实也很好理解。</p>
+<p>事实上，对于两个集合$S_1,S_2$来说，我们知道在前面的矩阵的所有行中，他们的值同时为1的行有$|S_1\cap S_2|$个；一个是1一个是0的行有$|S_1\cup S_2|-|S_1 \cap S_2|$个。那么在对行进行随机排列之后，从上往下数同时为1的行比一个为1一个为0的行先出现的概率就是$\frac{|S_1\cap S_2|}{|S_1\cup S_2|}$。而这恰巧就是两个集合的Jaccard相似度。也就是说在每一次最小哈希的过程中，两个集合的哈希值相等的概率就是两个集合的Jaccard相似度。这个性质就非常棒了，他保证了如果把最小哈希签名生成的向量当成集合，那么对两个集合进行最小哈希签名之后生成的集合之间的Jaccrad相似度的期望值与原集合的Jaccard相似度相等。</p>
+<p>这就是所谓的保留相似度的哈希。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/16/%E6%96%87%E6%A1%A3%E5%88%86%E5%89%B2%E7%9A%84shingling%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/09/16/%E6%96%87%E6%A1%A3%E5%88%86%E5%89%B2%E7%9A%84shingling%E7%AE%97%E6%B3%95/" itemprop="url">文档分割的shingling算法</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-16T12:23:38+00:00">
+                2016-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Mining/" itemprop="url" rel="index">
+                    <span itemprop="name">Data Mining</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>shingling算法是最常见的文档分割算法，说白了就是将一个文档分解成由短字符构成的字符串集合。分割后的文档就可以通过Jaccard相似度等简单的度量标准进行相似度检测了。</p>
+<h2 id="k-shingling"><a href="#k-shingling" class="headerlink" title="k-shingling"></a>k-shingling</h2><p>对于任意一篇文档，我们把他当成一个字符串，那么他的k-shingling集合就被定义为文档中所有长度为k的子字符串的集合。比如字符串“abcdabd”，他的2-shingling集合就是{ab,bc,cd,da,bd}。</p>
+<p>当然，所有类型的子字符串只会在集合中出现一次。不过实际的文档中可能会有连续的空格、TAB、回车或者标点符号之类的东西，一般可以把他们都变成一个空格来进行处理。</p>
+<h2 id="shingle大小的选择"><a href="#shingle大小的选择" class="headerlink" title="shingle大小的选择"></a>shingle大小的选择</h2><p>显然，如果要使用k-shingling来对文档进行处理就要先确定这个k值，一般而言，要确保这个值足够大，保证任意的shingle在文档中出现的概率较低。不过也没有一个具体的选择方法，倒是有一些经验参数，比如对于英文邮件，可以取k&#x3D;5；而对于英文研究论文，可以取k&#x3D;9，因为邮件的长度一般比较低，而论文则相对较高。</p>
+<h2 id="一个简单变种"><a href="#一个简单变种" class="headerlink" title="一个简单变种"></a>一个简单变种</h2><p>有一种简单的基于词的shingling方法，能够很有效的区分英文新闻与广告。这个应用在对网页进行查重的时候特别有用，因为网页上除了新闻本身之外，通常还会有不同的广告，干扰我们对相同新闻的判断。具体的做法也很简单，就是把shingle定义成一个停用词(就是”and”、”but”、“you”之类经常出现的词)加上后续的两个单词。这样做是因为广告通常比较精炼而较少包含停用词。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/16/%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%BA%A6%E9%87%8F%E6%A0%87%E5%87%86%E4%B9%8BJaccard%E7%9B%B8%E4%BC%BC%E5%BA%A6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1537,306 +1839,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/09/04/python%E7%B1%BB%E5%8F%98%E9%87%8F%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/09/04/python%E7%B1%BB%E5%8F%98%E9%87%8F%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9/" itemprop="url">python类变量和成员变量的使用注意点</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-09-04T12:18:55+00:00">
-                2016-09-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前在用python写一个项目，发现一个很恶心的bug，就是同由一个类生成的两个实例之间的数据竟然会相互影响，这让我非常不解。后来联想到java的类有类变量也有实例变量，因此翻阅了相关资料，发现python也有类似的类变量和实例变量，比如下面的代码中：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    x = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.y = <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<p>x就是类变量，y就是实例变量。</p>
-<p>原则上是没有错的，但是实际用的时候就发现一些恶心的问题（也就是我找了三天的bug）。。。比如下面的代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    x = []</span><br><span class="line">    y = <span class="number">0</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">self</span>):</span><br><span class="line">        self.x.append(<span class="string">&#x27;1&#x27;</span>)</span><br><span class="line">        self.y+=<span class="number">1</span></span><br><span class="line">a=A() </span><br><span class="line"><span class="built_in">print</span> a.x,a.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br><span class="line">a.add()</span><br><span class="line"><span class="built_in">print</span> a.x,a.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br><span class="line">b=A() </span><br><span class="line"><span class="built_in">print</span> b.x,b.y</span><br><span class="line"><span class="built_in">print</span> A.x,A.y</span><br></pre></td></tr></table></figure>
-<p>这里很明显x和y都是类变量，add的作用是分别对x和y做出修改。然后构造一个实例a，对实例a的值进行修改，最后构造实例b。</p>
-<p>本以为这个结果是显而易见的，然而他输出的结果却是：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[] 0</span><br><span class="line">[] 0</span><br><span class="line">[&#x27;1&#x27;] 1</span><br><span class="line">[&#x27;1&#x27;] 0</span><br><span class="line">[&#x27;1&#x27;] 0</span><br><span class="line">[&#x27;1&#x27;] 0</span><br></pre></td></tr></table></figure>
-<p>问题在哪？明明x和y都是类变量，在第二组print中为什么a.x和b.x一样，但是a.y和b.y就是不一样呢？</p>
-<p>想了半天悟了一个道理。。。就是对于python来说，类变量的确是所有类共有的东西。但是那是在我们用的同一个引用的情况下，比如对于[]对象的append方法就是公用一个类变量了；但是对于赋值语句来说，如果在类中对类变量使用了赋值语句，那么python就会生成一个该对象的副本，以后的操作都是基于这个副本而不会对原来的类对象造成影响。这样就解释的通上面的现象了。</p>
-<p>那么为了杜绝自己忘记类变量和实例变量的区别导致本不想公用变量的时候公用了变量，最好的办法就是在每个类中使用变量的时候重新初始化一下，这样就不会导致意外了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/08/30/coding-snapdragon-810-down/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/08/30/coding-snapdragon-810-down/" itemprop="url">制服火龙——为骁龙810降温</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-30T09:19:00+00:00">
-                2016-08-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AE%9E%E9%AA%8C%E5%AE%A4/" itemprop="url" rel="index">
-                    <span itemprop="name">实验室</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <blockquote>
-<p>“高通骁龙 810 是我们的一款失败的产品”——高通工程师</p>
-</blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/08/30/coding-snapdragon-810-down/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1887,7 +1889,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">572</span>
+                  <span class="site-state-item-count">574</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1909,7 +1911,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">284</span>
+                  <span class="site-state-item-count">286</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

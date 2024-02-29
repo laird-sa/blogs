@@ -307,6 +307,316 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/21/Ubuntu%E4%B8%8B%E9%85%8D%E7%BD%AETomcat%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/21/Ubuntu%E4%B8%8B%E9%85%8D%E7%BD%AETomcat%E6%9C%8D%E5%8A%A1%E5%99%A8/" itemprop="url">Ubuntu下配置Tomcat服务器</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-21T12:50:57+00:00">
+                2016-01-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本来以为安装了apache之后就可以万事大吉了，没想到在用java的时候发现apache并不能执行servlet服务，也不能解析jsp。想实现这些功能就得安装Apache的一个拓展服务器－－Tomcat。</p>
+<h2 id="与apache的差别"><a href="#与apache的差别" class="headerlink" title="与apache的差别"></a>与apache的差别</h2><p>这个Tomcat其实可以看成是apache的一个拓展，他能实现上述apache服务器实现不了的东西。但是他也有不足，那就是他不能解析php，而且据说解析网页的速度也没有apache快，也没有apache稳定。所以说他并不能代替apache，apache也不能代替他。事实上他和apache虽说是两个服务器，但却是能很好的兼容的，因为apache的默认端口是80，而Tomcat的默认端口是8080（当然这是可以修改的），所以并不冲突。</p>
+<h2 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h2><p>首先从<a target="_blank" rel="noopener" href="http://tomcat.apache.org/">apache的Tomcat官网</a>上找到需要下载的源码。这里注意搭配环境，8.０的版本是要支持JDK1.7的，而9.0的版本是要支持JDK1.8的。这里我是JDK1.7所以只能用8.0的。</p>
+<p>（这里需要注意一下，我们最好下Core版本，而不要下src源码版本。因为src版本里面缺少一些必要的jar包，在启动服务的时候会报错，还得回官网来下载&#x2F;bint&#x2F;extra里面的包。。。）</p>
+<p>下载下来后按理说应该找README文件，但是这里没有。最后浏览了下找到了RUNNING.txt文件，打开一看，大概就是我需要的安装向导了。</p>
+<p>根据安装向导做出了以下配置：</p>
+<p>１、设置CATALINA_HOME环境变量：</p>
+<p>这个变量是给系统寻找tomcat文件目录用的，会在他的脚本里面调用，所以有必要设置成环境变量，在&#x2F;etc&#x2F;envirenment里面根据格式加上他的文件地址就可以了。这里还有一个CATALINA_BASE变量可以写，不过既然默认是和CATALINA_HOME一样，那就暂且忽略他吧。</p>
+<p>２、设置配置文件：</p>
+<p>根据提示找到了<code>$CATALINA_HOME/bin/catalina.sh</code>文件，里面讲了一大堆可以设置的变量，但是必选的只有两个，一个是上面提到的，另一个就是<code>$JAVA_HOME</code>变量了。不过他建议我们把这些用户写的变量统一写到setenv.sh下面便于管理，那我们就照做吧。在同文件下新建setenv.sh文件并写入<code>$JAVA_HOME</code>变量的地址（<code>/usr/lib/jvm/java-7-openjdk-amd64/</code>）。</p>
+<p>设置之后记得<code>source /etc/envirenment</code>执行一下文件。</p>
+<p>３、执行安装文件：</p>
+<p>找到start.sh，给予执行权限然后执行。我这里报了一个错，说找不到logs文件夹。。。。不晓得那个启动脚本怎么都没考虑到这一点。。找不到新建一个不就好了么。。。</p>
+<p>执行成功后他显示了<code>Tomcat started.</code> 。</p>
+<p>４、启动脚本：</p>
+<p>事实上tomcat的启动脚本是catalina.sh，所以我们可以通过.&#x2F;catalina.sh  start 和　.&#x2F;catalina.sh stop 来启动和关闭服务。既然如此，那么我们何不把他移到&#x2F;etc&#x2F;init.d里面去用service命令来操作呢？用一个软链接加进去就好了<code>sudo ln -s /usr/local/tomcat/ibn/catalina.sh tomcat </code> 。</p>
+<p>这样就可以方便的进行管理了。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>打开浏览器访问<code>localhost:8080</code>即可看到测试页面了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/20/service%E5%91%BD%E4%BB%A4%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8Ainit.d%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E7%9A%84%E6%A0%BC%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/01/20/service%E5%91%BD%E4%BB%A4%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8Ainit.d%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E7%9A%84%E6%A0%BC%E5%BC%8F/" itemprop="url">service命令的原理以及init.d启动脚本的格式</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-20T07:27:00+00:00">
+                2016-01-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们在启用一些服务的时候，经常会用到这个service命令，比如启动apache2的命令<code>$sudo service apache2 start</code>等等。用他来开启或者关闭我们的服务可谓是非常的方便，因为service命令基本都会支持start、stop、restart之类的参数，十分的好记。</p>
+<h2 id="作用原理"><a href="#作用原理" class="headerlink" title="作用原理"></a>作用原理</h2><p>那么service命令的原理是什么呢？为什么他能做到这么统一的样式呢？</p>
+<p>其实答案很简单，我们来查看帮助文档就知道了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$man service</span><br><span class="line">......</span><br><span class="line">     service runs a System V init script or upstart job in as predictable an</span><br><span class="line">       environment as possible, removing most environment variables  and  with</span><br><span class="line">       the current working directory set to /.</span><br><span class="line"></span><br><span class="line">       The  SCRIPT  parameter  specifies  a  System  V init script, located in</span><br><span class="line">       /etc/init.d/SCRIPT, or the name of an upstart  job  in  /etc/init.  The</span><br><span class="line">       existence of an upstart job of the same name as a script in /etc/init.d</span><br><span class="line">       will cause the upstart job to take precedence over the  init.d  script.</span><br><span class="line">       The  supported values of COMMAND depend on the invoked script.  service</span><br><span class="line">       passes COMMAND and OPTIONS to the init script unmodified.  For  upstart</span><br><span class="line">       jobs,  start, stop, status, are passed through to their upstart equiva‐</span><br><span class="line">       lents. Restart will call the upstart &#x27;stop&#x27; for the job, followed imme‐</span><br><span class="line">       diately by the &#x27;start&#x27;, and will exit with the return code of the start</span><br><span class="line">       command.  All scripts should support at least the start and  stop  com‐</span><br><span class="line">       mands.   As a special case, if COMMAND is --full-restart, the script is</span><br><span class="line">       run twice, first with the stop command, then with  the  start  command.</span><br><span class="line">       This option has no effect on upstart jobs.</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p>上面这段话已经说了很清楚了，这个service命令，会去查找&#x2F;etc&#x2F;init.d&#x2F;和&#x2F;etc&#x2F;init&#x2F;目录下的可执行脚本。这些脚本通常保证得实现start，stop，status之类的命令来实现相应的功能。也就是说，我们通常类似<code>service apache2 start</code>的命令完全可以用<code>/etc/init.d/apache2 start</code>来代替，效果一模一样。</p>
+<p>其实他做的事情就是这么简单，一般就是去&#x2F;etc&#x2F;init.d&#x2F;目录下寻找脚本来执行。所以问题的重点就变成了这些脚本到底是什么样的。</p>
+<p>这就牵涉到&#x2F;etc&#x2F;init.d&#x2F;下的启动脚本格式的问题了。</p>
+<h2 id="启动脚本"><a href="#启动脚本" class="headerlink" title="启动脚本"></a>启动脚本</h2><p>本着自力更生的原则，自己查看man文档，在service命令的末尾他给了一个&#x2F;etc&#x2F;init.d&#x2F;skeleton文件叫我们看。那就打开来看看喽～～：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#! /bin/sh</span></span><br><span class="line"><span class="comment">### BEGIN INIT INFO</span></span><br><span class="line"><span class="comment"># Provides:          skeleton</span></span><br><span class="line"><span class="comment"># Required-Start:    $remote_fs $syslog</span></span><br><span class="line"><span class="comment"># Required-Stop:     $remote_fs $syslog</span></span><br><span class="line"><span class="comment"># Default-Start:     2 3 4 5</span></span><br><span class="line"><span class="comment"># Default-Stop:      0 1 6</span></span><br><span class="line"><span class="comment"># Short-Description: Example initscript</span></span><br><span class="line"><span class="comment"># Description:       This file should be used to construct scripts to be</span></span><br><span class="line"><span class="comment">#                    placed in /etc/init.d.</span></span><br><span class="line"><span class="comment">### END INIT INFO</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Author: Foo Bar &lt;foobar@baz.org&gt;</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Please remove the &quot;Author&quot; lines above and replace them</span></span><br><span class="line"><span class="comment"># with your own name if you copy and modify this script.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Do NOT &quot;set -e&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># PATH should only include /usr/* if it runs after the mountnfs.sh script</span></span><br><span class="line">PATH=/sbin:/usr/sbin:/bin:/usr/bin</span><br><span class="line">DESC=<span class="string">&quot;Description of the service&quot;</span></span><br><span class="line">NAME=daemonexecutablename</span><br><span class="line">DAEMON=/usr/sbin/<span class="variable">$NAME</span></span><br><span class="line">DAEMON_ARGS=<span class="string">&quot;--options args&quot;</span></span><br><span class="line">PIDFILE=/var/run/<span class="variable">$NAME</span>.pid</span><br><span class="line">SCRIPTNAME=/etc/init.d/<span class="variable">$NAME</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Exit if the package is not installed</span></span><br><span class="line">[ -x <span class="string">&quot;<span class="variable">$DAEMON</span>&quot;</span> ] || <span class="built_in">exit</span> 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Read configuration variable file if it is present</span></span><br><span class="line">[ -r /etc/default/<span class="variable">$NAME</span> ] &amp;&amp; . /etc/default/<span class="variable">$NAME</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Load the VERBOSE setting and other rcS variables</span></span><br><span class="line">. /lib/init/vars.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># Define LSB log_* functions.</span></span><br><span class="line"><span class="comment"># Depend on lsb-base (&gt;= 3.2-14) to ensure that this file is present</span></span><br><span class="line"><span class="comment"># and status_of_proc is working.</span></span><br><span class="line">. /lib/lsb/init-functions</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Function that starts the daemon/service</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="function"><span class="title">do_start</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment"># Return</span></span><br><span class="line">	<span class="comment">#   0 if daemon has been started</span></span><br><span class="line">	<span class="comment">#   1 if daemon was already running</span></span><br><span class="line">	<span class="comment">#   2 if daemon could not be started</span></span><br><span class="line">	start-stop-daemon --start --quiet --pidfile <span class="variable">$PIDFILE</span> --<span class="built_in">exec</span> <span class="variable">$DAEMON</span> --<span class="built_in">test</span> &gt; /dev/null \</span><br><span class="line">		|| <span class="built_in">return</span> 1</span><br><span class="line">	start-stop-daemon --start --quiet --pidfile <span class="variable">$PIDFILE</span> --<span class="built_in">exec</span> <span class="variable">$DAEMON</span> -- \</span><br><span class="line">		<span class="variable">$DAEMON_ARGS</span> \</span><br><span class="line">		|| <span class="built_in">return</span> 2</span><br><span class="line">	<span class="comment"># Add code here, if necessary, that waits for the process to be ready</span></span><br><span class="line">	<span class="comment"># to handle requests from services started subsequently which depend</span></span><br><span class="line">	<span class="comment"># on this one.  As a last resort, sleep for some time.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Function that stops the daemon/service</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="function"><span class="title">do_stop</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment"># Return</span></span><br><span class="line">	<span class="comment">#   0 if daemon has been stopped</span></span><br><span class="line">	<span class="comment">#   1 if daemon was already stopped</span></span><br><span class="line">	<span class="comment">#   2 if daemon could not be stopped</span></span><br><span class="line">	<span class="comment">#   other if a failure occurred</span></span><br><span class="line">	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile <span class="variable">$PIDFILE</span> --name <span class="variable">$NAME</span></span><br><span class="line">	RETVAL=<span class="string">&quot;$?&quot;</span></span><br><span class="line">	[ <span class="string">&quot;<span class="variable">$RETVAL</span>&quot;</span> = 2 ] &amp;&amp; <span class="built_in">return</span> 2</span><br><span class="line">	<span class="comment"># Wait for children to finish too if this is a daemon that forks</span></span><br><span class="line">	<span class="comment"># and if the daemon is only ever run from this initscript.</span></span><br><span class="line">	<span class="comment"># If the above conditions are not satisfied then add some other code</span></span><br><span class="line">	<span class="comment"># that waits for the process to drop all resources that could be</span></span><br><span class="line">	<span class="comment"># needed by services started subsequently.  A last resort is to</span></span><br><span class="line">	<span class="comment"># sleep for some time.</span></span><br><span class="line">	start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --<span class="built_in">exec</span> <span class="variable">$DAEMON</span></span><br><span class="line">	[ <span class="string">&quot;$?&quot;</span> = 2 ] &amp;&amp; <span class="built_in">return</span> 2</span><br><span class="line">	<span class="comment"># Many daemons don&#x27;t delete their pidfiles when they exit.</span></span><br><span class="line">	<span class="built_in">rm</span> -f <span class="variable">$PIDFILE</span></span><br><span class="line">	<span class="built_in">return</span> <span class="string">&quot;<span class="variable">$RETVAL</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Function that sends a SIGHUP to the daemon/service</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="function"><span class="title">do_reload</span></span>() &#123;</span><br><span class="line">	<span class="comment">#</span></span><br><span class="line">	<span class="comment"># If the daemon can reload its configuration without</span></span><br><span class="line">	<span class="comment"># restarting (for example, when it is sent a SIGHUP),</span></span><br><span class="line">	<span class="comment"># then implement that here.</span></span><br><span class="line">	<span class="comment">#</span></span><br><span class="line">	start-stop-daemon --stop --signal 1 --quiet --pidfile <span class="variable">$PIDFILE</span> --name <span class="variable">$NAME</span></span><br><span class="line">	<span class="built_in">return</span> 0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span></span><br><span class="line">  start)</span><br><span class="line">	[ <span class="string">&quot;<span class="variable">$VERBOSE</span>&quot;</span> != no ] &amp;&amp; log_daemon_msg <span class="string">&quot;Starting <span class="variable">$DESC</span>&quot;</span> <span class="string">&quot;<span class="variable">$NAME</span>&quot;</span></span><br><span class="line">	do_start</span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;$?&quot;</span> <span class="keyword">in</span></span><br><span class="line">		0|1) [ <span class="string">&quot;<span class="variable">$VERBOSE</span>&quot;</span> != no ] &amp;&amp; log_end_msg 0 ;;</span><br><span class="line">		2) [ <span class="string">&quot;<span class="variable">$VERBOSE</span>&quot;</span> != no ] &amp;&amp; log_end_msg 1 ;;</span><br><span class="line">	<span class="keyword">esac</span></span><br><span class="line">	;;</span><br><span class="line">  stop)</span><br><span class="line">	[ <span class="string">&quot;<span class="variable">$VERBOSE</span>&quot;</span> != no ] &amp;&amp; log_daemon_msg <span class="string">&quot;Stopping <span class="variable">$DESC</span>&quot;</span> <span class="string">&quot;<span class="variable">$NAME</span>&quot;</span></span><br><span class="line">	do_stop</span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;$?&quot;</span> <span class="keyword">in</span></span><br><span class="line">		0|1) [ <span class="string">&quot;<span class="variable">$VERBOSE</span>&quot;</span> != no ] &amp;&amp; log_end_msg 0 ;;</span><br><span class="line">		2) [ <span class="string">&quot;<span class="variable">$VERBOSE</span>&quot;</span> != no ] &amp;&amp; log_end_msg 1 ;;</span><br><span class="line">	<span class="keyword">esac</span></span><br><span class="line">	;;</span><br><span class="line">  status)</span><br><span class="line">	status_of_proc <span class="string">&quot;<span class="variable">$DAEMON</span>&quot;</span> <span class="string">&quot;<span class="variable">$NAME</span>&quot;</span> &amp;&amp; <span class="built_in">exit</span> 0 || <span class="built_in">exit</span> $?</span><br><span class="line">	;;</span><br><span class="line">  <span class="comment">#reload|force-reload)</span></span><br><span class="line">	<span class="comment">#</span></span><br><span class="line">	<span class="comment"># If do_reload() is not implemented then leave this commented out</span></span><br><span class="line">	<span class="comment"># and leave &#x27;force-reload&#x27; as an alias for &#x27;restart&#x27;.</span></span><br><span class="line">	<span class="comment">#</span></span><br><span class="line">	<span class="comment">#log_daemon_msg &quot;Reloading $DESC&quot; &quot;$NAME&quot;</span></span><br><span class="line">	<span class="comment">#do_reload</span></span><br><span class="line">	<span class="comment">#log_end_msg $?</span></span><br><span class="line">	<span class="comment">#;;</span></span><br><span class="line">  restart|force-reload)</span><br><span class="line">	<span class="comment">#</span></span><br><span class="line">	<span class="comment"># If the &quot;reload&quot; option is implemented then remove the</span></span><br><span class="line">	<span class="comment"># &#x27;force-reload&#x27; alias</span></span><br><span class="line">	<span class="comment">#</span></span><br><span class="line">	log_daemon_msg <span class="string">&quot;Restarting <span class="variable">$DESC</span>&quot;</span> <span class="string">&quot;<span class="variable">$NAME</span>&quot;</span></span><br><span class="line">	do_stop</span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;$?&quot;</span> <span class="keyword">in</span></span><br><span class="line">	  0|1)</span><br><span class="line">		do_start</span><br><span class="line">		<span class="keyword">case</span> <span class="string">&quot;$?&quot;</span> <span class="keyword">in</span></span><br><span class="line">			0) log_end_msg 0 ;;</span><br><span class="line">			1) log_end_msg 1 ;; <span class="comment"># Old process is still running</span></span><br><span class="line">			*) log_end_msg 1 ;; <span class="comment"># Failed to start</span></span><br><span class="line">		<span class="keyword">esac</span></span><br><span class="line">		;;</span><br><span class="line">	  *)</span><br><span class="line">		<span class="comment"># Failed to stop</span></span><br><span class="line">		log_end_msg 1</span><br><span class="line">		;;</span><br><span class="line">	<span class="keyword">esac</span></span><br><span class="line">	;;</span><br><span class="line">  *)</span><br><span class="line">	<span class="comment">#echo &quot;Usage: $SCRIPTNAME &#123;start|stop|restart|reload|force-reload&#125;&quot; &gt;&amp;2</span></span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;Usage: <span class="variable">$SCRIPTNAME</span> &#123;start|stop|status|restart|force-reload&#125;&quot;</span> &gt;&amp;2</span><br><span class="line">	<span class="built_in">exit</span> 3</span><br><span class="line">	;;</span><br><span class="line"><span class="keyword">esac</span></span><br><span class="line"></span><br><span class="line">:</span><br></pre></td></tr></table></figure>
+<p>哦～原来这就是所有init.d目录下脚本的框架了～～难怪他能保证良好的兼容性，原来所有的service原则上都是从这个框架上生成的。。。这个文件看上去挺长的，其实内容很少，主要就是一个case语句根据相应的参数进行不同的输出。这里不做过多讨论，以后需要自己写一个启动脚本的时候再来研究也不迟。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/19/screen%E5%91%BD%E4%BB%A4%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1641,339 +1951,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/08/%E4%B8%80%E4%B8%AA%E5%AE%9E%E7%94%A8%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9F%A5%E9%87%8D%E7%A8%8B%E5%BA%8Fsim%E5%B7%A5%E5%85%B7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/08/%E4%B8%80%E4%B8%AA%E5%AE%9E%E7%94%A8%E7%9A%84%E4%BB%A3%E7%A0%81%E6%9F%A5%E9%87%8D%E7%A8%8B%E5%BA%8Fsim%E5%B7%A5%E5%85%B7/" itemprop="url">一个实用的代码查重程序sim工具</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-08T07:19:55+00:00">
-                2016-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>sim工具是在搭建hustoj的过程中发现的一个小玩意。毕竟作为一个OJ，hust的人肯定也考虑到了网络比赛中代码复制粘贴的现象。所以一个代码判重的工具肯定是必不可少的。然而这个工具在网站的前后台中并没有体现，而是作为一个附带的工具一起打包下来的。而且事实上他打包的版本有点老了，所以我去了作者的博客上找了最新的版本－－<a target="_blank" rel="noopener" href="https://dickgrune.com/">Dick grune</a>。</p>
-<p>额，是的没错，他就叫 Dick~~，大概看了下博客，真是个挺厉害的人，写了不少的书，都是关于编译方面的东西，好像还搞了LaTeX的解释器啥的。。。我现在要用的是他的一个小工具，在<a target="_blank" rel="noopener" href="https://dickgrune.com/Programs/similarity_tester/">这里</a>下载。</p>
-<p>下下来解包之后还要细心的查看并编辑下Makefile的配置，然后进行编译，主要是这几步：</p>
-<ol>
-<li>选择操作系统，Makefile里有两套配置，一套是“For UNIX-like systems”，另一套是“For MSDOS + MinGW”，根据当前系统把另一套注释掉就行了。</li>
-<li>修改<code>BINDIR</code>的值，推荐设置为<code>/usr/bin/</code>，一般来说，放到$PATH下比较方便。</li>
-<li>修改<code>MAN1DIR</code>的值，推荐设置为<code>/usr/share/man/man1</code>，这个目录是系统man文档的默认目录。</li>
-<li>将<code>sim.1</code>文件放到刚才设置的<code>MAN1DIR</code>里，放进去之后，<code>man sim</code>命令就应该可用了。</li>
-<li>安装依赖，一般来说，安装了<code>gcc</code>,<code>make</code>,<code>flex</code>这几个东西就够了。</li>
-<li>执行<code>make install</code>。</li>
-</ol>
-<p>搞定之后就会发现生成了一堆可执行文件:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sim_8086</span><br><span class="line">sim_c</span><br><span class="line">sim_c++</span><br><span class="line">sim_java</span><br><span class="line">sim_lisp</span><br><span class="line">sim_m2</span><br><span class="line">sim_mira</span><br><span class="line">sim_pasc</span><br><span class="line">sim_txt</span><br></pre></td></tr></table></figure>
-<p>这样，编译工作就搞定了。不过，如果是用的windows，其实直接就有编译好的可执行文件了，不需要自己编译安装。。。</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><ol>
-<li>选择语言： sim 支持多种语言：C, Java, Pascal, Modula-2, Lisp , Miranda, or text files，对应的命令分别是： sim_c ，sim_java，sim_pasc ，sim_m2，sim_lisp ，sim_mira，sim_text 。</li>
-<li>选择参数： 常用的参数有三个：</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>-p</td>
-<td>表示以“F consists for x % of G material”的形式输出相似度</td>
-</tr>
-<tr>
-<td>-t N</td>
-<td>表示只显示相似度大于N%的条目（除text 默认为20%外，其余默认为1%);</td>
-</tr>
-<tr>
-<td>-o file</td>
-<td>表示将结果输出到file中</td>
-</tr>
-</tbody></table>
-<pre><code>最后可以输入文件名，支持通配符。
-</code></pre>
-<h2 id="示意"><a href="#示意" class="headerlink" title="示意"></a>示意</h2><p>如下两个文件：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="comment">//定义一个新的数据类型</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> yue;<span class="comment">//月份</span></span><br><span class="line">	<span class="type">int</span> tian;<span class="comment">//天</span></span><br><span class="line">&#125;Date;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(Date x, Date y)</span></span>;<span class="comment">//函数声明</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Date date1, date2;</span><br><span class="line">	<span class="comment">//类型赋值</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;输入一个日期（mm/dd）：\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d/%d&quot;</span>, &amp;date1.yue, &amp;date1.tian);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;再输入一个日期（在上一个日期之后）（mm/dd）：\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d/%d&quot;</span>, &amp;date2.yue, &amp;date2.tian);</span><br><span class="line">	<span class="comment">//调用函数</span></span><br><span class="line">	<span class="built_in">f</span>(date1, date2);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(Date x, Date y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> m, n;</span><br><span class="line">	<span class="type">int</span> t;</span><br><span class="line">	<span class="comment">//计算两个日期的天数</span></span><br><span class="line">	<span class="keyword">switch</span> (x.yue)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:m = x.tian; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:m = x.tian + <span class="number">31</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:m = x.tian + <span class="number">59</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:m = x.tian + <span class="number">90</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:m = x.tian + <span class="number">120</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:m = x.tian + <span class="number">151</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:m = x.tian + <span class="number">181</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:m = x.tian + <span class="number">212</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:m = x.tian + <span class="number">243</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:m = x.tian + <span class="number">273</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:m = x.tian + <span class="number">304</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:m = x.tian + <span class="number">334</span>; <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">switch</span> (y.yue)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:n = y.tian; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:n = y.tian + <span class="number">31</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:n = y.tian + <span class="number">59</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:n = y.tian + <span class="number">90</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:n = y.tian + <span class="number">120</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:n = y.tian + <span class="number">151</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:n = y.tian + <span class="number">181</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:n = y.tian + <span class="number">212</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:n = y.tian + <span class="number">243</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:n = y.tian + <span class="number">273</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:n = y.tian + <span class="number">304</span>; <span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:n = y.tian + <span class="number">334</span>; <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//求相差天数</span></span><br><span class="line">	t = n - m;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;相差的天数：%d\n&quot;</span>, t);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="comment">//使用结构体</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> month;</span><br><span class="line">	<span class="type">int</span> day;</span><br><span class="line">&#125;date;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">f</span><span class="params">(date d1, date d2)</span></span>;<span class="comment">//函数声明</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	date d1, d2;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;输入第一个日期:\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d,%d&quot;</span>, &amp;d1.month, &amp;d1.day);<span class="comment">//输入第一个日期</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;输入第一个日期:\n&quot;</span>);</span><br><span class="line">	<span class="built_in">scanf_s</span>(<span class="string">&quot;%d,%d&quot;</span>, &amp;d2.month, &amp;d2.day);<span class="comment">//输入第二个日期</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;相差%d天&quot;</span>, <span class="built_in">f</span>(d1, d2));<span class="comment">//调用函数并输出相差天数</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">f</span><span class="params">(date d1, date d2)</span><span class="comment">//函数定义</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> x, m, n;</span><br><span class="line">	<span class="keyword">switch</span> (d1.month)<span class="comment">//计算第一个日期是一年的第几天</span></span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">		m = d1.day;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">		m = d1.day + <span class="number">31</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">		m = d1.day + <span class="number">59</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">		m = d1.day + <span class="number">90</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">		m = d1.day + <span class="number">120</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">		m = d1.day + <span class="number">151</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">		m = d1.day + <span class="number">181</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">		m = d1.day + <span class="number">212</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">		m = d1.day + <span class="number">243</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">		m = d1.day + <span class="number">273</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:</span><br><span class="line">		m = d1.day + <span class="number">304</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:</span><br><span class="line">		m = d1.day + <span class="number">334</span>;<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">switch</span> (d2.month)<span class="comment">//计算第二个日期是一年的第几天</span></span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">		n = d2.day;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">		n = d2.day + <span class="number">31</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">		n = d2.day + <span class="number">59</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">		n = d2.day + <span class="number">90</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">		n = d2.day + <span class="number">120</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">		n = d2.day + <span class="number">151</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">		n = d2.day + <span class="number">181</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">		n = d2.day + <span class="number">212</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">		n = d2.day + <span class="number">243</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">		n = d2.day + <span class="number">273</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">11</span>:</span><br><span class="line">		n = d2.day + <span class="number">304</span>;<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">12</span>:</span><br><span class="line">		n = d2.day + <span class="number">334</span>;<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	x = m - n;<span class="comment">//计算日期差</span></span><br><span class="line">	<span class="keyword">if</span> (x &gt;= <span class="number">0</span>)<span class="comment">//返回非负值</span></span><br><span class="line">		<span class="keyword">return</span> x;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> -x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这两个是用来计算日期只差的cpp文件（学生提交的作业，对不对另说），看上去还是有点差别的，至少很多变量名都经过了替换，修改了注释，而且也改了缩进的风格，但是经过sim程序判别之后，可以发现他们的相似度还是极高的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">myths@Business:~/桌面$ sim_c -p a.cpp b.cpp</span><br><span class="line">File a.cpp: 374 tokens, 82 lines</span><br><span class="line">File b.cpp: 388 tokens, 81 lines</span><br><span class="line">Total: 762 tokens</span><br><span class="line"></span><br><span class="line">a.cpp consists for 89 % of b.cpp material</span><br><span class="line">b.cpp consists for 86 % of a.cpp material</span><br></pre></td></tr></table></figure>
-<p>相似度仍然达到了90%左右，所以我们可以确定的认为这两份作业是抄袭的。可以证明这个程序的识别率还是非常高的～</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/01/08/Ubuntu%E4%B8%AD%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%B8%8B%E7%9A%84%E5%9B%BE%E7%89%87%E6%9F%A5%E7%9C%8B%E5%99%A8eog/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/01/08/Ubuntu%E4%B8%AD%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%B8%8B%E7%9A%84%E5%9B%BE%E7%89%87%E6%9F%A5%E7%9C%8B%E5%99%A8eog/" itemprop="url">Ubuntu中命令行下的图片查看器eog</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-08T02:37:15+00:00">
-                2016-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>有时候在命令行下看文件的时候突然遇到个图片，这个又不能直接在命令行下查看，还得手动在桌面上打开文件来查看，十分的不方便。其实ubuntu本身自带的图像查看器就带了一个命令行下打开的接口——eog 命令（eye of gnome 的缩写，十分好记）。</p>
-<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">EOG(1)                 General Commands Manual                EOG(1)</span><br><span class="line"></span><br><span class="line">NAME</span><br><span class="line">       eog - a GNOME image viewer</span><br><span class="line"></span><br><span class="line">SYNOPSIS</span><br><span class="line">       eog [options] files...</span><br><span class="line"></span><br><span class="line">DESCRIPTION</span><br><span class="line">       An image viewer for GNOME which uses gdk_pixbuf</span><br></pre></td></tr></table></figure>
-<p>用man 命令可以看到用法，其实通常option 选项可以忽略，直接在后面接文件名即可，非常的方便。</p>
-<h2 id="附加"><a href="#附加" class="headerlink" title="附加"></a>附加</h2><p>后来发现，其实Linux桌面下绝大多数图片查看器都可以用命令行打开，比如使用shotwell命令也可以从命令行查看图片。。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2024,7 +2001,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">572</span>
+                  <span class="site-state-item-count">574</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -2046,7 +2023,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">284</span>
+                  <span class="site-state-item-count">286</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>

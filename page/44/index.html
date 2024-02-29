@@ -307,6 +307,324 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/20/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97LCSS%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/20/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97LCSS%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">路径匹配之最长公共子序列LCSS算法简析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-20T15:19:46+00:00">
+                2016-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
+                    <span itemprop="name">Trajectory Similarity</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>LCSS算法其实就是我们熟悉的LCS算法（Longest Common Subsequence　最长公共子序列），一个非常基础的dp。以前一直以为LCS算法没啥用，完全就是为了应付比赛用的，现在才发现原来LCS算法竟然在路径匹配上也能有很大作用。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>LCSS算法解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都可以是一个二维坐标点或者是更高维度的坐标。现在我们需要分别从序列$A,B$中依次抽取出$k$个点构成序列$SubA$，$SubB$，使得$SubA$和$SubB$的点一一“相等”。这里“相等”的含义可以定义为两个点之间的距离（通常是欧式距离）小于一个阈值$\varepsilon$，如下图所示：</p>
+<p><img src="/images/2016/04/20/1/1.png"></p>
+<p>其中$p_2,p^,_1$ 、$p_4,p^,_3$ 便可以看成是匹配的两组。</p>
+<p>我们用满足上述条件的最长的$SubA($或$SubB)$的长度来衡量两个序列$A,B$的相似程度，这也是可以令人理解的。</p>
+<p>有时候我们还会对这个定义加一个限制条件：$A_i,B_j$匹配需要满足$|i-j|&lt;\delta$。</p>
+<p>简而言之，我们的LCSS需要做的事就是求出这个最长的序列长度。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>基础的dp，对于序列$A[1…n],B[1…m]$，令$lcss[i][j]$表示序列$(A_1,A_2,A_3,A_4…A_i)$和$(B_1,B_2,B_3,B_4…B_j)$的最长公共子序列，$dis[i][j]$表示$A_i,B_j$之间的距离，那么我们可以很容易得到下面的递推式：</p>
+<p>$for\ 1\leq i\leq n,1\leq j \leq m:$</p>
+<p>$$lcss[i][j]&#x3D;\left\{\begin{aligned}&amp;1+lcss[i-1][j-1],|i-j|&lt;\delta\ \ dis[i][j]&lt;\varepsilon\\&amp;max(lcss[i][j-1],lcss[i-1][j]),else\end{aligned}\right.$$</p>
+<p>$else:$</p>
+<p>$$lcss[i][j]&#x3D;0$$</p>
+<p>最终求得的$lcss[n][m]$便是最长序列的长度，复杂度为$O(\delta(m+n))$。</p>
+<h2 id="后续处理"><a href="#后续处理" class="headerlink" title="后续处理"></a>后续处理</h2><p>通过上面的方法，我们能够计算得到路径间的LCSS，但是这并不适合作为相似度的直接评判标准。毕竟较长的路径之间的LCSS在数值上可能比较大，但是事实上的符合程度却不是那么好。因此我们通常会将结果除以较短的路径的长度，即：</p>
+<p>$$S(A,B)&#x3D;\frac{LCSS(A,B)}{min(n,m)}$$</p>
+<p>这样得到的值就有了较好的可度量性了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>LCSS算法由于没有用到所有的点，所以能够较好的抵抗噪声。但是判断两点相等的阈值$\varepsilon$不太好确定，这是LCSS的最大弊端。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>VLACHOS, M., GUNOPULOS, D., AND KOLLIOS, G. Discovering similar multidimensional trajectories. ICDE 2002<br>Kevin Toohey, Matt Duckham Trajectory similarity measures.March 2015<br>Ke Deng, Kexin Xie, Kevin Zheng and Xiaofang Zhou ,Trajectory-Indexing-and-Retrieval<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/v_july_v/article/details/6695482">程序员编程艺术第十一章：最长公共子序列(LCS)问题</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Resive world">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/19/%E8%B7%AF%E5%BE%84%E5%8C%B9%E9%85%8D%E4%B9%8B%E5%8A%A8%E6%80%81%E6%97%B6%E9%97%B4%E8%A7%84%E6%95%B4DTW%E7%AE%97%E6%B3%95%E7%AE%80%E6%9E%90/" itemprop="url">路径匹配之动态时间规整DTW算法简析</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-19T15:38:29+00:00">
+                2016-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Trajectory-Similarity/" itemprop="url" rel="index">
+                    <span itemprop="name">Trajectory Similarity</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p><strong>DTW算法</strong>又叫<strong>动态时间规整</strong>（  <strong>Dynamic Time Warping</strong>），是一个比较简单的dp算法。常用于不等长的离散的路径点的匹配问题，在孤立词语音识别、手势识别、数据挖掘和信息检索等领域有着很不错的表现。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>DTW解决的问题是，给定两个序列$(A_1,A_2,A_3,A_4…A_n)$和$(B_1,B_2,B_3,B_4…B_m)$，其中每一个元素可以都是一个二维坐标点或者是更高维度的坐标。我们现在需要求出一个“距离”，使得他能够表示这两个路径的相似度。</p>
+<p>很明显，如果m等于n，那么我们可以很方便的用对应节点（下标相等）之间的欧氏距离（也可以是其他类型的距离）之和来表示这个”距离“，这看上去还是能让人信服的。但是当m和n不等的时候，我们就发现这种办法就不适用了。但是我们完全可以仍然采用这个思想，只不过与之前每个节点都是一一对应不同，我们可以令其中的某些节点是一对多的对应关系，如下图所示：</p>
+<p><img src="/images/2016/04/19/1/1.png"></p>
+<p>当然，这样的对应关系也得满足”非降“的对应，即若$A_i$与$B_j$对应，那么$A_{i+p}$必然不能与$B_{j-q}$对应（其中$p,q\gt 0$）。</p>
+<p>这样一来，我们就可以通过计算新的对应点之间的距离之和来表示这两个路径之间的距离。</p>
+<p>很明显，这样的匹配方法有很多种，不过对我们来说有意义的匹配方式应该是使最后计算出的距离最小的方式，那么我们到底要怎样确定点的对应关系呢？这就是DTW要解决的问题。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>令$dtw[i][j]$表示$A$序列的前$i$个元素与$B$序列的前$j$个元素匹配后得到的最小距离(下标从1开始)，$dis[i][j]$表示$A_i$与$B_j$的距离。显然，这时候$A_i$必然和$B_j$匹配。那么我们很容易得到下面的递推关系式(考虑边界条件)：</p>
+<p>$i&#x3D;j&#x3D;0:$</p>
+<p>$$dtw[i][j]&#x3D;0$$</p>
+<p>$i&#x3D;0\ or\ j&#x3D;0:$</p>
+<p>$$dtw[i][j]&#x3D;\infty$$</p>
+<p>$for\ 1\leq i\leq n,1\leq j \leq m:$</p>
+<p>$$dtw[i][j]&#x3D;dis[i][j]+min\left\{\begin{aligned}&amp;dtw[i-1][j]\\&amp;dtw[i-1][j-1]\\&amp;dtw[i][j-1]\end{aligned}\right.$$</p>
+<p>最后$dtw[n][m]$就是我们所求的距离，复杂度$O(n*m)$。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>DTW算法在应对不等长路径问题的相似度匹配的时候效果还是挺好的，但是由于他需要计算到每一个点，因此他对噪声比较敏感。而且他也无法应对存在时间维度的路径匹配问题。</p>
+<p>当然，我们利用DTW算法不仅仅是为了获得距离，很多情况下，我们是为了获得点的对应关系，从而对两个序列更好的进行比较。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Yi, Byoung-Kee, Jagadish, HV and Faloutsos, Christos, Efficient retrieval of similar time sequences under time warping. ICDE 1998<br>Lei Chen,Raymond Ng,On The Marriage of Lp-norms and Edit Distance,2004<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/tornadomeet/archive/2012/03/23/2413363.html">HMM学习笔记_1(从一个实例中学习DTW算法)</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/zouxy09/article/details/9140207">语音信号处理之（一）动态时间规整（DTW）</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dynamic_time_warping">Dynamic time warping</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/17/%E7%BB%93%E5%90%88%E8%BF%9E%E9%80%9A%E5%9D%97%E5%B9%B3%E5%9D%87%E5%88%86%E5%89%B2%E4%BB%A5%E5%8F%8A%E6%8A%95%E5%BD%B1%E7%9F%AB%E6%AD%A3%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%86%E5%89%B2%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1546,304 +1864,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/04/04/%E6%95%99%E8%82%B2%E7%BD%91%E4%B8%AD%E7%AE%80%E5%8D%95%E5%88%A9%E7%94%A8ipv6%E4%B8%8A%E7%BD%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/04/%E6%95%99%E8%82%B2%E7%BD%91%E4%B8%AD%E7%AE%80%E5%8D%95%E5%88%A9%E7%94%A8ipv6%E4%B8%8A%E7%BD%91/" itemprop="url">教育网中简单利用ipv6上网</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-04T14:44:03+00:00">
-                2016-04-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Others/" itemprop="url" rel="index">
-                    <span itemprop="name">Others</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>之前一直没有注意过科学上网的问题，因为平常不怎么需要，改个hosts文件登个google也就够用了。直到最近才发现，其实在教育网中，本身就可以利用ipv6地址进行绕过GFW访问google,facebook,twitter,youtube等等，而且甚至还不需要登网关（当然，不登网关反而只能访问国外的IPv6网址，对于很多ipv4的网址反而无法访问）。当然，这种不登陆网关就访问其他网站的行为并不能算是作弊，这只能算是对ipv6资源的合理利用，这是学校鼓励并推荐使用的。但是可惜的是，很多同学并没有充分的利用这个资源，在<a target="_blank" rel="noopener" href="http://6rank.edu.cn/tongji2.php">6rank</a>中可以查看到这个资源使用的情况，基本上大部分的高校对ipv6的使用率都不到1%。。。</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>ipv6的配置其实特别简单，只要你的网段给你的机子分配了ipv6的地址，就完全可以通过简单的修改ipv6的hosts达到访问国外ipv6网址的效果。</p>
-<h3 id="查看是否支持ipv6"><a href="#查看是否支持ipv6" class="headerlink" title="查看是否支持ipv6"></a>查看是否支持ipv6</h3><p>尽管大部分的高校都接通了ipv6，但是有的高校还没有接入，而且接入ipv6的高校中在有些位置也并没有做到完全覆盖，因此还是要先确认下首先要支持ipv6再行折腾。</p>
-<p>首先确认下电脑是否支持ipv6：windows下在cmd中输入<code>ipconfig</code> ，查看是否有Ipv6地址项；在Linux下输入<code>ifconfig</code> ，查看是否有inet6地址项，如果有，就说明你的电脑有ipv6的地址。</p>
-<p>然后确认下网络是否支持ipv6：有一个项目叫kame.net，登陆进这里，如果能看到动态的小乌龟就说明网络是支持ipv6的。</p>
-<h3 id="修改hosts"><a href="#修改hosts" class="headerlink" title="修改hosts"></a>修改hosts</h3><p>ipv6说白了跟ipv4一样，对于国外的主机还是缺少dns解析这一步，因此我们还是需要通过各种手段找到ipv6的域名跟ip的对应关系，写在hosts文件里，这样才能直接通过域名来访问。</p>
-<p>windows中在<code>c:\User\Administrator\system32\drivers\etc\hosts</code>下，Linux中在<code>/etc/hosts</code>下。</p>
-<p>至于这个文件的内容从哪里找，我个人是在<a target="_blank" rel="noopener" href="https://serve.netsh.org/pub/ipv6-hosts/">https://serve.netsh.org/pub/ipv6-hosts/</a>中看的，这个应该算是比较官方的。</p>
-<h3 id="清除缓存"><a href="#清除缓存" class="headerlink" title="清除缓存"></a>清除缓存</h3><p>上面的操作基本就OK了，但是一般这时候还要清除下浏览器的缓存，因为为了提高效率，如果这次发送的http请求和之前发送的http请求一模一样，很多浏览器都会直接从缓存中提取内容而不去获取最新的消息。windows下还需要在cmd中输入<code>ipconfig/flushdns</code>，ubuntu下在shell下输入<code>sudo service networking restart</code>。</p>
-<p>通过以上配置，我们就可以直接访问ipv6的地址了，由于普通的校园网关只对ipv4加以限制，因此ipv6的部分并不需要连接网关就可以登陆。而且ipv6的网络速度还格外的快，访问facebook甚至比访问百度还快！</p>
-<h2 id="相关信息"><a href="#相关信息" class="headerlink" title="相关信息"></a>相关信息</h2><p><a target="_blank" rel="noopener" href="http://6rank.edu.cn/">CNGI高校驻地网IPv6用户数量测试</a><br><a target="_blank" rel="noopener" href="http://pcedu.pconline.com.cn/671/6712896_2.html">为何Ipv6难以普及</a><br><a target="_blank" rel="noopener" href="https://serve.netsh.org/pub/ipv6-hosts/">奶齿网发布的ipv6信息</a><br><a target="_blank" rel="noopener" href="http://ipv6-test.com/">Ipv6测试网</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.resonanat.com/2016/03/29/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E7%9A%84Gamma%E7%9F%AB%E6%AD%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Resive world">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/29/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E7%9A%84Gamma%E7%9F%AB%E6%AD%A3/" itemprop="url">图像处理的Gamma矫正</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-29T16:06:36+00:00">
-                2016-03-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Computer-Vision/" itemprop="url" rel="index">
-                    <span itemprop="name">Computer Vision</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Gamma矫正这个东西听上去挺玄乎，其实特别简单。就是为了调节照相机拍摄的图像的色调，使他更加符合人眼的观测效果（主要用在）。说白了就是一种幂函数型的色调曲线，即对于每个像素的灰度$I$我们把他变成$I^{gamma}$，当然，在这之前，我们得把灰度值$I$归一化到(0,1)的范围内。</p>
-<p>这个gamma分为大于一和小于一的情况。当他大于一的时候，很明显这个幂函数在(0,1)的区间内是下凸的，图像会变暗；当他小于一的时候，这个幂函数在(0,1)的区间内是上凸的，图像会变亮。通常认为人眼的gamma值大概是0.45左右。姑且信了。</p>
-<p>说实话这个东西我还没觉得有啥用处。实现起来也非常简单：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> pylab <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">imshow((cv2.imread(<span class="string">&#x27;lena.png&#x27;</span>,<span class="number">0</span>)/<span class="number">255.0</span>))</span><br><span class="line">imshow((cv2.imread(<span class="string">&#x27;lena.png&#x27;</span>,<span class="number">0</span>)/<span class="number">255.0</span>)**<span class="number">5</span>)</span><br><span class="line">imshow((cv2.imread(<span class="string">&#x27;lena.png&#x27;</span>,<span class="number">0</span>)/<span class="number">255.0</span>)**<span class="number">0.5</span>)</span><br></pre></td></tr></table></figure>
-<p><img src="/images/2016/03/30/1/1.png"><br><img src="/images/2016/03/30/1/2.png"><br><img src="/images/2016/03/30/1/3.png"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1894,7 +1914,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">572</span>
+                  <span class="site-state-item-count">574</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1916,7 +1936,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">284</span>
+                  <span class="site-state-item-count">286</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
